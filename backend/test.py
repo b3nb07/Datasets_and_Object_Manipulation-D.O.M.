@@ -1,7 +1,6 @@
 # Will need to change these things to get values from frontend UI
 # run with blenderproc run backend/test.py
 # visualise with blenderproc vis hdf5 output/0.hdf5
-
 import blenderproc as bproc
 import numpy as np
 
@@ -20,7 +19,7 @@ light.set_location([6, -9, 0])
 light.set_energy(300)
 # light.set_color((255, 0, 0))
 
-# Set the camera to be in front of the object
+# Set the camera to be in front of the object (vectors in [x, z, y])
 cam_pose = bproc.math.build_transformation_mat([0, -10, 0], [np.pi / 2, 0, 0])
 bproc.camera.add_camera_pose(cam_pose)
 # change res of render
