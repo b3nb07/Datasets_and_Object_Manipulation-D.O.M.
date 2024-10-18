@@ -13,17 +13,29 @@ class Backend():
         """
         raise NotImplementedError()
 
-    def set_cam_pose(self):
-        # TODO: Ilya
-        raise NotImplementedError()
+    def set_cam_pose(self, pose):
+        """Sets the position of the camera in the scene for rendering
+        
+        :param pose: a list containing position and rotation config details. Position in index 0 and rotation in index 1"""
+        cam_pose = bproc.math.build_transformation_mat(pose[0], pose[1])
+        
 
-    def set_bg_colour(self):
-        # TODO: Ilya
-        raise NotImplementedError()
+    def set_bg_colour(self, colour, strength=1):
+        """Sets the world background colour for rendering. Note: RBG values are between 0-1, diving by 255 gives the appropriate values
+        
+        :param colour: a list containing RGB values for the colour of the background
+        :param strength: strength of the background colour, set to 1 by default"""
+
+        bproc.renderer.set_world_background([colour[0]/255, colour[1]/255, colour[2]/255], strength)
+
 
     def render(self):
-        # TODO: Ilya
-        raise NotImplementedError()
+        """Renders the scene and saves to file in the output folder"""
+
+        data = bproc.renderer.render()
+
+        bproc.writer.write_hdf5("output/", data)
+
 
     class RenderObject():
         """An object to be rendered."""
