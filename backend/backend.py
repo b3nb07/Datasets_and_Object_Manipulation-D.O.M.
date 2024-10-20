@@ -47,17 +47,26 @@ class Backend():
             """
             self.object = bproc.loader.load_blend(filepath) if filepath.endswith(".blend") else bproc.loader.load_obj(filepath)
 
-        def set_loc(self):
-            # TODO: Miller
-            raise NotImplementedError()
+        def set_loc(self, location):
+            """Set the location of an object in the scene.
+            
+            :param location: A list containing [x,z,y] where x,z,y is an integer or float. This determines the coordinates of the objects location.
+            """
+            self.object.set_location(location)
 
-        def set_scale(self):
-            # TODO: Miller
-            raise NotImplementedError()
+        def set_scale(self, scale):
+            """Set the scale of an object in the scene.
+            
+            :param scale: A list containing [x,z,y] where x,z,y is an integer or float. This determines the scaling of each axis.
+            """
+            self.object.set_scale(scale)
 
-        def set_rotation(self):
-            # TODO: Miller
-            raise NotImplementedError()
+        def set_rotation(self, euler_rotation):
+            """Set the rotation of an object in the scene.
+            
+            :param euler_rotation: A list containing [x,z,y] values for the euler rotation to be applied to the object.
+            """
+            self.object.set_rotation_euler(euler_rotation)
 
         #! TODO: Think of and implement more object manipulation methods
 
