@@ -1,14 +1,157 @@
-#import stuff
+"""Importing"""
 
+from functools import cached_property
 import sys
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget
+from PyQt5 import QtCore, QtWidgets
 
-#main
-class MainWindow(QMainWindow):
+"""Importing"""
+
+class Page(QtWidgets.QWidget):
+    """
+    Navbar page creation class
+    """
+    completeChanged = QtCore.pyqtSignal()
+
+    def __init__(self, parent=None):
+        """
+        Intialise page class
+        """
+        super().__init__(parent)
+        lay = QtWidgets.QVBoxLayout(self)
+        lay.addWidget(self.container)
+
+    @cached_property
+    def container(self):
+        return QtWidgets.QWidget()
+
+class TabWizard(QTabWidget):
+    """
+    creates a tab like widget For the Navbar
+    """
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def addPage(self, page, title):
+        """
+
+        """
+        if not isinstance(page, Page):
+            raise TypeError(f"{page} must be a Page object")
+        self.addTab(page, title)
+
+class Widget(QtWidgets.QWidget):
+    """
+    Clas to Add all pages into a tabwizard
+    """
     def __init__(self):
+        """
+        Initialise widget class for Navbar
+        """
         super().__init__()
 
-        # Get screen geometry and set window size to half
+        #nav bar widget adding
+        self.tabwizard = TabWizard()
+        lay = QVBoxLayout(self)
+        lay.addWidget(self.tabwizard)
+
+        #pages
+        self.tabwizard.addPage(Page1(), "Page 1")
+        self.tabwizard.addPage(Page2(), "Page 2")
+        self.tabwizard.addPage(Page3(), "Page 3")
+        self.tabwizard.addPage(Page4(), "Page 4")
+        self.tabwizard.addPage(Page5(), "Page 5")
+
+class Page1(Page):
+    """
+    Page 1: Dibs
+    """
+    def __init__(self, parent=None):
+        """
+        Initialise "Page n"
+
+        Args:
+            parent
+
+        Methods:
+
+        """
+        super().__init__(parent)
+
+class Page2(Page):
+    """
+    Page 2:
+    """
+    def __init__(self, parent=None):
+        """
+        Initialise "Page n"
+
+        Args:
+            parent
+            
+        Methods:
+
+        """
+        super().__init__(parent)
+
+class Page3(Page):
+    """
+    Page 3:
+    """
+    def __init__(self, parent=None):
+        """
+        Initialise "Page n"
+
+        Args:
+            parent
+            
+        Methods:
+
+        """
+        super().__init__(parent)
+
+class Page4(Page):
+    """
+    Page 4:
+    """
+    def __init__(self, parent=None):
+        """
+        Initialise "Page n"
+
+        Args:
+            parent
+            
+        Methods:
+
+        """
+        super().__init__(parent)
+
+class Page5(Page):
+    """
+    Page 5:
+    """
+    def __init__(self, parent=None):
+        """
+        Initialise "Page n"
+
+        Args:
+            parent
+            
+        Methods:
+
+        """
+        super().__init__(parent)
+
+class MainWindow(QMainWindow):
+    """
+    Main Window for all the elements
+    """
+    def __init__(self):
+        """
+        Initialise all elements of the Program
+        """
+        super().__init__()
+        self.setWindowTitle('CS 3028 Project')
         screen = QApplication.primaryScreen()
         screen_geometry = screen.geometry()
         self.setGeometry(
@@ -17,78 +160,43 @@ class MainWindow(QMainWindow):
             screen_geometry.width() // 2,
             screen_geometry.height() // 2
         )
-        self.setWindowTitle('CS 3028 Project')
 
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         self.layout = QVBoxLayout()
 
-        # Remove spacing and margins to touch
-        self.layout.setSpacing(0)
-        self.layout.setContentsMargins(0, 0, 0, 0)
+        # Nav bar
 
-        # Button bar
-        self.button_bar = QWidget()
-        button_layout = QHBoxLayout()
-        button_layout.setSpacing(0)
-        button_layout.setContentsMargins(0, 0, 0, 0)
-
-        # Create buttons (temp since buttons need dfifferent stuff)
-        self.buttons = []
-        for i in range(1, 6):
-            button = QPushButton(f'Button {i}', self.button_bar)
-            button.setFixedHeight(int(self.height() * 0.05))  # Set buttons to take full height
-            button.clicked.connect(self.on_click)
-            button_layout.addWidget(button)
-            self.buttons.append(button)
-
-        self.button_bar.setLayout(button_layout)
-        self.button_bar.setStyleSheet("border: 1px solid black; background-color: gray;")
-
-        # Top bar
-        self.top_bar = QWidget()
-        self.top_bar.setStyleSheet("background-color: gray;")
-
-        # Environment
+        # margins need to be removed to match enviroment
+        self.navbar = Widget()
+        self.layout.addWidget(self.navbar)
+        
+        # enviroment
         self.environment = QWidget()
+        self.layout.addWidget(self.environment)
         self.environment.setStyleSheet("background-color: black;")
 
-        # Add widgets to layout
-        self.layout.addWidget(self.button_bar)
-        self.layout.addWidget(self.top_bar)
-        self.layout.addWidget(self.environment)
         central_widget.setLayout(self.layout)
-
-        # Minimum size
-        self.setMinimumSize(400, 300)
-
-        #dispaly all widgets/buttons
+        self.setMinimumSize(400, 300) # minimum size of program
         self.show()
 
-    # Resize dynamically
     def resizeEvent(self, event):
-        ##https://stackoverflow.com/questions/35887237/current-screen-size-in-python3-with-pyqt5
-        window_height = self.height()
-        button_bar_height = int(window_height * 0.05)  # button_bar height to 5%
-        top_bar_height = int(window_height * 0.10)     # top_bar height to 10%
-        self.top_bar.setFixedHeight(top_bar_height)
-        self.button_bar.setFixedHeight(button_bar_height)
+        """
+        Handles window resize event
 
-        # Adjust button height dynamically
-        for button in self.buttons:
-            button.setFixedHeight(int(button_bar_height))
+        #On re sizing all elements in the program should be re-adjusted to fit
 
-        super().resizeEvent(event)  # resize
+        Args:
+            event
+        """
+        window_height = self.height() # get screen height
+        navbar_height = int(window_height * 0.20)  # Top 20% for navbar
+        self.navbar.setFixedHeight(navbar_height) # emviroment
+        super().resizeEvent(event)  # handle resize event
 
-    #clicky clicky tee hee
-    def on_click(self):
-        print('PyQt5 button click')
-
-# Main function
-def main():
+if __name__ == "__main__":
+    
     app = QApplication(sys.argv)
     window = MainWindow()
+    window.show()
     sys.exit(app.exec_())
-
-if __name__ == '__main__':
-    main()
