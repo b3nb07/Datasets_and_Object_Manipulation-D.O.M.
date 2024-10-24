@@ -4,6 +4,15 @@ from functools import cached_property
 import sys
 from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox
 from PyQt5 import QtCore, QtWidgets
+from functools import cached_property
+import sys
+from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import * 
+from PyQt5.QtGui import * 
+from PyQt5.QtWidgets import *
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
+from PyQt5.QtGui import QPalette, QColor
 
 """Importing"""
 
@@ -59,8 +68,8 @@ class Widget(QtWidgets.QWidget):
         self.tabwizard.addPage(Page1(), "Object")
         self.tabwizard.addPage(Page2(), "Page 2")
         self.tabwizard.addPage(Page3(), "Page 3")
-        self.tabwizard.addPage(Page4(), "Page 4")
-        self.tabwizard.addPage(Page5(), "Page 5")
+        self.tabwizard.addPage(Page4(), "Generate Random")
+        self.tabwizard.addPage(Page5(), "Import and Export")
 
 class Page1(Page):
     """
@@ -288,7 +297,84 @@ class Page4(Page):
         Methods:
 
         """
+
         super().__init__(parent)
+
+        #First Section
+        self.Set_All_Random_Button = QCheckBox("Set all Random", self)
+        self.Set_All_Random_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.Set_All_Random_Button.setGeometry(10, 10, 90, 20)
+
+        #Second Section
+        self.ObjectDimensions_Label = QLabel(f"Object x Dimension", self)
+        self.ObjectDimensions_Label.setGeometry(120, 10, 100, 20)
+
+        self.Length = QCheckBox("Length", self)
+        self.Length.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.Length.setGeometry(120, 30, 90, 20)
+
+        self.Breadth_Button = QCheckBox("Breadth", self)
+        self.Breadth_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.Breadth_Button.setGeometry(120, 50, 90, 20)
+
+        self.Height_Button = QCheckBox("Height", self)
+        self.Height_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.Height_Button.setGeometry(120, 70, 90, 20)
+
+        #Third Section
+        self.Positions_Label = QLabel(f"Positions:", self)
+        self.Positions_Label.setGeometry(250, 10, 100, 20)
+
+        self.X_Button = QCheckBox("X", self)
+        self.X_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.X_Button.setGeometry(285, 30, 100, 20)
+
+        self.Y_Button = QCheckBox("Y", self)
+        self.Y_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.Y_Button.setGeometry(325, 30, 100, 20)
+
+        self.Z = QCheckBox("Z", self)
+        self.Z.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.Z.setGeometry(365, 30, 100, 20)
+
+        self.PivotPoint_Label = QLabel(f"Pivot Point Co-ords:", self)
+        self.PivotPoint_Label.setGeometry(250, 50, 100, 20)
+
+        self.X_Button = QCheckBox("X", self)
+        self.X_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.X_Button.setGeometry(285, 70, 100, 20)
+
+        self.Y_Button = QCheckBox("Y", self)
+        self.Y_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.Y_Button.setGeometry(325, 70, 100, 20)
+
+        self.Z_Button = QCheckBox("Z", self)
+        self.Z_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.Z_Button.setGeometry(365, 70, 100, 20)
+
+        #Fourth Section
+        self.Reflect_Button = QCheckBox("Reflect", self)
+        self.Reflect_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.Reflect_Button.setGeometry(450, 10, 150, 20)
+
+        self.AutoRotationAngle_Button = QCheckBox("Auto Rotation Angle", self)
+        self.AutoRotationAngle_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.AutoRotationAngle_Button.setGeometry(450, 30, 150, 20)
+
+        self.ImportObjects_Button = QCheckBox("Import Objects", self)
+        self.ImportObjects_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.ImportObjects_Button.setGeometry(450, 50, 150, 20)
+
+        self.ImportEnvironment_Button = QCheckBox("Import Environment", self)
+        self.ImportEnvironment_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.ImportEnvironment_Button.setGeometry(450, 70, 150, 20)
+
+        #Section 5
+        self.RandomSettingSeed_Label = QLabel(f"Random Setting Seed", self)
+        self.RandomSettingSeed_Label.setGeometry(625, 10, 150, 20)
+
+        self.RandomSeed_Label = QLabel(f"<Random Seed>", self)
+        self.RandomSeed_Label.setGeometry(625, 30, 150, 20)
 
 class Page5(Page):
     """
@@ -305,6 +391,25 @@ class Page5(Page):
 
         """
         super().__init__(parent)
+
+        #First Section
+        self.Import_Object_Label = QLabel("Import Object", self)
+        self.Import_Object_Label.setGeometry(10, 10, 90, 20)
+
+        self.BrowseFiles_Button = QPushButton('Browse Files', self)
+        self.BrowseFiles_Button.setGeometry(10, 30, 100, 20)
+
+        #Second Section
+        self.GenerateDataSet_Button = QPushButton('Generate Data Set', self)
+        self.GenerateDataSet_Button.setGeometry(115, 30, 100, 20)
+
+        #Third Section
+        self.ExportDataSet_Button = QPushButton('Export Data Set', self)
+        self.ExportDataSet_Button.setGeometry(220, 30, 100, 20)
+
+        #Fourth Section
+        self.ExportSettings_Button = QPushButton('Export Settings', self)
+        self.ExportSettings_Button.setGeometry(325, 30, 100, 20)
 
 class MainWindow(QMainWindow):
     """
