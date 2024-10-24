@@ -4,10 +4,12 @@ from functools import cached_property
 import sys
 from PyQt5 import QtCore, QtWidgets
 from functools import cached_property
+
 from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox
 from PyQt5.QtCore import * 
 from PyQt5.QtGui import * 
 from PyQt5.QtWidgets import *
+
 
 """Importing"""
 
@@ -338,6 +340,7 @@ class Page4(Page):
         #First Section
         self.Set_All_Random_Button = QCheckBox("Set all Random", self)
         self.Set_All_Random_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+
         self.Set_All_Random_Button.setGeometry(0, 0, 125, 30)
 
         #Second Section
@@ -399,6 +402,7 @@ class Page4(Page):
         self.AutoRotationAngle_Button.setGeometry(450, 30, 150, 20)
 
         self.ImportObjects_Button = QCheckBox("Import Objects       ", self)
+
         self.ImportObjects_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.ImportObjects_Button.setGeometry(450, 50, 150, 20)
 
@@ -438,6 +442,7 @@ class Page5(Page):
         super().__init__(parent)
 
         #First Section
+
         self.Import_Object_Label = QPushButton("Import Object", self)
         self.Import_Object_Label.setGeometry(0, 10, 125, 50)
 
