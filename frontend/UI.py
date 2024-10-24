@@ -2,17 +2,14 @@
 
 from functools import cached_property
 import sys
-from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox
 from PyQt5 import QtCore, QtWidgets
 from functools import cached_property
-import sys
+
 from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox
-from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import * 
 from PyQt5.QtGui import * 
 from PyQt5.QtWidgets import *
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget
-from PyQt5.QtGui import QPalette, QColor
+
 
 """Importing"""
 
@@ -142,7 +139,6 @@ class Page1(Page):
         self.Z_button_plus = QPushButton('+', self)
 
         ##########################################################
-        self.Position_layout = QVBoxLayout()
         self.Object_scale_title = QLabel(f"Object {n} Scale", self)
 
         self.Width_Obj_pos = QLabel("Width:", self)
@@ -164,6 +160,29 @@ class Page1(Page):
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
 
         ########################################
+
+        self.Object_rotation_title = QLabel(f"Object {n} Rotation", self)
+
+        self.X_Rotation_Label = QLabel("X:", self)
+        self.X_Rotation_input_field = QLineEdit(parent=self)
+        
+        self.X_Rotation = QtWidgets.QSlider(self)
+        self.X_Rotation.setOrientation(QtCore.Qt.Horizontal)
+
+        self.Y_Rotation_Label = QLabel("Y:", self)
+        self.Y_Rotation_input_field = QLineEdit(parent=self)
+        
+        self.Y_Rotation = QtWidgets.QSlider(self)
+        self.Y_Rotation.setOrientation(QtCore.Qt.Horizontal)
+
+        self.Z_Rotation_Label = QLabel("Z:", self)
+        self.Z_Rotation_input_field = QLineEdit(parent=self)
+        
+        self.Z_Rotation = QtWidgets.QSlider(self)
+        self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
+
+
+        #########################################
 
         self.combo_box = QComboBox(self)
         Obj_list = ["Object 1", "Object 2", "Object 3"]
@@ -212,41 +231,59 @@ class Page1(Page):
         """
         self.Object_pos_title.setGeometry(int(self.width()*0.01), int(self.height()*0.01), 200, 30)
 
-        self.XObj_pos.setGeometry(int(self.width()*0.01), int(self.height()*0.25),5, 30)
-        self.XObj_pos_input_field.setGeometry(int(self.width()*0.02), int(self.height()*0.25), int(self.width()*0.1), 20)
+        self.XObj_pos.setGeometry(int(self.width()*0.01), int(self.height()*0.25),15, 30)
+        self.XObj_pos_input_field.setGeometry(int(self.width()*0.03), int(self.height()*0.25), int(self.width()*0.1), 20)
         
-        self.X_button_minus.setGeometry(int(self.width()*0.125), int(self.height()*0.25), int(self.width()*0.025), 20)
-        self.X_button_plus.setGeometry(int(self.width()*0.125+int(self.width()*0.025)), int(self.height()*0.25), int(self.width()*0.025), 20)
+        self.X_button_minus.setGeometry(int(self.width()*0.13), int(self.height()*0.25), int(self.width()*0.025), 20)
+        self.X_button_plus.setGeometry(int(self.width()*0.13+int(self.width()*0.025)), int(self.height()*0.25), int(self.width()*0.025), 20)
 
-        self.YObj_pos.setGeometry(int(self.width()*0.01), int(self.height()*0.50),5, 30)
-        self.YObj_pos_input_field.setGeometry(int(self.width()*0.02), int(self.height()*0.5), int(self.width()*0.1), 20)
+        self.YObj_pos.setGeometry(int(self.width()*0.01), int(self.height()*0.50),15, 30)
+        self.YObj_pos_input_field.setGeometry(int(self.width()*0.03), int(self.height()*0.5), int(self.width()*0.1), 20)
 
-        self.Y_button_minus.setGeometry(int(self.width()*0.125), int(self.height()*0.50), int(self.width()*0.025), 20)
-        self.Y_button_plus.setGeometry(int(self.width()*0.125+int(self.width()*0.025)), int(self.height()*0.50), int(self.width()*0.025), 20)
+        self.Y_button_minus.setGeometry(int(self.width()*0.13), int(self.height()*0.50), int(self.width()*0.025), 20)
+        self.Y_button_plus.setGeometry(int(self.width()*0.13+int(self.width()*0.025)), int(self.height()*0.50), int(self.width()*0.025), 20)
 
-        self.ZObj_pos.setGeometry(int(self.width()*0.01), int(self.height()*0.75),5, 30)
-        self.ZObj_pos_input_field.setGeometry(int(self.width()*0.02), int(self.height()*0.75), int(self.width()*0.1), 20)
+        self.ZObj_pos.setGeometry(int(self.width()*0.01), int(self.height()*0.75),15, 30)
+        self.ZObj_pos_input_field.setGeometry(int(self.width()*0.03), int(self.height()*0.75), int(self.width()*0.1), 20)
 
-        self.Z_button_minus.setGeometry(int(self.width()*0.125), int(self.height()*0.75), int(self.width()*0.025), 20)
-        self.Z_button_plus.setGeometry(int(self.width()*0.125+int(self.width()*0.025)), int(self.height()*0.75), int(self.width()*0.025), 20)
+        self.Z_button_minus.setGeometry(int(self.width()*0.13), int(self.height()*0.75), int(self.width()*0.025), 20)
+        self.Z_button_plus.setGeometry(int(self.width()*0.13+int(self.width()*0.025)), int(self.height()*0.75), int(self.width()*0.025), 20)
     
 
         ##########################################################
 
-        self.Object_scale_title.setGeometry(int(self.width()*0.30), int(self.height()*0.01), 200, 30)
+        self.Object_scale_title.setGeometry(int(self.width()*0.20), int(self.height()*0.01), 200, 30)
 
-        self.Width_Obj_pos.setGeometry(int(self.width()*0.30), int(self.height()*0.2), 50, 30)
-        self.Width_Obj_pos_input_field.setGeometry(int(self.width()*0.35), int(self.height()*0.25), int(self.width()*0.1), 20)
-        self.W_slider.setGeometry(QtCore.QRect(int(self.width()*0.48), int(self.height()*0.28), int(self.width()*0.2), 16))
+        self.Width_Obj_pos.setGeometry(int(self.width()*0.20), int(self.height()*0.2), 50, 30)
+        self.Width_Obj_pos_input_field.setGeometry(int(self.width()*0.25), int(self.height()*0.25), int(self.width()*0.1), 20)
+        self.W_slider.setGeometry(QtCore.QRect(int(self.width()*0.38), int(self.height()*0.28), int(self.width()*0.2), 16))
 
-        self.Height_Obj_pos.setGeometry(int(self.width()*0.30), int(self.height()*0.45), 50, 30)
-        self.Height_Obj_pos_input_field.setGeometry(int(self.width()*0.35), int(self.height()*0.5), int(self.width()*0.1), 20)
-        self.H_slider.setGeometry(QtCore.QRect(int(self.width()*0.48), int(self.height()*0.52), int(self.width()*0.2), 16))
+        self.Height_Obj_pos.setGeometry(int(self.width()*0.20), int(self.height()*0.45), 50, 30)
+        self.Height_Obj_pos_input_field.setGeometry(int(self.width()*0.25), int(self.height()*0.5), int(self.width()*0.1), 20)
+        self.H_slider.setGeometry(QtCore.QRect(int(self.width()*0.38), int(self.height()*0.52), int(self.width()*0.2), 16))
 
-        self.Length_Obj_pos.setGeometry(int(self.width()*0.30), int(self.height()*0.7), 50, 30)
-        self.Length_Obj_pos_input_field.setGeometry(int(self.width()*0.35), int(self.height()*0.75), int(self.width()*0.1), 20)
-        self.L_slider.setGeometry(QtCore.QRect(int(self.width()*0.48), int(self.height()*0.77), int(self.width()*0.2), 16))
+        self.Length_Obj_pos.setGeometry(int(self.width()*0.20), int(self.height()*0.7), 50, 30)
+        self.Length_Obj_pos_input_field.setGeometry(int(self.width()*0.25), int(self.height()*0.75), int(self.width()*0.1), 20)
+        self.L_slider.setGeometry(QtCore.QRect(int(self.width()*0.38), int(self.height()*0.77), int(self.width()*0.2), 16))
 
+        ################################################################
+
+
+        self.Object_rotation_title.setGeometry(int(self.width()*0.60), int(self.height()*0.01), 200, 30)
+
+        self.X_Rotation_Label.setGeometry(int(self.width()*0.60), int(self.height()*0.2), 50, 30)
+        self.X_Rotation_input_field.setGeometry(int(self.width()*0.65), int(self.height()*0.25), int(self.width()*0.1), 20)
+        self.X_Rotation.setGeometry(QtCore.QRect(int(self.width()*0.78), int(self.height()*0.28), int(self.width()*0.2), 16))
+
+        self.Y_Rotation_Label.setGeometry(int(self.width()*0.60), int(self.height()*0.45), 50, 30)
+        self.Y_Rotation_input_field.setGeometry(int(self.width()*0.65), int(self.height()*0.5), int(self.width()*0.1), 20)
+        self.Y_Rotation.setGeometry(QtCore.QRect(int(self.width()*0.78), int(self.height()*0.52), int(self.width()*0.2), 16))
+
+        self.Z_Rotation_Label.setGeometry(int(self.width()*0.60), int(self.height()*0.7), 50, 30)
+        self.Z_Rotation_input_field.setGeometry(int(self.width()*0.65), int(self.height()*0.75), int(self.width()*0.1), 20)
+        self.Z_Rotation.setGeometry(QtCore.QRect(int(self.width()*0.78), int(self.height()*0.77), int(self.width()*0.2), 16))
+
+        ###############################################################
         self.combo_box.setGeometry(self.width()-self.combo_box.width(), 0, self.combo_box.width(), self.combo_box.height())
 
 
@@ -303,65 +340,69 @@ class Page4(Page):
         #First Section
         self.Set_All_Random_Button = QCheckBox("Set all Random", self)
         self.Set_All_Random_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.Set_All_Random_Button.setGeometry(10, 10, 90, 20)
+
+        self.Set_All_Random_Button.setGeometry(0, 0, 125, 30)
 
         #Second Section
         self.ObjectDimensions_Label = QLabel(f"Object x Dimension", self)
-        self.ObjectDimensions_Label.setGeometry(120, 10, 100, 20)
+        self.ObjectDimensions_Label.setGeometry(150, 10, 125, 20)
 
-        self.Length = QCheckBox("Length", self)
-        self.Length.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.Length.setGeometry(120, 30, 90, 20)
-
-        self.Breadth_Button = QCheckBox("Breadth", self)
-        self.Breadth_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.Breadth_Button.setGeometry(120, 50, 90, 20)
+        self.Width_Button = QCheckBox("Width ", self)
+        self.Width_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.Width_Button.setGeometry(150, 30, 65, 20)
 
         self.Height_Button = QCheckBox("Height", self)
         self.Height_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.Height_Button.setGeometry(120, 70, 90, 20)
+        self.Height_Button.setGeometry(150, 50, 65, 20)
+
+        self.Length = QCheckBox("Length", self)
+        self.Length.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.Length.setGeometry(150, 70, 65, 20)
 
         #Third Section
-        self.Positions_Label = QLabel(f"Positions:", self)
-        self.Positions_Label.setGeometry(250, 10, 100, 20)
+        self.combo_box = QComboBox(self)
+        Obj_list = ["Object 1", "Object 2", "Object 3"]
+        self.combo_box.addItems(Obj_list)
+        self.combo_box.setGeometry(275, 10, 100, 20)
 
         self.X_Button = QCheckBox("X", self)
         self.X_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.X_Button.setGeometry(285, 30, 100, 20)
+        self.X_Button.setGeometry(275, 30, 30, 20)
 
         self.Y_Button = QCheckBox("Y", self)
         self.Y_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.Y_Button.setGeometry(325, 30, 100, 20)
+        self.Y_Button.setGeometry(315, 30, 30, 20)
 
         self.Z = QCheckBox("Z", self)
         self.Z.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.Z.setGeometry(365, 30, 100, 20)
+        self.Z.setGeometry(350, 30, 30, 20)
 
         self.PivotPoint_Label = QLabel(f"Pivot Point Co-ords:", self)
-        self.PivotPoint_Label.setGeometry(250, 50, 100, 20)
+        self.PivotPoint_Label.setGeometry(275, 50, 120, 20)
 
         self.X_Button = QCheckBox("X", self)
         self.X_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.X_Button.setGeometry(285, 70, 100, 20)
+        self.X_Button.setGeometry(275, 70, 30, 20)
 
         self.Y_Button = QCheckBox("Y", self)
         self.Y_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.Y_Button.setGeometry(325, 70, 100, 20)
+        self.Y_Button.setGeometry(315, 70, 30, 20)
 
         self.Z_Button = QCheckBox("Z", self)
         self.Z_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.Z_Button.setGeometry(365, 70, 100, 20)
+        self.Z_Button.setGeometry(350, 70, 30, 20)
 
         #Fourth Section
-        self.Reflect_Button = QCheckBox("Reflect", self)
+        self.Reflect_Button = QCheckBox("Reflect                  ", self)
         self.Reflect_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.Reflect_Button.setGeometry(450, 10, 150, 20)
 
-        self.AutoRotationAngle_Button = QCheckBox("Auto Rotation Angle", self)
+        self.AutoRotationAngle_Button = QCheckBox(" Auto Rotation Angle", self)
         self.AutoRotationAngle_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.AutoRotationAngle_Button.setGeometry(450, 30, 150, 20)
 
-        self.ImportObjects_Button = QCheckBox("Import Objects", self)
+        self.ImportObjects_Button = QCheckBox("Import Objects       ", self)
+
         self.ImportObjects_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.ImportObjects_Button.setGeometry(450, 50, 150, 20)
 
@@ -370,11 +411,19 @@ class Page4(Page):
         self.ImportEnvironment_Button.setGeometry(450, 70, 150, 20)
 
         #Section 5
+        
         self.RandomSettingSeed_Label = QLabel(f"Random Setting Seed", self)
-        self.RandomSettingSeed_Label.setGeometry(625, 10, 150, 20)
-
+        self.RandomSettingSeed_Label.setGeometry(self.width()-self.RandomSettingSeed_Label.width(), 10, 125, 20)
         self.RandomSeed_Label = QLabel(f"<Random Seed>", self)
-        self.RandomSeed_Label.setGeometry(625, 30, 150, 20)
+
+    def resizeEvent(self, event):
+        if self.RandomSeed_Label.width() > 125:
+            x = self.RandomSeed_Label.width()
+        else:
+            x = 125
+        self.RandomSettingSeed_Label.setGeometry(self.width()-self.RandomSettingSeed_Label.width(), 10, x, 20)
+        self.RandomSeed_Label.setGeometry(self.width()-self.RandomSeed_Label.width(), 30, self.RandomSeed_Label.width(), 20)
+
 
 class Page5(Page):
     """
@@ -393,23 +442,29 @@ class Page5(Page):
         super().__init__(parent)
 
         #First Section
-        self.Import_Object_Label = QLabel("Import Object", self)
-        self.Import_Object_Label.setGeometry(10, 10, 90, 20)
 
-        self.BrowseFiles_Button = QPushButton('Browse Files', self)
-        self.BrowseFiles_Button.setGeometry(10, 30, 100, 20)
+        self.Import_Object_Label = QPushButton("Import Object", self)
+        self.Import_Object_Label.setGeometry(0, 10, 125, 50)
 
         #Second Section
-        self.GenerateDataSet_Button = QPushButton('Generate Data Set', self)
-        self.GenerateDataSet_Button.setGeometry(115, 30, 100, 20)
+        self.BrowseFiles_Button = QPushButton('Render Enviroment', self)
+        self.BrowseFiles_Button.setGeometry(150, 10, 125, 50)
 
         #Third Section
-        self.ExportDataSet_Button = QPushButton('Export Data Set', self)
-        self.ExportDataSet_Button.setGeometry(220, 30, 100, 20)
+        self.BrowseFiles_Button = QPushButton('Tutorial Objects', self)
+        self.BrowseFiles_Button.setGeometry(300, 10, 125, 50)
 
         #Fourth Section
+        self.GenerateDataSet_Button = QPushButton('Generate Data Set', self)
+        self.GenerateDataSet_Button.setGeometry(450, 10, 125, 50)
+
+        #Fifth Section
+        self.ExportSettings_Button = QPushButton('Import Settings', self)
+        self.ExportSettings_Button.setGeometry(600, 10, 125, 50)
+
+        #Sixth Section
         self.ExportSettings_Button = QPushButton('Export Settings', self)
-        self.ExportSettings_Button.setGeometry(325, 30, 100, 20)
+        self.ExportSettings_Button.setGeometry(750, 10, 125, 50)
 
 class MainWindow(QMainWindow):
     """
@@ -460,9 +515,7 @@ class MainWindow(QMainWindow):
         """
         window_height = self.height() # get screen height
         print(f"{self.width()}, {self.height()}") # get screen height
-        navbar_height = int(window_height * 0.25)  # Top 20% for navbar
-        if navbar_height > 150: # Prevents Navbar being massive
-            navbar_height = 150
+        navbar_height = 150
         self.navbar.setFixedHeight(navbar_height) # emviroment
         super().resizeEvent(event)  # handle resize event
 
