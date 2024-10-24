@@ -19,9 +19,9 @@ def get_uniform_across_a_set_y(r, n, xAngle, yPose=0):
         xPose = r * np.sin(    np.deg2rad(i * degs) )
         zPose = -1 * r * np.cos(    np.deg2rad(i * degs) )
 
-    yAngle = np.deg2rad ( i * degs )
+        yAngle = np.deg2rad ( i * degs )
 
-    pose.append( [[xPose, zPose, yPose],[xAngle, 0, yAngle]] )
+        pose.append( [[xPose, zPose, yPose],[xAngle, 0, yAngle]] )
 
     return pose
 
@@ -30,28 +30,40 @@ def get_x_for_higher_angles(r, xAngle):
     return d
 
 def get_y_for_higher_angles(r, xAngle):
-    a = np.cos(xAngle)
+    a = np.cos(xAngle) * r
     return a
 
 
 def get_uniform_pose(r,n):
-    xAngleStep = 180 / n
+    xAngleStep = 180 / n 
     poses = []
-    for i in range(n):
-        xAngle = xAngleStep * i
+    for i in range(n + 1):
+        # RADIANS MAKE IT RADINAS
+
+
+        print(180 - ( xAngleStep * i))
+        xAngle = np.deg2rad(180 - ( xAngleStep * i) )
+        print(xAngle)
+
+        
+
 
         distanceFromCenterX = get_x_for_higher_angles(r, xAngle)
-        distanceFromCenterY = get_y_for_higher_angles(r, xAngle)
+        print("Distance from x: ", distanceFromCenterX)
 
-        poses = poses, get_uniform_across_a_set_y(distanceFromCenterX, n, xAngle, distanceFromCenterY)
+        distanceFromCenterY = get_y_for_higher_angles(r, xAngle)
+        print("Distance from center y: ", distanceFromCenterY)
+
+        poses = poses + get_uniform_across_a_set_y(distanceFromCenterX, n, xAngle, distanceFromCenterY)
     
-    poses = poses[1::]
+    #print(poses)
+    
     return poses
         
 
 
-poses = get_uniform_pose(10, 8)
-print(len(poses))
+poses = get_uniform_pose(10, 4)
+#print(len(poses))
 
 
 # You can import multiple objects:
