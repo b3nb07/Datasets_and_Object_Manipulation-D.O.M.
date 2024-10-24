@@ -6,23 +6,27 @@ import numpy as np
 
 bproc.init()
 
-def get_uniform_pose(r, n):
+def get_uniform_pose(r, n, yPose=0):
+    """ xRotate will be the one to look down / up
+    make a new func to get values for this and then call this
+    
+    """
     pose = []
 
     degs = 360 / n
 
     for i in range(n):
-        xp = r * np.sin(    np.deg2rad(i * degs) )
-        zp = -1 * r * np.cos(    np.deg2rad(i * degs) )
+        xPose = r * np.sin(    np.deg2rad(i * degs) )
+        zPose = -1 * r * np.cos(    np.deg2rad(i * degs) )
 
         angle = np.deg2rad ( i * degs )
 
-        pose.append( [[xp, zp, 0],[np.pi / 2 , 0, angle]] )
+        pose.append( [[xPose, zPose, yPose],[np.pi / 2 , 0, angle]] )
 
     return pose
 
 
-poses = get_uniform_pose(10, 8)
+poses = get_uniform_pose(10, 8,1)
 
 
 # You can import multiple objects:
