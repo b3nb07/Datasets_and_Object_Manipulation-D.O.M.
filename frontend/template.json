@@ -1,0 +1,23 @@
+{
+    "objects": [
+      {
+        "filename":"",
+        "pos": [0,0,0], 
+        "rot": [0,0,0],
+        "sca": [0,0,0]
+      }
+    ],
+    "light_sources":[
+      { 
+        "type": "",
+        "pos": [0,0,0],
+        "rot": [0,0,0], 
+        "energy": 1,
+        "color": [0,0,0]
+      }
+    ],
+    "camera_pos": [0,0,0],
+    "camera_rot": [0,0,0],
+    "background_color": [0,0,0],
+    "seed": 0
+  }
