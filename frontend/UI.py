@@ -393,22 +393,29 @@ class Page4(Page):
         self.Z_Button.setGeometry(350, 70, 30, 20)
 
         #Fourth Section
-        self.Reflect_Button = QCheckBox("Reflect                  ", self)
-        self.Reflect_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.Reflect_Button.setGeometry(450, 10, 150, 20)
+        self.Reflect_Label = QLabel(f"Reflect:", self)
+        self.Reflect_Label.setGeometry(450, 10, 150, 20)
 
-        self.AutoRotationAngle_Button = QCheckBox(" Auto Rotation Angle", self)
-        self.AutoRotationAngle_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.AutoRotationAngle_Button.setGeometry(450, 30, 150, 20)
+        self.Reflect_Button = QCheckBox("", self)
+        self.Reflect_Button.setGeometry(560, 10, 150, 20)
 
-        self.ImportObjects_Button = QCheckBox("Import Objects       ", self)
+        self.AutoRotationAngle_Label = QLabel(f"Auto Rotation Angle:", self)
+        self.AutoRotationAngle_Label.setGeometry(450, 30, 150, 20)
 
-        self.ImportObjects_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.ImportObjects_Button.setGeometry(450, 50, 150, 20)
+        self.AutoRotationAngle_Button = QCheckBox("", self)
+        self.AutoRotationAngle_Button.setGeometry(560, 30, 150, 20)
 
-        self.ImportEnvironment_Button = QCheckBox("Import Environment", self)
-        self.ImportEnvironment_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.ImportEnvironment_Button.setGeometry(450, 70, 150, 20)
+        self.ImportObjects_Label = QLabel(f"Import Objects:", self)
+        self.ImportObjects_Label.setGeometry(450, 50, 150, 20)
+
+        self.ImportObjects_Button = QCheckBox("", self)
+        self.ImportObjects_Button.setGeometry(560, 50, 150, 20)
+
+        self.ImportEnvironment_Label = QLabel(f"Import Environment:", self)
+        self.ImportEnvironment_Label.setGeometry(450, 70, 150, 20)
+
+        self.ImportEnvironment_Button = QCheckBox("", self)
+        self.ImportEnvironment_Button.setGeometry(560, 70, 150, 20)
 
         #Section 5
         
