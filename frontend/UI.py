@@ -63,7 +63,7 @@ class Widget(QtWidgets.QWidget):
 
         #pages
         self.tabwizard.addPage(Page1(), "Object")
-        self.tabwizard.addPage(Page2(), "Page 2")
+        self.tabwizard.addPage(Page2(), "Pivot Point")
         self.tabwizard.addPage(Page3(), "Page 3")
         self.tabwizard.addPage(Page4(), "Generate Random")
         self.tabwizard.addPage(Page5(), "Import and Export")
@@ -297,11 +297,108 @@ class Page2(Page):
 
         Args:
             parent
+            Pivot Point Title
+            X_Pivot Point
+            Y Pivot Point
+            Z pivot Point
+            Angle_change_title
+            Degrees
+            Rotations
             
         Methods:
 
         """
         super().__init__(parent)
+        
+        # Pivot Point Coords Section
+        self.Pivot_Point_subtitle = QLabel("Pivot Point", self)
+
+        # X Pivot Point Controls
+        self.XPivot_pos = QLabel("X:", self)
+        self.XPivot_point_input_field = QLineEdit(parent=self)
+        self.XPivot_button_minus = QPushButton('-', self)
+        self.XPivot_button_plus = QPushButton('+', self)
+
+        # Y Pivot Point Controls
+        self.YPivot_pos = QLabel("Y:", self)
+        self.YPivot_point_input_field = QLineEdit(parent=self)
+        self.YPivot_button_minus = QPushButton('-', self)
+        self.YPivot_button_plus = QPushButton('+', self)
+
+        # Z Pivot Point Controls
+        self.ZPivot_pos = QLabel("Z:", self)
+        self.ZPivot_point_input_field = QLineEdit(parent=self)
+        self.ZPivot_button_minus = QPushButton('-', self)
+        self.ZPivot_button_plus = QPushButton('+', self)
+
+
+        #Angle Change Section
+
+        self.Position_layout = QVBoxLayout()
+        self.Angle_Change_title = QLabel(f"Angle Change Between Images", self)
+
+        self.Degrees_Pivot = QLabel("Degrees:", self)
+        self.Degrees_Pivot_input_field = QLineEdit(parent=self)
+        
+        self.Degrees_Slider = QtWidgets.QSlider(self)
+        self.Degrees_Slider.setOrientation(QtCore.Qt.Horizontal)
+
+        self.Num_Rotations = QLabel("Rotations:", self)
+        self.Num_Rotations_input_field = QLineEdit(parent=self)
+        self.Num_Rotations_minus = QPushButton('-', self)
+        self.Num_rotations_plus = QPushButton('+', self)
+
+        self.combo_box = QComboBox(self)
+        Pivot_list = ["Custom", "Object 1", "Object 2"]
+        self.combo_box.addItems(Pivot_list)
+    
+    
+
+
+
+    def resizeEvent(self, event):
+        
+        # Title Position
+        self.Pivot_Point_subtitle.setGeometry(int(self.width() * 0.025), int(self.height() * 0.01), 100, 30)
+
+        # X Pivot Point
+        self.XPivot_pos.setGeometry(int(self.width() * 0.05), int(self.height() * 0.2), 20, 30)
+        self.XPivot_point_input_field.setGeometry(int(self.width() * 0.1), int(self.height() * 0.2), int(self.width() * 0.1), 20)
+        self.XPivot_button_minus.setGeometry(int(self.width() * 0.22), int(self.height() * 0.2), 25, 20)
+        self.XPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.2), 25, 20)
+
+        # Y Pivot Point
+        self.YPivot_pos.setGeometry(int(self.width() * 0.05), int(self.height() * 0.4), 20, 30)
+        self.YPivot_point_input_field.setGeometry(int(self.width() * 0.1), int(self.height() * 0.4), int(self.width() * 0.1), 20)
+        self.YPivot_button_minus.setGeometry(int(self.width() * 0.22), int(self.height() * 0.4), 25, 20)
+        self.YPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.4), 25, 20)
+
+        # Z Pivot Point
+        self.ZPivot_pos.setGeometry(int(self.width() * 0.05), int(self.height() * 0.6), 20, 30)
+        self.ZPivot_point_input_field.setGeometry(int(self.width() * 0.1), int(self.height() * 0.6), int(self.width() * 0.1), 20)
+        self.ZPivot_button_minus.setGeometry(int(self.width() * 0.22), int(self.height() * 0.6), 25, 20)
+        self.ZPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.6), 25, 20)
+
+        # Angle Change Section
+        self.Angle_Change_title.setGeometry(int(self.width() * 0.30), int(self.height() * 0.03), 150, 30)
+
+        # Degrees
+        self.Degrees_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.30), 50, 30)
+        self.Degrees_Pivot_input_field.setGeometry(int(self.width() * 0.35), int(self.height() * 0.35), int(self.width() * 0.1), 20)
+        self.Degrees_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.48), int(self.height() * 0.35), int(self.width() * 0.2), 16))
+
+        # Rotations
+        self.Num_Rotations.setGeometry(int(self.width() * 0.30), int(self.height() * 0.60), 80, 30)
+        self.Num_Rotations_input_field.setGeometry(int(self.width() * 0.35), int(self.height() * 0.65), int(self.width() * 0.1), 20)
+        self.Num_Rotations_minus.setGeometry(int(self.width() * 0.48), int(self.height() * 0.65), 25, 20)
+        self.Num_rotations_plus.setGeometry(int(self.width() * 0.51), int(self.height() * 0.65), 25, 20)
+
+        #Pivot Selction
+        self.combo_box.setGeometry(self.width()-self.combo_box.width(), 0, self.combo_box.width(), self.combo_box.height())
+
+
+        super().resizeEvent(event)  # Call the parent class's resizeEvent
+
         
 
 class Page3(Page):
