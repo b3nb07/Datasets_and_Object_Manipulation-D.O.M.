@@ -64,8 +64,8 @@ class Widget(QtWidgets.QWidget):
         #pages
         self.tabwizard.addPage(Page1(), "Object")
         self.tabwizard.addPage(Page2(), "Pivot Point")
-        self.tabwizard.addPage(Page3(), "Page 3")
-        self.tabwizard.addPage(Page4(), "Generate Random")
+        self.tabwizard.addPage(Page3(), "Generate Random")
+        self.tabwizard.addPage(Page4(), "Render")
         self.tabwizard.addPage(Page5(), "Import and Export")
 
 class Page1(Page):
@@ -296,14 +296,7 @@ class Page2(Page):
         Initialise "Page n"
 
         Args:
-            parent
-            Pivot Point Title
-            X_Pivot Point
-            Y Pivot Point
-            Z pivot Point
-            Angle_change_title
-            Degrees
-            Rotations
+
             
         Methods:
 
@@ -368,30 +361,30 @@ class Page2(Page):
         self.XPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.2), 25, 20)
 
         # Y Pivot Point
-        self.YPivot_pos.setGeometry(int(self.width() * 0.05), int(self.height() * 0.4), 20, 30)
-        self.YPivot_point_input_field.setGeometry(int(self.width() * 0.1), int(self.height() * 0.4), int(self.width() * 0.1), 20)
-        self.YPivot_button_minus.setGeometry(int(self.width() * 0.22), int(self.height() * 0.4), 25, 20)
-        self.YPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.4), 25, 20)
+        self.YPivot_pos.setGeometry(int(self.width() * 0.05), int(self.height() * 0.5), 20, 30)
+        self.YPivot_point_input_field.setGeometry(int(self.width() * 0.1), int(self.height() * 0.5), int(self.width() * 0.1), 20)
+        self.YPivot_button_minus.setGeometry(int(self.width() * 0.22), int(self.height() * 0.5), 25, 20)
+        self.YPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.5), 25, 20)
 
         # Z Pivot Point
-        self.ZPivot_pos.setGeometry(int(self.width() * 0.05), int(self.height() * 0.6), 20, 30)
-        self.ZPivot_point_input_field.setGeometry(int(self.width() * 0.1), int(self.height() * 0.6), int(self.width() * 0.1), 20)
-        self.ZPivot_button_minus.setGeometry(int(self.width() * 0.22), int(self.height() * 0.6), 25, 20)
-        self.ZPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.6), 25, 20)
+        self.ZPivot_pos.setGeometry(int(self.width() * 0.05), int(self.height() * 0.8), 20, 30)
+        self.ZPivot_point_input_field.setGeometry(int(self.width() * 0.1), int(self.height() * 0.8), int(self.width() * 0.1), 20)
+        self.ZPivot_button_minus.setGeometry(int(self.width() * 0.22), int(self.height() * 0.8), 25, 20)
+        self.ZPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.8), 25, 20)
 
         # Angle Change Section
-        self.Angle_Change_title.setGeometry(int(self.width() * 0.30), int(self.height() * 0.03), 150, 30)
+        self.Angle_Change_title.setGeometry(int(self.width() * 0.30), int(self.height() * 0.01), 150, 30)
 
         # Degrees
         self.Degrees_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.30), 50, 30)
-        self.Degrees_Pivot_input_field.setGeometry(int(self.width() * 0.35), int(self.height() * 0.35), int(self.width() * 0.1), 20)
-        self.Degrees_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.48), int(self.height() * 0.35), int(self.width() * 0.2), 16))
+        self.Degrees_Pivot_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.35), int(self.width() * 0.1), 20)
+        self.Degrees_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.53), int(self.height() * 0.35), int(self.width() * 0.2), 16))
 
         # Rotations
         self.Num_Rotations.setGeometry(int(self.width() * 0.30), int(self.height() * 0.60), 80, 30)
-        self.Num_Rotations_input_field.setGeometry(int(self.width() * 0.35), int(self.height() * 0.65), int(self.width() * 0.1), 20)
-        self.Num_Rotations_minus.setGeometry(int(self.width() * 0.48), int(self.height() * 0.65), 25, 20)
-        self.Num_rotations_plus.setGeometry(int(self.width() * 0.51), int(self.height() * 0.65), 25, 20)
+        self.Num_Rotations_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.65), int(self.width() * 0.1), 20)
+        self.Num_Rotations_minus.setGeometry(int(self.width() * 0.53), int(self.height() * 0.65), 25, 20)
+        self.Num_rotations_plus.setGeometry(int(self.width() * 0.56), int(self.height() * 0.65), 25, 20)
 
         #Pivot Selction
         self.combo_box.setGeometry(self.width()-self.combo_box.width(), 0, self.combo_box.width(), self.combo_box.height())
@@ -399,27 +392,10 @@ class Page2(Page):
 
         super().resizeEvent(event)  # Call the parent class's resizeEvent
 
-        
 
 class Page3(Page):
     """
     Page 3:
-    """
-    def __init__(self, parent=None):
-        """
-        Initialise "Page n"
-
-        Args:
-            parent
-            
-        Methods:
-
-        """
-        super().__init__(parent)
-
-class Page4(Page):
-    """
-    Page 4:
     """
     def __init__(self, parent=None):
         """
@@ -527,6 +503,82 @@ class Page4(Page):
             x = 125
         self.RandomSettingSeed_Label.setGeometry(self.width()-self.RandomSettingSeed_Label.width(), 10, x, 20)
         self.RandomSeed_Label.setGeometry(self.width()-self.RandomSeed_Label.width(), 30, self.RandomSeed_Label.width(), 20)
+
+class Page4(Page):
+    """
+    Page 4: Render
+    """
+    def __init__(self, parent=None):
+        """
+        Initialize Page 4
+        """
+        super().__init__(parent)
+
+
+
+        # Number of Renders input fields
+        self.Number_of_renders_title = QLabel("Number of Renders", self)
+        self.Number_of_renders_input_field = QLineEdit(parent=self)
+        self.Number_of_renders_minus = QPushButton('-', self)
+        self.Number_of_renders_plus = QPushButton('+', self)
+
+        self.Degree_Change_title = QLabel("Degrees of Change", self)
+
+        # X Degree
+        self.X_Degree_Label = QLabel("X:", self)
+        self.X_Degree_input_field = QLineEdit(parent=self)
+        self.X_Degree_slider = QtWidgets.QSlider(self)
+        self.X_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
+
+        # Y Degree
+        self.Y_Degree_Label = QLabel("Y:", self)
+        self.Y_Degree_input_field = QLineEdit(parent=self)
+        self.Y_Degree_slider = QtWidgets.QSlider(self)
+        self.Y_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
+
+        # Z Degree
+        self.Z_Degree_Label = QLabel("Z:", self)
+        self.Z_Degree_input_field = QLineEdit(parent=self)
+        self.Z_Degree_slider = QtWidgets.QSlider(self)
+        self.Z_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
+
+        #Generate Renders Button
+        self.GenerateRenders_Button = QPushButton('Generate Renders', self)
+
+    def resizeEvent(self, event):
+
+        # Number of Renders Title Position
+        self.Number_of_renders_title.setGeometry(int(self.width() * 0.025), int(self.height() * 0.01), 100, 30)
+
+        # Number of renders
+        self.Number_of_renders_input_field.setGeometry(int(self.width() * 0.025), int(self.height() * 0.25), int(self.width() * 0.1), 20)
+        self.Number_of_renders_minus.setGeometry(int(self.width() * 0.14), int(self.height() * 0.25), 25, 20)
+        self.Number_of_renders_plus.setGeometry(int(self.width() * 0.17), int(self.height() * 0.25), 25, 20)
+
+        # Degree Change title position
+        self.Degree_Change_title.setGeometry(int(self.width() * 0.25), int(self.height() * 0.01), 100, 30)
+
+        # X Degree
+        self.X_Degree_Label.setGeometry(int(self.width() * 0.25), int(self.height() * 0.2), 50, 30)
+        self.X_Degree_input_field.setGeometry(int(self.width() * 0.30), int(self.height() * 0.25), int(self.width() * 0.1), 20)
+        self.X_Degree_slider.setGeometry(QtCore.QRect(int(self.width() * 0.43), int(self.height() * 0.28), int(self.width() * 0.2), 16))
+
+        # Y Degree
+        self.Y_Degree_Label.setGeometry(int(self.width() * 0.25), int(self.height() * 0.45), 50, 30)
+        self.Y_Degree_input_field.setGeometry(int(self.width() * 0.30), int(self.height() * 0.5), int(self.width() * 0.1), 20)
+        self.Y_Degree_slider.setGeometry(QtCore.QRect(int(self.width() * 0.43), int(self.height() * 0.52), int(self.width() * 0.2), 16))
+
+        # Z Degree
+        self.Z_Degree_Label.setGeometry(int(self.width() * 0.25), int(self.height() * 0.7), 50, 30)
+        self.Z_Degree_input_field.setGeometry(int(self.width() * 0.30), int(self.height() * 0.75), int(self.width() * 0.1), 20)
+        self.Z_Degree_slider.setGeometry(QtCore.QRect(int(self.width() * 0.43), int(self.height() * 0.77), int(self.width() * 0.2), 16))
+        
+        # Generate Button 
+        self.GenerateRenders_Button.setGeometry(750, 25, 125, 50)
+
+
+        super().resizeEvent(event)  # Call the parent class's resizeEvent
+
 
 
 class Page5(Page):
