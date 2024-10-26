@@ -574,7 +574,7 @@ class Page4(Page):
         self.Z_Degree_slider.setGeometry(QtCore.QRect(int(self.width() * 0.43), int(self.height() * 0.77), int(self.width() * 0.2), 16))
         
         # Generate Button 
-        self.GenerateRenders_Button.setGeometry(750, 25, 125, 50)
+        self.GenerateRenders_Button.setGeometry(800, 25, 125, 50)
 
 
         super().resizeEvent(event)  # Call the parent class's resizeEvent
