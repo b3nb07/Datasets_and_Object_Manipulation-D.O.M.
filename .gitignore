@@ -1,5 +1,6 @@
-# Backend outpuot
+# Backend output
 output/
+export.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
