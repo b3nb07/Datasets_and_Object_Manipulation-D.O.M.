@@ -161,19 +161,19 @@ class Page1(Page):
 
         self.Object_rotation_title = QLabel(f"Object {n} Rotation", self)
 
-        self.X_Rotation_Label = QLabel("X:", self)
+        self.X_Rotation_Label = QLabel("Roll:", self)
         self.X_Rotation_input_field = QLineEdit(parent=self)
         
         self.X_Rotation = QtWidgets.QSlider(self)
         self.X_Rotation.setOrientation(QtCore.Qt.Horizontal)
 
-        self.Y_Rotation_Label = QLabel("Y:", self)
+        self.Y_Rotation_Label = QLabel("Pitch:", self)
         self.Y_Rotation_input_field = QLineEdit(parent=self)
         
         self.Y_Rotation = QtWidgets.QSlider(self)
         self.Y_Rotation.setOrientation(QtCore.Qt.Horizontal)
 
-        self.Z_Rotation_Label = QLabel("Z:", self)
+        self.Z_Rotation_Label = QLabel("Yaw:", self)
         self.Z_Rotation_input_field = QLineEdit(parent=self)
         
         self.Z_Rotation = QtWidgets.QSlider(self)
@@ -420,6 +420,85 @@ class Page4(Page):
         self.RandomSettingSeed_Label.setGeometry(self.width()-self.RandomSettingSeed_Label.width(), 10, x, 20)
         self.RandomSeed_Label.setGeometry(self.width()-self.RandomSeed_Label.width(), 30, self.RandomSeed_Label.width(), 20)
 
+<<<<<<< Updated upstream
+=======
+class Page4(Page):
+    """
+    Page 4: Render
+    """
+    def __init__(self, parent=None):
+        """
+        Initialize Page 4
+        """
+        super().__init__(parent)
+
+
+
+        # Number of Renders input fields
+        self.Number_of_renders_title = QLabel("Number of Renders", self)
+        self.Number_of_renders_input_field = QLineEdit(parent=self)
+        self.Number_of_renders_minus = QPushButton('-', self)
+        self.Number_of_renders_plus = QPushButton('+', self)
+
+        self.Degree_Change_title = QLabel("Degrees of Change", self)
+
+        # X Degree
+        self.X_Degree_Label = QLabel("X:", self)
+        self.X_Degree_input_field = QLineEdit(parent=self)
+        self.X_Degree_slider = QtWidgets.QSlider(self)
+        self.X_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
+
+        # Y Degree
+        self.Y_Degree_Label = QLabel("Y:", self)
+        self.Y_Degree_input_field = QLineEdit(parent=self)
+        self.Y_Degree_slider = QtWidgets.QSlider(self)
+        self.Y_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
+
+        # Z Degree
+        self.Z_Degree_Label = QLabel("Z:", self)
+        self.Z_Degree_input_field = QLineEdit(parent=self)
+        self.Z_Degree_slider = QtWidgets.QSlider(self)
+        self.Z_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
+
+        #Generate Renders Button
+        self.GenerateRenders_Button = QPushButton('Generate Renders', self)
+
+    def resizeEvent(self, event):
+
+        # Number of Renders Title Position
+        self.Number_of_renders_title.setGeometry(int(self.width() * 0.025), int(self.height() * 0.01), 100, 30)
+
+        # Number of renders
+        self.Number_of_renders_input_field.setGeometry(int(self.width() * 0.025), int(self.height() * 0.25), int(self.width() * 0.1), 20)
+        self.Number_of_renders_minus.setGeometry(int(self.width() * 0.14), int(self.height() * 0.25), 25, 20)
+        self.Number_of_renders_plus.setGeometry(int(self.width() * 0.17), int(self.height() * 0.25), 25, 20)
+
+        # Degree Change title position
+        self.Degree_Change_title.setGeometry(int(self.width() * 0.25), int(self.height() * 0.01), 100, 30)
+
+        # X Degree
+        self.X_Degree_Label.setGeometry(int(self.width() * 0.25), int(self.height() * 0.2), 50, 30)
+        self.X_Degree_input_field.setGeometry(int(self.width() * 0.30), int(self.height() * 0.25), int(self.width() * 0.1), 20)
+        self.X_Degree_slider.setGeometry(QtCore.QRect(int(self.width() * 0.43), int(self.height() * 0.28), int(self.width() * 0.2), 16))
+
+        # Y Degree
+        self.Y_Degree_Label.setGeometry(int(self.width() * 0.25), int(self.height() * 0.45), 50, 30)
+        self.Y_Degree_input_field.setGeometry(int(self.width() * 0.30), int(self.height() * 0.5), int(self.width() * 0.1), 20)
+        self.Y_Degree_slider.setGeometry(QtCore.QRect(int(self.width() * 0.43), int(self.height() * 0.52), int(self.width() * 0.2), 16))
+
+        # Z Degree
+        self.Z_Degree_Label.setGeometry(int(self.width() * 0.25), int(self.height() * 0.7), 50, 30)
+        self.Z_Degree_input_field.setGeometry(int(self.width() * 0.30), int(self.height() * 0.75), int(self.width() * 0.1), 20)
+        self.Z_Degree_slider.setGeometry(QtCore.QRect(int(self.width() * 0.43), int(self.height() * 0.77), int(self.width() * 0.2), 16))
+        
+        # Generate Button 
+        self.GenerateRenders_Button.setGeometry(self.width()-self.GenerateRenders_Button.width(), 10, self.GenerateRenders_Button.width(), 50)
+
+
+        super().resizeEvent(event)  # Call the parent class's resizeEvent
+
+
+>>>>>>> Stashed changes
 
 class Page5(Page):
     """
@@ -442,24 +521,20 @@ class Page5(Page):
         self.Import_Object_Label.setGeometry(0, 10, 125, 50)
 
         #Second Section
-        self.BrowseFiles_Button = QPushButton('Render Enviroment', self)
+        self.BrowseFiles_Button = QPushButton('Tutorial Objects', self)
         self.BrowseFiles_Button.setGeometry(150, 10, 125, 50)
 
         #Third Section
-        self.BrowseFiles_Button = QPushButton('Tutorial Objects', self)
+        self.BrowseFiles_Button = QPushButton('Generate Data Set', self)
         self.BrowseFiles_Button.setGeometry(300, 10, 125, 50)
 
         #Fourth Section
-        self.GenerateDataSet_Button = QPushButton('Generate Data Set', self)
+        self.GenerateDataSet_Button = QPushButton('Export Settings', self)
         self.GenerateDataSet_Button.setGeometry(450, 10, 125, 50)
 
         #Fifth Section
         self.ExportSettings_Button = QPushButton('Import Settings', self)
         self.ExportSettings_Button.setGeometry(600, 10, 125, 50)
-
-        #Sixth Section
-        self.ExportSettings_Button = QPushButton('Export Settings', self)
-        self.ExportSettings_Button.setGeometry(750, 10, 125, 50)
 
 class MainWindow(QMainWindow):
     """
