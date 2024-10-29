@@ -63,7 +63,8 @@ class Widget(QtWidgets.QWidget):
 
         #pages
         self.tabwizard.addPage(Page1(), "Object")
-        self.tabwizard.addPage(Page2(), "Pivot Point")
+        self.tabwizard.addPage(
+          Page2(), "Pivot Point")
         self.tabwizard.addPage(Page3(), "Generate Random")
         self.tabwizard.addPage(Page4(), "Render")
         self.tabwizard.addPage(Page5(), "Import and Export")
@@ -163,19 +164,19 @@ class Page1(Page):
 
         self.Object_rotation_title = QLabel(f"Object {n} Rotation", self)
 
-        self.X_Rotation_Label = QLabel("X:", self)
+        self.X_Rotation_Label = QLabel("Roll:", self)
         self.X_Rotation_input_field = QLineEdit(parent=self)
         
         self.X_Rotation = QtWidgets.QSlider(self)
         self.X_Rotation.setOrientation(QtCore.Qt.Horizontal)
 
-        self.Y_Rotation_Label = QLabel("Y:", self)
+        self.Y_Rotation_Label = QLabel("Pitch:", self)
         self.Y_Rotation_input_field = QLineEdit(parent=self)
         
         self.Y_Rotation = QtWidgets.QSlider(self)
         self.Y_Rotation.setOrientation(QtCore.Qt.Horizontal)
 
-        self.Z_Rotation_Label = QLabel("Z:", self)
+        self.Z_Rotation_Label = QLabel("Yaw:", self)
         self.Z_Rotation_input_field = QLineEdit(parent=self)
         
         self.Z_Rotation = QtWidgets.QSlider(self)
@@ -574,12 +575,11 @@ class Page4(Page):
         self.Z_Degree_slider.setGeometry(QtCore.QRect(int(self.width() * 0.43), int(self.height() * 0.77), int(self.width() * 0.2), 16))
         
         # Generate Button 
-        self.GenerateRenders_Button.setGeometry(800, 25, 125, 50)
+        self.GenerateRenders_Button.setGeometry(self.width()-self.GenerateRenders_Button.width(), 10, self.GenerateRenders_Button.width(), 50)
+
 
 
         super().resizeEvent(event)  # Call the parent class's resizeEvent
-
-
 
 class Page5(Page):
     """
@@ -603,24 +603,20 @@ class Page5(Page):
         self.Import_Object_Label.setGeometry(0, 10, 125, 50)
 
         #Second Section
-        self.BrowseFiles_Button = QPushButton('Render Enviroment', self)
+        self.BrowseFiles_Button = QPushButton('Tutorial Objects', self)
         self.BrowseFiles_Button.setGeometry(150, 10, 125, 50)
 
         #Third Section
-        self.BrowseFiles_Button = QPushButton('Tutorial Objects', self)
+        self.BrowseFiles_Button = QPushButton('Generate Data Set', self)
         self.BrowseFiles_Button.setGeometry(300, 10, 125, 50)
 
         #Fourth Section
-        self.GenerateDataSet_Button = QPushButton('Generate Data Set', self)
+        self.GenerateDataSet_Button = QPushButton('Export Settings', self)
         self.GenerateDataSet_Button.setGeometry(450, 10, 125, 50)
 
         #Fifth Section
         self.ExportSettings_Button = QPushButton('Import Settings', self)
         self.ExportSettings_Button.setGeometry(600, 10, 125, 50)
-
-        #Sixth Section
-        self.ExportSettings_Button = QPushButton('Export Settings', self)
-        self.ExportSettings_Button.setGeometry(750, 10, 125, 50)
 
 class MainWindow(QMainWindow):
     """
