@@ -6,20 +6,24 @@ import json
 import os
 
 config = {} # will hold the config ready for export
-is_blender_environment = False # default value, is true when this file is executed in the blender environment
+
+# check if this is the blender environment
+try:
+    bproc
+except NameError:
+    is_blender_environment = False
+else:
+    is_blender_environment = True
 
 class Backend():
     """The main backend class which deals with setting up paramaters for the renderer."""
-    def __init__(self, json_filepath=None, with_bproc=False):
+    def __init__(self, json_filepath=None):
         """Initialise the backend by setting up bproc.
 
         :param json_filepath: Filepath to a JSON configuration file.
-        :param with_bproc: Set up using the blender environment.
         """
-        if (with_bproc):
+        if (is_blender_environment):
             bproc.init()
-            global is_blender_environment
-            is_blender_environment = True
 
         config = {} # reset config due to new initialisation
 
@@ -101,7 +105,7 @@ class Backend():
 
         with open(path + "\\_temp.py", "w") as to_run:
             path = path.replace("\\", "\\\\")
-            to_run.write("import blenderproc as bproc\n" + file_contents + f"""Backend("{path}\\\\temp_export.json", True)._render()""")
+            to_run.write("import blenderproc as bproc\n" + file_contents + f"""Backend("{path}\\\\temp_export.json")._render()""")
 
         os.system("blenderproc run backend/_temp.py")
         os.system("blenderproc vis hdf5 output/0.hdf5")
