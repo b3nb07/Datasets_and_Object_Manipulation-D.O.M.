@@ -606,7 +606,9 @@ class Page5(Page):
         #First Section
         def Get_Object_Filepath():
             try:
-                backend.RenderObject(filepath = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0])
+                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
+                if (path == ""): return
+                backend.RenderObject(filepath = path)
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
 
@@ -644,7 +646,9 @@ class Page5(Page):
         #Fifth Section
         def Get_Settings_Filepath():
             try:
-                backend = Backend(json_filepath = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0])
+                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0]
+                if (path == ""): return
+                backend = Backend(json_filepath = path)
             except Exception:
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
     
