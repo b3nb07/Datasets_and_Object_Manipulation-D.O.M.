@@ -605,11 +605,14 @@ class Page5(Page):
 
         #First Section
         def Get_Object_Filepath():
-            return QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
+            try:
+                backend.RenderObject(filepath = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0])
+            except Exception:
+                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
 
         self.Import_Object_Button = QPushButton("Import Object", self)
         self.Import_Object_Button.setGeometry(0, 10, 125, 50)
-        self.Import_Object_Button.clicked.connect(lambda: backend.RenderObject(filepath = Get_Object_Filepath()))
+        self.Import_Object_Button.clicked.connect(Get_Object_Filepath)
 
         #Second Section
         def Tutorial_Object():
@@ -640,8 +643,11 @@ class Page5(Page):
 
         #Fifth Section
         def Get_Settings_Filepath():
-            backend = Backend(json_filepath = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0])
-        
+            try:
+                backend = Backend(json_filepath = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0])
+            except Exception:
+                QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
+    
         self.ExportSettings_Button = QPushButton('Import Settings', self)
         self.ExportSettings_Button.setGeometry(600, 10, 125, 50)
         self.ExportSettings_Button.clicked.connect(Get_Settings_Filepath)
