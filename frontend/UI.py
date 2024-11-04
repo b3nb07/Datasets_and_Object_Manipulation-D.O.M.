@@ -10,8 +10,14 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import * 
 from PyQt5.QtWidgets import *
 
-
+from sys import path
+path.append("backend")
 """Importing"""
+from backend import Backend
+import numpy as np
+
+# Initialise backend
+backend = Backend()
 
 class Page(QtWidgets.QWidget):
     """
@@ -598,25 +604,57 @@ class Page5(Page):
         super().__init__(parent)
 
         #First Section
+        def Get_Object_Filepath():
+            try:
+                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
+                if (path == ""): return
+                backend.RenderObject(filepath = path)
+            except Exception:
+                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
 
-        self.Import_Object_Label = QPushButton("Import Object", self)
-        self.Import_Object_Label.setGeometry(0, 10, 125, 50)
+        self.Import_Object_Button = QPushButton("Import Object", self)
+        self.Import_Object_Button.setGeometry(0, 10, 125, 50)
+        self.Import_Object_Button.clicked.connect(Get_Object_Filepath)
 
         #Second Section
-        self.BrowseFiles_Button = QPushButton('Tutorial Objects', self)
-        self.BrowseFiles_Button.setGeometry(150, 10, 125, 50)
+        def Tutorial_Object():
+            Tutorial_Box = QMessageBox()
+            Tutorial_Box.setText("Please select a tutorial object from below")
+            Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Cylinder", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Cone", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
 
-        #Third Section
+            Tutorial_Box.exec()
+            backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+
+        self.TutorialObjects_Button = QPushButton('Tutorial Objects', self)
+        self.TutorialObjects_Button.setGeometry(150, 10, 125, 50)
+        self.TutorialObjects_Button.clicked.connect(Tutorial_Object)
+
+        #Third Section --> LEFT FOR NOW
         self.BrowseFiles_Button = QPushButton('Generate Data Set', self)
         self.BrowseFiles_Button.setGeometry(300, 10, 125, 50)
 
         #Fourth Section
         self.GenerateDataSet_Button = QPushButton('Export Settings', self)
         self.GenerateDataSet_Button.setGeometry(450, 10, 125, 50)
+        self.GenerateDataSet_Button.clicked.connect(lambda: backend.export())
 
         #Fifth Section
+        def Get_Settings_Filepath():
+            try:
+                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0]
+                if (path == ""): return
+                backend = Backend(json_filepath = path)
+            except Exception:
+                QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
+    
         self.ExportSettings_Button = QPushButton('Import Settings', self)
         self.ExportSettings_Button.setGeometry(600, 10, 125, 50)
+        self.ExportSettings_Button.clicked.connect(Get_Settings_Filepath)
 
 class MainWindow(QMainWindow):
     """
