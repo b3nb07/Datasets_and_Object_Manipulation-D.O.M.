@@ -19,7 +19,8 @@ light.set_energy(5)
 light.set_color([255, 0, 0])
 
 # Set the camera position and change output resolution to 1080p
-backend.set_cam_pose([[0, -10, 0], [np.pi / 2, 0, 0]])
+backend.add_cam_pose([[0, -10, 0], [np.pi / 2, 0, 0]])
+backend.add_cam_pose([[0, -20, 0], [np.pi / 2, 0, 0]])
 backend.set_res([1920, 1080])
 
 # Start the render

@@ -17,8 +17,9 @@
         "color": [0,0,0]
       }
     ],
-    "camera_pos": [0,0,0],
-    "camera_rot": [0,0,0],
+    "camera_poses": [
+      [[0,0,0], [0,0,0]]
+    ],
     "render_res": [1920, 1080],
     "background_color": [0,0,0],
     "seed": 0
