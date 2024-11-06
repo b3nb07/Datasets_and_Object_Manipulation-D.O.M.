@@ -19,21 +19,6 @@ import numpy as np
 # Initialise backend
 backend = Backend()
 
-class ComboBoxState():
-    def __init__(self):
-        self.items = []
-        self.selected = None
-        
-    def update_items(self, items):
-        self.items = items
-        print(f'items in combo box have been updated: {items}')
-        
-    def update_selected(self, index):
-        self.selected_index = index
-        
-# creates this shared state
-shared_state = ComboBoxState()
-
 class Page(QtWidgets.QWidget):
     """
     Navbar page creation class
@@ -87,15 +72,18 @@ class Widget(QtWidgets.QWidget):
         self.tabwizard.addPage(Page2(), "Pivot Point")
         self.tabwizard.addPage(Page3(), "Generate Random")
         self.tabwizard.addPage(Page4(), "Render")
-        self.tabwizard.addPage(Page5(), "Import and Export")
-        self.tabwizard.setTabVisible(0, self.Object_detect())
-        self.tabwizard.setTabVisible(1, self.Object_detect())
-        self.tabwizard.setTabVisible(2, self.Object_detect())
-        self.tabwizard.setTabVisible(3, self.Object_detect())
+        self.tabwizard.addPage(Page5(self), "Import and Export")
+        self.tabwizard.setTabEnabled(0, False)
+        self.tabwizard.setTabEnabled(1, False)
+        self.tabwizard.setTabEnabled(2, False)
+        self.tabwizard.setTabEnabled(3, False)
         
     def Object_detect(self):
-        return False
+        State = Backend.is_config_objects_empty(self)
+        for i in range(4):
+            self.tabwizard.setTabEnabled(i, State)
 
+        
 class Page1(Page):
     """
     Page 1: Objects
@@ -144,7 +132,6 @@ class Page1(Page):
 
         """
         super().__init__(parent)
-        n=1
 
         self.Object_pos_title = QLabel(f"{Obj_list[0]} Co-ords", self)
 
@@ -167,12 +154,8 @@ class Page1(Page):
 
         self.Z_button_minus = QPushButton('-', self)
         self.Z_button_plus = QPushButton('+', self)
-        
+
         ##########################################################
-        # textChanged callbacks that updates backend
-        self.XObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
-        self.YObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
-        self.ZObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
         
         self.X_button_plus.clicked.connect(lambda: self.Plus_click(self.XObj_pos_input_field))
         self.X_button_minus.clicked.connect(lambda: self.Minus_click(self.XObj_pos_input_field))
@@ -182,6 +165,7 @@ class Page1(Page):
         
         self.Z_button_plus.clicked.connect(lambda: self.Plus_click(self.ZObj_pos_input_field))
         self.Z_button_minus.clicked.connect(lambda: self.Minus_click(self.ZObj_pos_input_field))
+        
         ##########################################################
         self.Object_scale_title = QLabel(f"{Obj_list[0]} Scale", self)
 
@@ -252,65 +236,17 @@ class Page1(Page):
         self.Z_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.Z_Rotation_input_field))
         
         #########################################
-        # creates combo_box
+
         self.combo_box = QComboBox(self)
-    
-        # connecting shared state updates to combo box
-        shared_state.items_updated.connect(self.update_combo_box_items)
-        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
-
-        # Initialize combo box items
-        self.update_combo_box_items(shared_state.items)
-    
-    def update_combo_box_items(self, items):
-        self.combo_box.clear()
-        self.combo_box.addItems(items)
-    
-    
-    def on_object_selected(self):
-        # Get the selected object's position (index)
-        selected_object_pos = self.object_list_combo.currentIndex()
+        self.combo_box.addItems(Obj_list)
+        self.combo_box.currentIndexChanged.connect(lambda: self.update_label())
         
-        # Find the corresponding object from the backend using its position
-        selected_object = self.backend.get_object_by_pos(selected_object_pos)
-
-        # Now populate the input fields with the selected object's properties
-        self.XObj_pos_input_field.setText(str(selected_object["pos"][0]))
-        self.YObj_pos_input_field.setText(str(selected_object["pos"][1]))
-        self.ZObj_pos_input_field.setText(str(selected_object["pos"][2]))
-    
-    def update_object_pos(self):
-        try:
-            if self.XObj_pos_input_field.text():
-                x = float(self.XObj_pos_input_field.text())
-            else: # if no text
-                x = 0
-                
-            if self.ZObj_pos_input_field.text():
-                z = float(self.ZObj_pos_input_field.text())
-            else: # if no text
-                z = 0
-            
-            if self.YObj_pos_input_field.text():
-                y = float(self.YObj_pos_input_field.text())
-            else: # if no text
-                y = 0
-                
-            location = [x,z,y]
-            print(location)
-            # call backend function
-            obj = backend.RenderObject(primative = "MONKEY")
-            obj.update_object_location(location)    
-        except:
-            QMessageBox.warning(self, "Error Updating Pos", "X, Y or Z value is invalid")
-    
     def Plus_click(self, field):
         try:
             val = float(field.text()) + 1
             field.setText(str(val))
         except:
             field.setText(str(0.0))
-            # print("error")
         
         
     def Minus_click(self, field):
@@ -319,7 +255,6 @@ class Page1(Page):
             field.setText(str(val))
         except:
             field.setText(str(0.0))
-            print("error")
             
     def Slider_Update(self, val, field):
         field.setText(str(val))
@@ -526,7 +461,6 @@ class Page2(Page):
             field.setText(str(val))
         except:
             field.setText(str(0.0))
-            print("error")
         
         
     def Minus_click(self, field):
@@ -535,10 +469,11 @@ class Page2(Page):
             field.setText(str(val))
         except:
             field.setText(str(0.0))
-            print("error")
             
     def Slider_Update(self, val, field):
         field.setText(str(val))
+        
+    
 
 
     def resizeEvent(self, event):
@@ -776,7 +711,8 @@ class Page5(Page):
     """
     Page 5:
     """
-    def __init__(self, parent=None):
+    def __init__(self, path ,parent=None):
+        self.path = path
         """
         Initialise "Page n"
 
@@ -794,6 +730,7 @@ class Page5(Page):
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
                 if (path == ""): return
                 backend.RenderObject(filepath = path)
+                self.path.Object_detect()
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
 
@@ -814,6 +751,7 @@ class Page5(Page):
 
             Tutorial_Box.exec()
             backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+            self.path.Object_detect()
 
         self.TutorialObjects_Button = QPushButton('Tutorial Objects', self)
         self.TutorialObjects_Button.setGeometry(150, 10, 125, 50)
@@ -889,7 +827,6 @@ class MainWindow(QMainWindow):
             event
         """
         window_height = self.height() # get screen height
-        print(f"{self.width()}, {self.height()}") # get screen height
         navbar_height = 150
         self.navbar.setFixedHeight(navbar_height) # emviroment
         super().resizeEvent(event)  # handle resize event
