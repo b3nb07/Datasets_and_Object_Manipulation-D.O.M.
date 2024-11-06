@@ -535,15 +535,15 @@ class Page3(Page):
         self.ObjectDimensions_Label.setGeometry(150, 10, 125, 20)
 
         self.Width_Button = QCheckBox("Width ", self)
-        self.Width_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        #self.Width_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.Width_Button.setGeometry(150, 30, 65, 20)
 
         self.Height_Button = QCheckBox("Height", self)
-        self.Height_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        #self.Height_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.Height_Button.setGeometry(150, 50, 65, 20)
 
         self.Length = QCheckBox("Length", self)
-        self.Length.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        #self.Length.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.Length.setGeometry(150, 70, 65, 20)
 
         #Third Section
@@ -553,15 +553,15 @@ class Page3(Page):
         self.combo_box.setGeometry(275, 10, 100, 20)
 
         self.X_Button = QCheckBox("X", self)
-        self.X_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        #self.X_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.X_Button.setGeometry(215, 50, 30, 20)
 
         self.Y_Button = QCheckBox("Y", self)
-        self.Y_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        #self.Y_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.Y_Button.setGeometry(315, 50, 30, 20)
 
         self.Z_Button = QCheckBox("Z", self)
-        self.Z_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        #self.Z_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.Z_Button.setGeometry(250, 50, 30, 20)
 
         self.PivotPoint_Label = QLabel(f"Pivot Point Co-ords:", self)
@@ -620,9 +620,9 @@ class Page3(Page):
         # Second Section
         self.ObjectDimensions_Label.setGeometry(int(window_width * 0.25), int(window_height * 0.02), int(window_width * 0.2), 20)
         
-        self.Width_Button.setGeometry(int(window_width * 0.17), int(window_height * 0.3), int(window_width * 0.15), 20)
-        self.Height_Button.setGeometry(int(window_width * 0.24), int(window_height * 0.3), int(window_width * 0.15), 20)
-        self.Length.setGeometry(int(window_width * 0.31), int(window_height * 0.3), int(window_width * 0.15), 20)
+        self.Width_Button.setGeometry(int(window_width * 0.2875), int(window_height * 0.3), int(window_width * 0.15), 20)
+        self.Height_Button.setGeometry(int(window_width * 0.3575), int(window_height * 0.3), int(window_width * 0.15), 20)
+        self.Length.setGeometry(int(window_width * 0.4275), int(window_height * 0.3), int(window_width * 0.15), 20)
         
         # Third Section
         self.combo_box.setGeometry(int(window_width * 0.375), int(window_height * 0.02), int(window_width * 0.15), 20)
