@@ -73,6 +73,13 @@ class Widget(QtWidgets.QWidget):
         self.tabwizard.addPage(Page3(), "Generate Random")
         self.tabwizard.addPage(Page4(), "Render")
         self.tabwizard.addPage(Page5(), "Import and Export")
+        self.tabwizard.setTabVisible(0, self.Object_detect())
+        self.tabwizard.setTabVisible(1, self.Object_detect())
+        self.tabwizard.setTabVisible(2, self.Object_detect())
+        self.tabwizard.setTabVisible(3, self.Object_detect())
+        
+    def Object_detect(self):
+        return False
 
 class Page1(Page):
     """
