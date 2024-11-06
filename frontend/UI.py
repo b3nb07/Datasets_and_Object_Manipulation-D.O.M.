@@ -296,16 +296,41 @@ class Page1(Page):
 
 class Page2(Page):
     """
-    Page 2:
+    Page 2: Pivot Point
     """
     def __init__(self, parent=None):
         """
         Initialise "Page n"
+        Handles pivot point controls
 
         Args:
+        parent
+        Pivot_Point_subtitle
+        XPivot_pos
+        XPivot_point_input_field
+        XPivot_button_minus
+        XPivot_button_plus
+        YPivot_pos
+        YPivot_point_input_field
+        YPivot_button_minus
+        YPivot_button_plus
+        ZPivot_pos
+        ZPivot_point_input_field
+        ZPivot_button_minus
+        ZPivot_button_plus
+        Angle_Change_title
+        Degrees_Pivot
+        Degrees_Pivot_input_field
+        Degrees_Slider
+        Num_Rotations
+        Num_Rotations_input_field
+        Num_Rotations_minus
+        Num_rotations_plus
+        combo_box
+        Pivot_list
 
-            
         Methods:
+
 
         """
         super().__init__(parent)
@@ -318,23 +343,34 @@ class Page2(Page):
         self.XPivot_point_input_field = QLineEdit(parent=self)
         self.XPivot_button_minus = QPushButton('-', self)
         self.XPivot_button_plus = QPushButton('+', self)
+        self.XPivot_button_minus.clicked.connect(self.decrease_xpivot)
+        self.XPivot_button_plus.clicked.connect(self.increase_xpivot)
+        self.XPivot_point_input_field.setText("0")
+
+        
+
 
         # Y Pivot Point Controls
         self.YPivot_pos = QLabel("Y:", self)
         self.YPivot_point_input_field = QLineEdit(parent=self)
         self.YPivot_button_minus = QPushButton('-', self)
         self.YPivot_button_plus = QPushButton('+', self)
+        self.YPivot_button_minus.clicked.connect(self.decrease_ypivot)
+        self.YPivot_button_plus.clicked.connect(self.increase_ypivot)
+        self.YPivot_point_input_field.setText("0")
 
         # Z Pivot Point Controls
         self.ZPivot_pos = QLabel("Z:", self)
         self.ZPivot_point_input_field = QLineEdit(parent=self)
         self.ZPivot_button_minus = QPushButton('-', self)
         self.ZPivot_button_plus = QPushButton('+', self)
+        self.ZPivot_button_minus.clicked.connect(self.decrease_zpivot)
+        self.ZPivot_button_plus.clicked.connect(self.increase_zpivot)
+        self.ZPivot_point_input_field.setText("0")
 
 
         #Angle Change Section
 
-        self.Position_layout = QVBoxLayout()
         self.Angle_Change_title = QLabel(f"Angle Change Between Images", self)
 
         self.Degrees_Pivot = QLabel("Degrees:", self)
@@ -347,10 +383,55 @@ class Page2(Page):
         self.Num_Rotations_input_field = QLineEdit(parent=self)
         self.Num_Rotations_minus = QPushButton('-', self)
         self.Num_rotations_plus = QPushButton('+', self)
+        self.Num_Rotations_minus.clicked.connect(self.decrease_num_rotations)
+        self.Num_rotations_plus.clicked.connect(self.increase_num_rotations)
+        self.Num_Rotations_input_field.setText("0")
+
 
         self.combo_box = QComboBox(self)
         Pivot_list = ["Custom", "Object 1", "Object 2"]
         self.combo_box.addItems(Pivot_list)
+
+    def increase_xpivot(self):
+        value = int(self.XPivot_point_input_field.text())
+        self.XPivot_point_input_field.setText(str(value + 1))
+
+    def decrease_xpivot(self):
+        value = int(self.XPivot_point_input_field.text())
+        if value > 0:  # Prevent negative values if needed
+            self.XPivot_point_input_field.setText(str(value - 1))
+
+    # Y Pivot Point plus and minus 
+    def increase_ypivot(self):
+        value = int(self.YPivot_point_input_field.text())
+        self.YPivot_point_input_field.setText(str(value + 1))
+
+    def decrease_ypivot(self):
+        value = int(self.YPivot_point_input_field.text())
+        if value > 0:  # Prevent negative values if needed
+            self.YPivot_point_input_field.setText(str(value - 1))
+
+    # Z Pivot Point plus and minus 
+    def increase_zpivot(self):
+        value = int(self.ZPivot_point_input_field.text())
+        self.ZPivot_point_input_field.setText(str(value + 1))
+
+    def decrease_zpivot(self):
+        value = int(self.ZPivot_point_input_field.text())
+        if value > 0:  # Prevent negative values if needed
+            self.ZPivot_point_input_field.setText(str(value - 1))
+
+    # Number of Rotations plus and minus 
+    def increase_num_rotations(self):
+        value = int(self.Num_Rotations_input_field.text())
+        self.Num_Rotations_input_field.setText(str(value + 1))
+
+    def decrease_num_rotations(self):
+        value = int(self.Num_Rotations_input_field.text())
+        if value > 0:  # Prevent negative values if needed
+            self.Num_Rotations_input_field.setText(str(value - 1))
+
+
     
     
 
@@ -402,7 +483,7 @@ class Page2(Page):
 
 class Page3(Page):
     """
-    Page 3:
+    Page 3: Generate Random
     """
     def __init__(self, parent=None):
         """
@@ -410,6 +491,30 @@ class Page3(Page):
 
         Args:
             parent
+            Set_All_Random_Button
+            ObjectDimensions_Label
+            Width_Button
+            Height_Button
+            Length
+            combo_box
+            Obj_list
+            X_Button
+            Y_Button
+            Z
+            PivotPoint_Label
+            X_Button
+            Y_Button
+            Z_Button
+            Reflect_Label
+            Reflect_Button
+            AutoRotationAngle_Label
+            AutoRotationAngle_Button
+            ImportObjects_Label
+            ImportObjects_Button
+            ImportEnvironment_Label
+            ImportEnvironment_Button
+            RandomSettingSeed_Label
+            RandomSeed_Label
             
         Methods:
 
@@ -520,14 +625,40 @@ class Page4(Page):
         Initialize Page 4
         """
         super().__init__(parent)
+        
+        #def GenerateRenders():
+
+        #backend.render
+        #backend.RenderObject.setloc()
+        #backend.RenderObject.setscale()
+        #backend.RenderObject.setrotation()
+
+
+
+
+        #Generate Renders Button
+        self.GenerateRenders_Button = QPushButton('Generate Renders', self)
+        #self.GenerateRenders_Button.clicked.connect(GenerateRenders)
+        self.GenerateRenders_Button.setGeometry(0, 10, 125, 50)
+
+        
+
 
 
 
         # Number of Renders input fields
         self.Number_of_renders_title = QLabel("Number of Renders", self)
         self.Number_of_renders_input_field = QLineEdit(parent=self)
+        self.Number_of_renders_input_field.setText("0")
+
         self.Number_of_renders_minus = QPushButton('-', self)
         self.Number_of_renders_plus = QPushButton('+', self)
+
+        self.Number_of_renders_minus.clicked.connect(self.decrease_count)
+        self.Number_of_renders_plus.clicked.connect(self.increase_count)
+
+
+
 
         self.Degree_Change_title = QLabel("Degrees of Change", self)
 
@@ -548,9 +679,17 @@ class Page4(Page):
         self.Z_Degree_input_field = QLineEdit(parent=self)
         self.Z_Degree_slider = QtWidgets.QSlider(self)
         self.Z_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
+    
+    def increase_count(self):
+        number_of_renders_value = int(self.Number_of_renders_input_field.text())
+        self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
 
-        #Generate Renders Button
-        self.GenerateRenders_Button = QPushButton('Generate Renders', self)
+    def decrease_count(self):
+        number_of_renders_value = int(self.Number_of_renders_input_field.text())
+        if number_of_renders_value > 0:  # Prevent negative values if needed
+            self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
+
+
 
     def resizeEvent(self, event):
 
