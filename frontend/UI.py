@@ -293,7 +293,6 @@ class Page1(Page):
         ###############################################################
         self.combo_box.setGeometry(self.width()-self.combo_box.width(), 0, self.combo_box.width(), self.combo_box.height())
 
-
 class Page2(Page):
     """
     Page 2: Pivot Point
@@ -480,7 +479,6 @@ class Page2(Page):
 
         super().resizeEvent(event)  # Call the parent class's resizeEvent
 
-
 class Page3(Page):
     """
     Page 3: Generate Random
@@ -638,7 +636,7 @@ class Page4(Page):
 
         #Generate Renders Button
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
-        #self.GenerateRenders_Button.clicked.connect(GenerateRenders)
+        self.GenerateRenders_Button.clicked.connect(self.generateRandom)
         self.GenerateRenders_Button.setGeometry(0, 10, 125, 50)
 
         
@@ -649,7 +647,7 @@ class Page4(Page):
         # Number of Renders input fields
         self.Number_of_renders_title = QLabel("Number of Renders", self)
         self.Number_of_renders_input_field = QLineEdit(parent=self)
-        self.Number_of_renders_input_field.setText("0")
+        self.Number_of_renders_input_field.setText("1")
 
         self.Number_of_renders_minus = QPushButton('-', self)
         self.Number_of_renders_plus = QPushButton('+', self)
@@ -686,10 +684,8 @@ class Page4(Page):
 
     def decrease_count(self):
         number_of_renders_value = int(self.Number_of_renders_input_field.text())
-        if number_of_renders_value > 0:  # Prevent negative values if needed
+        if number_of_renders_value > 1:  # Prevent negative values if needed
             self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
-
-
 
     def resizeEvent(self, event):
 
@@ -724,7 +720,42 @@ class Page4(Page):
 
 
 
+
+
         super().resizeEvent(event)  # Call the parent class's resizeEvent
+
+
+    def add_camera_poses_linear(self):
+        number_of_renders = int(self.Number_of_renders_input_field.text())
+
+        x_degree_change = int(self.X_Degree_input_field.text())
+        z_degree_change = int(self.Z_Degree_input_field.text())
+        y_degree_change = int(self.Y_Degree_input_field.text())
+
+    def add_camera_poses_random():
+        pass
+
+
+    def generateRandom(self):
+        #validate
+        number_of_renders = int(self.Number_of_renders_input_field.text())
+
+        if number_of_renders <1:
+            QMessageBox.warning(self, "Error when starting render", "Invalid value for number of renders.")
+            return
+        
+        #add cameras
+        
+        #for now all cameras are linear
+
+        self.add_camera_poses_linear()
+        
+
+
+        
+        #backend.render()
+
+
 
 class Page5(Page):
     """
