@@ -34,7 +34,12 @@ class Backend():
                 temp = json.load(import_file)
 
             # call funcitons to set up scene
-            self.set_cam_pose([temp["camera_pos"], temp["camera_rot"]])
+            poses = temp.get("camera_poses", False)
+            if (poses):
+                for pose in poses:
+                    self.add_cam_pose(pose)
+            else:
+                self.add_cam_pose([[0, 0, 0], [np.pi / 2, 0, 0]])
             if ("background_color" in temp):
                 self.set_bg_color(temp["background_color"])
             if ("render_res" in temp):
@@ -59,16 +64,16 @@ class Backend():
                 l.set_energy(light["energy"])
                 l.set_color(light["color"])
 
-    def set_cam_pose(self, pose):
-        """Sets the position of the camera in the scene for rendering.
+    def add_cam_pose(self, pose):
+        """Adds a position of a camera to the scene for rendering.
         
         :param pose: a list containing position and rotation config details. Position in index 0 and rotation in index 1."""
         if (is_blender_environment):
             cam_pose = bproc.math.build_transformation_mat(pose[0], pose[1])
             bproc.camera.add_camera_pose(cam_pose)
 
-        config["camera_pos"] = pose[0]
-        config["camera_rot"] = pose[1]
+        config.setdefault("camera_poses", [])
+        config["camera_poses"].append(pose)
         
     def set_res(self, resolution):
         """Set the resolution of the output images. Will effect total render time.
