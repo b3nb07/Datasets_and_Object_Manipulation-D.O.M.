@@ -66,21 +66,11 @@ class Widget(QtWidgets.QWidget):
         self.tabwizard = TabWizard()
         lay = QVBoxLayout(self)
         lay.addWidget(self.tabwizard)
-        #central_widget.setStyleSheet("background-color: gray;")
 
+        #applying stlye for tabs
+        self.tabwizard.setStyleSheet(GlobalStyles.style())
 
-        self.tabwizard.setStyleSheet("QTabBar::tab {"
-        "    background-color: #D3D3D3;"  # Light gray color for tabs"
-        "    padding: 5px;"
-        "    border: 1px solid black;"
-        "}"
-        "QTabBar::tab:selected {"
-        "    background-color: #A9A9A9;"  # Darker gray for selected tab"
-        "}"
-        "QTabWidget::pane {"
-        "    border: none;"  # Remove the border around the content area"
-        "}"
-        )
+        
         #pages
         self.tabwizard.addPage(Page1(), "Object")
         self.tabwizard.addPage(
@@ -949,14 +939,31 @@ class MainWindow(QMainWindow):
         self.navbar.setFixedHeight(navbar_height) # emviroment
         super().resizeEvent(event)  # handle resize event
 
-if __name__ == "__main__":
-    
-    
 
-    app = QApplication(sys.argv)
-    
-    # Global Styling #
-    app.setStyleSheet("""
+class GlobalStyles:
+    """
+    Class for global styling
+    """
+
+
+    @staticmethod
+
+    def style():
+        return """
+        QTabBar::tab {
+            background-color: #D3D3D3;
+            padding: 5px;
+            border: 1px solid black;
+        }
+        QTabBar::tab:selected {
+            background-color: #A9A9A9;  /* Darker gray for selected tab */
+        }
+        QTabWidget::pane {
+            border: none;
+        }
+        QTabBar:hover {
+            background-color: #A9A9A9;  /* Hover effect for tab */
+        }
         QPushButton {
             background-color: white;
             color: black;
@@ -965,24 +972,33 @@ if __name__ == "__main__":
             font-weight: bold;
         }
         QPushButton:hover {
-            background-color: #A9A9A9;
+            background-color: #A9A9A9;  /* Dark gray for button hover */
+        }
+        QPushButton:checked {
+            background-color: #A9A9A9;  /* Darker gray when checked */
         }
         QLineEdit {
-            border: 1px solid black;  /* Border color */
-            border-radius: 5px;       /* Optional: Rounded corners */
-            background-color: white;  /* Background color of input field */
-            color: black;             /* Text color */
+            border: 1px solid black; 
+            border-radius: 5px;       
+            background-color: white; 
+            color: black;            
         }
         QLabel {
-        font-weight: bold;
-    }
+            font-weight: bold;
+        }
         QCheckBox {
-        font-weight: bold;
-    }
-    """)
+            font-weight: bold;
+        }
+        """
 
 
-    ##########
+
+if __name__ == "__main__":
+    
+    
+
+    app = QApplication(sys.argv)
+    
 
     window = MainWindow()
     window.show()
