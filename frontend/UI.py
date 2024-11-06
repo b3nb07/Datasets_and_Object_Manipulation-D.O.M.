@@ -372,6 +372,15 @@ class Page2(Page):
         
         self.Degrees_Slider = QtWidgets.QSlider(self)
         self.Degrees_Slider.setOrientation(QtCore.Qt.Horizontal)
+        self.Degrees_Slider.setMinimum(1)
+        self.Degrees_Slider.setMaximum(360)
+        self.Degrees_Slider.setValue(1)
+        self.Degrees_Slider.setTickInterval(1)  # Interval between each tick mark
+        self.Degrees_Slider.setTickPosition(QSlider.TicksBelow)
+        self.Degrees_Slider.valueChanged.connect(self.update_degrees_input)
+
+
+
 
         self.Num_Rotations = QLabel("Rotations:", self)
         self.Num_Rotations_input_field = QLineEdit(parent=self)
@@ -394,6 +403,12 @@ class Page2(Page):
         new_input_value = input_value + value_change
         if new_input_value >= 0:  
             input_field.setText(str(new_input_value))
+    
+
+    def update_degrees_input(self):
+        # Get the slider's current value and update the input field
+        value = self.Degrees_Slider.value()
+        self.Degrees_Pivot_input_field.setText(str(value))
     
 
 
@@ -705,20 +720,39 @@ class Page4(Page):
         # X Degree
         self.X_Degree_Label = QLabel("X:", self)
         self.X_Degree_input_field = QLineEdit(parent=self)
+        self.X_Degree_input_field.setText("1")
         self.X_Degree_slider = QtWidgets.QSlider(self)
         self.X_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.X_Degree_slider.setMinimum(1) 
+        self.X_Degree_slider.setMaximum(365) 
+        self.X_Degree_slider.setTickInterval(1) 
+        self.X_Degree_slider.setTickPosition(QSlider.TicksBelow)
 
         # Y Degree
         self.Y_Degree_Label = QLabel("Y:", self)
         self.Y_Degree_input_field = QLineEdit(parent=self)
         self.Y_Degree_slider = QtWidgets.QSlider(self)
+        self.Y_Degree_input_field.setText("1")
         self.Y_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.Y_Degree_slider.setMinimum(1)
+        self.Y_Degree_slider.setMaximum(365)
+        self.Y_Degree_slider.setTickInterval(1)
+        self.Y_Degree_slider.setTickPosition(QSlider.TicksBelow)
 
         # Z Degree
         self.Z_Degree_Label = QLabel("Z:", self)
         self.Z_Degree_input_field = QLineEdit(parent=self)
+        self.Z_Degree_input_field.setText("1")
         self.Z_Degree_slider = QtWidgets.QSlider(self)
         self.Z_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.Z_Degree_slider.setMinimum(1)
+        self.Z_Degree_slider.setMaximum(365)
+        self.Z_Degree_slider.setTickInterval(1)
+        self.Z_Degree_slider.setTickPosition(QSlider.TicksBelow)
+
+        self.X_Degree_slider.valueChanged.connect(lambda: self.update_degree_input(self.X_Degree_slider, self.X_Degree_input_field))
+        self.Y_Degree_slider.valueChanged.connect(lambda: self.update_degree_input(self.Y_Degree_slider, self.Y_Degree_input_field))
+        self.Z_Degree_slider.valueChanged.connect(lambda: self.update_degree_input(self.Z_Degree_slider, self.Z_Degree_input_field))
     
     def increase_count(self):
         number_of_renders_value = int(self.Number_of_renders_input_field.text())
@@ -728,6 +762,10 @@ class Page4(Page):
         number_of_renders_value = int(self.Number_of_renders_input_field.text())
         if number_of_renders_value > 1:  # Prevent negative values if needed
             self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
+    
+    def update_degree_input(self, slider, input_field):
+        value = slider.value()
+        input_field.setText(str(value))
 
     def resizeEvent(self, event):
 
@@ -760,7 +798,7 @@ class Page4(Page):
         # Generate Button 
         self.GenerateRenders_Button.setGeometry(self.width()-self.GenerateRenders_Button.width(), 10, self.GenerateRenders_Button.width(), 50)
 
-
+        
 
 
 
