@@ -128,19 +128,20 @@ class Page1(Page):
 
         self.XObj_pos = QLabel("X:", self)
         self.XObj_pos_input_field = QLineEdit(parent=self)
+        self.XObj_pos_input_field.setText("0.0")
         self.X_button_minus = QPushButton('-', self)
         self.X_button_plus = QPushButton('+', self)
 
         self.YObj_pos = QLabel("Y:", self)
-
         self.YObj_pos_input_field = QLineEdit(parent=self)
+        self.YObj_pos_input_field.setText("0.0")
 
         self.Y_button_minus = QPushButton('-', self)
         self.Y_button_plus = QPushButton('+', self)
         
         self.ZObj_pos = QLabel("Z:", self)
-
-        self.ZObj_pos_input_field = QLineEdit(parent=self)
+        self.ZObj_pos_input_field = QLineEdit(parent=self) 
+        self.ZObj_pos_input_field.setText("0.0")
 
         self.Z_button_minus = QPushButton('-', self)
         self.Z_button_plus = QPushButton('+', self)
@@ -162,12 +163,15 @@ class Page1(Page):
         self.Width_Obj_pos = QLabel("Width:", self)
         self.Width_Obj_pos_input_field = QLineEdit(parent=self)
         
+        self.Width_Obj_pos_input_field.setText("0.0")
+        
         self.W_slider = QtWidgets.QSlider(self)
         self.W_slider.setRange(0, 100)
         self.W_slider.setOrientation(QtCore.Qt.Horizontal)
 
         self.Height_Obj_pos = QLabel("Height:", self)
         self.Height_Obj_pos_input_field = QLineEdit(parent=self)
+        self.Height_Obj_pos_input_field.setText("0.0")
 
         self.H_slider = QtWidgets.QSlider(self)
         self.H_slider.setRange(0, 100)
@@ -175,6 +179,7 @@ class Page1(Page):
         
         self.Length_Obj_pos = QLabel("Length:", self)
         self.Length_Obj_pos_input_field = QLineEdit(parent=self)
+        self.Length_Obj_pos_input_field.setText("0.0")
 
         self.L_slider = QtWidgets.QSlider(self)
         self.L_slider.setRange(0, 100)
@@ -192,6 +197,7 @@ class Page1(Page):
 
         self.X_Rotation_Label = QLabel("Roll:", self)
         self.X_Rotation_input_field = QLineEdit(parent=self)
+        self.X_Rotation_input_field.setText("0.0")
         
         self.X_Rotation = QtWidgets.QSlider(self)
         
@@ -200,6 +206,7 @@ class Page1(Page):
         
         self.Y_Rotation_Label = QLabel("Pitch:", self)
         self.Y_Rotation_input_field = QLineEdit(parent=self)
+        self.Y_Rotation_input_field.setText("0.0")
         
         self.Y_Rotation = QtWidgets.QSlider(self)
         self.Y_Rotation.setOrientation(QtCore.Qt.Horizontal)
@@ -207,6 +214,7 @@ class Page1(Page):
 
         self.Z_Rotation_Label = QLabel("Yaw:", self)
         self.Z_Rotation_input_field = QLineEdit(parent=self)
+        self.Z_Rotation_input_field.setText("0.0")
         
         self.Z_Rotation = QtWidgets.QSlider(self)
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
@@ -373,6 +381,7 @@ class Page2(Page):
         # X Pivot Point Controls
         self.XPivot_pos = QLabel("X:", self)
         self.XPivot_point_input_field = QLineEdit(parent=self)
+        self.XPivot_point_input_field.setText("0.0")
         self.XPivot_button_minus = QPushButton('-', self)
         self.XPivot_button_plus = QPushButton('+', self)
         
@@ -384,6 +393,7 @@ class Page2(Page):
         # Y Pivot Point Controls
         self.YPivot_pos = QLabel("Y:", self)
         self.YPivot_point_input_field = QLineEdit(parent=self)
+        self.YPivot_point_input_field.setText("0.0")
         self.YPivot_button_minus = QPushButton('-', self)
         self.YPivot_button_plus = QPushButton('+', self)
         
@@ -395,6 +405,7 @@ class Page2(Page):
         # Z Pivot Point Controls
         self.ZPivot_pos = QLabel("Z:", self)
         self.ZPivot_point_input_field = QLineEdit(parent=self)
+        self.ZPivot_point_input_field.setText("0.0")
         self.ZPivot_button_minus = QPushButton('-', self)
         self.ZPivot_button_plus = QPushButton('+', self)
         
@@ -411,6 +422,7 @@ class Page2(Page):
 
         self.Degrees_Pivot = QLabel("Degrees:", self)
         self.Degrees_Pivot_input_field = QLineEdit(parent=self)
+        self.Degrees_Pivot_input_field.setText("0")
         
         self.Degrees_Slider = QtWidgets.QSlider(self)
         self.Degrees_Slider.setOrientation(QtCore.Qt.Horizontal)
@@ -422,6 +434,7 @@ class Page2(Page):
         
         self.Num_Rotations = QLabel("Rotations:", self)
         self.Num_Rotations_input_field = QLineEdit(parent=self)
+        self.Num_Rotations_input_field.setText("0")
         self.Num_Rotations_minus = QPushButton('-', self)
         self.Num_rotations_plus = QPushButton('+', self)
         
