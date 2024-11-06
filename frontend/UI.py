@@ -162,6 +162,7 @@ class Page1(Page):
         self.Width_Obj_pos_input_field = QLineEdit(parent=self)
         
         self.W_slider = QtWidgets.QSlider(self)
+        self.W_slider.setRange(0, 100)
         self.W_slider.setOrientation(QtCore.Qt.Horizontal)
 
         self.Height_Obj_pos = QLabel("Height:", self)
@@ -176,6 +177,12 @@ class Page1(Page):
         self.L_slider = QtWidgets.QSlider(self)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
 
+        ########################################
+
+        self.W_slider.valueChanged.connect(lambda val: self.update_label(val, self.Width_Obj_pos_input_field))
+        self.H_slider.valueChanged.connect(lambda val: self.update_label(val, self.Height_Obj_pos_input_field))
+        self.L_slider.valueChanged.connect(lambda val: self.update_label(val, self.Length_Obj_pos_input_field))
+        
         ########################################
 
         self.Object_rotation_title = QLabel(f"Object {n} Rotation", self)
@@ -198,7 +205,12 @@ class Page1(Page):
         self.Z_Rotation = QtWidgets.QSlider(self)
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
 
-
+        #########################################
+        
+        self.X_Rotation.valueChanged.connect(lambda val: self.update_label(val, self.X_Rotation_input_field))
+        self.Y_Rotation.valueChanged.connect(lambda val: self.update_label(val, self.Y_Rotation_input_field))
+        self.Z_Rotation.valueChanged.connect(lambda val: self.update_label(val, self.Z_Rotation_input_field))
+        
         #########################################
 
         self.combo_box = QComboBox(self)
@@ -221,6 +233,9 @@ class Page1(Page):
         except:
             field.setText(str(0.0))
             print("error")
+            
+    def update_label(self, val, field):
+        field.setText(str(val))
 
 
     def resizeEvent(self, event):
