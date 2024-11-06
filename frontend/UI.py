@@ -435,8 +435,17 @@ class Page2(Page):
         self.Degrees_Slider.setOrientation(QtCore.Qt.Horizontal)
         self.Degrees_Slider.setRange(0, 360)
         
+        self.Distance_Pivot = QLabel("Distance:", self)
+        self.Distance_Pivot_input_field = QLineEdit(parent=self)
+        self.Distance_Pivot_input_field.setText("0")
+        
+        self.Distance_Slider = QtWidgets.QSlider(self)
+        self.Distance_Slider.setOrientation(QtCore.Qt.Horizontal)
+        self.Distance_Slider.setRange(0, 100)
+        
         #################
         self.Degrees_Slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Degrees_Pivot_input_field))
+        self.Distance_Slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
         #################
         
         self.Num_Rotations = QLabel("Rotations:", self)
@@ -503,15 +512,20 @@ class Page2(Page):
         self.Angle_Change_title.setGeometry(int(self.width() * 0.30), int(self.height() * 0.01), 150, 30)
 
         # Degrees
-        self.Degrees_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.30), 50, 30)
-        self.Degrees_Pivot_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.35), int(self.width() * 0.1), 20)
-        self.Degrees_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.53), int(self.height() * 0.35), int(self.width() * 0.2), 16))
+        self.Degrees_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.275), 50, 30)
+        self.Degrees_Pivot_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.275), int(self.width() * 0.1), 20)
+        self.Degrees_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.53), int(self.height() * 0.275), int(self.width() * 0.2), 16))
+        
+        # Distacne
+        self.Distance_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.5), 75, 30)
+        self.Distance_Pivot_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.5), int(self.width() * 0.1), 20)
+        self.Distance_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.53), int(self.height() * 0.5), int(self.width() * 0.2), 16))
 
         # Rotations
-        self.Num_Rotations.setGeometry(int(self.width() * 0.30), int(self.height() * 0.60), 80, 30)
-        self.Num_Rotations_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.65), int(self.width() * 0.1), 20)
-        self.Num_Rotations_minus.setGeometry(int(self.width() * 0.53), int(self.height() * 0.65), 25, 20)
-        self.Num_rotations_plus.setGeometry(int(self.width() * 0.56), int(self.height() * 0.65), 25, 20)
+        self.Num_Rotations.setGeometry(int(self.width() * 0.30), int(self.height() * 0.75), 80, 30)
+        self.Num_Rotations_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.75), int(self.width() * 0.1), 20)
+        self.Num_Rotations_minus.setGeometry(int(self.width() * 0.53), int(self.height() * 0.75), 25, 20)
+        self.Num_rotations_plus.setGeometry(int(self.width() * 0.56), int(self.height() * 0.75), 25, 20)
 
         #Pivot Selction
         self.combo_box.setGeometry(self.width()-self.combo_box.width(), 0, self.combo_box.width(), self.combo_box.height())
@@ -762,9 +776,9 @@ class Page5(Page):
         self.BrowseFiles_Button.setGeometry(300, 10, 125, 50)
 
         #Fourth Section
-        self.GenerateDataSet_Button = QPushButton('Export Settings', self)
-        self.GenerateDataSet_Button.setGeometry(450, 10, 125, 50)
-        self.GenerateDataSet_Button.clicked.connect(lambda: backend.export())
+        self.Delete_Object__Button = QPushButton('Export Settings', self)
+        self.Delete_Object__Button.setGeometry(450, 10, 125, 50)
+        ##self.Delete_Object__Button.clicked.connect(lambda: backend.export())
 
         #Fifth Section
         def Get_Settings_Filepath():
@@ -778,6 +792,10 @@ class Page5(Page):
         self.ExportSettings_Button = QPushButton('Import Settings', self)
         self.ExportSettings_Button.setGeometry(600, 10, 125, 50)
         self.ExportSettings_Button.clicked.connect(Get_Settings_Filepath)
+        
+        self.Delete_Object_Button = QPushButton('Delete Object', self)
+        self.Delete_Object_Button.setGeometry(750, 10, 125, 50)
+        ##self.Delete_Object_Button.clicked.connect("""Remove Object""")
 
 class MainWindow(QMainWindow):
     """
