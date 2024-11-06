@@ -663,21 +663,21 @@ class Page4(Page):
         # X Degree
         self.X_Degree_Label = QLabel("X:", self)
         self.X_Degree_input_field = QLineEdit(parent=self)
-        self.X_Degree_input_field.setText("1")
+        self.X_Degree_input_field.setText("0")
         self.X_Degree_slider = QtWidgets.QSlider(self)
         self.X_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
 
         # Y Degree
         self.Y_Degree_Label = QLabel("Y:", self)
         self.Y_Degree_input_field = QLineEdit(parent=self)
-        self.Y_Degree_input_field.setText("1")
+        self.Y_Degree_input_field.setText("0")
         self.Y_Degree_slider = QtWidgets.QSlider(self)
         self.Y_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
 
         # Z Degree
         self.Z_Degree_Label = QLabel("Z:", self)
         self.Z_Degree_input_field = QLineEdit(parent=self)
-        self.Z_Degree_input_field.setText("1")
+        self.Z_Degree_input_field.setText("0")
         self.Z_Degree_slider = QtWidgets.QSlider(self)
         self.Z_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
     
