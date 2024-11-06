@@ -17,6 +17,7 @@ else:
 
 class Backend():
     """The main backend class which deals with setting up paramaters for the renderer."""
+    object_counter = 0 # initialise an object counter
     def __init__(self, json_filepath=None):
         """Initialise the backend by setting up bproc.
 
@@ -24,9 +25,8 @@ class Backend():
         """
         if (is_blender_environment):
             bproc.init()
-
+            
         config = {} # reset config due to new initialisation
-
         if (json_filepath is not None):
             # load json objects into self
             temp = None
@@ -134,19 +134,26 @@ class Backend():
 
     class RenderObject():
         """An object to be rendered."""
-
-        def __init__(self, filepath=None, primative=None):
+        
+        def __init__(self, filepath=None, primative=None, object_id=None):
             """Initialise a render object.
 
             :param filepath: Filepath to an object file.
             :param primative: Create object primatively, choose from one of ["CUBE", "CYLINDER", "CONE", "PLANE", "SPHERE", "MONKEY"].
+            :param object_id: Acts as a unique identifier for the object.
             """
             self.object_pos = len(config.setdefault("objects", []))
             config["objects"].append({})
+            
+            # getting object ID and incrementing the counter so that all objects are uniquely identified
+            object_id = Backend.object_counter
+            Backend.object_counter+=1
+                        
             if (filepath is not None):
                 if (is_blender_environment):
                     self.object = bproc.loader.load_blend(filepath) if filepath.endswith(".blend") else bproc.loader.load_obj(filepath)
                 config["objects"][self.object_pos] = {
+                    "object_id": object_id,
                     "filename": filepath,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
@@ -158,6 +165,7 @@ class Backend():
                 if (is_blender_environment):
                     self.object = bproc.object.create_primitive(primative)
                 config["objects"][self.object_pos] = {
+                    "object_id": object_id,
                     "primative": primative,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
@@ -167,8 +175,8 @@ class Backend():
 
             raise TypeError('No filepath or primative argument given.')
 
-        def set_loc(self, location):
-            """Set the location of an object in the scene.
+        def update_object_location(self, location):
+            """Update the location of an object in the scene.
             
             :param location: A list containing [x,z,y] where x,z,y is an integer or float. This determines the coordinates of the object's location.
             """
@@ -177,8 +185,8 @@ class Backend():
 
             config["objects"][self.object_pos]["pos"] = location
 
-        def set_scale(self, scale):
-            """Set the scale of an object in the scene.
+        def update_object_scale(self, scale):
+            """Update the scale of an object in the scene.
             
             :param scale: A list containing [x,z,y] where x,z,y is an integer or float. This determines the scaling of each axis.
             """
@@ -187,8 +195,8 @@ class Backend():
 
             config["objects"][self.object_pos]["sca"] = scale
 
-        def set_rotation(self, euler_rotation):
-            """Set the rotation of an object in the scene.
+        def update_object_rotation(self, euler_rotation):
+            """Update the rotation of an object in the scene.
             
             :param euler_rotation: A list containing [x,z,y] values for the euler rotation to be applied to the object.
             """
