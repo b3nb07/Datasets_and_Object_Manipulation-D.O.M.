@@ -69,8 +69,7 @@ class Widget(QtWidgets.QWidget):
 
         #pages
         self.tabwizard.addPage(Page1(), "Object")
-        self.tabwizard.addPage(
-          Page2(), "Pivot Point")
+        self.tabwizard.addPage(Page2(), "Pivot Point")
         self.tabwizard.addPage(Page3(), "Generate Random")
         self.tabwizard.addPage(Page4(), "Render")
         self.tabwizard.addPage(Page5(), "Import and Export")
@@ -146,6 +145,17 @@ class Page1(Page):
         self.Z_button_plus = QPushButton('+', self)
 
         ##########################################################
+        
+        self.X_button_plus.clicked.connect(lambda: self.Plus_click(self.XObj_pos_input_field))
+        self.X_button_minus.clicked.connect(lambda: self.Minus_click(self.XObj_pos_input_field))
+        
+        self.Y_button_plus.clicked.connect(lambda: self.Plus_click(self.YObj_pos_input_field))
+        self.Y_button_minus.clicked.connect(lambda: self.Minus_click(self.YObj_pos_input_field))
+        
+        self.Z_button_plus.clicked.connect(lambda: self.Plus_click(self.ZObj_pos_input_field))
+        self.Z_button_minus.clicked.connect(lambda: self.Minus_click(self.ZObj_pos_input_field))
+        
+        ##########################################################
         self.Object_scale_title = QLabel(f"Object {n} Scale", self)
 
         self.Width_Obj_pos = QLabel("Width:", self)
@@ -194,6 +204,23 @@ class Page1(Page):
         self.combo_box = QComboBox(self)
         Obj_list = ["Object 1", "Object 2", "Object 3"]
         self.combo_box.addItems(Obj_list)
+        
+    def Plus_click(self, field):
+        try:
+            val = float(field.text()) + 1
+            field.setText(str(val))
+        except:
+            field.setText(str(0.0))
+            print("error")
+        
+        
+    def Minus_click(self, field):
+        try:
+            val = float(field.text()) - 1
+            field.setText(str(val))
+        except:
+            field.setText(str(0.0))
+            print("error")
 
 
     def resizeEvent(self, event):
