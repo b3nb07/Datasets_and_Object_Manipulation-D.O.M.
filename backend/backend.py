@@ -45,24 +45,26 @@ class Backend():
             if ("render_res" in temp):
                 self.set_res(temp["render_res"])
 
-            for obj in temp["objects"]:
-                o = None
-                if ("filename" in obj):
-                    o = self.RenderObject(filepath = obj["filename"])
-                else:
-                    o = self.RenderObject(primative = obj["primative"])
+            if ("objects" in temp):
+                for obj in temp["objects"]:
+                    o = None
+                    if ("filename" in obj):
+                        o = self.RenderObject(filepath = obj["filename"])
+                    else:
+                        o = self.RenderObject(primative = obj["primative"])
 
-                o.set_loc(obj["pos"])
-                o.set_rotation(obj["rot"])
-                o.set_scale(obj["sca"])
+                    o.set_loc(obj["pos"])
+                    o.set_rotation(obj["rot"])
+                    o.set_scale(obj["sca"])
 
-            for light in temp["light_sources"]:
-                l = self.RenderLight(light["type"], light["name"])
+            if ("light_sources" in temp):
+                for light in temp["light_sources"]:
+                    l = self.RenderLight(light["type"], light["name"])
 
-                l.set_loc(light["pos"])
-                l.set_rotation(light["rot"])
-                l.set_energy(light["energy"])
-                l.set_color(light["color"])
+                    l.set_loc(light["pos"])
+                    l.set_rotation(light["rot"])
+                    l.set_energy(light["energy"])
+                    l.set_color(light["color"])
 
     def add_cam_pose(self, pose):
         """Adds a position of a camera to the scene for rendering.
