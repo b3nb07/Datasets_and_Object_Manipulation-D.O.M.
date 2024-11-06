@@ -79,6 +79,7 @@ class Page1(Page):
     Page 1: Objects
     """
     def __init__(self, parent=None):
+        Obj_list = ["Object 1", "Object 2", "Object 3"]
         """
         Initialise "Page n"
 
@@ -123,7 +124,7 @@ class Page1(Page):
         super().__init__(parent)
         n=1
 
-        self.Object_pos_title = QLabel(f"Object {n} Co-ords", self)
+        self.Object_pos_title = QLabel(f"{Obj_list[0]} Co-ords", self)
 
         self.XObj_pos = QLabel("X:", self)
         self.XObj_pos_input_field = QLineEdit(parent=self)
@@ -156,7 +157,7 @@ class Page1(Page):
         self.Z_button_minus.clicked.connect(lambda: self.Minus_click(self.ZObj_pos_input_field))
         
         ##########################################################
-        self.Object_scale_title = QLabel(f"Object {n} Scale", self)
+        self.Object_scale_title = QLabel(f"{Obj_list[0]} Scale", self)
 
         self.Width_Obj_pos = QLabel("Width:", self)
         self.Width_Obj_pos_input_field = QLineEdit(parent=self)
@@ -179,13 +180,13 @@ class Page1(Page):
 
         ########################################
 
-        self.W_slider.valueChanged.connect(lambda val: self.update_label(val, self.Width_Obj_pos_input_field))
-        self.H_slider.valueChanged.connect(lambda val: self.update_label(val, self.Height_Obj_pos_input_field))
-        self.L_slider.valueChanged.connect(lambda val: self.update_label(val, self.Length_Obj_pos_input_field))
+        self.W_slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Width_Obj_pos_input_field))
+        self.H_slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Height_Obj_pos_input_field))
+        self.L_slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Length_Obj_pos_input_field))
         
         ########################################
 
-        self.Object_rotation_title = QLabel(f"Object {n} Rotation", self)
+        self.Object_rotation_title = QLabel(f"{Obj_list[0]} Rotation", self)
 
         self.X_Rotation_Label = QLabel("Roll:", self)
         self.X_Rotation_input_field = QLineEdit(parent=self)
@@ -207,15 +208,15 @@ class Page1(Page):
 
         #########################################
         
-        self.X_Rotation.valueChanged.connect(lambda val: self.update_label(val, self.X_Rotation_input_field))
-        self.Y_Rotation.valueChanged.connect(lambda val: self.update_label(val, self.Y_Rotation_input_field))
-        self.Z_Rotation.valueChanged.connect(lambda val: self.update_label(val, self.Z_Rotation_input_field))
+        self.X_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.X_Rotation_input_field))
+        self.Y_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.Y_Rotation_input_field))
+        self.Z_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.Z_Rotation_input_field))
         
         #########################################
 
         self.combo_box = QComboBox(self)
-        Obj_list = ["Object 1", "Object 2", "Object 3"]
         self.combo_box.addItems(Obj_list)
+        self.combo_box.currentIndexChanged.connect(lambda: self.update_label())
         
     def Plus_click(self, field):
         try:
@@ -234,8 +235,16 @@ class Page1(Page):
             field.setText(str(0.0))
             print("error")
             
-    def update_label(self, val, field):
+    def Slider_Update(self, val, field):
         field.setText(str(val))
+        
+    def update_label(self):
+        AllItems = [self.combo_box.itemText(i) for i in range(self.combo_box.count())]
+        n = self.combo_box.currentIndex()
+        Title = AllItems[n]
+        self.Object_pos_title.setText(f"{Title} Co-ords")
+        self.Object_scale_title.setText(f"{Title} Scale")
+        self.Object_rotation_title.setText(f"{Title} Rotation")
 
 
     def resizeEvent(self, event):
