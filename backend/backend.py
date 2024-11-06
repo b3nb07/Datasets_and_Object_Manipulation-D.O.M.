@@ -17,7 +17,6 @@ else:
 
 class Backend():
     """The main backend class which deals with setting up paramaters for the renderer."""
-    object_counter = 0 # initialise an object counter
     def __init__(self, json_filepath=None):
         """Initialise the backend by setting up bproc.
 
@@ -74,6 +73,20 @@ class Backend():
 
         config.setdefault("camera_poses", [])
         config["camera_poses"].append(pose)
+        
+    def get_object_by_pos(self, pos):
+        """Get an object by its index in the config list.
+        
+        :param pos: A int value to try index the config list.
+        """
+        try:
+            return config["objects"][pos]
+        except IndexError:
+            return None
+        
+    def is_config_objects_empty(self):
+        if not config.get("objects"):
+            return True
         
     def set_res(self, resolution):
         """Set the resolution of the output images. Will effect total render time.
@@ -144,16 +157,12 @@ class Backend():
             """
             self.object_pos = len(config.setdefault("objects", []))
             config["objects"].append({})
-            
-            # getting object ID and incrementing the counter so that all objects are uniquely identified
-            object_id = Backend.object_counter
-            Backend.object_counter+=1
                         
             if (filepath is not None):
                 if (is_blender_environment):
                     self.object = bproc.loader.load_blend(filepath) if filepath.endswith(".blend") else bproc.loader.load_obj(filepath)
                 config["objects"][self.object_pos] = {
-                    "object_id": object_id,
+                    "object_pos": self.object_pos,
                     "filename": filepath,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
@@ -165,7 +174,7 @@ class Backend():
                 if (is_blender_environment):
                     self.object = bproc.object.create_primitive(primative)
                 config["objects"][self.object_pos] = {
-                    "object_id": object_id,
+                    "object_pos": self.object_pos,
                     "primative": primative,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
@@ -235,6 +244,7 @@ class Backend():
             """
             if (is_blender_environment):
                 self.light.set_location(location)
+                print(f'location updated to (x:{location[0]}, z:{location[1]}, y{location[2]})')
 
             config["light_sources"][self.light_pos]["pos"] = location
 
