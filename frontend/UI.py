@@ -170,12 +170,14 @@ class Page1(Page):
         self.Height_Obj_pos_input_field = QLineEdit(parent=self)
 
         self.H_slider = QtWidgets.QSlider(self)
+        self.H_slider.setRange(0, 100)
         self.H_slider.setOrientation(QtCore.Qt.Horizontal)
         
         self.Length_Obj_pos = QLabel("Length:", self)
         self.Length_Obj_pos_input_field = QLineEdit(parent=self)
 
         self.L_slider = QtWidgets.QSlider(self)
+        self.L_slider.setRange(0, 100)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
 
         ########################################
@@ -192,19 +194,23 @@ class Page1(Page):
         self.X_Rotation_input_field = QLineEdit(parent=self)
         
         self.X_Rotation = QtWidgets.QSlider(self)
+        
         self.X_Rotation.setOrientation(QtCore.Qt.Horizontal)
-
+        self.X_Rotation.setRange(0, 360)
+        
         self.Y_Rotation_Label = QLabel("Pitch:", self)
         self.Y_Rotation_input_field = QLineEdit(parent=self)
         
         self.Y_Rotation = QtWidgets.QSlider(self)
         self.Y_Rotation.setOrientation(QtCore.Qt.Horizontal)
+        self.Y_Rotation.setRange(0, 360)
 
         self.Z_Rotation_Label = QLabel("Yaw:", self)
         self.Z_Rotation_input_field = QLineEdit(parent=self)
         
         self.Z_Rotation = QtWidgets.QSlider(self)
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
+        self.Z_Rotation.setRange(0, 360)
 
         #########################################
         
@@ -369,18 +375,33 @@ class Page2(Page):
         self.XPivot_point_input_field = QLineEdit(parent=self)
         self.XPivot_button_minus = QPushButton('-', self)
         self.XPivot_button_plus = QPushButton('+', self)
+        
+        ###################
+        self.XPivot_button_plus.clicked.connect(lambda: self.Plus_click(self.XPivot_point_input_field))
+        self.XPivot_button_minus.clicked.connect(lambda: self.Minus_click(self.XPivot_point_input_field))
+        ###################
 
         # Y Pivot Point Controls
         self.YPivot_pos = QLabel("Y:", self)
         self.YPivot_point_input_field = QLineEdit(parent=self)
         self.YPivot_button_minus = QPushButton('-', self)
         self.YPivot_button_plus = QPushButton('+', self)
+        
+        ###################
+        self.YPivot_button_plus.clicked.connect(lambda: self.Plus_click(self.YPivot_point_input_field))
+        self.YPivot_button_minus.clicked.connect(lambda: self.Minus_click(self.YPivot_point_input_field))
+        ###################
 
         # Z Pivot Point Controls
         self.ZPivot_pos = QLabel("Z:", self)
         self.ZPivot_point_input_field = QLineEdit(parent=self)
         self.ZPivot_button_minus = QPushButton('-', self)
         self.ZPivot_button_plus = QPushButton('+', self)
+        
+        ###################
+        self.ZPivot_button_plus.clicked.connect(lambda: self.Plus_click(self.ZPivot_point_input_field))
+        self.ZPivot_button_minus.clicked.connect(lambda: self.Minus_click(self.ZPivot_point_input_field))
+        ###################
 
 
         #Angle Change Section
@@ -393,18 +414,46 @@ class Page2(Page):
         
         self.Degrees_Slider = QtWidgets.QSlider(self)
         self.Degrees_Slider.setOrientation(QtCore.Qt.Horizontal)
-
+        self.Degrees_Slider.setRange(0, 360)
+        
+        #################
+        self.Degrees_Slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Degrees_Pivot_input_field))
+        #################
+        
         self.Num_Rotations = QLabel("Rotations:", self)
         self.Num_Rotations_input_field = QLineEdit(parent=self)
         self.Num_Rotations_minus = QPushButton('-', self)
         self.Num_rotations_plus = QPushButton('+', self)
+        
+        ###################
+        self.Num_rotations_plus.clicked.connect(lambda: self.Plus_click(self.Num_Rotations_input_field))
+        self.Num_Rotations_minus.clicked.connect(lambda: self.Minus_click(self.Num_Rotations_input_field))
+        ###################
 
         self.combo_box = QComboBox(self)
         Pivot_list = ["Custom", "Object 1", "Object 2"]
         self.combo_box.addItems(Pivot_list)
     
     
-
+    def Plus_click(self, field):
+        try:
+            val = float(field.text()) + 1
+            field.setText(str(val))
+        except:
+            field.setText(str(0.0))
+            print("error")
+        
+        
+    def Minus_click(self, field):
+        try:
+            val = float(field.text()) - 1
+            field.setText(str(val))
+        except:
+            field.setText(str(0.0))
+            print("error")
+            
+    def Slider_Update(self, val, field):
+        field.setText(str(val))
 
 
     def resizeEvent(self, event):
