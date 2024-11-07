@@ -11,7 +11,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from sys import path
-path.append("backend")
+path.append("../backend")
 """Importing"""
 from backend import Backend
 import numpy as np
@@ -19,17 +19,30 @@ import numpy as np
 # Initialise backend
 backend = Backend()
 
-class ComboBoxState():
+class ComboBoxState(QObject):
+    # Defines basic signals for items and selection updates
+    items_updated = pyqtSignal(list) # signal to send when items are updated
+    selection_changed = pyqtSignal(int)# signal to send when selection changes
+    
     def __init__(self):
-        self.items = []
+        super().__init__()
+        self.items = [] # this will store what is in the combobox
         self.selected = None
         
     def update_items(self, items):
         self.items = items
         print(f'items in combo box have been updated: {items}')
+        self.items_updated.emit(items)  # Emit signal for item updates
         
+    def add_item(self, item):
+        self.items.append(item)
+        self.items_updated.emit(self.items)
+        print('ComboBox Item added {item}')
+    
     def update_selected(self, index):
         self.selected_index = index
+        # maybe delete
+        self.selection_changed.emit(index)
         
 # creates this shared state
 shared_state = ComboBoxState()
@@ -261,6 +274,9 @@ class Page1(Page):
 
         # Initialize combo box items
         self.update_combo_box_items(shared_state.items)
+        
+        shared_state.update_items(items=["Option 1", "Option 2", "Option 3"])
+        shared_state.update_selected(1)  # Sets the selection to index 1 in all pages
     
     def update_combo_box_items(self, items):
         self.combo_box.clear()
