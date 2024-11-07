@@ -950,16 +950,21 @@ class GlobalStyles:
 
     def style():
         return """
-        QTabBar::tab {
+        QTabBar::tab { 
             background-color: #D3D3D3; 
             padding: 5px;
             border: 1px solid black;
+            border-radius: 3px;
+            font-weight: bold;
+            min-width: 120px;
+            
+
         }
         QTabBar::tab:selected {
             background-color: #A9A9A9;  
         }
         QTabWidget::pane {
-            border: none;
+            border: black;
         }
         QTabBar:hover {
             background-color: #A9A9A9; 
