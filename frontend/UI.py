@@ -1000,8 +1000,8 @@ if __name__ == "__main__":
 
         Initial_Object.exec_()
         if Initial_Object.clickedButton().text() == "Custom Object":
-            objectSelected = Get_Object_Filepath(Widget())
+            objectSelected = Get_Object_Filepath(window.navbar)
         else:
-            objectSelected = Tutorial_Object(Widget())
+            objectSelected = Tutorial_Object(window.navbar)
 
     sys.exit(app.exec_())
