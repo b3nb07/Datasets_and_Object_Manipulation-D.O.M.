@@ -590,9 +590,6 @@ class Page2(Page):
             
     def Slider_Update(self, val, field):
         field.setText(str(val))
-        
-    
-
 
     def resizeEvent(self, event):
         
@@ -968,12 +965,10 @@ if __name__ == "__main__":
         try:
             path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
             if (path == ""): return
-            backend.RenderObject(filepath = path)
+            # add the object to the shared state
+            shared_state.add_item(backend.RenderObject(filepath = path))
             
-            new_item = f'Object {len(shared_state.items) + 1}'
-            shared_state.add_item(new_item)
-            
-            self.path.Object_detect()
+            self.Object_detect()
         except Exception:
             QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
 
@@ -989,12 +984,10 @@ if __name__ == "__main__":
         Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
 
         Tutorial_Box.exec()
-        backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-        
-        new_item = f'Object {len(shared_state.items) + 1}'
-        shared_state.add_item(new_item)
+        obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+        shared_state.add_item(obj)
 
-        self.path.Object_detect()
+        self.Object_detect()
 
     Initial_Object = QMessageBox()
     Initial_Object.setText("Please select an initial object from below")
