@@ -76,21 +76,6 @@ class Backend():
         config.setdefault("camera_poses", [])
         config["camera_poses"].append(pose)
         
-    def get_object_by_pos(self, pos):
-        """Get an object by its index in the config list.
-        
-        :param pos: A int value to try index the config list.
-        """
-        try:
-            obj_data = config["objects"][pos]
-            print(obj_data)
-            # Returns the RenderObject data
-            return self.RenderObject(filepath=obj_data.get("filename"),
-                                     primative=obj_data.get("primative"),
-                                     object_id=obj_data["object_pos"])
-        except IndexError:
-            return None
-        
     def is_config_objects_empty(self):
         if config.get("objects") == None:
             return False
@@ -192,6 +177,9 @@ class Backend():
                 return
 
             raise TypeError('No filepath or primative argument given.')
+
+        def __str__(self):
+            return f"Object {self.object_pos + 1}"
 
         def set_loc(self, location):
             """Set the location of an object in the scene.

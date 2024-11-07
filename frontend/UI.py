@@ -11,7 +11,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from sys import path
-path.append("../backend")
+path.append("backend")
 """Importing"""
 from backend import Backend
 import numpy as np
@@ -26,27 +26,27 @@ class ComboBoxState(QObject):
     # Defines basic signals for items and selection updates
     items_updated = pyqtSignal(list) # signal to send when items are updated
     selection_changed = pyqtSignal(int)# signal to send when selection changes
-    
+
     def __init__(self):
         super().__init__()
         self.items = [] # this will store what is in the combobox
         self.selected = None
-        
+
     def update_items(self, items):
         self.items = items
         print(f'items in combo box have been updated: {items}')
         self.items_updated.emit(items)  # Emit signal for item updates
-        
+
     def add_item(self, item):
         self.items.append(item)
         self.items_updated.emit(self.items)
         print(f'ComboBox Item added {item}')
-    
+
     def update_selected(self, index):
         self.selected_index = index
         # maybe delete
         self.selection_changed.emit(index)
-        
+
 # creates this shared state
 shared_state = ComboBoxState()
 
@@ -292,7 +292,7 @@ class Page1(Page):
     
     def update_combo_box_items(self, items):
         self.combo_box.clear()
-        self.combo_box.addItems(items)
+        self.combo_box.addItems(map(lambda o: str(o), items))
     
     
     # TODO: THIS SHOULD BE SELECTED AND CALLED WHEN SWITCHING BETWEEN OBJECT TABS. IT SHOULD INITIALISE ALL ATTRIBUTES.
@@ -302,7 +302,7 @@ class Page1(Page):
         print(selected_object_pos)
 
         # find the corresponding object from the backend
-        selected_object = self.backend.get_object_by_pos(selected_object_pos)
+        selected_object = shared_state.items[selcted_object_pos]
         # insert the selected object's properties
         self.XObj_pos_input_field.setText(str(selected_object["pos"][0]))
         self.YObj_pos_input_field.setText(str(selected_object["pos"][1]))
@@ -325,7 +325,7 @@ class Page1(Page):
             #DEBUG
             # obj = backend.RenderObject(primative = "MONKEY")
             # obj.update_object_location(location)            
-            obj = backend.get_object_by_pos(selected_object_index)
+            obj = shared_state.items[selected_object_index]
             print(obj)
             obj.set_loc(location)
         except:
@@ -343,7 +343,7 @@ class Page1(Page):
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
-            obj = backend.get_object_by_pos(selected_object_index)
+            obj = shared_state.items[selected_object_index]
             print(obj)
             obj.set_scaledd(scale)
         except:
@@ -852,10 +852,8 @@ class Page5(Page):
             try:
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
                 if (path == ""): return
-                backend.RenderObject(filepath = path)
-                
-                new_item = f'Object {len(shared_state.items) + 1}'
-                shared_state.add_item(new_item)
+                # add the object to the shared state
+                shared_state.add_item(backend.RenderObject(filepath = path))
                 
                 self.path.Object_detect()
             except Exception:
@@ -877,10 +875,8 @@ class Page5(Page):
             Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
 
             Tutorial_Box.exec()
-            backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-            
-            new_item = f'Object {len(shared_state.items) + 1}'
-            shared_state.add_item(new_item)
+            obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+            shared_state.add_item(obj)
     
             self.path.Object_detect()
 
@@ -893,9 +889,9 @@ class Page5(Page):
         self.BrowseFiles_Button.setGeometry(300, 10, 125, 50)
 
         #Fourth Section
-        self.GenerateDataSet_Button = QPushButton('Export Settings', self)
-        self.GenerateDataSet_Button.setGeometry(450, 10, 125, 50)
-        self.GenerateDataSet_Button.clicked.connect(lambda: backend.export())
+        self.ExportSettings_Button = QPushButton('Export Settings', self)
+        self.ExportSettings_Button.setGeometry(450, 10, 125, 50)
+        self.ExportSettings_Button.clicked.connect(lambda: backend.export())
 
         #Fifth Section
         def Get_Settings_Filepath():
@@ -906,9 +902,9 @@ class Page5(Page):
             except Exception:
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
-        self.ExportSettings_Button = QPushButton('Import Settings', self)
-        self.ExportSettings_Button.setGeometry(600, 10, 125, 50)
-        self.ExportSettings_Button.clicked.connect(Get_Settings_Filepath)
+        self.ImportSettings_Button = QPushButton('Import Settings', self)
+        self.ImportSettings_Button.setGeometry(600, 10, 125, 50)
+        self.ImportSettings_Button.clicked.connect(Get_Settings_Filepath)
 
 class MainWindow(QMainWindow):
     """
