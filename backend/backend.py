@@ -82,6 +82,9 @@ class Backend():
         else:
             return True
         
+    def get_config(self):
+        return config
+        
     def set_res(self, resolution):
         """Set the resolution of the output images. Will effect total render time.
 
