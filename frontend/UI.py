@@ -964,11 +964,12 @@ if __name__ == "__main__":
     def Get_Object_Filepath(self):
         try:
             path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
-            if (path == ""): return
+            if (path == ""): return False
             # add the object to the shared state
             shared_state.add_item(backend.RenderObject(filepath = path))
             
             self.Object_detect()
+            return True
         except Exception:
             QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
 
@@ -988,16 +989,19 @@ if __name__ == "__main__":
         shared_state.add_item(obj)
 
         self.Object_detect()
+        return True
 
-    Initial_Object = QMessageBox()
-    Initial_Object.setText("Please select an initial object from below")
-    Initial_Object.addButton("Custom Object", QMessageBox.ActionRole)
-    Initial_Object.addButton("Tutorial Object", QMessageBox.ActionRole)
+    objectSelected = False
+    while not objectSelected:
+        Initial_Object = QMessageBox()
+        Initial_Object.setText("Please select an initial object from below")
+        Initial_Object.addButton("Custom Object", QMessageBox.ActionRole)
+        Initial_Object.addButton("Tutorial Object", QMessageBox.ActionRole)
 
-    Initial_Object.exec_()
-    if Initial_Object.clickedButton().text() == "Custom Object":
-        Get_Object_Filepath(Widget())
-    else:
-        Tutorial_Object(Widget())
+        Initial_Object.exec_()
+        if Initial_Object.clickedButton().text() == "Custom Object":
+            objectSelected = Get_Object_Filepath(Widget())
+        else:
+            objectSelected = Tutorial_Object(Widget())
 
     sys.exit(app.exec_())
