@@ -20,6 +20,9 @@ import numpy as np
 backend = Backend()
 
 class ComboBoxState(QObject):
+    """
+    ComboBoxState is a child of QObject, used to handle and maintain the shared box states
+    """
     # Defines basic signals for items and selection updates
     items_updated = pyqtSignal(list) # signal to send when items are updated
     selection_changed = pyqtSignal(int)# signal to send when selection changes
@@ -37,7 +40,7 @@ class ComboBoxState(QObject):
     def add_item(self, item):
         self.items.append(item)
         self.items_updated.emit(self.items)
-        print('ComboBox Item added {item}')
+        print(f'ComboBox Item added {item}')
     
     def update_selected(self, index):
         self.selected_index = index
@@ -185,6 +188,11 @@ class Page1(Page):
 
         ##########################################################
         
+        # textChanged callbacks that updates backend
+        self.XObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
+        self.YObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
+        self.ZObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
+        
         self.X_button_plus.clicked.connect(lambda: self.Plus_click(self.XObj_pos_input_field))
         self.X_button_minus.clicked.connect(lambda: self.Minus_click(self.XObj_pos_input_field))
         
@@ -221,6 +229,11 @@ class Page1(Page):
         self.L_slider = QtWidgets.QSlider(self)
         self.L_slider.setRange(0, 100)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
+
+        # textChanged callbacks that updates backend
+        self.Width_Obj_pos_input_field.textChanged.connect(lambda: self.update_object_scale())
+        self.Height_Obj_pos_input_field.textChanged.connect(lambda: self.update_object_scale())
+        self.Length_Obj_pos_input_field.textChanged.connect(lambda: self.update_object_scale())
 
         ########################################
 
@@ -265,27 +278,78 @@ class Page1(Page):
         
         #########################################
 
+        # create initial combo_box
         self.combo_box = QComboBox(self)
     
         # connecting shared state updates to combo box
         shared_state.items_updated.connect(self.update_combo_box_items)
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
 
-        # Initialize combo box items
+        # initialise items
         self.update_combo_box_items(shared_state.items)
-        
-        shared_state.update_items(items=["Option 1", "Option 2", "Option 3"])
-        shared_state.update_selected(1)  # Sets the selection to index 1 in all pages
+        shared_state.update_items(items=[])
+        shared_state.update_selected(0)
     
     def update_combo_box_items(self, items):
         self.combo_box.clear()
         self.combo_box.addItems(items)
     
     
+    # TODO: THIS SHOULD BE SELECTED AND CALLED WHEN SWITCHING BETWEEN OBJECT TABS. IT SHOULD INITIALISE ALL ATTRIBUTES.
     def on_object_selected(self):
-        # Get the selected object's position (index)
+        # get the selected object's position (index)
         selected_object_pos = self.object_list_combo.currentIndex()
-        
+        print(selected_object_pos)
+
+        # find the corresponding object from the backend
+        selected_object = self.backend.get_object_by_pos(selected_object_pos)
+        # insert the selected object's properties
+        self.XObj_pos_input_field.setText(str(selected_object["pos"][0]))
+        self.YObj_pos_input_field.setText(str(selected_object["pos"][1]))
+        self.ZObj_pos_input_field.setText(str(selected_object["pos"][2]))
+    
+    def update_object_pos(self):
+        """ method to update a targetted object's position """
+        try: 
+            x = float(self.XObj_pos_input_field.text() or 0)
+            z = float(self.ZObj_pos_input_field.text() or 0)
+            y = float(self.YObj_pos_input_field.text() or 0)
+                
+            location = [x,z,y]
+            print(f"UPDATE_OBJECT_POS -> {location}") #DEBUG
+            
+            # get the selected object's position from the combo box
+            selected_object_index = self.combo_box.currentIndex()
+            #call backend function
+            
+            #DEBUG
+            # obj = backend.RenderObject(primative = "MONKEY")
+            # obj.update_object_location(location)            
+            obj = backend.get_object_by_pos(selected_object_index)
+            print(obj)
+            obj.update_object_location(location)
+        except:
+            QMessageBox.warning(self, "Error Updating Pos", "X, Y or Z value is invalid")
+    
+    def update_object_scale(self):
+        """ method to update a targetted object's scale """
+        try: 
+            width = float(self.Width_Obj_pos_input_field.text() or 0)
+            height = float(self.Height_Obj_pos_input_field.text() or 0)
+            length = float(self.Length_Obj_pos_input_field.text() or 0)
+            
+            scale = [width,height,length]
+            print(f"UPDATE_OBJECT_SCALE -> {scale}") #DEBUG
+            
+            # get the selected object's position from the combo box
+            selected_object_index = self.combo_box.currentIndex()
+            obj = backend.get_object_by_pos(selected_object_index)
+            print(obj)
+            obj.update_object_scale(scale)
+        except:
+            QMessageBox.warning(self, "Error Updating Scale", "Width, Height or Length value is invalid")
+    
+    
     def Plus_click(self, field):
         try:
             val = float(field.text()) + 1
@@ -789,6 +853,10 @@ class Page5(Page):
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
                 if (path == ""): return
                 backend.RenderObject(filepath = path)
+                
+                new_item = f'Object {len(shared_state.items) + 1}'
+                shared_state.add_item(new_item)
+                
                 self.path.Object_detect()
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
@@ -810,6 +878,10 @@ class Page5(Page):
 
             Tutorial_Box.exec()
             backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+            
+            new_item = f'Object {len(shared_state.items) + 1}'
+            shared_state.add_item(new_item)
+    
             self.path.Object_detect()
 
         self.TutorialObjects_Button = QPushButton('Tutorial Objects', self)

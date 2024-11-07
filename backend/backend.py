@@ -80,7 +80,11 @@ class Backend():
         :param pos: A int value to try index the config list.
         """
         try:
-            return config["objects"][pos]
+            obj_data = config["objects"][pos]
+            print(obj_data)
+            return self.RenderObject(filepath=obj_data.get("filename"),
+                                     primative=obj_data.get("primative"),
+                                     object_id=obj_data["object_pos"])
         except IndexError:
             return None
         
