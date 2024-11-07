@@ -334,7 +334,6 @@ class Page1(Page):
             width = float(self.Width_Obj_pos_input_field.text() or 0)
             height = float(self.Height_Obj_pos_input_field.text() or 0)
             length = float(self.Length_Obj_pos_input_field.text() or 0)
-            
             scale = [width,height,length]
             print(f"UPDATE_OBJECT_SCALE -> {scale}") #DEBUG
             
@@ -575,6 +574,7 @@ class Page2(Page):
     
     
     def Plus_click(self, field):
+        """Updates Field value"""
         try:
             val = float(field.text()) + 1
             field.setText(str(val))
@@ -583,6 +583,7 @@ class Page2(Page):
         
         
     def Minus_click(self, field):
+        """Updates Field value"""
         try:
             val = float(field.text()) - 1
             field.setText(str(val))
@@ -590,6 +591,7 @@ class Page2(Page):
             field.setText(str(0.0))
             
     def Slider_Update(self, val, field):
+        """Sets field value to slider value"""
         field.setText(str(val))
         
     
@@ -910,6 +912,11 @@ class Page5(Page):
         self.ExportSettings_Button = QPushButton('Import Settings', self)
         self.ExportSettings_Button.setGeometry(600, 10, 125, 50)
         self.ExportSettings_Button.clicked.connect(Get_Settings_Filepath)
+
+        #Sixth section
+        self.Delete_Object_Button = QPushButton('Delete Object', self)
+        self.Delete_Object_Button.setGeometry(750, 10, 125, 50)
+        #self.Delete_Object_Button.clicked.connect("""Delete Object Function""")
 
 class MainWindow(QMainWindow):
     """
