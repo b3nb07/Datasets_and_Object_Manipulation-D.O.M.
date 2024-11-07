@@ -189,9 +189,9 @@ class Page1(Page):
         ##########################################################
         
         # textChanged callbacks that updates backend
-        self.XObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
-        self.YObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
-        self.ZObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
+        self.XObj_pos_input_field.textChanged.connect(self.update_object_pos)
+        self.YObj_pos_input_field.textChanged.connect(self.update_object_pos)
+        self.ZObj_pos_input_field.textChanged.connect(self.update_object_pos)
         
         self.X_button_plus.clicked.connect(lambda: self.Plus_click(self.XObj_pos_input_field))
         self.X_button_minus.clicked.connect(lambda: self.Minus_click(self.XObj_pos_input_field))
@@ -284,6 +284,7 @@ class Page1(Page):
         # connecting shared state updates to combo box
         shared_state.items_updated.connect(self.update_combo_box_items)
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
         self.update_combo_box_items(shared_state.items)
@@ -296,17 +297,22 @@ class Page1(Page):
     
     
     # TODO: THIS SHOULD BE SELECTED AND CALLED WHEN SWITCHING BETWEEN OBJECT TABS. IT SHOULD INITIALISE ALL ATTRIBUTES.
-    def on_object_selected(self):
+    def on_object_selected(self, selected_object_pos):
         # get the selected object's position (index)
-        selected_object_pos = self.object_list_combo.currentIndex()
         print(selected_object_pos)
 
         # find the corresponding object from the backend
-        selected_object = shared_state.items[selcted_object_pos]
+        selected_object = backend.get_config()["objects"][selected_object_pos]
         # insert the selected object's properties
+        self.XObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
+        self.YObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
+        self.ZObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
         self.XObj_pos_input_field.setText(str(selected_object["pos"][0]))
-        self.YObj_pos_input_field.setText(str(selected_object["pos"][1]))
-        self.ZObj_pos_input_field.setText(str(selected_object["pos"][2]))
+        self.YObj_pos_input_field.setText(str(selected_object["pos"][2]))
+        self.ZObj_pos_input_field.setText(str(selected_object["pos"][1]))
+        self.XObj_pos_input_field.textChanged.connect(self.update_object_pos)
+        self.YObj_pos_input_field.textChanged.connect(self.update_object_pos)
+        self.ZObj_pos_input_field.textChanged.connect(self.update_object_pos)
     
     def update_object_pos(self):
         """ method to update a targetted object's position """
