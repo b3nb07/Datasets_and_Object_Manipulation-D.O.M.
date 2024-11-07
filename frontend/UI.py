@@ -345,7 +345,7 @@ class Page1(Page):
             selected_object_index = self.combo_box.currentIndex()
             obj = shared_state.items[selected_object_index]
             print(obj)
-            obj.set_scaledd(scale)
+            obj.set_scale(scale)
         except:
             QMessageBox.warning(self, "Error Updating Scale", "Width, Height or Length value is invalid")
     
