@@ -85,7 +85,9 @@ class Backend():
             return None
         
     def is_config_objects_empty(self):
-        if not config.get("objects"):
+        if config.get("objects") == None:
+            return False
+        else:
             return True
         
     def set_res(self, resolution):
