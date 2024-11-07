@@ -11,7 +11,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from sys import path
-path.append("../backend")
+path.append("backend")
 """Importing"""
 from backend import Backend
 import numpy as np
@@ -46,9 +46,6 @@ class ComboBoxState(QObject):
         self.selected_index = index
         # maybe delete
         self.selection_changed.emit(index)
-        
-# creates this shared state
-shared_state = ComboBoxState()
 
 class Page(QtWidgets.QWidget):
     """
@@ -87,7 +84,7 @@ class Widget(QtWidgets.QWidget):
     """
     Clas to Add all pages into a tabwizard
     """
-    def __init__(self):
+    def __init__(self, shared_state):
         """
         Initialise widget class for Navbar
         """
@@ -99,7 +96,7 @@ class Widget(QtWidgets.QWidget):
         lay.addWidget(self.tabwizard)
 
         #pages
-        self.tabwizard.addPage(Page1(), "Object")
+        self.tabwizard.addPage(Page1(shared_state), "Object")
         self.tabwizard.addPage(Page2(), "Pivot Point")
         self.tabwizard.addPage(Page3(), "Generate Random")
         self.tabwizard.addPage(Page4(), "Render")
@@ -119,8 +116,7 @@ class Page1(Page):
     """
     Page 1: Objects
     """
-    def __init__(self, parent=None):
-        Obj_list = ["Object 1", "Object 2", "Object 3"]
+    def __init__(self, shared_state, parent=None):
         """
         Initialise "Page n"
 
@@ -164,7 +160,7 @@ class Page1(Page):
         """
         super().__init__(parent)
 
-        self.Object_pos_title = QLabel(f"{Obj_list[0]} Co-ords", self)
+        self.Object_pos_title = QLabel(f"Object 1 Co-ords", self)
 
         self.XObj_pos = QLabel("X:", self)
         self.XObj_pos_input_field = QLineEdit(parent=self)
@@ -203,7 +199,7 @@ class Page1(Page):
         self.Z_button_minus.clicked.connect(lambda: self.Minus_click(self.ZObj_pos_input_field))
         
         ##########################################################
-        self.Object_scale_title = QLabel(f"{Obj_list[0]} Scale", self)
+        self.Object_scale_title = QLabel(f"Object 1 Scale", self)
 
         self.Width_Obj_pos = QLabel("Width:", self)
         self.Width_Obj_pos_input_field = QLineEdit(parent=self)
@@ -243,7 +239,7 @@ class Page1(Page):
         
         ########################################
 
-        self.Object_rotation_title = QLabel(f"{Obj_list[0]} Rotation", self)
+        self.Object_rotation_title = QLabel(f"Object 1 Rotation", self)
 
         self.X_Rotation_Label = QLabel("Roll:", self)
         self.X_Rotation_input_field = QLineEdit(parent=self)
@@ -280,7 +276,6 @@ class Page1(Page):
 
         # create initial combo_box
         self.combo_box = QComboBox(self)
-    
         # connecting shared state updates to combo box
         shared_state.items_updated.connect(self.update_combo_box_items)
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
@@ -293,6 +288,7 @@ class Page1(Page):
     def update_combo_box_items(self, items):
         self.combo_box.clear()
         self.combo_box.addItems(items)
+        self.combo_box.activated.connect(self.update_label)
     
     
     # TODO: THIS SHOULD BE SELECTED AND CALLED WHEN SWITCHING BETWEEN OBJECT TABS. IT SHOULD INITIALISE ALL ATTRIBUTES.
@@ -307,6 +303,7 @@ class Page1(Page):
         self.XObj_pos_input_field.setText(str(selected_object["pos"][0]))
         self.YObj_pos_input_field.setText(str(selected_object["pos"][1]))
         self.ZObj_pos_input_field.setText(str(selected_object["pos"][2]))
+        
     
     def update_object_pos(self):
         """ method to update a targetted object's position """
@@ -351,6 +348,7 @@ class Page1(Page):
     
     
     def Plus_click(self, field):
+        """Updates field value"""
         try:
             val = float(field.text()) + 1
             field.setText(str(val))
@@ -359,6 +357,7 @@ class Page1(Page):
         
         
     def Minus_click(self, field):
+        """Updates field value"""
         try:
             val = float(field.text()) - 1
             field.setText(str(val))
@@ -366,9 +365,11 @@ class Page1(Page):
             field.setText(str(0.0))
             
     def Slider_Update(self, val, field):
+        """Set Field value to slider value"""
         field.setText(str(val))
         
     def update_label(self):
+        """Updates labels on object change"""
         AllItems = [self.combo_box.itemText(i) for i in range(self.combo_box.count())]
         n = self.combo_box.currentIndex()
         Title = AllItems[n]
@@ -914,7 +915,7 @@ class MainWindow(QMainWindow):
     """
     Main Window for all the elements
     """
-    def __init__(self):
+    def __init__(self, shared_state):
         """
         Initialise all elements of the Program
         """
@@ -936,7 +937,7 @@ class MainWindow(QMainWindow):
         # Nav bar
 
         # margins need to be removed to match enviroment
-        self.navbar = Widget()
+        self.navbar = Widget(shared_state)
         self.layout.addWidget(self.navbar)
         
         # enviroment
@@ -965,6 +966,8 @@ class MainWindow(QMainWindow):
 if __name__ == "__main__":
     
     app = QApplication(sys.argv)
-    window = MainWindow()
+    # creates this shared state
+    shared_state = ComboBoxState()
+    window = MainWindow(shared_state)
     window.show()
     sys.exit(app.exec_())
