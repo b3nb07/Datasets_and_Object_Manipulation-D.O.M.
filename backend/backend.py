@@ -82,6 +82,7 @@ class Backend():
         try:
             obj_data = config["objects"][pos]
             print(obj_data)
+            # Returns the RenderObject data
             return self.RenderObject(filepath=obj_data.get("filename"),
                                      primative=obj_data.get("primative"),
                                      object_id=obj_data["object_pos"])
@@ -154,7 +155,7 @@ class Backend():
     class RenderObject():
         """An object to be rendered."""
         
-        def __init__(self, filepath=None, primative=None, object_id=None):
+        def __init__(self, filepath=None, primative=None):
             """Initialise a render object.
 
             :param filepath: Filepath to an object file.
@@ -190,8 +191,8 @@ class Backend():
 
             raise TypeError('No filepath or primative argument given.')
 
-        def update_object_location(self, location):
-            """Update the location of an object in the scene.
+        def set_loc(self, location):
+            """Set the location of an object in the scene.
             
             :param location: A list containing [x,z,y] where x,z,y is an integer or float. This determines the coordinates of the object's location.
             """
@@ -200,8 +201,8 @@ class Backend():
 
             config["objects"][self.object_pos]["pos"] = location
 
-        def update_object_scale(self, scale):
-            """Update the scale of an object in the scene.
+        def set_scale(self, scale):
+            """Set the scale of an object in the scene.
             
             :param scale: A list containing [x,z,y] where x,z,y is an integer or float. This determines the scaling of each axis.
             """
@@ -210,8 +211,8 @@ class Backend():
 
             config["objects"][self.object_pos]["sca"] = scale
 
-        def update_object_rotation(self, euler_rotation):
-            """Update the rotation of an object in the scene.
+        def set_rotation(self, euler_rotation):
+            """Set the rotation of an object in the scene.
             
             :param euler_rotation: A list containing [x,z,y] values for the euler rotation to be applied to the object.
             """

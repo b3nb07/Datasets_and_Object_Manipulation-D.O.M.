@@ -327,7 +327,7 @@ class Page1(Page):
             # obj.update_object_location(location)            
             obj = backend.get_object_by_pos(selected_object_index)
             print(obj)
-            obj.update_object_location(location)
+            obj.set_loc(location)
         except:
             QMessageBox.warning(self, "Error Updating Pos", "X, Y or Z value is invalid")
     
@@ -345,7 +345,7 @@ class Page1(Page):
             selected_object_index = self.combo_box.currentIndex()
             obj = backend.get_object_by_pos(selected_object_index)
             print(obj)
-            obj.update_object_scale(scale)
+            obj.set_scaledd(scale)
         except:
             QMessageBox.warning(self, "Error Updating Scale", "Width, Height or Length value is invalid")
     
@@ -893,9 +893,9 @@ class Page5(Page):
         self.BrowseFiles_Button.setGeometry(300, 10, 125, 50)
 
         #Fourth Section
-        self.Delete_Object__Button = QPushButton('Export Settings', self)
-        self.Delete_Object__Button.setGeometry(450, 10, 125, 50)
-        ##self.Delete_Object__Button.clicked.connect(lambda: backend.export())
+        self.GenerateDataSet_Button = QPushButton('Export Settings', self)
+        self.GenerateDataSet_Button.setGeometry(450, 10, 125, 50)
+        self.GenerateDataSet_Button.clicked.connect(lambda: backend.export())
 
         #Fifth Section
         def Get_Settings_Filepath():
@@ -905,14 +905,10 @@ class Page5(Page):
                 backend = Backend(json_filepath = path)
             except Exception:
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
-    
+
         self.ExportSettings_Button = QPushButton('Import Settings', self)
         self.ExportSettings_Button.setGeometry(600, 10, 125, 50)
         self.ExportSettings_Button.clicked.connect(Get_Settings_Filepath)
-        
-        self.Delete_Object_Button = QPushButton('Delete Object', self)
-        self.Delete_Object_Button.setGeometry(750, 10, 125, 50)
-        ##self.Delete_Object_Button.clicked.connect("""Remove Object""")
 
 class MainWindow(QMainWindow):
     """
