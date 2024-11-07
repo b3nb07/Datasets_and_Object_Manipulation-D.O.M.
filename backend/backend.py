@@ -207,7 +207,7 @@ class Backend():
         def set_rotation(self, euler_rotation):
             """Set the rotation of an object in the scene.
             
-            :param euler_rotation: A list containing [x,z,y] values for the euler rotation to be applied to the object.
+            :param euler_rotation: A list containing [x,y,z] - (pitch,yaw,roll) values for the euler rotation to be applied to the object.
             """
             if (is_blender_environment):
                 self.object.set_rotation_euler(euler_rotation)

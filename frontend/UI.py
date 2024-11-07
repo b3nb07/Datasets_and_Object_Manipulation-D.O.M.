@@ -34,13 +34,11 @@ class ComboBoxState(QObject):
 
     def update_items(self, items):
         self.items = items
-        print(f'items in combo box have been updated: {items}')
         self.items_updated.emit(items)  # Emit signal for item updates
 
     def add_item(self, item):
         self.items.append(item)
         self.items_updated.emit(self.items)
-        print(f'ComboBox Item added {item}')
 
     def update_selected(self, index):
         self.selected_index = index
@@ -231,9 +229,9 @@ class Page1(Page):
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
 
         # textChanged callbacks that updates backend
-        self.Width_Obj_pos_input_field.textChanged.connect(lambda: self.update_object_scale())
-        self.Height_Obj_pos_input_field.textChanged.connect(lambda: self.update_object_scale())
-        self.Length_Obj_pos_input_field.textChanged.connect(lambda: self.update_object_scale())
+        self.Width_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
+        self.Height_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
+        self.Length_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
 
         ########################################
 
@@ -272,6 +270,11 @@ class Page1(Page):
 
         #########################################
         
+        # textChanged callbacks that updates backend
+        self.X_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        self.Y_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        self.Z_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        
         self.X_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.X_Rotation_input_field))
         self.Y_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.Y_Rotation_input_field))
         self.Z_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.Z_Rotation_input_field))
@@ -292,68 +295,102 @@ class Page1(Page):
         shared_state.update_selected(0)
     
     def update_combo_box_items(self, items):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
         self.combo_box.addItems(map(lambda o: str(o), items))
     
     
-    # TODO: THIS SHOULD BE SELECTED AND CALLED WHEN SWITCHING BETWEEN OBJECT TABS. IT SHOULD INITIALISE ALL ATTRIBUTES.
     def on_object_selected(self, selected_object_pos):
-        # get the selected object's position (index)
-        print(selected_object_pos)
-
-        # find the corresponding object from the backend
+        """ Method that updates attributes in text field when the object index is change from combo box. """
+        # find the corresponding object attributes from the backend
         selected_object = backend.get_config()["objects"][selected_object_pos]
-        # insert the selected object's properties
+        
+        # disconnects text fields
         self.XObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
         self.YObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
         self.ZObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
+        self.Width_Obj_pos_input_field.textChanged.disconnect(self.update_object_scale)
+        self.Height_Obj_pos_input_field.textChanged.disconnect(self.update_object_scale)
+        self.Length_Obj_pos_input_field.textChanged.disconnect(self.update_object_scale)
+        self.X_Rotation_input_field.textChanged.disconnect(self.update_object_rotation)
+        self.Y_Rotation_input_field.textChanged.disconnect(self.update_object_rotation)
+        self.Z_Rotation_input_field.textChanged.disconnect(self.update_object_rotation)
+        
+        # sets the text as object attributes
         self.XObj_pos_input_field.setText(str(selected_object["pos"][0]))
         self.YObj_pos_input_field.setText(str(selected_object["pos"][2]))
         self.ZObj_pos_input_field.setText(str(selected_object["pos"][1]))
+        self.Width_Obj_pos_input_field.setText(str(selected_object["sca"][0]))
+        self.Height_Obj_pos_input_field.setText(str(selected_object["sca"][1]))
+        self.Length_Obj_pos_input_field.setText(str(selected_object["sca"][2]))
+        self.X_Rotation_input_field.setText(str(selected_object["rot"][0]))
+        self.Y_Rotation_input_field.setText(str(selected_object["rot"][1]))
+        self.Z_Rotation_input_field.setText(str(selected_object["rot"][2]))
+        
+        # reconnects text fields
         self.XObj_pos_input_field.textChanged.connect(self.update_object_pos)
         self.YObj_pos_input_field.textChanged.connect(self.update_object_pos)
         self.ZObj_pos_input_field.textChanged.connect(self.update_object_pos)
-    
+        self.Width_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
+        self.Height_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
+        self.Length_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
+        self.X_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        self.Y_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        self.Z_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        
+        
+        
     def update_object_pos(self):
-        """ method to update a targetted object's position """
+        """ Method to dynamically update a targetted object's position """
         try: 
             x = float(self.XObj_pos_input_field.text() or 0)
             z = float(self.ZObj_pos_input_field.text() or 0)
             y = float(self.YObj_pos_input_field.text() or 0)
                 
             location = [x,z,y]
-            print(f"UPDATE_OBJECT_POS -> {location}") #DEBUG
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
-            #call backend function
-            
-            #DEBUG
-            # obj = backend.RenderObject(primative = "MONKEY")
-            # obj.update_object_location(location)            
+            #call backend function   
             obj = shared_state.items[selected_object_index]
-            print(obj)
+            #print(obj)
             obj.set_loc(location)
         except:
             QMessageBox.warning(self, "Error Updating Pos", "X, Y or Z value is invalid")
     
     def update_object_scale(self):
-        """ method to update a targetted object's scale """
+        """ Method to dynamically update a targetted object's scale """
         try: 
             width = float(self.Width_Obj_pos_input_field.text() or 0)
             height = float(self.Height_Obj_pos_input_field.text() or 0)
             length = float(self.Length_Obj_pos_input_field.text() or 0)
             
             scale = [width,height,length]
-            print(f"UPDATE_OBJECT_SCALE -> {scale}") #DEBUG
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
             obj = shared_state.items[selected_object_index]
-            print(obj)
+            #print(obj)
             obj.set_scale(scale)
         except:
             QMessageBox.warning(self, "Error Updating Scale", "Width, Height or Length value is invalid")
+    
+    def update_object_rotation(self):
+        """ Method to dynamically update a targetted object's rotation """
+        try: 
+            x_rot = float(self.X_Rotation_input_field.text() or 0)
+            y_rot = float(self.Y_Rotation_input_field.text() or 0)
+            z_rot = float(self.Z_Rotation_input_field.text() or 0)
+            
+            rotation = [x_rot,y_rot,z_rot]
+            
+            # get the selected object's position from the combo box
+            selected_object_index = self.combo_box.currentIndex()
+            obj = shared_state.items[selected_object_index]
+            #print(obj)
+            obj.set_rotation(rotation)
+        except:
+            QMessageBox.warning(self, "Error Updating Rotation", "X, Y or Z value is invalid")
     
     
     def Plus_click(self, field):
