@@ -11,13 +11,44 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 from sys import path
-path.append("backend")
+path.append("../backend")
 """Importing"""
 from backend import Backend
 import numpy as np
 
 # Initialise backend
 backend = Backend()
+
+class ComboBoxState(QObject):
+    """
+    ComboBoxState is a child of QObject, used to handle and maintain the shared box states
+    """
+    # Defines basic signals for items and selection updates
+    items_updated = pyqtSignal(list) # signal to send when items are updated
+    selection_changed = pyqtSignal(int)# signal to send when selection changes
+    
+    def __init__(self):
+        super().__init__()
+        self.items = [] # this will store what is in the combobox
+        self.selected = None
+        
+    def update_items(self, items):
+        self.items = items
+        print(f'items in combo box have been updated: {items}')
+        self.items_updated.emit(items)  # Emit signal for item updates
+        
+    def add_item(self, item):
+        self.items.append(item)
+        self.items_updated.emit(self.items)
+        print(f'ComboBox Item added {item}')
+    
+    def update_selected(self, index):
+        self.selected_index = index
+        # maybe delete
+        self.selection_changed.emit(index)
+        
+# creates this shared state
+shared_state = ComboBoxState()
 
 class Page(QtWidgets.QWidget):
     """
@@ -69,17 +100,27 @@ class Widget(QtWidgets.QWidget):
 
         #pages
         self.tabwizard.addPage(Page1(), "Object")
-        self.tabwizard.addPage(
-          Page2(), "Pivot Point")
+        self.tabwizard.addPage(Page2(), "Pivot Point")
         self.tabwizard.addPage(Page3(), "Generate Random")
         self.tabwizard.addPage(Page4(), "Render")
-        self.tabwizard.addPage(Page5(), "Import and Export")
+        self.tabwizard.addPage(Page5(self), "Import and Export")
+        self.tabwizard.setTabEnabled(0, False)
+        self.tabwizard.setTabEnabled(1, False)
+        self.tabwizard.setTabEnabled(2, False)
+        self.tabwizard.setTabEnabled(3, False)
+        
+    def Object_detect(self):
+        State = Backend.is_config_objects_empty(self)
+        for i in range(4):
+            self.tabwizard.setTabEnabled(i, State)
 
+        
 class Page1(Page):
     """
     Page 1: Objects
     """
     def __init__(self, parent=None):
+        Obj_list = ["Object 1", "Object 2", "Object 3"]
         """
         Initialise "Page n"
 
@@ -122,78 +163,218 @@ class Page1(Page):
 
         """
         super().__init__(parent)
-        n=1
 
-        self.Object_pos_title = QLabel(f"Object {n} Co-ords", self)
+        self.Object_pos_title = QLabel(f"{Obj_list[0]} Co-ords", self)
 
         self.XObj_pos = QLabel("X:", self)
         self.XObj_pos_input_field = QLineEdit(parent=self)
+        self.XObj_pos_input_field.setText("0.0")
         self.X_button_minus = QPushButton('-', self)
         self.X_button_plus = QPushButton('+', self)
 
         self.YObj_pos = QLabel("Y:", self)
-
         self.YObj_pos_input_field = QLineEdit(parent=self)
+        self.YObj_pos_input_field.setText("0.0")
 
         self.Y_button_minus = QPushButton('-', self)
         self.Y_button_plus = QPushButton('+', self)
         
         self.ZObj_pos = QLabel("Z:", self)
-
-        self.ZObj_pos_input_field = QLineEdit(parent=self)
+        self.ZObj_pos_input_field = QLineEdit(parent=self) 
+        self.ZObj_pos_input_field.setText("0.0")
 
         self.Z_button_minus = QPushButton('-', self)
         self.Z_button_plus = QPushButton('+', self)
 
         ##########################################################
-        self.Object_scale_title = QLabel(f"Object {n} Scale", self)
+        
+        # textChanged callbacks that updates backend
+        self.XObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
+        self.YObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
+        self.ZObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
+        
+        self.X_button_plus.clicked.connect(lambda: self.Plus_click(self.XObj_pos_input_field))
+        self.X_button_minus.clicked.connect(lambda: self.Minus_click(self.XObj_pos_input_field))
+        
+        self.Y_button_plus.clicked.connect(lambda: self.Plus_click(self.YObj_pos_input_field))
+        self.Y_button_minus.clicked.connect(lambda: self.Minus_click(self.YObj_pos_input_field))
+        
+        self.Z_button_plus.clicked.connect(lambda: self.Plus_click(self.ZObj_pos_input_field))
+        self.Z_button_minus.clicked.connect(lambda: self.Minus_click(self.ZObj_pos_input_field))
+        
+        ##########################################################
+        self.Object_scale_title = QLabel(f"{Obj_list[0]} Scale", self)
 
         self.Width_Obj_pos = QLabel("Width:", self)
         self.Width_Obj_pos_input_field = QLineEdit(parent=self)
         
+        self.Width_Obj_pos_input_field.setText("0.0")
+        
         self.W_slider = QtWidgets.QSlider(self)
+        self.W_slider.setRange(0, 100)
         self.W_slider.setOrientation(QtCore.Qt.Horizontal)
 
         self.Height_Obj_pos = QLabel("Height:", self)
         self.Height_Obj_pos_input_field = QLineEdit(parent=self)
+        self.Height_Obj_pos_input_field.setText("0.0")
 
         self.H_slider = QtWidgets.QSlider(self)
+        self.H_slider.setRange(0, 100)
         self.H_slider.setOrientation(QtCore.Qt.Horizontal)
         
         self.Length_Obj_pos = QLabel("Length:", self)
         self.Length_Obj_pos_input_field = QLineEdit(parent=self)
+        self.Length_Obj_pos_input_field.setText("0.0")
 
         self.L_slider = QtWidgets.QSlider(self)
+        self.L_slider.setRange(0, 100)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
+
+        # textChanged callbacks that updates backend
+        self.Width_Obj_pos_input_field.textChanged.connect(lambda: self.update_object_scale())
+        self.Height_Obj_pos_input_field.textChanged.connect(lambda: self.update_object_scale())
+        self.Length_Obj_pos_input_field.textChanged.connect(lambda: self.update_object_scale())
 
         ########################################
 
-        self.Object_rotation_title = QLabel(f"Object {n} Rotation", self)
+        self.W_slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Width_Obj_pos_input_field))
+        self.H_slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Height_Obj_pos_input_field))
+        self.L_slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Length_Obj_pos_input_field))
+        
+        ########################################
+
+        self.Object_rotation_title = QLabel(f"{Obj_list[0]} Rotation", self)
 
         self.X_Rotation_Label = QLabel("Roll:", self)
         self.X_Rotation_input_field = QLineEdit(parent=self)
+        self.X_Rotation_input_field.setText("0.0")
         
         self.X_Rotation = QtWidgets.QSlider(self)
+        
         self.X_Rotation.setOrientation(QtCore.Qt.Horizontal)
-
+        self.X_Rotation.setRange(0, 360)
+        
         self.Y_Rotation_Label = QLabel("Pitch:", self)
         self.Y_Rotation_input_field = QLineEdit(parent=self)
+        self.Y_Rotation_input_field.setText("0.0")
         
         self.Y_Rotation = QtWidgets.QSlider(self)
         self.Y_Rotation.setOrientation(QtCore.Qt.Horizontal)
+        self.Y_Rotation.setRange(0, 360)
 
         self.Z_Rotation_Label = QLabel("Yaw:", self)
         self.Z_Rotation_input_field = QLineEdit(parent=self)
+        self.Z_Rotation_input_field.setText("0.0")
         
         self.Z_Rotation = QtWidgets.QSlider(self)
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
-
+        self.Z_Rotation.setRange(0, 360)
 
         #########################################
+        
+        self.X_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.X_Rotation_input_field))
+        self.Y_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.Y_Rotation_input_field))
+        self.Z_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.Z_Rotation_input_field))
+        
+        #########################################
 
+        # create initial combo_box
         self.combo_box = QComboBox(self)
-        Obj_list = ["Object 1", "Object 2", "Object 3"]
-        self.combo_box.addItems(Obj_list)
+    
+        # connecting shared state updates to combo box
+        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+
+        # initialise items
+        self.update_combo_box_items(shared_state.items)
+        shared_state.update_items(items=[])
+        shared_state.update_selected(0)
+    
+    def update_combo_box_items(self, items):
+        self.combo_box.clear()
+        self.combo_box.addItems(items)
+    
+    
+    # TODO: THIS SHOULD BE SELECTED AND CALLED WHEN SWITCHING BETWEEN OBJECT TABS. IT SHOULD INITIALISE ALL ATTRIBUTES.
+    def on_object_selected(self):
+        # get the selected object's position (index)
+        selected_object_pos = self.object_list_combo.currentIndex()
+        print(selected_object_pos)
+
+        # find the corresponding object from the backend
+        selected_object = self.backend.get_object_by_pos(selected_object_pos)
+        # insert the selected object's properties
+        self.XObj_pos_input_field.setText(str(selected_object["pos"][0]))
+        self.YObj_pos_input_field.setText(str(selected_object["pos"][1]))
+        self.ZObj_pos_input_field.setText(str(selected_object["pos"][2]))
+    
+    def update_object_pos(self):
+        """ method to update a targetted object's position """
+        try: 
+            x = float(self.XObj_pos_input_field.text() or 0)
+            z = float(self.ZObj_pos_input_field.text() or 0)
+            y = float(self.YObj_pos_input_field.text() or 0)
+                
+            location = [x,z,y]
+            print(f"UPDATE_OBJECT_POS -> {location}") #DEBUG
+            
+            # get the selected object's position from the combo box
+            selected_object_index = self.combo_box.currentIndex()
+            #call backend function
+            
+            #DEBUG
+            # obj = backend.RenderObject(primative = "MONKEY")
+            # obj.update_object_location(location)            
+            obj = backend.get_object_by_pos(selected_object_index)
+            print(obj)
+            obj.set_loc(location)
+        except:
+            QMessageBox.warning(self, "Error Updating Pos", "X, Y or Z value is invalid")
+    
+    def update_object_scale(self):
+        """ method to update a targetted object's scale """
+        try: 
+            width = float(self.Width_Obj_pos_input_field.text() or 0)
+            height = float(self.Height_Obj_pos_input_field.text() or 0)
+            length = float(self.Length_Obj_pos_input_field.text() or 0)
+            
+            scale = [width,height,length]
+            print(f"UPDATE_OBJECT_SCALE -> {scale}") #DEBUG
+            
+            # get the selected object's position from the combo box
+            selected_object_index = self.combo_box.currentIndex()
+            obj = backend.get_object_by_pos(selected_object_index)
+            print(obj)
+            obj.set_scaledd(scale)
+        except:
+            QMessageBox.warning(self, "Error Updating Scale", "Width, Height or Length value is invalid")
+    
+    
+    def Plus_click(self, field):
+        try:
+            val = float(field.text()) + 1
+            field.setText(str(val))
+        except:
+            field.setText(str(0.0))
+        
+        
+    def Minus_click(self, field):
+        try:
+            val = float(field.text()) - 1
+            field.setText(str(val))
+        except:
+            field.setText(str(0.0))
+            
+    def Slider_Update(self, val, field):
+        field.setText(str(val))
+        
+    def update_label(self):
+        AllItems = [self.combo_box.itemText(i) for i in range(self.combo_box.count())]
+        n = self.combo_box.currentIndex()
+        Title = AllItems[n]
+        self.Object_pos_title.setText(f"{Title} Co-ords")
+        self.Object_scale_title.setText(f"{Title} Scale")
+        self.Object_rotation_title.setText(f"{Title} Rotation")
 
 
     def resizeEvent(self, event):
@@ -316,20 +497,38 @@ class Page2(Page):
         # X Pivot Point Controls
         self.XPivot_pos = QLabel("X:", self)
         self.XPivot_point_input_field = QLineEdit(parent=self)
+        self.XPivot_point_input_field.setText("0.0")
         self.XPivot_button_minus = QPushButton('-', self)
         self.XPivot_button_plus = QPushButton('+', self)
+        
+        ###################
+        self.XPivot_button_plus.clicked.connect(lambda: self.Plus_click(self.XPivot_point_input_field))
+        self.XPivot_button_minus.clicked.connect(lambda: self.Minus_click(self.XPivot_point_input_field))
+        ###################
 
         # Y Pivot Point Controls
         self.YPivot_pos = QLabel("Y:", self)
         self.YPivot_point_input_field = QLineEdit(parent=self)
+        self.YPivot_point_input_field.setText("0.0")
         self.YPivot_button_minus = QPushButton('-', self)
         self.YPivot_button_plus = QPushButton('+', self)
+        
+        ###################
+        self.YPivot_button_plus.clicked.connect(lambda: self.Plus_click(self.YPivot_point_input_field))
+        self.YPivot_button_minus.clicked.connect(lambda: self.Minus_click(self.YPivot_point_input_field))
+        ###################
 
         # Z Pivot Point Controls
         self.ZPivot_pos = QLabel("Z:", self)
         self.ZPivot_point_input_field = QLineEdit(parent=self)
+        self.ZPivot_point_input_field.setText("0.0")
         self.ZPivot_button_minus = QPushButton('-', self)
         self.ZPivot_button_plus = QPushButton('+', self)
+        
+        ###################
+        self.ZPivot_button_plus.clicked.connect(lambda: self.Plus_click(self.ZPivot_point_input_field))
+        self.ZPivot_button_minus.clicked.connect(lambda: self.Minus_click(self.ZPivot_point_input_field))
+        ###################
 
 
         #Angle Change Section
@@ -339,21 +538,60 @@ class Page2(Page):
 
         self.Degrees_Pivot = QLabel("Degrees:", self)
         self.Degrees_Pivot_input_field = QLineEdit(parent=self)
+        self.Degrees_Pivot_input_field.setText("0")
         
         self.Degrees_Slider = QtWidgets.QSlider(self)
         self.Degrees_Slider.setOrientation(QtCore.Qt.Horizontal)
-
+        self.Degrees_Slider.setRange(0, 360)
+        
+        self.Distance_Pivot = QLabel("Distance:", self)
+        self.Distance_Pivot_input_field = QLineEdit(parent=self)
+        self.Distance_Pivot_input_field.setText("0")
+        
+        self.Distance_Slider = QtWidgets.QSlider(self)
+        self.Distance_Slider.setOrientation(QtCore.Qt.Horizontal)
+        self.Distance_Slider.setRange(0, 100)
+        
+        #################
+        self.Degrees_Slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Degrees_Pivot_input_field))
+        self.Distance_Slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
+        #################
+        
         self.Num_Rotations = QLabel("Rotations:", self)
         self.Num_Rotations_input_field = QLineEdit(parent=self)
+        self.Num_Rotations_input_field.setText("0")
         self.Num_Rotations_minus = QPushButton('-', self)
         self.Num_rotations_plus = QPushButton('+', self)
+        
+        ###################
+        self.Num_rotations_plus.clicked.connect(lambda: self.Plus_click(self.Num_Rotations_input_field))
+        self.Num_Rotations_minus.clicked.connect(lambda: self.Minus_click(self.Num_Rotations_input_field))
+        ###################
 
         self.combo_box = QComboBox(self)
         Pivot_list = ["Custom", "Object 1", "Object 2"]
         self.combo_box.addItems(Pivot_list)
     
     
-
+    def Plus_click(self, field):
+        try:
+            val = float(field.text()) + 1
+            field.setText(str(val))
+        except:
+            field.setText(str(0.0))
+        
+        
+    def Minus_click(self, field):
+        try:
+            val = float(field.text()) - 1
+            field.setText(str(val))
+        except:
+            field.setText(str(0.0))
+            
+    def Slider_Update(self, val, field):
+        field.setText(str(val))
+        
+    
 
 
     def resizeEvent(self, event):
@@ -383,15 +621,20 @@ class Page2(Page):
         self.Angle_Change_title.setGeometry(int(self.width() * 0.30), int(self.height() * 0.01), 150, 30)
 
         # Degrees
-        self.Degrees_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.30), 50, 30)
-        self.Degrees_Pivot_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.35), int(self.width() * 0.1), 20)
-        self.Degrees_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.53), int(self.height() * 0.35), int(self.width() * 0.2), 16))
+        self.Degrees_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.275), 50, 30)
+        self.Degrees_Pivot_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.275), int(self.width() * 0.1), 20)
+        self.Degrees_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.53), int(self.height() * 0.275), int(self.width() * 0.2), 16))
+        
+        # Distacne
+        self.Distance_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.5), 75, 30)
+        self.Distance_Pivot_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.5), int(self.width() * 0.1), 20)
+        self.Distance_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.53), int(self.height() * 0.5), int(self.width() * 0.2), 16))
 
         # Rotations
-        self.Num_Rotations.setGeometry(int(self.width() * 0.30), int(self.height() * 0.60), 80, 30)
-        self.Num_Rotations_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.65), int(self.width() * 0.1), 20)
-        self.Num_Rotations_minus.setGeometry(int(self.width() * 0.53), int(self.height() * 0.65), 25, 20)
-        self.Num_rotations_plus.setGeometry(int(self.width() * 0.56), int(self.height() * 0.65), 25, 20)
+        self.Num_Rotations.setGeometry(int(self.width() * 0.30), int(self.height() * 0.75), 80, 30)
+        self.Num_Rotations_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.75), int(self.width() * 0.1), 20)
+        self.Num_Rotations_minus.setGeometry(int(self.width() * 0.53), int(self.height() * 0.75), 25, 20)
+        self.Num_rotations_plus.setGeometry(int(self.width() * 0.56), int(self.height() * 0.75), 25, 20)
 
         #Pivot Selction
         self.combo_box.setGeometry(self.width()-self.combo_box.width(), 0, self.combo_box.width(), self.combo_box.height())
@@ -591,7 +834,8 @@ class Page5(Page):
     """
     Page 5:
     """
-    def __init__(self, parent=None):
+    def __init__(self, path ,parent=None):
+        self.path = path
         """
         Initialise "Page n"
 
@@ -609,6 +853,11 @@ class Page5(Page):
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
                 if (path == ""): return
                 backend.RenderObject(filepath = path)
+                
+                new_item = f'Object {len(shared_state.items) + 1}'
+                shared_state.add_item(new_item)
+                
+                self.path.Object_detect()
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
 
@@ -629,6 +878,11 @@ class Page5(Page):
 
             Tutorial_Box.exec()
             backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+            
+            new_item = f'Object {len(shared_state.items) + 1}'
+            shared_state.add_item(new_item)
+    
+            self.path.Object_detect()
 
         self.TutorialObjects_Button = QPushButton('Tutorial Objects', self)
         self.TutorialObjects_Button.setGeometry(150, 10, 125, 50)
@@ -651,7 +905,7 @@ class Page5(Page):
                 backend = Backend(json_filepath = path)
             except Exception:
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
-    
+
         self.ExportSettings_Button = QPushButton('Import Settings', self)
         self.ExportSettings_Button.setGeometry(600, 10, 125, 50)
         self.ExportSettings_Button.clicked.connect(Get_Settings_Filepath)
@@ -704,7 +958,6 @@ class MainWindow(QMainWindow):
             event
         """
         window_height = self.height() # get screen height
-        print(f"{self.width()}, {self.height()}") # get screen height
         navbar_height = 150
         self.navbar.setFixedHeight(navbar_height) # emviroment
         super().resizeEvent(event)  # handle resize event

@@ -24,9 +24,8 @@ class Backend():
         """
         if (is_blender_environment):
             bproc.init()
-
+            
         config = {} # reset config due to new initialisation
-
         if (json_filepath is not None):
             # load json objects into self
             temp = None
@@ -76,6 +75,27 @@ class Backend():
 
         config.setdefault("camera_poses", [])
         config["camera_poses"].append(pose)
+        
+    def get_object_by_pos(self, pos):
+        """Get an object by its index in the config list.
+        
+        :param pos: A int value to try index the config list.
+        """
+        try:
+            obj_data = config["objects"][pos]
+            print(obj_data)
+            # Returns the RenderObject data
+            return self.RenderObject(filepath=obj_data.get("filename"),
+                                     primative=obj_data.get("primative"),
+                                     object_id=obj_data["object_pos"])
+        except IndexError:
+            return None
+        
+    def is_config_objects_empty(self):
+        if config.get("objects") == None:
+            return False
+        else:
+            return True
         
     def set_res(self, resolution):
         """Set the resolution of the output images. Will effect total render time.
@@ -136,19 +156,22 @@ class Backend():
 
     class RenderObject():
         """An object to be rendered."""
-
+        
         def __init__(self, filepath=None, primative=None):
             """Initialise a render object.
 
             :param filepath: Filepath to an object file.
             :param primative: Create object primatively, choose from one of ["CUBE", "CYLINDER", "CONE", "PLANE", "SPHERE", "MONKEY"].
+            :param object_id: Acts as a unique identifier for the object.
             """
             self.object_pos = len(config.setdefault("objects", []))
             config["objects"].append({})
+                        
             if (filepath is not None):
                 if (is_blender_environment):
                     self.object = bproc.loader.load_blend(filepath) if filepath.endswith(".blend") else bproc.loader.load_obj(filepath)
                 config["objects"][self.object_pos] = {
+                    "object_pos": self.object_pos,
                     "filename": filepath,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
@@ -160,6 +183,7 @@ class Backend():
                 if (is_blender_environment):
                     self.object = bproc.object.create_primitive(primative)
                 config["objects"][self.object_pos] = {
+                    "object_pos": self.object_pos,
                     "primative": primative,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
@@ -229,6 +253,7 @@ class Backend():
             """
             if (is_blender_environment):
                 self.light.set_location(location)
+                print(f'location updated to (x:{location[0]}, z:{location[1]}, y{location[2]})')
 
             config["light_sources"][self.light_pos]["pos"] = location
 
