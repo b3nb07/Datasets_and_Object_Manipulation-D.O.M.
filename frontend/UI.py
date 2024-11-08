@@ -609,11 +609,24 @@ class Page2(Page):
         ###################
         self.Num_rotations_plus.clicked.connect(lambda: self.Plus_click(self.Num_Rotations_input_field))
         self.Num_Rotations_minus.clicked.connect(lambda: self.Minus_click(self.Num_Rotations_input_field))
-        ###################
-
-        self.combo_box = QComboBox(self)
-        Pivot_list = ["Custom", "Object 1", "Object 2"]
-        self.combo_box.addItems(Pivot_list)
+        ################### 
+        # textChanged callbacks that updates backend
+        self.XPivot_point_input_field.textChanged.connect(self.update_pivot)
+        self.YPivot_point_input_field.textChanged.connect(self.update_pivot)
+        self.ZPivot_point_input_field.textChanged.connect(self.update_pivot)
+    
+    def update_pivot(self):
+        """ Method to dynamically update a targetted object's position """
+        try: 
+            x = float(self.XPivot_point_input_field.text() or 0)
+            z = float(self.YPivot_point_input_field.text() or 0)
+            y = float(self.ZPivot_point_input_field.text() or 0)
+                
+            point = [x,z,y]
+            
+            backend.set_pivot_point(point)
+        except:
+            QMessageBox.warning(self, "Error Updating Pivot", "X, Y or Z value is invalid")
     
     
     def Plus_click(self, field):
@@ -675,10 +688,6 @@ class Page2(Page):
         self.Num_Rotations_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.75), int(self.width() * 0.1), 20)
         self.Num_Rotations_minus.setGeometry(int(self.width() * 0.53), int(self.height() * 0.75), 25, 20)
         self.Num_rotations_plus.setGeometry(int(self.width() * 0.56), int(self.height() * 0.75), 25, 20)
-
-        #Pivot Selction
-        self.combo_box.setGeometry(self.width()-self.combo_box.width(), 0, self.combo_box.width(), self.combo_box.height())
-
 
         super().resizeEvent(event)  # Call the parent class's resizeEvent
 

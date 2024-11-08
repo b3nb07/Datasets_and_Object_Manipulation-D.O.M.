@@ -5,7 +5,14 @@ import numpy as np
 import json
 import os
 
-config = {} # will hold the config ready for export
+# initialise config - will hold the config ready for export
+config = { 
+    "pivot": {
+        "point": [0, 0, 0],
+        "distance": 0
+    },
+}
+
 
 # check if this is the blender environment
 try:
@@ -75,6 +82,16 @@ class Backend():
 
         config.setdefault("camera_poses", [])
         config["camera_poses"].append(pose)
+        
+    def set_pivot_point(self, point):
+        """ Sets a custom pivotpoint in the scene for rendering.
+        
+        :param point: a list containing [X,Y,Z]"""
+        # if (is_blender_environment):
+        #     pass
+        
+        config["pivot"]["point"] = point
+        # print(f'pivot point updated from {point}')
         
     def is_config_objects_empty(self):
         if config.get("objects") == None:
