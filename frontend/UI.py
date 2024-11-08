@@ -537,7 +537,10 @@ class Page2(Page):
         super().__init__(parent)
         
         # Pivot Point Coords Section
-        self.Pivot_Point_subtitle = QLabel("Pivot Point", self)
+        self.Pivot_Point_Check = QCheckBox("Cutom Pivot Point", self)
+        self.Pivot_Point_Check.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
+        self.Pivot_Point_Check.setChecked(True)
+        self.Pivot_Point_Check.stateChanged.connect(lambda: self.state_changed(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
 
         # X Pivot Point Controls
         self.XPivot_pos = QLabel("X:", self)
@@ -575,47 +578,65 @@ class Page2(Page):
         self.ZPivot_button_minus.clicked.connect(lambda: self.Minus_click(self.ZPivot_point_input_field))
         ###################
 
-
         #Angle Change Section
 
         self.Position_layout = QVBoxLayout()
-        self.Angle_Change_title = QLabel(f"Angle Change Between Images", self)
+        self.Distance_Pivot = QLabel(f"Distance", self)
 
-        self.Degrees_Pivot = QLabel("Degrees:", self)
-        self.Degrees_Pivot_input_field = QLineEdit(parent=self)
-        self.Degrees_Pivot_input_field.setText("0")
-        
-        self.Degrees_Slider = QtWidgets.QSlider(self)
-        self.Degrees_Slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Degrees_Slider.setRange(0, 360)
-        
-        self.Distance_Pivot = QLabel("Distance:", self)
         self.Distance_Pivot_input_field = QLineEdit(parent=self)
         self.Distance_Pivot_input_field.setText("0")
         
         self.Distance_Slider = QtWidgets.QSlider(self)
         self.Distance_Slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Distance_Slider.setRange(0, 100)
+        self.Distance_Slider.setRange(0, 1000)
         
         #################
-        self.Degrees_Slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Degrees_Pivot_input_field))
         self.Distance_Slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
         #################
         
-        self.Num_Rotations = QLabel("Rotations:", self)
-        self.Num_Rotations_input_field = QLineEdit(parent=self)
-        self.Num_Rotations_input_field.setText("0")
-        self.Num_Rotations_minus = QPushButton('-', self)
-        self.Num_rotations_plus = QPushButton('+', self)
-        
-        ###################
-        self.Num_rotations_plus.clicked.connect(lambda: self.Plus_click(self.Num_Rotations_input_field))
-        self.Num_Rotations_minus.clicked.connect(lambda: self.Minus_click(self.Num_Rotations_input_field))
         ################### 
         # textChanged callbacks that updates backend
         self.XPivot_point_input_field.textChanged.connect(self.update_pivot)
         self.YPivot_point_input_field.textChanged.connect(self.update_pivot)
         self.ZPivot_point_input_field.textChanged.connect(self.update_pivot)
+        
+        ################
+        # create initial combo_box
+        self.combo_box = QComboBox(self)
+        # connecting shared state updates to combo box
+        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        self.combo_box.activated.connect(lambda: self.Object_pivot_selected(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
+        
+        # initialise items
+        self.update_combo_box_items(shared_state.items)
+        shared_state.update_items(items=[])
+        shared_state.update_selected(0)
+        
+    def Object_pivot_selected(self, Check, Fields, Buttons):
+        "Set checkbox and associsated Fields and buttons False"
+        Check.setChecked(False)
+        self.able_Fields(Fields, Buttons, True)
+
+    def state_changed(self, Pivot_Point_Check, Fields, Buttons):
+        "Detects if State of checkbox has changed"
+        if Pivot_Point_Check.isChecked():
+            self.able_Fields(Fields, Buttons, False)
+        else:
+            self.able_Fields(Fields, Buttons, True)
+    
+    def able_Fields(self, Fields, Buttons, State):
+        "Sets all fields and buttons specified to Desired state"
+        for i in range(len(Fields)):
+            Fields[i].setDisabled(State)
+            
+        for i in range(len(Buttons)):
+            Buttons[i].blockSignals(State) 
+    
+    def update_combo_box_items(self, items):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        self.combo_box.clear()
+        self.combo_box.addItems(map(lambda o: str(o), items))
     
     def update_pivot(self):
         """ Method to dynamically update a targetted object's position """
@@ -655,7 +676,7 @@ class Page2(Page):
     def resizeEvent(self, event):
         
         # Title Position
-        self.Pivot_Point_subtitle.setGeometry(int(self.width() * 0.025), int(self.height() * 0.01), 100, 30)
+        self.Pivot_Point_Check.setGeometry(int(self.width() * 0.01), int(self.height() * 0.00), 120, 30)
 
         # X Pivot Point
         self.XPivot_pos.setGeometry(int(self.width() * 0.05), int(self.height() * 0.2), 20, 30)
@@ -675,24 +696,12 @@ class Page2(Page):
         self.ZPivot_button_minus.setGeometry(int(self.width() * 0.22), int(self.height() * 0.8), 25, 20)
         self.ZPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.8), 25, 20)
 
-        # Angle Change Section
-        self.Angle_Change_title.setGeometry(int(self.width() * 0.30), int(self.height() * 0.01), 150, 30)
-
         # Degrees
-        self.Degrees_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.275), 50, 30)
-        self.Degrees_Pivot_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.275), int(self.width() * 0.1), 20)
-        self.Degrees_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.53), int(self.height() * 0.275), int(self.width() * 0.2), 16))
+        self.Distance_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.01), 150, 30)
+        self.Distance_Pivot_input_field.setGeometry(int(self.width() * 0.30), int(self.height() * 0.2), int(self.width() * 0.1), 20)
+        self.Distance_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.425), int(self.height() * 0.21), int(self.width() * 0.3), 16))
         
-        # Distacne
-        self.Distance_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.5), 75, 30)
-        self.Distance_Pivot_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.5), int(self.width() * 0.1), 20)
-        self.Distance_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.53), int(self.height() * 0.5), int(self.width() * 0.2), 16))
-
-        # Rotations
-        self.Num_Rotations.setGeometry(int(self.width() * 0.30), int(self.height() * 0.75), 80, 30)
-        self.Num_Rotations_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.75), int(self.width() * 0.1), 20)
-        self.Num_Rotations_minus.setGeometry(int(self.width() * 0.53), int(self.height() * 0.75), 25, 20)
-        self.Num_rotations_plus.setGeometry(int(self.width() * 0.56), int(self.height() * 0.75), 25, 20)
+        self.combo_box.setGeometry(self.width()-self.combo_box.width(), 0, self.combo_box.width(), self.combo_box.height())
 
         super().resizeEvent(event)  # Call the parent class's resizeEvent
 
@@ -1025,7 +1034,7 @@ if __name__ == "__main__":
     window = MainWindow(shared_state)
     window.show()
 
-    def Get_Object_Filepath(self):
+    """def Get_Object_Filepath(self):
         try:
             path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
             if (path == ""): return False
@@ -1067,5 +1076,5 @@ if __name__ == "__main__":
             objectSelected = Get_Object_Filepath(window.navbar)
         else:
             objectSelected = Tutorial_Object(window.navbar)
-
+"""
     sys.exit(app.exec_())
