@@ -582,13 +582,14 @@ class Page2(Page):
 
         self.Position_layout = QVBoxLayout()
         self.Distance_Pivot = QLabel(f"Distance", self)
-
-        self.Distance_Pivot_input_field = QLineEdit(parent=self)
-        self.Distance_Pivot_input_field.setText("0")
         
         self.Distance_Slider = QtWidgets.QSlider(self)
         self.Distance_Slider.setOrientation(QtCore.Qt.Horizontal)
         self.Distance_Slider.setRange(0, 1000)
+
+        self.Distance_Pivot_input_field = QLineEdit(parent=self)
+        self.Distance_Pivot_input_field.textChanged.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
+        self.Distance_Pivot_input_field.setText("0")
         
         #################
         self.Distance_Slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
@@ -613,6 +614,9 @@ class Page2(Page):
         self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
+        
+    def Update_slider(self, slider, val):
+        slider.value() == val
         
     def Object_pivot_selected(self, Check, Fields, Buttons):
         "Set checkbox and associsated Fields and buttons False"
