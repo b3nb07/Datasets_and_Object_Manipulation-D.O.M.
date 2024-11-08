@@ -5,7 +5,14 @@ import numpy as np
 import json
 import os
 
-config = {} # will hold the config ready for export
+# initialise config - will hold the config ready for export
+config = { 
+    "pivot": {
+        "point": [0, 0, 0],
+        "distance": 0
+    },
+}
+
 
 # check if this is the blender environment
 try:
@@ -44,24 +51,26 @@ class Backend():
             if ("render_res" in temp):
                 self.set_res(temp["render_res"])
 
-            for obj in temp["objects"]:
-                o = None
-                if ("filename" in obj):
-                    o = self.RenderObject(filepath = obj["filename"])
-                else:
-                    o = self.RenderObject(primative = obj["primative"])
+            if ("objects" in temp):
+                for obj in temp["objects"]:
+                    o = None
+                    if ("filename" in obj):
+                        o = self.RenderObject(filepath = obj["filename"])
+                    else:
+                        o = self.RenderObject(primative = obj["primative"])
 
-                o.set_loc(obj["pos"])
-                o.set_rotation(obj["rot"])
-                o.set_scale(obj["sca"])
+                    o.set_loc(obj["pos"])
+                    o.set_rotation(obj["rot"])
+                    o.set_scale(obj["sca"])
 
-            for light in temp["light_sources"]:
-                l = self.RenderLight(light["type"], light["name"])
+            if ("light_sources" in temp):
+                for light in temp["light_sources"]:
+                    l = self.RenderLight(light["type"], light["name"])
 
-                l.set_loc(light["pos"])
-                l.set_rotation(light["rot"])
-                l.set_energy(light["energy"])
-                l.set_color(light["color"])
+                    l.set_loc(light["pos"])
+                    l.set_rotation(light["rot"])
+                    l.set_energy(light["energy"])
+                    l.set_color(light["color"])
 
     def add_cam_pose(self, pose):
         """Adds a position of a camera to the scene for rendering.
@@ -74,26 +83,24 @@ class Backend():
         config.setdefault("camera_poses", [])
         config["camera_poses"].append(pose)
         
-    def get_object_by_pos(self, pos):
-        """Get an object by its index in the config list.
+    def set_pivot_point(self, point):
+        """ Sets a custom pivotpoint in the scene for rendering.
         
-        :param pos: A int value to try index the config list.
-        """
-        try:
-            obj_data = config["objects"][pos]
-            print(obj_data)
-            # Returns the RenderObject data
-            return self.RenderObject(filepath=obj_data.get("filename"),
-                                     primative=obj_data.get("primative"),
-                                     object_id=obj_data["object_pos"])
-        except IndexError:
-            return None
+        :param point: a list containing [X,Y,Z]"""
+        # if (is_blender_environment):
+        #     pass
+        
+        config["pivot"]["point"] = point
+        # print(f'pivot point updated from {point}')
         
     def is_config_objects_empty(self):
         if config.get("objects") == None:
             return False
         else:
             return True
+        
+    def get_config(self):
+        return config
         
     def set_res(self, resolution):
         """Set the resolution of the output images. Will effect total render time.
@@ -191,6 +198,9 @@ class Backend():
 
             raise TypeError('No filepath or primative argument given.')
 
+        def __str__(self):
+            return f"Object {self.object_pos + 1}"
+
         def set_loc(self, location):
             """Set the location of an object in the scene.
             
@@ -214,7 +224,7 @@ class Backend():
         def set_rotation(self, euler_rotation):
             """Set the rotation of an object in the scene.
             
-            :param euler_rotation: A list containing [x,z,y] values for the euler rotation to be applied to the object.
+            :param euler_rotation: A list containing [x,y,z] - (pitch,yaw,roll) values for the euler rotation to be applied to the object.
             """
             if (is_blender_environment):
                 self.object.set_rotation_euler(euler_rotation)

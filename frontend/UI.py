@@ -26,26 +26,28 @@ class ComboBoxState(QObject):
     # Defines basic signals for items and selection updates
     items_updated = pyqtSignal(list) # signal to send when items are updated
     selection_changed = pyqtSignal(int)# signal to send when selection changes
-    
+
     def __init__(self):
         super().__init__()
         self.items = [] # this will store what is in the combobox
         self.selected = None
-        
+
     def update_items(self, items):
         self.items = items
-        print(f'items in combo box have been updated: {items}')
         self.items_updated.emit(items)  # Emit signal for item updates
-        
+
     def add_item(self, item):
         self.items.append(item)
         self.items_updated.emit(self.items)
-        print(f'ComboBox Item added {item}')
-    
+
     def update_selected(self, index):
         self.selected_index = index
         # maybe delete
         self.selection_changed.emit(index)
+
+# creates this shared state
+shared_state = ComboBoxState()
+
 
 class Page(QtWidgets.QWidget):
     """
@@ -185,9 +187,9 @@ class Page1(Page):
         ##########################################################
         
         # textChanged callbacks that updates backend
-        self.XObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
-        self.YObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
-        self.ZObj_pos_input_field.textChanged.connect(lambda: self.update_object_pos())
+        self.XObj_pos_input_field.textChanged.connect(self.update_object_pos)
+        self.YObj_pos_input_field.textChanged.connect(self.update_object_pos)
+        self.ZObj_pos_input_field.textChanged.connect(self.update_object_pos)
         
         self.X_button_plus.clicked.connect(lambda: self.Plus_click(self.XObj_pos_input_field))
         self.X_button_minus.clicked.connect(lambda: self.Minus_click(self.XObj_pos_input_field))
@@ -227,9 +229,9 @@ class Page1(Page):
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
 
         # textChanged callbacks that updates backend
-        self.Width_Obj_pos_input_field.textChanged.connect(lambda: self.update_object_scale())
-        self.Height_Obj_pos_input_field.textChanged.connect(lambda: self.update_object_scale())
-        self.Length_Obj_pos_input_field.textChanged.connect(lambda: self.update_object_scale())
+        self.Width_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
+        self.Height_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
+        self.Length_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
 
         ########################################
 
@@ -268,6 +270,11 @@ class Page1(Page):
 
         #########################################
         
+        # textChanged callbacks that updates backend
+        self.X_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        self.Y_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        self.Z_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        
         self.X_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.X_Rotation_input_field))
         self.Y_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.Y_Rotation_input_field))
         self.Z_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.Z_Rotation_input_field))
@@ -279,6 +286,7 @@ class Page1(Page):
         # connecting shared state updates to combo box
         shared_state.items_updated.connect(self.update_combo_box_items)
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
         self.update_combo_box_items(shared_state.items)
@@ -286,64 +294,101 @@ class Page1(Page):
         shared_state.update_selected(0)
     
     def update_combo_box_items(self, items):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
-        self.combo_box.addItems(items)
+        self.combo_box.addItems(map(lambda o: str(o), items))
         self.combo_box.activated.connect(self.update_label)
-    
-    
-    # TODO: THIS SHOULD BE SELECTED AND CALLED WHEN SWITCHING BETWEEN OBJECT TABS. IT SHOULD INITIALISE ALL ATTRIBUTES.
-    def on_object_selected(self):
-        # get the selected object's position (index)
-        selected_object_pos = self.object_list_combo.currentIndex()
-        print(selected_object_pos)
 
-        # find the corresponding object from the backend
-        selected_object = self.backend.get_object_by_pos(selected_object_pos)
-        # insert the selected object's properties
-        self.XObj_pos_input_field.setText(str(selected_object["pos"][0]))
-        self.YObj_pos_input_field.setText(str(selected_object["pos"][1]))
-        self.ZObj_pos_input_field.setText(str(selected_object["pos"][2]))
-        
     
+    
+    def on_object_selected(self, selected_object_pos):
+        """ Method that updates attributes in text field when the object index is change from combo box. """
+        # find the corresponding object attributes from the backend
+        selected_object = backend.get_config()["objects"][selected_object_pos]
+        
+        # disconnects text fields
+        self.XObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
+        self.YObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
+        self.ZObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
+        self.Width_Obj_pos_input_field.textChanged.disconnect(self.update_object_scale)
+        self.Height_Obj_pos_input_field.textChanged.disconnect(self.update_object_scale)
+        self.Length_Obj_pos_input_field.textChanged.disconnect(self.update_object_scale)
+        self.X_Rotation_input_field.textChanged.disconnect(self.update_object_rotation)
+        self.Y_Rotation_input_field.textChanged.disconnect(self.update_object_rotation)
+        self.Z_Rotation_input_field.textChanged.disconnect(self.update_object_rotation)
+        
+        # sets the text as object attributes
+        self.XObj_pos_input_field.setText(str(selected_object["pos"][0]))
+        self.YObj_pos_input_field.setText(str(selected_object["pos"][2]))
+        self.ZObj_pos_input_field.setText(str(selected_object["pos"][1]))
+        self.Width_Obj_pos_input_field.setText(str(selected_object["sca"][0]))
+        self.Height_Obj_pos_input_field.setText(str(selected_object["sca"][1]))
+        self.Length_Obj_pos_input_field.setText(str(selected_object["sca"][2]))
+        self.X_Rotation_input_field.setText(str(selected_object["rot"][0]))
+        self.Y_Rotation_input_field.setText(str(selected_object["rot"][1]))
+        self.Z_Rotation_input_field.setText(str(selected_object["rot"][2]))
+        
+        # reconnects text fields
+        self.XObj_pos_input_field.textChanged.connect(self.update_object_pos)
+        self.YObj_pos_input_field.textChanged.connect(self.update_object_pos)
+        self.ZObj_pos_input_field.textChanged.connect(self.update_object_pos)
+        self.Width_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
+        self.Height_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
+        self.Length_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
+        self.X_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        self.Y_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        self.Z_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+
     def update_object_pos(self):
-        """ method to update a targetted object's position """
+        """ Method to dynamically update a targetted object's position """
         try: 
             x = float(self.XObj_pos_input_field.text() or 0)
             z = float(self.ZObj_pos_input_field.text() or 0)
             y = float(self.YObj_pos_input_field.text() or 0)
                 
             location = [x,z,y]
-            print(f"UPDATE_OBJECT_POS -> {location}") #DEBUG
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
-            #call backend function
-            
-            #DEBUG
-            # obj = backend.RenderObject(primative = "MONKEY")
-            # obj.update_object_location(location)            
-            obj = backend.get_object_by_pos(selected_object_index)
-            print(obj)
+            #call backend function   
+            obj = shared_state.items[selected_object_index]
+            #print(obj)
             obj.set_loc(location)
         except:
             QMessageBox.warning(self, "Error Updating Pos", "X, Y or Z value is invalid")
     
     def update_object_scale(self):
-        """ method to update a targetted object's scale """
+        """ Method to dynamically update a targetted object's scale """
         try: 
             width = float(self.Width_Obj_pos_input_field.text() or 0)
             height = float(self.Height_Obj_pos_input_field.text() or 0)
             length = float(self.Length_Obj_pos_input_field.text() or 0)
             scale = [width,height,length]
-            print(f"UPDATE_OBJECT_SCALE -> {scale}") #DEBUG
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
-            obj = backend.get_object_by_pos(selected_object_index)
-            print(obj)
-            obj.set_scaledd(scale)
+            obj = shared_state.items[selected_object_index]
+            #print(obj)
+            obj.set_scale(scale)
         except:
             QMessageBox.warning(self, "Error Updating Scale", "Width, Height or Length value is invalid")
+    
+    def update_object_rotation(self):
+        """ Method to dynamically update a targetted object's rotation """
+        try: 
+            x_rot = float(self.X_Rotation_input_field.text() or 0)
+            y_rot = float(self.Y_Rotation_input_field.text() or 0)
+            z_rot = float(self.Z_Rotation_input_field.text() or 0)
+            
+            rotation = [x_rot,y_rot,z_rot]
+            
+            # get the selected object's position from the combo box
+            selected_object_index = self.combo_box.currentIndex()
+            obj = shared_state.items[selected_object_index]
+            #print(obj)
+            obj.set_rotation(rotation)
+        except:
+            QMessageBox.warning(self, "Error Updating Rotation", "X, Y or Z value is invalid")
     
     
     def Plus_click(self, field):
@@ -566,11 +611,24 @@ class Page2(Page):
         ###################
         self.Num_rotations_plus.clicked.connect(lambda: self.Plus_click(self.Num_Rotations_input_field))
         self.Num_Rotations_minus.clicked.connect(lambda: self.Minus_click(self.Num_Rotations_input_field))
-        ###################
-
-        self.combo_box = QComboBox(self)
-        Pivot_list = ["Custom", "Object 1", "Object 2"]
-        self.combo_box.addItems(Pivot_list)
+        ################### 
+        # textChanged callbacks that updates backend
+        self.XPivot_point_input_field.textChanged.connect(self.update_pivot)
+        self.YPivot_point_input_field.textChanged.connect(self.update_pivot)
+        self.ZPivot_point_input_field.textChanged.connect(self.update_pivot)
+    
+    def update_pivot(self):
+        """ Method to dynamically update a targetted object's position """
+        try: 
+            x = float(self.XPivot_point_input_field.text() or 0)
+            z = float(self.YPivot_point_input_field.text() or 0)
+            y = float(self.ZPivot_point_input_field.text() or 0)
+                
+            point = [x,z,y]
+            
+            backend.set_pivot_point(point)
+        except:
+            QMessageBox.warning(self, "Error Updating Pivot", "X, Y or Z value is invalid")
     
     
     def Plus_click(self, field):
@@ -593,9 +651,6 @@ class Page2(Page):
     def Slider_Update(self, val, field):
         """Sets field value to slider value"""
         field.setText(str(val))
-        
-    
-
 
     def resizeEvent(self, event):
         
@@ -638,10 +693,6 @@ class Page2(Page):
         self.Num_Rotations_input_field.setGeometry(int(self.width() * 0.40), int(self.height() * 0.75), int(self.width() * 0.1), 20)
         self.Num_Rotations_minus.setGeometry(int(self.width() * 0.53), int(self.height() * 0.75), 25, 20)
         self.Num_rotations_plus.setGeometry(int(self.width() * 0.56), int(self.height() * 0.75), 25, 20)
-
-        #Pivot Selction
-        self.combo_box.setGeometry(self.width()-self.combo_box.width(), 0, self.combo_box.width(), self.combo_box.height())
-
 
         super().resizeEvent(event)  # Call the parent class's resizeEvent
 
@@ -855,10 +906,8 @@ class Page5(Page):
             try:
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
                 if (path == ""): return
-                backend.RenderObject(filepath = path)
-                
-                new_item = f'Object {len(shared_state.items) + 1}'
-                shared_state.add_item(new_item)
+                # add the object to the shared state
+                shared_state.add_item(backend.RenderObject(filepath = path))
                 
                 self.path.Object_detect()
             except Exception:
@@ -880,10 +929,8 @@ class Page5(Page):
             Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
 
             Tutorial_Box.exec()
-            backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-            
-            new_item = f'Object {len(shared_state.items) + 1}'
-            shared_state.add_item(new_item)
+            obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+            shared_state.add_item(obj)
     
             self.path.Object_detect()
 
@@ -896,9 +943,9 @@ class Page5(Page):
         self.BrowseFiles_Button.setGeometry(300, 10, 125, 50)
 
         #Fourth Section
-        self.GenerateDataSet_Button = QPushButton('Export Settings', self)
-        self.GenerateDataSet_Button.setGeometry(450, 10, 125, 50)
-        self.GenerateDataSet_Button.clicked.connect(lambda: backend.export())
+        self.ExportSettings_Button = QPushButton('Export Settings', self)
+        self.ExportSettings_Button.setGeometry(450, 10, 125, 50)
+        self.ExportSettings_Button.clicked.connect(lambda: backend.export())
 
         #Fifth Section
         def Get_Settings_Filepath():
@@ -909,9 +956,9 @@ class Page5(Page):
             except Exception:
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
-        self.ExportSettings_Button = QPushButton('Import Settings', self)
-        self.ExportSettings_Button.setGeometry(600, 10, 125, 50)
-        self.ExportSettings_Button.clicked.connect(Get_Settings_Filepath)
+        self.ImportSettings_Button = QPushButton('Import Settings', self)
+        self.ImportSettings_Button.setGeometry(600, 10, 125, 50)
+        self.ImportSettings_Button.clicked.connect(Get_Settings_Filepath)
 
         #Sixth section
         self.Delete_Object_Button = QPushButton('Delete Object', self)
@@ -977,4 +1024,48 @@ if __name__ == "__main__":
     shared_state = ComboBoxState()
     window = MainWindow(shared_state)
     window.show()
+
+    def Get_Object_Filepath(self):
+        try:
+            path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
+            if (path == ""): return False
+            # add the object to the shared state
+            shared_state.add_item(backend.RenderObject(filepath = path))
+            
+            self.Object_detect()
+            return True
+        except Exception:
+            QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
+
+
+    def Tutorial_Object(self):
+        Tutorial_Box = QMessageBox()
+        Tutorial_Box.setText("Please select a tutorial object from below")
+        Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
+        Tutorial_Box.addButton("Cylinder", QMessageBox.ActionRole)
+        Tutorial_Box.addButton("Cone", QMessageBox.ActionRole)
+        Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
+        Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
+        Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
+
+        Tutorial_Box.exec()
+        obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+        shared_state.add_item(obj)
+
+        self.Object_detect()
+        return True
+
+    objectSelected = False
+    while not objectSelected:
+        Initial_Object = QMessageBox()
+        Initial_Object.setText("Please select an initial object from below")
+        Initial_Object.addButton("Custom Object", QMessageBox.ActionRole)
+        Initial_Object.addButton("Tutorial Object", QMessageBox.ActionRole)
+
+        Initial_Object.exec_()
+        if Initial_Object.clickedButton().text() == "Custom Object":
+            objectSelected = Get_Object_Filepath(window.navbar)
+        else:
+            objectSelected = Tutorial_Object(window.navbar)
+
     sys.exit(app.exec_())
