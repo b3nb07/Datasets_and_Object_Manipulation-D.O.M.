@@ -616,19 +616,27 @@ class Page2(Page):
         self.XPivot_point_input_field.textChanged.connect(self.update_pivot)
         self.YPivot_point_input_field.textChanged.connect(self.update_pivot)
         self.ZPivot_point_input_field.textChanged.connect(self.update_pivot)
+        self.Distance_Pivot_input_field.textChanged.connect(self.update_distance)
     
     def update_pivot(self):
         """ Method to dynamically update a targetted object's position """
         try: 
             x = float(self.XPivot_point_input_field.text() or 0)
-            z = float(self.YPivot_point_input_field.text() or 0)
-            y = float(self.ZPivot_point_input_field.text() or 0)
+            y = float(self.YPivot_point_input_field.text() or 0)
+            z = float(self.ZPivot_point_input_field.text() or 0)
                 
-            point = [x,z,y]
-            
+            point = [x,y,z]
             backend.set_pivot_point(point)
         except:
             QMessageBox.warning(self, "Error Updating Pivot", "X, Y or Z value is invalid")
+            
+    def update_distance(self):
+        """ Method to dynamically update a targetted object's position """
+        try: 
+            dis = float(self.Distance_Pivot_input_field.text() or 0)
+            backend.set_pivot_distance(dis)
+        except:
+            QMessageBox.warning(self, "Error Updating Distance", "You entered an invalid input.")
     
     
     def Plus_click(self, field):
