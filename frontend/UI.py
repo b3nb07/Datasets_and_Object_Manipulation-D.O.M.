@@ -755,10 +755,8 @@ class Page3(Page):
         self.Length.setGeometry(150, 70, 65, 20)
 
         #Third Section
-        self.combo_box = QComboBox(self)
-        Obj_list = ["Object 1", "Object 2", "Object 3"]
-        self.combo_box.addItems(Obj_list)
-        self.combo_box.setGeometry(275, 10, 100, 20)
+        self.Object_Coords_Label = QLabel(f"Object x Co-ords:", self)
+        self.Object_Coords_Label.setGeometry(275, 10, 100, 20)
 
         self.X_Button = QCheckBox("X", self)
         self.X_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
@@ -815,16 +813,24 @@ class Page3(Page):
         #Section 5
         
         self.RandomSettingSeed_Label = QLabel(f"Random Setting Seed", self)
-        self.RandomSettingSeed_Label.setGeometry(self.width()-self.RandomSettingSeed_Label.width(), 10, 125, 20)
         self.RandomSeed_Label = QLabel(f"<Random Seed>", self)
+        
+        #Third Section
+        self.combo_box = QComboBox(self)
+        Obj_list = ["Object 1", "Object 2", "Object 3"]
+        self.combo_box.addItems(Obj_list)
+        
 
     def resizeEvent(self, event):
         if self.RandomSeed_Label.width() > 125:
             x = self.RandomSeed_Label.width()
         else:
             x = 125
-        self.RandomSettingSeed_Label.setGeometry(self.width()-self.RandomSettingSeed_Label.width(), 10, x, 20)
-        self.RandomSeed_Label.setGeometry(self.width()-self.RandomSeed_Label.width(), 30, self.RandomSeed_Label.width(), 20)
+            
+            
+        self.RandomSeed_Label.setGeometry(self.width()-self.RandomSeed_Label.width(), 80, self.RandomSeed_Label.width(), 20)
+        self.RandomSettingSeed_Label.setGeometry(self.width()-self.RandomSettingSeed_Label.width() - 15, 60, x, 20)
+        self.combo_box.setGeometry(self.width()-self.combo_box.width(), 0, self.combo_box.width(), self.combo_box.height())
 
 class Page4(Page):
     """
