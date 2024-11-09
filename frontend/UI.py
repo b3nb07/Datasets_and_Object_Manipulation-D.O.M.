@@ -16,6 +16,8 @@ path.append("backend")
 from backend import Backend
 import numpy as np
 
+
+
 # Initialise backend
 backend = Backend()
 
@@ -78,6 +80,7 @@ class Widget(QtWidgets.QWidget):
         self.tabwizard.addPage(Page3(), "Generate Random")
         self.tabwizard.addPage(Page4(), "Render")
         self.tabwizard.addPage(Page5(), "Import and Export")
+        
 
 class Page1(Page):
     """
@@ -281,7 +284,6 @@ class Page1(Page):
 
 
         self.Object_rotation_title.setGeometry(int(self.width()*0.60), int(self.height()*0.01), 200, 30)
-
         self.X_Rotation_Label.setGeometry(int(self.width()*0.60), int(self.height()*0.2), 50, 30)
         self.X_Rotation_input_field.setGeometry(int(self.width()*0.65), int(self.height()*0.25), int(self.width()*0.1), 20)
         self.X_Rotation.setGeometry(QtCore.QRect(int(self.width()*0.78), int(self.height()*0.28), int(self.width()*0.2), 16))
@@ -376,15 +378,8 @@ class Page2(Page):
         
         self.Degrees_Slider = QtWidgets.QSlider(self)
         self.Degrees_Slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Degrees_Slider.setMinimum(1)
-        self.Degrees_Slider.setMaximum(360)
-        self.Degrees_Slider.setValue(1)
-        self.Degrees_Slider.setTickInterval(1)  # Interval between each tick mark
-        self.Degrees_Slider.setTickPosition(QSlider.TicksBelow)
-        self.Degrees_Slider.valueChanged.connect(self.update_degrees_input)
-
-
-
+        self.Degrees_Slider.setRange(0, 360)
+        self.Degrees_Slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Degrees_Pivot_input_field))
 
         self.Num_Rotations = QLabel("Rotations:", self)
         self.Num_Rotations_input_field = QLineEdit(parent=self)
@@ -408,12 +403,16 @@ class Page2(Page):
         if new_input_value >= 0:  
             input_field.setText(str(new_input_value))
     
+    
 
     def update_degrees_input(self):
         # Get the slider's current value and update the input field
         Degrees_value = self.Degrees_Slider.Degrees_value()
         self.Degrees_Pivot_input_field.setText(str(Degrees_value))
-    
+     
+    def Slider_Update(self, val, field):
+        field.setText(str(val))
+
 
 
 
@@ -547,13 +546,17 @@ class Page3(Page):
         self.Set_All_Random_Button = QCheckBox("Set all Random", self)
         self.Set_All_Random_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.Set_All_Random_Button.setGeometry(0, 0, 125, 30)
+        self.Set_All_Random_Button.stateChanged.connect(self.set_all_random)
+        
 
         #Second Section
         self.ObjectDimensions_Label = QLabel(f"Object x Dimension", self)
         self.ObjectDimensions_Label.setGeometry(150, 10, 125, 20)
+        
 
         self.Width_Button = QCheckBox("Width ", self)
         self.Width_Button.setGeometry(150, 30, 65, 20)
+        
 
         self.Height_Button = QCheckBox("Height", self)
         self.Height_Button.setGeometry(150, 50, 65, 20)
@@ -622,20 +625,23 @@ class Page3(Page):
         self.RandomSettingSeed_Label.setGeometry(self.width()-self.RandomSettingSeed_Label.width(), 10, 125, 20)
         self.RandomSeed_Label = QLabel(f"<Random Seed>", self)
 
+
     def resizeEvent(self, event):
         window_width = self.width()
         window_height = self.height()
         
         # First Section
         self.Set_All_Random_Button.setGeometry(int(window_width * 0), int(window_height * 0.02), int(window_width * 0.12), 20)
-        
+
         # Second Section
         self.ObjectDimensions_Label.setGeometry(int(window_width * 0.15), int(window_height * 0.02), int(window_width * 0.2), 20)
-        
+
+
         self.Width_Button.setGeometry(int(window_width * 0.15), int(window_height * 0.3), int(window_width * 0.15), 20)
         self.Height_Button.setGeometry(int(window_width * 0.22), int(window_height * 0.3), int(window_width * 0.15), 20)
         self.Length.setGeometry(int(window_width * 0.29), int(window_height * 0.3), int(window_width * 0.15), 20)
-        
+
+
         # Third Section
         self.combo_box.setGeometry(int(window_width * 0.01), int(window_height * 0.3), int(window_width * 0.12), 20)
         
@@ -644,7 +650,6 @@ class Page3(Page):
         self.Z_Button.setGeometry(int(window_width * 0.29), int(window_height * 0.60), 30, 20)
         
         self.PivotPoint_Label.setGeometry(int(window_width * 0.40), int(window_height * 0.02), int(window_width * 0.2), 20)
-        
         self.X_Button2.setGeometry(int(window_width * 0.38), int(window_height * 0.3), 30, 20)
         self.Y_Button2.setGeometry(int(window_width * 0.45), int(window_height * 0.3), 30, 20)
         self.Z_Button2.setGeometry(int(window_width * 0.52), int(window_height * 0.3), 30, 20)
@@ -652,21 +657,45 @@ class Page3(Page):
         # Fourth Section
         self.Reflect_Label.setGeometry(int(window_width * 0.6), int(window_height * 0.1), int(window_width * 0.2), 20)
         self.Reflect_Button.setGeometry(int(window_width * 0.73), int(window_height * 0.12), 30, 20)
-        
+
         self.AutoRotationAngle_Label.setGeometry(int(window_width * 0.6), int(window_height * 0.3), int(window_width * 0.2), 20)
         self.AutoRotationAngle_Button.setGeometry(int(window_width * 0.73), int(window_height * 0.32), 30, 20)
-        
+
         self.ImportObjects_Label.setGeometry(int(window_width * 0.6), int(window_height * 0.5), int(window_width * 0.2), 20)
         self.ImportObjects_Button.setGeometry(int(window_width * 0.73), int(window_height * 0.52), 30, 20)
-        
+
         self.ImportEnvironment_Label.setGeometry(int(window_width * 0.6), int(window_height * 0.7), int(window_width * 0.2), 20)
         self.ImportEnvironment_Button.setGeometry(int(window_width * 0.73), int(window_height * 0.72), 30, 20)
-        
+
         # Fifth Section
         x = max(self.RandomSeed_Label.width(), 125)  # Minimum width for RandomSettingSeed_Label
         self.RandomSettingSeed_Label.setGeometry(window_width - x - 10, int(window_height * 0.02), x, 20)
         self.RandomSeed_Label.setGeometry(window_width - self.RandomSeed_Label.width() - 10, int(window_height * 0.2), self.RandomSeed_Label.width(), 20)
+    
 
+
+    def decrease_count(self):
+        number_of_renders_value = int(self.Number_of_renders_input_field.text())
+        if number_of_renders_value > 1:  # Prevent negative values if needed
+                self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
+
+
+    def set_all_random(self, state):
+                
+        check_state = (state == Qt.Checked)
+        self.Width_Button.setChecked(check_state)
+        self.Height_Button.setChecked(check_state)
+        self.Length.setChecked(check_state)
+        self.X_Button.setChecked(check_state)
+        self.Y_Button.setChecked(check_state)
+        self.Z_Button.setChecked(check_state)
+        self.X_Button2.setChecked(check_state)
+        self.Y_Button2.setChecked(check_state)
+        self.Z_Button2.setChecked(check_state)
+        self.Reflect_Button.setChecked(check_state)
+        self.AutoRotationAngle_Button.setChecked(check_state)
+        self.ImportObjects_Button.setChecked(check_state)
+        self.ImportEnvironment_Button.setChecked(check_state)
 
 class Page4(Page):
     """
@@ -681,12 +710,14 @@ class Page4(Page):
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
         self.GenerateRenders_Button.clicked.connect(self.generate_render)
         self.GenerateRenders_Button.setGeometry(0, 10, 125, 50)
+        
 
 
         # Number of Renders input fields
         self.Number_of_renders_title = QLabel("Number of Renders", self)
         self.Number_of_renders_input_field = QLineEdit(parent=self)
         self.Number_of_renders_input_field.setText("1")
+
 
         self.Number_of_renders_minus = QPushButton('-', self)
         self.Number_of_renders_plus = QPushButton('+', self)
@@ -709,6 +740,7 @@ class Page4(Page):
         self.X_Degree_slider.setMaximum(360) 
         self.X_Degree_slider.setTickPosition(QSlider.TicksBelow)
 
+
         # Y Degree
         self.Y_Degree_Label = QLabel("Y:", self)
         self.Y_Degree_input_field = QLineEdit(parent=self)
@@ -719,6 +751,7 @@ class Page4(Page):
         self.Y_Degree_slider.setMaximum(360)
         self.Y_Degree_slider.setTickPosition(QSlider.TicksBelow)
 
+
         # Z Degree
         self.Z_Degree_Label = QLabel("Z:", self)
         self.Z_Degree_input_field = QLineEdit(parent=self)
@@ -728,6 +761,7 @@ class Page4(Page):
         self.Z_Degree_slider.setMinimum(1)
         self.Z_Degree_slider.setMaximum(360)
         self.Z_Degree_slider.setTickPosition(QSlider.TicksBelow)
+
 
         self.X_Degree_slider.valueChanged.connect(lambda: self.update_degree_input(self.X_Degree_slider, self.X_Degree_input_field))
         self.Y_Degree_slider.valueChanged.connect(lambda: self.update_degree_input(self.Y_Degree_slider, self.Y_Degree_input_field))
@@ -833,7 +867,8 @@ class Page4(Page):
             current_x_angle += x_change_angle
             current_z_angle += z_change_angle
             current_y_angle += y_change_angle
-            
+    
+
 
         
     def generate_render(self):
@@ -853,6 +888,7 @@ class Page4(Page):
 
         
         backend.render()
+    
 
 
 
@@ -949,14 +985,27 @@ class MainWindow(QMainWindow):
         central_widget = QWidget(self)
         self.setCentralWidget(central_widget)
         self.layout = QVBoxLayout(central_widget)
-        central_widget.setStyleSheet("background-color: gray;")
+        central_widget.setStyleSheet("background-color: #9bc1bc;")
         
         # Nav bar
         # margins need to be removed to match enviroment
         self.navbar = Widget()
-        self.navbar.setStyleSheet("background-color: #D3D3D3;")  # Set navbar background color
         self.layout.addWidget(self.navbar)
-        self.navbar.setFixedHeight(150)
+        self.navbar.setFixedHeight(int(self.height()*0.2))
+
+        
+        ############
+        
+        #Set image background - dont delete will use later
+
+        #self.navbar.setStyleSheet("""
+        #background-image: url(frontend/background.jpg); 
+        #background-attachment: fixed;
+        #""")
+
+        ############
+
+
 
         # enviroment
         self.environment = QWidget()
@@ -1000,18 +1049,16 @@ class GlobalStyles:
             border-radius: 3px;
             font-weight: bold;
             min-width: 120px;
-            
-
         }
+        
+
         QTabBar::tab:selected {
             background-color: #A9A9A9;  
         }
         QTabWidget::pane {
-            border: black;
+            border: 1px solid black;
         }
-        QTabBar:hover {
-            background-color: #A9A9A9; 
-        }
+
         QPushButton {
             background-color: white;
             color: black;
@@ -1036,7 +1083,16 @@ class GlobalStyles:
         }
         QCheckBox {
             font-weight: bold;
+            background:transparent;
+
         }
+        QWidget {
+        background-color:#e6ebe0;
+        }
+        QSlider {
+        background: transparent; 
+        }
+        
         """
 
 
