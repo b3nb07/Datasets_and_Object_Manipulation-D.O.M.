@@ -227,6 +227,10 @@ class Page1(Page):
         self.L_slider = QtWidgets.QSlider(self)
         self.L_slider.setRange(0, 100)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
+        
+        self.Width_Obj_pos_input_field.textChanged.connect(lambda: self.Update_slider(self.W_slider, self.Width_Obj_pos_input_field.text()))
+        self.Height_Obj_pos_input_field.textChanged.connect(lambda: self.Update_slider(self.H_slider, self.Height_Obj_pos_input_field.text()))
+        self.Length_Obj_pos_input_field.textChanged.connect(lambda: self.Update_slider(self.L_slider, self.Length_Obj_pos_input_field.text()))
 
         # textChanged callbacks that updates backend
         self.Width_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
@@ -267,6 +271,10 @@ class Page1(Page):
         self.Z_Rotation = QtWidgets.QSlider(self)
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
         self.Z_Rotation.setRange(0, 360)
+        
+        self.X_Rotation_input_field.textChanged.connect(lambda: self.Update_slider(self.X_Rotation, self.X_Rotation_input_field.text()))
+        self.Y_Rotation_input_field.textChanged.connect(lambda: self.Update_slider(self.Y_Rotation, self.Y_Rotation_input_field.text()))
+        self.Z_Rotation_input_field.textChanged.connect(lambda: self.Update_slider(self.Z_Rotation, self.Z_Rotation_input_field.text()))
 
         #########################################
         
@@ -338,7 +346,14 @@ class Page1(Page):
         self.X_Rotation_input_field.textChanged.connect(self.update_object_rotation)
         self.Y_Rotation_input_field.textChanged.connect(self.update_object_rotation)
         self.Z_Rotation_input_field.textChanged.connect(self.update_object_rotation)
-
+        
+    
+    def Update_slider(self, slider, val):
+        try:
+            slider.setValue(int(val))
+        except:
+            print("Error")
+            
     def update_object_pos(self):
         """ Method to dynamically update a targetted object's position """
         try: 
@@ -616,7 +631,10 @@ class Page2(Page):
         shared_state.update_selected(0)
         
     def Update_slider(self, slider, val):
-        slider.value() == val
+        try:
+            slider.setValue(int(val))
+        except:
+            print("Error")
         
     def Object_pivot_selected(self, Check, Fields, Buttons):
         "Set checkbox and associsated Fields and buttons False"
