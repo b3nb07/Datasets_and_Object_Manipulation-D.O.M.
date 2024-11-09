@@ -5,7 +5,14 @@ import numpy as np
 import json
 import os
 
-config = {} # will hold the config ready for export
+# initialise config - will hold the config ready for export
+config = { 
+    "pivot": {
+        "point": [0, 0, 0],
+        "distance": 0
+    },
+}
+
 
 # check if this is the blender environment
 try:
@@ -24,9 +31,8 @@ class Backend():
         """
         if (is_blender_environment):
             bproc.init()
-
+            
         config = {} # reset config due to new initialisation
-
         if (json_filepath is not None):
             # load json objects into self
             temp = None
@@ -76,6 +82,25 @@ class Backend():
 
         config.setdefault("camera_poses", [])
         config["camera_poses"].append(pose)
+        
+    def set_pivot_point(self, point):
+        """ Sets a custom pivotpoint in the scene for rendering.
+        
+        :param point: a list containing [X,Y,Z]"""
+        # if (is_blender_environment):
+        #     pass
+        
+        config["pivot"]["point"] = point
+        # print(f'pivot point updated from {point}')
+        
+    def is_config_objects_empty(self):
+        if config.get("objects") == None:
+            return False
+        else:
+            return True
+        
+    def get_config(self):
+        return config
         
     def set_res(self, resolution):
         """Set the resolution of the output images. Will effect total render time.
@@ -136,19 +161,22 @@ class Backend():
 
     class RenderObject():
         """An object to be rendered."""
-
+        
         def __init__(self, filepath=None, primative=None):
             """Initialise a render object.
 
             :param filepath: Filepath to an object file.
             :param primative: Create object primatively, choose from one of ["CUBE", "CYLINDER", "CONE", "PLANE", "SPHERE", "MONKEY"].
+            :param object_id: Acts as a unique identifier for the object.
             """
             self.object_pos = len(config.setdefault("objects", []))
             config["objects"].append({})
+                        
             if (filepath is not None):
                 if (is_blender_environment):
                     self.object = bproc.loader.load_blend(filepath) if filepath.endswith(".blend") else bproc.loader.load_obj(filepath)
                 config["objects"][self.object_pos] = {
+                    "object_pos": self.object_pos,
                     "filename": filepath,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
@@ -160,6 +188,7 @@ class Backend():
                 if (is_blender_environment):
                     self.object = bproc.object.create_primitive(primative)
                 config["objects"][self.object_pos] = {
+                    "object_pos": self.object_pos,
                     "primative": primative,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
@@ -168,6 +197,9 @@ class Backend():
                 return
 
             raise TypeError('No filepath or primative argument given.')
+
+        def __str__(self):
+            return f"Object {self.object_pos + 1}"
 
         def set_loc(self, location):
             """Set the location of an object in the scene.
@@ -192,7 +224,7 @@ class Backend():
         def set_rotation(self, euler_rotation):
             """Set the rotation of an object in the scene.
             
-            :param euler_rotation: A list containing [x,z,y] values for the euler rotation to be applied to the object.
+            :param euler_rotation: A list containing [x,y,z] - (pitch,yaw,roll) values for the euler rotation to be applied to the object.
             """
             if (is_blender_environment):
                 self.object.set_rotation_euler(euler_rotation)
@@ -229,6 +261,7 @@ class Backend():
             """
             if (is_blender_environment):
                 self.light.set_location(location)
+                print(f'location updated to (x:{location[0]}, z:{location[1]}, y{location[2]})')
 
             config["light_sources"][self.light_pos]["pos"] = location
 
