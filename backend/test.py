@@ -20,7 +20,13 @@ light.set_energy(300)
 # light.set_color((255, 0, 0))
 
 # Set the camera to be in front of the object (vectors in [x, z, y])
-cam_pose = bproc.math.build_transformation_mat([0, -10, 0], [np.pi / 2, 0, 0])
+cam_pose = bproc.math.build_transformation_mat([0, -7, 0], [np.pi / 2, 0, 0])
+bproc.camera.add_camera_pose(cam_pose)
+
+cam_pose = bproc.math.build_transformation_mat([0, -7, 0], [np.pi / 2, 0, np.deg2rad(10)])
+bproc.camera.add_camera_pose(cam_pose)
+
+cam_pose = bproc.math.build_transformation_mat([0, -7, 0], [np.pi / 2, 0, np.deg2rad(20)])
 bproc.camera.add_camera_pose(cam_pose)
 # change res of render
 # bproc.camera.set_resolution(1920, 1080)
