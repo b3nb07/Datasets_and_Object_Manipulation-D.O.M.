@@ -9,7 +9,7 @@ import os
 config = { 
     "pivot": {
         "point": [0, 0, 0],
-        "distance": 0
+        "dis": 0
     },
 }
 
@@ -97,11 +97,13 @@ class Backend():
         """ Sets a custom pivotpoint in the scene for rendering.
         
         :param point: a list containing [X,Y,Z]"""
-        # if (is_blender_environment):
-        #     pass
-        
         config["pivot"]["point"] = point
-        # print(f'pivot point updated from {point}')
+        
+    def set_pivot_distance(self, dis):
+        """ Sets a custom distance for the pivotpoint in the scene for rendering.
+        
+        :param dis: a float value determining the distance"""
+        config["pivot"]["dis"] = dis
         
     def is_config_objects_empty(self):
         if config.get("objects") == None:
