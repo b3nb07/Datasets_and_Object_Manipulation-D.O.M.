@@ -13,6 +13,8 @@ config = {
     },
 }
 
+# remove linter wanrings that bproc is undefined (it's undefined due to vsc not running using blender's python interpreter)
+# pyright: reportUndefinedVariable=false
 
 # check if this is the blender environment
 try:
@@ -32,7 +34,12 @@ class Backend():
         if (is_blender_environment):
             bproc.init()
             
-        config = {} # reset config due to new initialisation
+        config.clear() # reset config due to new initialisation
+        config["pivot"] = {
+            "point": [0, 0, 0],
+            "dis": 0
+        }
+
         if (json_filepath is not None):
             # load json objects into self
             temp = None
@@ -71,6 +78,9 @@ class Backend():
                     l.set_rotation(light["rot"])
                     l.set_energy(light["energy"])
                     l.set_color(light["color"])
+
+            if ("pivot" in temp):
+                config["pivot"] = temp["pivot"].copy()
 
     def add_cam_pose(self, pose):
         """Adds a position of a camera to the scene for rendering.
@@ -160,7 +170,6 @@ class Backend():
         with open(filename, "w") as export_file:
             json.dump(config, export_file, indent = 2)
 
-
     class RenderObject():
         """An object to be rendered."""
         
@@ -178,7 +187,6 @@ class Backend():
                 if (is_blender_environment):
                     self.object = bproc.loader.load_blend(filepath) if filepath.endswith(".blend") else bproc.loader.load_obj(filepath)
                 config["objects"][self.object_pos] = {
-                    "object_pos": self.object_pos,
                     "filename": filepath,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
@@ -190,7 +198,6 @@ class Backend():
                 if (is_blender_environment):
                     self.object = bproc.object.create_primitive(primative)
                 config["objects"][self.object_pos] = {
-                    "object_pos": self.object_pos,
                     "primative": primative,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
