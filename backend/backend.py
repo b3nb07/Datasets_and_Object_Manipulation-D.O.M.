@@ -37,7 +37,7 @@ class Backend():
         config.clear() # reset config due to new initialisation
         config["pivot"] = {
             "point": [0, 0, 0],
-            "distance": 0
+            "dis": 0
         }
 
         if (json_filepath is not None):
@@ -187,7 +187,6 @@ class Backend():
                 if (is_blender_environment):
                     self.object = bproc.loader.load_blend(filepath) if filepath.endswith(".blend") else bproc.loader.load_obj(filepath)
                 config["objects"][self.object_pos] = {
-                    "object_pos": self.object_pos,
                     "filename": filepath,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
@@ -199,7 +198,6 @@ class Backend():
                 if (is_blender_environment):
                     self.object = bproc.object.create_primitive(primative)
                 config["objects"][self.object_pos] = {
-                    "object_pos": self.object_pos,
                     "primative": primative,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],

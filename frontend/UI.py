@@ -42,6 +42,10 @@ class ComboBoxState(QObject):
         self.items.append(item)
         self.items_updated.emit(self.items)
 
+    def remove_item(self, item):
+        self.items.remove(item)
+        self.items_updated.emit(self.items)
+
     def update_selected(self, index):
         self.selected_index = index
         # maybe delete
@@ -49,7 +53,6 @@ class ComboBoxState(QObject):
 
 # creates this shared state
 shared_state = ComboBoxState()
-
 
 class Page(QtWidgets.QWidget):
     """
@@ -88,7 +91,7 @@ class Widget(QtWidgets.QWidget):
     """
     Clas to Add all pages into a tabwizard
     """
-    def __init__(self, shared_state):
+    def __init__(self):
         """
         Initialise widget class for Navbar
         """
@@ -104,7 +107,7 @@ class Widget(QtWidgets.QWidget):
 
         
         #pages
-        self.tabwizard.addPage(Page1(shared_state), "Object")
+        self.tabwizard.addPage(Page1(), "Object")
         self.tabwizard.addPage(Page2(), "Pivot Point")
         self.tabwizard.addPage(Page3(), "Generate Random")
         self.tabwizard.addPage(Page4(), "Render")
@@ -124,7 +127,7 @@ class Page1(Page):
     """
     Page 1: Objects
     """
-    def __init__(self, shared_state, parent=None):
+    def __init__(self, parent=None):
         """
         Initialise "Page n"
 
@@ -319,6 +322,7 @@ class Page1(Page):
         """ Method that updates attributes in text field when the object index is change from combo box. """
         # find the corresponding object attributes from the backend
         selected_object = backend.get_config()["objects"][selected_object_pos]
+        if (selected_object is None): return
         
         # disconnects text fields
         self.XObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
@@ -356,9 +360,9 @@ class Page1(Page):
     
     def Update_slider(self, slider, val):
         try:
-            slider.setValue(int(val))
-        except:
-            print("Error")
+            slider.setValue(int(round(float(val), 0)))
+        except Exception as e:
+            print("Error", e)
             
     def update_object_pos(self):
         """ Method to dynamically update a targetted object's position """
@@ -662,7 +666,7 @@ class Page2(Page):
         
     def Update_slider(self, slider, val):
         try:
-            slider.setValue(int(val))
+            slider.setValue(int(round(float(val), 0)))
         except:
             print("Error")
         
@@ -1209,7 +1213,7 @@ class Page5(Page):
     """
     Page 5:
     """
-    def __init__(self, path ,parent=None):
+    def __init__(self, path, parent=None):
         self.path = path
         """
         Initialise "Page n"
@@ -1281,16 +1285,45 @@ class Page5(Page):
         self.ImportSettings_Button.setGeometry(600, 10, 125, 50)
         self.ImportSettings_Button.clicked.connect(Get_Settings_Filepath)
 
+        def delete_object():
+            to_delete = QMessageBox()
+            to_delete.setText("Please select an object to remove from below")
+
+            if (not shared_state.items):
+                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
+
+            for obj in shared_state.items:
+                to_delete.addButton(str(obj), QMessageBox.ActionRole)
+
+            to_delete.exec()
+            obj_index = int(to_delete.clickedButton().text()[-1]) - 1
+            obj = shared_state.items[obj_index]
+            shared_state.remove_item(obj)
+            del backend.get_config()["objects"][obj.object_pos]
+            # shift objects after this one down by one
+            for i in range(obj_index, len(shared_state.items)):
+                obj = shared_state.items[i]
+                obj.object_pos = i
+
+            shared_state.items_updated.emit(shared_state.items)
+            # The last object was deleted
+            if (not shared_state.items):
+                self.path.tabwizard.setTabEnabled(0, False)
+                self.path.tabwizard.setTabEnabled(1, False)
+                self.path.tabwizard.setTabEnabled(2, False)
+                self.path.tabwizard.setTabEnabled(3, False)
+                QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
+    
         #Sixth section
         self.Delete_Object_Button = QPushButton('Delete Object', self)
         self.Delete_Object_Button.setGeometry(750, 10, 125, 50)
-        #self.Delete_Object_Button.clicked.connect("""Delete Object Function""")
+        self.Delete_Object_Button.clicked.connect(delete_object)
 
 class MainWindow(QMainWindow):
     """
     Main Window for all the elements
     """
-    def __init__(self, shared_state):
+    def __init__(self):
         """
         Initialise all elements of the Program
         """
@@ -1314,7 +1347,7 @@ class MainWindow(QMainWindow):
         
         # Nav bar
         # margins need to be removed to match enviroment
-        self.navbar = Widget(shared_state)
+        self.navbar = Widget()
         self.layout.addWidget(self.navbar)
         self.navbar.setFixedHeight(int(self.height()*0.2))
 
@@ -1427,8 +1460,8 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
     # creates this shared state
-    shared_state = ComboBoxState()
-    window = MainWindow(shared_state)
+    # shared_state = ComboBoxState()
+    window = MainWindow()
     window.show()
 
     def Get_Object_Filepath(self):
