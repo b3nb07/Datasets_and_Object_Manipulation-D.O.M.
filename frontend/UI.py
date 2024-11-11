@@ -1266,33 +1266,10 @@ class Page4(Page):
 
         
     def generate_render(self):
-<<<<<<< HEAD
-        """
-
-
-        """
-        number_of_renders = int(self.Number_of_renders_input_field.text())
-        if number_of_renders <1:
-            QMessageBox.warning(self, "Error when starting render", "Invalid value for number of renders.")
-            return
-        
-        #add cameras
-        
-        #for now all cameras are linear
-        starting = [[0,0,0],[np.pi/2, 0 ,0]]
-        self.add_camera_poses_linear(starting, 5)  
-        
-
-
-        backend.render()
-    
-
-=======
         backend.render() 
 
     def set_renders(self):
         backend.set_renders( int(self.Number_of_renders_input_field.text()))  
->>>>>>> generate-random-ilya
 
 
 
