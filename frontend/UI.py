@@ -879,14 +879,17 @@ class Page3(Page):
         self.X_Button2 = QCheckBox("X", self)
         self.X_Button2.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.X_Button2.setGeometry(275, 70, 30, 20)
+        self.X_Button2.stateChanged.connect(backend.toggle_random_pivot_x)
 
         self.Y_Button2 = QCheckBox("Y", self)
         self.Y_Button2.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.Y_Button2.setGeometry(315, 70, 30, 20)
+        self.Y_Button2.stateChanged.connect(backend.toggle_random_pivot_y)
 
         self.Z_Button2 = QCheckBox("Z", self)
         self.Z_Button2.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.Z_Button2.setGeometry(350, 70, 30, 20)
+        self.Z_Button2.stateChanged.connect(backend.toggle_random_pivot_z)
 
         #Fourth Section
         self.Reflect_Label = QLabel(f"Reflect:", self)
@@ -894,18 +897,22 @@ class Page3(Page):
 
         self.Reflect_Button = QCheckBox("", self)
         self.Reflect_Button.setGeometry(560, 10, 150, 20)
+        self.Reflect_Button.stateChanged.connect(backend.toggle_random_environment_reflect)
 
         self.AutoRotationAngle_Label = QLabel(f"Auto Rotation Angle:", self)
         self.AutoRotationAngle_Label.setGeometry(450, 30, 150, 20)
+        
 
         self.AutoRotationAngle_Button = QCheckBox("", self)
         self.AutoRotationAngle_Button.setGeometry(560, 30, 150, 20)
+        self.AutoRotationAngle_Button.stateChanged.connect(backend.toggle_random_environment_angle)
 
         self.ImportEnvironment_Label = QLabel(f"Import Environment:", self)
         self.ImportEnvironment_Label.setGeometry(450, 70, 150, 20)
 
         self.ImportEnvironment_Button = QCheckBox("", self)
         self.ImportEnvironment_Button.setGeometry(560, 70, 150, 20)
+        self.ImportEnvironment_Button.stateChanged.connect(backend.toggle_random_environment_background)
 
         #Section 5
         
@@ -1072,6 +1079,7 @@ class Page4(Page):
         self.Number_of_renders_title = QLabel("Number of Renders", self)
         self.Number_of_renders_input_field = QLineEdit(parent=self)
         self.Number_of_renders_input_field.setText("1")
+        self.Number_of_renders_input_field.textChanged.connect(self.set_renders)
 
 
         self.Number_of_renders_minus = QPushButton('-', self)
@@ -1258,25 +1266,10 @@ class Page4(Page):
 
         
     def generate_render(self):
-        """
+        backend.render() 
 
-
-        """
-        number_of_renders = int(self.Number_of_renders_input_field.text())
-        if number_of_renders <1:
-            QMessageBox.warning(self, "Error when starting render", "Invalid value for number of renders.")
-            return
-        
-        #add cameras
-        
-        #for now all cameras are linear
-        starting = [[0,0,0],[np.pi/2, 0 ,0]]
-        self.add_camera_poses_linear(starting, 5)  
-        
-
-
-        backend.render()
-    
+    def set_renders(self):
+        backend.set_renders( int(self.Number_of_renders_input_field.text()))  
 
 
 
