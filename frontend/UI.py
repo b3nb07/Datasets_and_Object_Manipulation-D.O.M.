@@ -146,8 +146,12 @@ class Widget(QtWidgets.QWidget):
         
 class Page1(Page):
     """
-        Page 1: Object manipulation page.
-        
+    Page 1: Objects
+    """
+    def __init__(self, parent=None):
+        """
+        Initialise "Page n"
+
         Args:
             Object_pos_title - QLabel : Title for object position
             XObj_pos, YObj_pos, ZObj_pos - QLabel: Text for the X Y Z of object
@@ -373,7 +377,6 @@ class Page1(Page):
         
     
     def Update_slider(self, slider, val):
-        """ """
         try:
             slider.setValue(int(round(float(val), 0)))
         except Exception as e:
@@ -853,9 +856,9 @@ class Page3(Page):
         self.Length_Button = QCheckBox("Length", self)
         self.Length_Button.setGeometry(150, 70, 65, 20)
 
-        # Third Section
-        self.Object_Coords_Label = QLabel(f"Object Coordinates", self)
-        self.Object_Coords_Label.setGeometry(10, 62, 100, 20)
+        #Third Section
+        self.Object_Coords_Label = QLabel(f"Object x Co-ords:", self)
+        self.Object_Coords_Label.setGeometry(275, 10, 100, 20)
 
         self.X_Button = QCheckBox("X", self)
         self.X_Button.setGeometry(215, 50, 30, 20)
@@ -904,12 +907,14 @@ class Page3(Page):
         
         self.RandomSettingSeed_Label = QLabel(f"Random Setting Seed", self)
         self.RandomSeed_Label = QLabel(f"<Random Seed>", self)
-        
+        self.RandomSeed_Label.setText(str(backend.get_config()["seed"]))
+
+
         #Third Section
         self.combo_box = QComboBox(self)
         Obj_list = ["Object 1", "Object 2", "Object 3"]
         self.combo_box.addItems(Obj_list)
-
+        
 
 
     def resizeEvent(self, event):
@@ -1185,89 +1190,8 @@ class Page4(Page):
         # Generate Button 
         self.GenerateRenders_Button.setGeometry(self.width()-self.GenerateRenders_Button.width(), 10, self.GenerateRenders_Button.width(), 50)
 
-
-    def calculate_position(self, angle, distance):
-        """"
-        calculate x/z based on y
-        caluclate y based on x
-        z is a gangsta
-        """
-
-
-        r = np.sin(angle[0]) * distance
-
-        x_position = r * np.sin( angle[2] )   
-        z_position = -1 * r * np.cos( angle[2] )
-
-        y_position = np.cos(angle[0]) * distance
-
-        return [x_position, z_position, y_position]
-
-
-
-    def add_camera_poses_linear(self, pivot, distance_from_pivot):
-        """"
-        #print(starting[0])
-        #working around 0 0 0 and pi/2 0 0  for now and distance of 5 
-        
-        """
-
-        number_of_renders = int(self.Number_of_renders_input_field.text())        
-
-        x_change_angle = -1 * np.deg2rad( int(self.X_Degree_input_field.text()) )
-        starting_x_angle = pivot[1][0]
-
-        z_change_angle = np.deg2rad( int(self.Z_Degree_input_field.text()) )
-        starting_z_angle = pivot[1][1]
-
-        y_change_angle = np.deg2rad( int(self.Y_Degree_input_field.text()) )
-        starting_y_angle = pivot[1][2]
-
-
-
-        current_x_angle = starting_x_angle
-        current_z_angle = starting_z_angle
-        current_y_angle = starting_y_angle
-
-        for i in range(number_of_renders):
-            #Y CHANGE
-            camera_rotation = [current_x_angle,current_z_angle,current_y_angle]
-            #calculate position based on angle
-
-            position = self.calculate_position(camera_rotation, distance_from_pivot)
-
-            backend.add_cam_pose([position, camera_rotation])
-            print([position, camera_rotation])
-            #increment
-
-
-            current_x_angle += x_change_angle
-            current_z_angle += z_change_angle
-            current_y_angle += y_change_angle
-    
-
-
-        
     def generate_render(self):
-        """
-
-
-        """
-        number_of_renders = int(self.Number_of_renders_input_field.text())
-        if number_of_renders <1:
-            QMessageBox.warning(self, "Error when starting render", "Invalid value for number of renders.")
-            return
-        
-        #add cameras
-        
-        #for now all cameras are linear
-        starting = [[0,0,0],[np.pi/2, 0 ,0]]
-        self.add_camera_poses_linear(starting, 5)  
-        
-
-
-        backend.render()
-    
+        backend.render()   
 
 
 
