@@ -265,14 +265,6 @@ class Backend():
         
 
         for i in range(config["renders"]):
-            if "angle" in randoms["environment"]:
-                current_x_angle += np.deg2rad( random.randint(0,359) )
-                current_z_angle += np.deg2rad( random.randint(0,359) )
-                current_y_angle += np.deg2rad( random.randint(0,359) )
-            else:
-                current_x_angle = starting_x_angle
-                current_z_angle = starting_z_angle
-                current_y_angle = starting_y_angle
             
             if "background" in randoms["environment"]:
                 self.set_bg_color( [ random.randint(1,255) , random.randint(1,255) , random.randint(1,255) ] )
@@ -280,6 +272,7 @@ class Backend():
                 pass
 
             camera_rotation = [current_x_angle,current_z_angle,current_y_angle]
+            position = self.calculate_position(camera_rotation, pivot_distance)
 
 
             if "x" in randoms["pivot"]:
@@ -290,10 +283,21 @@ class Backend():
             
             if "y" in randoms["pivot"]:
                position[2] += random.randint(0,10) 
-            
+
+            self.add_cam_pose([position, camera_rotation])
             
 
-            position = self.calculate_position(camera_rotation, pivot_distance)
+            if "angle" in randoms["environment"]:
+                current_x_angle += np.deg2rad( random.randint(0,359) )
+                current_z_angle += np.deg2rad( random.randint(0,359) )
+                current_y_angle += np.deg2rad( random.randint(0,359) )
+            else:
+                current_x_angle = starting_x_angle
+                current_z_angle = starting_z_angle
+                current_y_angle = starting_y_angle
+            
+
+            
 
             
            
