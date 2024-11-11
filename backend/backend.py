@@ -210,6 +210,7 @@ class Backend():
         angle_changes = config["render"]["change"]  """
 
         number_of_renders = config["renders"]
+        print("renders", number_of_renders)
         angle_changes = [10, 0, 0]
 
         pivot_point = config["pivot"]["point"]  
@@ -249,7 +250,7 @@ class Backend():
             current_z_angle += z_change_angle
             current_y_angle += y_change_angle
     
-    def add_camera_poses_random(self):
+    def add_camera_poses(self):
         randoms = config["random"]
 
         pivot_distance = config["pivot"]["dis"]
@@ -263,9 +264,9 @@ class Backend():
         current_z_angle = starting_z_angle
         current_y_angle = starting_y_angle
 
-        
+        number_of_renders = config["renders"]
 
-        for i in range(config["renders"]):
+        for i in range(number_of_renders):
             if "angle" in randoms["environment"]:
                 current_x_angle += np.deg2rad( random.randint(0,359) )
                 current_z_angle += np.deg2rad( random.randint(0,359) )
@@ -285,17 +286,32 @@ class Backend():
 
             if "x" in randoms["pivot"]:
                position[0] += random.randint(0,10)
+            else:
+                position[0] += pivot_point[0]
 
             if "z" in randoms["pivot"]:
-               position[1] += random.randint(0,10) 
+               position[1] += random.randint(0,10)
+            else:
+                position[1] += pivot_point[1]
             
             if "y" in randoms["pivot"]:
-               position[2] += random.randint(0,10) 
+               position[2] += random.randint(0,10)
+            else:
+                position[2] += pivot_point[2] 
             
             
 
             position = self.calculate_position(camera_rotation, pivot_distance)
+            self.add_cam_pose([position, camera_rotation])
 
+            if "angle" in randoms["environment"]:
+                current_x_angle += np.deg2rad( random.randint(0,359) )
+                current_z_angle += np.deg2rad( random.randint(0,359) )
+                current_y_angle += np.deg2rad( random.randint(0,359) )
+            else:
+                current_x_angle = starting_x_angle
+                current_z_angle = starting_z_angle
+                current_y_angle = starting_y_angle
             
            
 
@@ -318,10 +334,12 @@ class Backend():
 
     def populate_cameras(self):
         #VALIDATE ON FRONT END
-        if (config["random"]["pivot"] or config["random"]["environment"]):
+        """if (config["random"]["pivot"] or config["random"]["environment"]):
             self.add_camera_poses_random()
         else:
-            self.add_camera_poses_linear()  
+            self.add_camera_poses_linear()  """
+        
+        self.add_camera_poses()
 
 
 
