@@ -2,6 +2,7 @@
 
 # import blenderproc as bproc
 import numpy as np
+import random
 import json
 import os
 
@@ -39,6 +40,9 @@ class Backend():
             "point": [0, 0, 0],
             "dis": 0
         }
+
+        new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
+        self.set_seed(new_seed)
 
         if (json_filepath is not None):
             # load json objects into self
@@ -104,6 +108,9 @@ class Backend():
         
         :param dis: a float value determining the distance"""
         config["pivot"]["dis"] = dis
+
+    def set_seed(self,seed):
+        config["seed"] = seed
         
     def is_config_objects_empty(self):
         if config.get("objects") == None:
@@ -134,8 +141,86 @@ class Backend():
 
         config["background_color"] = color
 
+    def randomise_config():
+        pass
+
+    def calculate_position(self, angle, distance):
+        #calculate x/z based on y
+        #caluclate y based on x
+
+        r = np.sin(angle[0]) * distance
+
+        x_position = r * np.sin( angle[2] )   
+        z_position = -1 * r * np.cos( angle[2] )
+
+        y_position = np.cos(angle[0]) * distance
+
+        return [x_position, z_position, y_position]
+
+
+
+    def add_camera_poses_linear(self):
+        #print(starting[0])
+        #working around 0 0 0 and pi/2 0 0  for now and distance of 5 
+
+        config = self.get_config()
+
+        
+        """ number_of_renders = config["render"]["number"]
+        angle_changes = config["render"]["change"]  """
+        number_of_renders = 1
+        angle_changes = [10, 0, 0]
+
+        pivot_point = config["pivot"]["point"]  
+        pivot_distance = config["pivot"]["dis"]
+        
+
+        x_change_angle = -1 * np.deg2rad( angle_changes[0] )
+        starting_x_angle = np.pi / 2
+
+        z_change_angle = np.deg2rad( angle_changes[1] )
+        starting_z_angle = 0
+
+        y_change_angle = np.deg2rad( angle_changes[2] )
+        starting_y_angle = 0
+
+        current_x_angle = starting_x_angle
+        current_z_angle = starting_z_angle
+        current_y_angle = starting_y_angle
+
+        for i in range(number_of_renders):
+            #Y CHANGE
+            camera_rotation = [current_x_angle,current_z_angle,current_y_angle]
+            #calculate position based on angle
+
+            position = self.calculate_position(camera_rotation, pivot_distance)
+
+            position[0] += pivot_point[0]
+            position[1] += pivot_point[1]
+            position[2] += pivot_point[2]
+
+            self.add_cam_pose([position, camera_rotation])
+            print([position, camera_rotation])
+            #increment
+
+
+            current_x_angle += x_change_angle
+            current_z_angle += z_change_angle
+            current_y_angle += y_change_angle
+    
+
+
+    def populate_cameras(self):
+        #VALIDATE ON FRONT END
+        self.add_camera_poses_linear()  
+
+
+
     def render(self):
         """Renders the scene and saves to file in the output folder."""
+        self.randomise_config()
+        self.populate_cameras()
+        
 
         with open("backend\\temp_export.json", "w") as export_file:
             json.dump(config, export_file)
