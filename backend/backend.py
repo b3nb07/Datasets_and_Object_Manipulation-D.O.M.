@@ -44,6 +44,7 @@ class Backend():
             "pivot": [],
             "environment": []
         }
+        config["renders"] = True
 
         new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
         self.set_seed(new_seed)
