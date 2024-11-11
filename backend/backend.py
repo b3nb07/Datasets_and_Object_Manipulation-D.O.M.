@@ -249,7 +249,7 @@ class Backend():
             current_z_angle += z_change_angle
             current_y_angle += y_change_angle
     
-    def add_camera_poses_random():
+    def add_camera_poses_random(self):
         randoms = config["random"]
 
         pivot_distance = config["pivot"]["dis"]
