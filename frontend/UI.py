@@ -16,14 +16,35 @@ path.append("backend")
 from backend import Backend
 import numpy as np
 
+""""
+    Comment info - 
+    Comment at start of class with :""" """" to signify the args,methods within class
+    Add comment at start of methods describing their purpose
+    Add green comments during parts of code you need to explain
+
+"""
+
 
 
 # Initialise backend
 backend = Backend()
 
+
+
 class ComboBoxState(QObject):
-    """
+
+    """"
     ComboBoxState is a child of QObject, used to handle and maintain the shared box states
+    Args:
+
+
+    Methods:
+        update_items
+        add_item
+        remove_item
+        Update_selected
+
+
     """
     # Defines basic signals for items and selection updates
     items_updated = pyqtSignal(list) # signal to send when items are updated
@@ -40,6 +61,10 @@ class ComboBoxState(QObject):
 
     def add_item(self, item):
         self.items.append(item)
+        self.items_updated.emit(self.items)
+
+    def remove_item(self, item):
+        self.items.remove(item)
         self.items_updated.emit(self.items)
 
     def remove_item(self, item):
@@ -89,7 +114,7 @@ class TabWizard(QTabWidget):
 
 class Widget(QtWidgets.QWidget):
     """
-    Clas to Add all pages into a tabwizard
+    Class to Add all pages into a tabwizard
     """
     def __init__(self):
         """
@@ -132,43 +157,40 @@ class Page1(Page):
         Initialise "Page n"
 
         Args:
-            parent
-            n
-            Object_pos_title
-            XObj_pos
-            XObj_pos_input_field
-            X_button_minus
-            X_button_plus
-
-            YObj_pos
-            YObj_pos_input_field
-            Y_button_minus
-            Y_button_plus
-
-            ZObj_pos
-            ZObj_pos_input_field
-            Z_button_minus
-            Z_button_plus
-
-            Object_pos_title
-            Width_Obj_pos
-            Width_Obj_pos_input_field
-            W_slider
-
-            Height_Obj_pos
-            Height_Obj_pos_input_field
-            H_slider
-
-            Length_Obj_pos
-            Length_Obj_pos_input_field
-            L_slider
-
-            combo_box
-            Obj_list
-
+            Object_pos_title - QLabel : Title for object position
+            XObj_pos, YObj_pos, ZObj_pos - QLabel: Text for the X Y Z of object
+            XObj_pos_input_field, YObj_pos_input_field ZObj_pos_input_field - QLineEdit: Input fields for each axis position
+            X_button_minus X_button_plus Y_button_minus Y_button_plus, Z_button_minus, Z_button_plus - QPushButton: Buttons for incrementing or decrementing position values
+            Width_Obj_pos, Height_Obj_pos, Length_Obj_pos - QLabel - Text for object scale dimensions
+            Width_Obj_pos_input_field Height_Obj_pos_input_field Length_Obj_pos_input_field - QLineEdit: Input fields for object scale
+            W_slider H_slider L_slider - QSlider: Sliders to adjust scale
+            combo_box - QComboBox: Dropdown menu for object selection
+        
         Methods:
-
+            __init__: Initializes the page with necessary UI components and connections.
+            update_combo_box_items: Updates items in the combo box.
+            on_object_selected: Changes displayed attributes when a new object is selected.
+            Update_slider: Syncs text input to slider position.
+            update_object_pos: Updates object position based on input fields.
+            update_object_scale: Updates object scale dynamically.
+            update_object_rotation: Adjusts object rotation as per input fields.
+            Plus_click: Increments input field by 1.
+            Minus_click: Decrements input field by 1.
+            Slider_Update: Sets input field to slider value.
+            update_label: Updates labels for position, scale, and rotation sections.
+            resizeEvent: Adjusts component positions on window resize.
+        
         """
+
+    def __init__(self, parent=None):
+        """
+        Initialize Page 1:Object Manipulation UI components and buttons for object interaction
+        
+        Args:
+            parent (QWidget, optional): Parent widget for this page.
+        """
+
+        
         super().__init__(parent)
 
         self.Object_pos_title = QLabel(f"Object 1 Co-ords", self)
@@ -448,45 +470,39 @@ class Page1(Page):
 
 
     def resizeEvent(self, event):
+    
         """
-        Handles window resize event
-        #each page needs it own re-size event whoda thunk that
+        Handles window resize event to dynamically change styling
 
-        #On re sizing all elements in the program should be re-adjusted to fit
 
         Args:
-            event # re-size
-            Object_pos_title # Label for object position
-            XObj_pos # Label for x position
-            XObj_pos_input_field # Input field for x position
-            X_button_minus # Button addition for x position
-            X_button_plus # Button sdubtraction for x position
-
-            YObj_pos # Label for y position
-            YObj_pos_input_field # Input field for y position
-            Y_button_minus # Button addition for y position
-            Y_button_plus # Button sdubtraction for y position
-
-            ZObj_pos # Label for z position
-            ZObj_pos_input_field # Input field for z position
-            Z_button_minus # Button addition for z position
-            Z_button_plus # Button sdubtraction for z position
-
-            Object_scale_title # Label for object position
-            Width_Obj_pos  # Label for width scale
-            Width_Obj_pos_input_field # Input field for width scale
-            W_slider # Slider for width scale
-
-            Height_Obj_pos # Label for Height scale
-            Height_Obj_pos_input_field # Input field for Height scale
-            H_slider # Slider for Height scale
-
-            Length_Obj_pos # Label for Length scale
-            Length_Obj_pos_input_field # Input field for Length scale
-            L_slider # Slider for Length scale
-
-            combo_box # Dropdown menu for Object select
-        """
+            - Object Position:
+                - Object_pos_title: Label for object position.
+                - XObj_pos, YObj_pos, ZObj_pos: Labels for X Y Z positions
+                - XObj_pos_input_field, YObj_pos_input_field, ZObj_pos_input_field - Input for X Y Z positions.
+                - X_button_minus/plus, Y_button_minus/plus, Z_button_minus/plus - Buttons to increase/decrease X Y Z positions.
+            
+            - Object Scale:
+                - Object_scale_title: Label for object scale.
+                - Width_Obj_pos, Height_Obj_pos, Length_Obj_pos: Labels for width, 
+                height, and length scales.
+                - Width_Obj_pos_input_field, Height_Obj_pos_input_field, 
+                Length_Obj_pos_input_field: Input fields for width, height, 
+                length scales.
+                - W_slider, H_slider, L_slider: Sliders for width, height, and length.
+            
+            - Object Rotation:
+                - Object_rotation_title: Label for object rotation.
+                - X_Rotation_Label, Y_Rotation_Label, Z_Rotation_Label: Labels for 
+                rotation on X, Y, Z axes.
+                - X_Rotation_input_field, Y_Rotation_input_field, Z_Rotation_input_field:
+                Input fields for rotation on X, Y, Z axes.
+                - X_Rotation, Y_Rotation, Z_Rotation: Sliders for rotation on X, Y, Z axes.
+            
+            - combo_box: Dropdown menu for object selection, anchored to the top-right.
+        
+          """
+    
         self.Object_pos_title.setGeometry(int(self.width()*0.01), int(self.height()*0.01), 200, 30)
 
         self.XObj_pos.setGeometry(int(self.width()*0.01), int(self.height()*0.25),15, 30)
@@ -547,38 +563,10 @@ class Page2(Page):
     """
     Page 2: Pivot Point
     """
+
     def __init__(self, parent=None):
         """
         Initialise "Page n"
-        Handles pivot point controls
-
-        Args:
-        parent
-        Pivot_Point_subtitle
-        XPivot_pos
-        XPivot_point_input_field
-        XPivot_button_minus
-        XPivot_button_plus
-        YPivot_pos
-        YPivot_point_input_field
-        YPivot_button_minus
-        YPivot_button_plus
-        ZPivot_pos
-        ZPivot_point_input_field
-        ZPivot_button_minus
-        ZPivot_button_plus
-        Angle_Change_title
-        Degrees_Pivot
-        Degrees_Pivot_input_field
-        Degrees_Slider
-        Num_Rotations
-        Num_Rotations_input_field
-        Num_Rotations_minus
-        Num_rotations_plus
-        combo_box
-        Pivot_list
-
-        Methods:
 
 
         """
@@ -739,48 +727,43 @@ class Page2(Page):
         field.setText(str(val))
 
     def resizeEvent(self, event):
-
-
-        """""
-        handles Resizing of window 
+            
+        """
+        Handles window resize event
 
         Args:
-
-        Pivot_Point_subtitle
-        
-        XPivot_pos 
-        XPivot_point_input_field
-        XPivot_button_minus
-        XPivot_button_plus
-
-        YPivot_pos 
-        YPivot_point_input_field
-        YPivot_button_minus
-        YPivot_button_plus
-        
-        XPivot_pos 
-        XPivot_point_input_field
-        XPivot_button_minus
-        XPivot_button_plus
+                -Pivot Position
+                -   Pivot_point_subtitle
+                -   XPivot_pos
+                -   XPivot
+                -   XPivot_button_minus
+                -   XPivot_button_plus
                 
+                -   YPivot_pos
+                -   YPivot_point_input_field
+                -   YPivot_button_minus
+                -   YPivot_button_plus
+            
 
-        ZPivot_pos 
-        ZPivot_point_input_field
-        ZPivot_button_minus
-        ZPivot_button_plus
-        
-        Angle_Change_title
+                -   ZPivot_pos
+                -   ZPivot_point_input_field
+                -   ZPivot_button_minus
+                -   ZPivot_button_plus
 
-        Degrees_Pivot
-        Degrees_Pivot_input_field
-        Degrees_Slider
-        Num_Rotations
-        Num_Rotations_input_field
-        Num_Rotations_minus
-        Num_Rotations_plus
+            -Degree of Angle Change
+                -   Angle_change_title
+                -   Degrees_pivot
+                -   Degrees_pivot_input_field
+                -   Degrees_Slider
 
+            -Number of rotaions
+                -   Num_Rotations
+                -   Num_Rotations_input_field
+                -   Num_Rotations_minus
+                -   Num_Rotations_plus
+            
+        """
 
-        """""
         
         # Title Position
         self.Pivot_Point_Check.setGeometry(int(self.width() * 0.01), int(self.height() * 0.00), 120, 30)
@@ -820,63 +803,62 @@ class Page3(Page):
     Page 3: Generate Random
     """
     def __init__(self, parent=None):
+
         """
         Initialise "Page n"
-
-        Args:
-            parent
-            Set_All_Random_Button
-            ObjectDimensions_Label
-            Width_Button
-            Height_Button
-            Length
-            combo_box
-            Obj_list
-            X_Button
-            Y_Button
-            Z
-            PivotPoint_Label
-            X_Button
-            Y_Button
-            Z_Button
-            Reflect_Label
-            Reflect_Button
-            AutoRotationAngle_Label
-            AutoRotationAngle_Button
-            ImportObjects_Label
-            ImportObjects_Button
-            ImportEnvironment_Label
-            ImportEnvironment_Button
-            RandomSettingSeed_Label
-            RandomSeed_Label
+        
+        This page allows the user to generate random values of properties for objects, including:
+        dimensions, coordinates, pivot point coordinates, reflection, rotation angles,
             
+        Args:
+            Set_All_Random_Button - QCheckBox -  Checkbox for setting ALL properties to random values
+            ObjectDimensions_Label - QLabel -  text for object dimensions
+            Width_Button, Height_Button, Length - QCheckBox - Checkboxes for width height and length
+            Object_Coords_Label - QLabel: text for object coordinates
+            X_Button, Y_Button, Z_Button - QCheckBox -  Checkboxes for Object X Y Z coordinates
+            PivotPoint_Label - QLabel -  text for pivot point coordinates
+            X_Button2, Y_Button2, Z_Button2 - QCheckBox: Checkboxes for pivot point coordinates
+            Reflect_Label - QLabel: Text for reflection option
+            Reflect_Button - QCheckBox: Checkbox for randomizing reflection
+            AutoRotationAngle_Label - QLabel -  Text for auto-rotation angle option
+            AutoRotationAngle_Button - QCheckBox -  Checkbox for enabling/disabling auto-rotation
+            ImportObjects_Label - QLabel -  text for importing objects option
+            ImportObjects_Button - QCheckBox -  Checkbox for importing objects
+            ImportEnvironment_Label - QLabel -  text for importing environment option
+            ImportEnvironment_Button - QCheckBox -  Checkbox for importing environment
+            RandomSettingSeed_Label - QLabel - text for random setting seed
+            RandomSeed_Label - QLabel - text displaying the random seed
+            combo_box - QComboBox -  Dropdown for selecting objects
+
         Methods:
+            __init__(parent=None) - Initializes the page, setting up all UI components.                
+            resizeEvent(event) -  Adjusts component positions on window resize.
+            decrease_count() -  Decreases the number of renders.
+            set_all_random(state) -  Sets all randomization checkboxes based on the state.
 
         """
 
         super().__init__(parent)
 
-        #First Section
+        # First Section
         self.Set_All_Random_Button = QCheckBox("Set all Random", self)
         self.Set_All_Random_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.Set_All_Random_Button.setGeometry(0, 0, 125, 30)
         self.Set_All_Random_Button.stateChanged.connect(self.set_all_random)
-        
 
-        #Second Section
-        self.ObjectDimensions_Label = QLabel(f"Object x Dimension", self)
+
+        # Second Section
+        self.ObjectDimensions_Label = QLabel(f"Object Dimensions", self)
         self.ObjectDimensions_Label.setGeometry(150, 10, 125, 20)
         
-
-        self.Width_Button = QCheckBox("Width ", self)
+        self.Width_Button = QCheckBox("Width", self)
         self.Width_Button.setGeometry(150, 30, 65, 20)
-        
 
         self.Height_Button = QCheckBox("Height", self)
         self.Height_Button.setGeometry(150, 50, 65, 20)
 
-        self.Length = QCheckBox("Length", self)
-        self.Length.setGeometry(150, 70, 65, 20)
+        self.Length_Button = QCheckBox("Length", self)
+        self.Length_Button.setGeometry(150, 70, 65, 20)
 
         #Third Section
         self.Object_Coords_Label = QLabel(f"Object x Co-ords:", self)
@@ -925,12 +907,6 @@ class Page3(Page):
         self.AutoRotationAngle_Button.setGeometry(560, 30, 150, 20)
         self.AutoRotationAngle_Button.stateChanged.connect(backend.toggle_random_environment_angle)
 
-        self.ImportObjects_Label = QLabel(f"Import Objects:", self)
-        self.ImportObjects_Label.setGeometry(450, 50, 150, 20)
-
-        self.ImportObjects_Button = QCheckBox("", self)
-        self.ImportObjects_Button.setGeometry(560, 50, 150, 20)
-
         self.ImportEnvironment_Label = QLabel(f"Import Environment:", self)
         self.ImportEnvironment_Label.setGeometry(450, 70, 150, 20)
 
@@ -953,11 +929,52 @@ class Page3(Page):
 
 
     def resizeEvent(self, event):
+
+
+        """
+        Handles window resize event
+
+        Args:
+            - Random Object Dimensions
+                -   Object_Dimensions_Label
+                -   Width_button
+                -   Height_button
+                -   Length
+            - Random Object Co-ords
+                -   X_button
+                -   Y_button
+                -   Z_button
+
+            - Random Pivot Point Co-ords
+                -   PivotPoint_Label
+                -   X_Button2
+                -   Y_Button2
+                -   Z_Button2
+
+
+            - Random Properties
+                -   Reflect_Label
+                -   Reflect_Button
+                -?
+                -?
+
+            - Titles and Text
+                -   RandomSettingSeed_Label
+                -   RandomSeed_Label
+                -   
+    
+
+
+            """
+
+
+
         window_width = self.width()
         window_height = self.height()
         
         # First Section
         self.Set_All_Random_Button.setGeometry(int(window_width * 0), int(window_height * 0.02), int(window_width * 0.12), 20)
+        
 
         # Second Section
         self.ObjectDimensions_Label.setGeometry(int(window_width * 0.15), int(window_height * 0.02), int(window_width * 0.2), 20)
@@ -965,7 +982,7 @@ class Page3(Page):
 
         self.Width_Button.setGeometry(int(window_width * 0.15), int(window_height * 0.3), int(window_width * 0.15), 20)
         self.Height_Button.setGeometry(int(window_width * 0.22), int(window_height * 0.3), int(window_width * 0.15), 20)
-        self.Length.setGeometry(int(window_width * 0.29), int(window_height * 0.3), int(window_width * 0.15), 20)
+        self.Length_Button.setGeometry(int(window_width * 0.29), int(window_height * 0.3), int(window_width * 0.15), 20)
 
 
         # Third Section
@@ -986,9 +1003,6 @@ class Page3(Page):
 
         self.AutoRotationAngle_Label.setGeometry(int(window_width * 0.6), int(window_height * 0.3), int(window_width * 0.2), 20)
         self.AutoRotationAngle_Button.setGeometry(int(window_width * 0.73), int(window_height * 0.32), 30, 20)
-
-        self.ImportObjects_Label.setGeometry(int(window_width * 0.6), int(window_height * 0.5), int(window_width * 0.2), 20)
-        self.ImportObjects_Button.setGeometry(int(window_width * 0.73), int(window_height * 0.52), 30, 20)
 
         self.ImportEnvironment_Label.setGeometry(int(window_width * 0.6), int(window_height * 0.7), int(window_width * 0.2), 20)
         self.ImportEnvironment_Button.setGeometry(int(window_width * 0.73), int(window_height * 0.72), 30, 20)
@@ -1011,7 +1025,7 @@ class Page3(Page):
         check_state = (state == Qt.Checked)
         self.Width_Button.setChecked(check_state)
         self.Height_Button.setChecked(check_state)
-        self.Length.setChecked(check_state)
+        self.Length_Button.setChecked(check_state)
         self.X_Button.setChecked(check_state)
         self.Y_Button.setChecked(check_state)
         self.Z_Button.setChecked(check_state)
@@ -1020,13 +1034,35 @@ class Page3(Page):
         self.Z_Button2.setChecked(check_state)
         self.Reflect_Button.setChecked(check_state)
         self.AutoRotationAngle_Button.setChecked(check_state)
-        self.ImportObjects_Button.setChecked(check_state)
         self.ImportEnvironment_Button.setChecked(check_state)
+
+
 
 class Page4(Page):
     """
     Page 4: Render
-    """
+        
+        Generate 3D Renders
+
+        Args:
+            GenerateRenders_Button - QPushButton - Button for Generating Renders
+            Number_of_renders_title - QLabel - Title for number of renders
+            Number_of_renders_input_field - QLineEdit - Field to input number of renders
+            Number_of_renders_minus - QPushButton -  Button to decrease number of renders
+            Number_of_renders_plus - QPushButton - Button to increase number of renders
+            Degree_Change_title - QLabel: Title for degrees of change section
+            X_Degree_Label, Y_Degree_Label, Z_Degree_Label - QLabel -  Text for angles of rotation 
+            X_Degree_input_field, Y_Degree_input_field, Z_Degree_input_field - QLineEdit - Fields to input degree values
+            X_Degree_slider, Y_Degree_slider, Z_Degree_slider - QSlider - Sliders to adjust rotation angles
+            
+        Methods:
+            __init__(parent=None)
+            increase_count() - Increases number of renders for buttons
+            decrease_count() - Decreases number of renders for buttons
+            update_degree_input(slider, input_field) - Updates degree input
+            resizeEvent(event) - Dynamically adjusts the UI components' positions and sizes during window resize
+        """
+
     def __init__(self, parent=None):
         """
         Initialize Page 4
@@ -1109,6 +1145,34 @@ class Page4(Page):
 
     def resizeEvent(self, event):
 
+        """
+        Handles window resize event
+
+        Args:
+            - Number of renders
+                -   
+                -   
+                -   
+                -   
+            - Degree Change
+                -   
+                -   
+                -   
+                -  
+                -
+                -
+                -
+
+            - Generate Button
+                -   
+                -   
+                -   
+    
+
+
+            """
+
+
         # Number of Renders Title Position
         self.Number_of_renders_title.setGeometry(int(self.width() * 0.025), int(self.height() * 0.01), 150, 20)
 
@@ -1138,11 +1202,75 @@ class Page4(Page):
         # Generate Button 
         self.GenerateRenders_Button.setGeometry(self.width()-self.GenerateRenders_Button.width(), 10, self.GenerateRenders_Button.width(), 50)
 
+
+    def calculate_position(self, angle, distance):
+        """"
+        calculate x/z based on y
+        caluclate y based on x
+        z is a gangsta
+        """
+
+
+        r = np.sin(angle[0]) * distance
+
+        x_position = r * np.sin( angle[2] )   
+        z_position = -1 * r * np.cos( angle[2] )
+
+        y_position = np.cos(angle[0]) * distance
+
+        return [x_position, z_position, y_position]
+
+
+
+    def add_camera_poses_linear(self, pivot, distance_from_pivot):
+        """"
+        #print(starting[0])
+        #working around 0 0 0 and pi/2 0 0  for now and distance of 5 
+        
+        """
+
+        number_of_renders = int(self.Number_of_renders_input_field.text())        
+
+        x_change_angle = -1 * np.deg2rad( int(self.X_Degree_input_field.text()) )
+        starting_x_angle = pivot[1][0]
+
+        z_change_angle = np.deg2rad( int(self.Z_Degree_input_field.text()) )
+        starting_z_angle = pivot[1][1]
+
+        y_change_angle = np.deg2rad( int(self.Y_Degree_input_field.text()) )
+        starting_y_angle = pivot[1][2]
+
+
+
+        current_x_angle = starting_x_angle
+        current_z_angle = starting_z_angle
+        current_y_angle = starting_y_angle
+
+        for i in range(number_of_renders):
+            #Y CHANGE
+            camera_rotation = [current_x_angle,current_z_angle,current_y_angle]
+            #calculate position based on angle
+
+            position = self.calculate_position(camera_rotation, distance_from_pivot)
+
+            backend.add_cam_pose([position, camera_rotation])
+            print([position, camera_rotation])
+            #increment
+
+
+            current_x_angle += x_change_angle
+            current_z_angle += z_change_angle
+            current_y_angle += y_change_angle
+    
+
+
+        
     def generate_render(self):
         backend.render() 
 
     def set_renders(self):
         backend.set_renders( int(self.Number_of_renders_input_field.text()))  
+
 
 
 
