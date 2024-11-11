@@ -1,3 +1,4 @@
+import blenderproc as bproc
 """The main backend file which deals with rendering."""
 
 # import blenderproc as bproc
@@ -499,3 +500,4 @@ class Backend():
                 self.light.set_color(color)
 
             config["light_sources"][self.light_pos]["color"] = color
+Backend("C:\\Users\\dalek\\OneDrive\\Desktop\\School Work\\SE\\backend\\temp_export.json")._render()
