@@ -40,6 +40,10 @@ class Backend():
             "point": [0, 0, 0],
             "dis": 0
         }
+        config["random"] = {
+            "pivot": [],
+            "environment": []
+        }
 
         new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
         self.set_seed(new_seed)
@@ -111,6 +115,45 @@ class Backend():
 
     def set_seed(self,seed):
         config["seed"] = seed
+
+    def set_renders(self, n):
+        config["renders"] = n
+
+    def toggle_random_pivot_x(self):
+        if "x" in config["random"]["pivot"]:
+            config["random"]["pivot"].remove("x")
+        else:
+            config["random"]["pivot"].append("x")
+
+    def toggle_random_pivot_z(self):
+        if "z" in config["random"]["pivot"]:
+            config["random"]["pivot"].remove("z")
+        else:
+            config["random"]["pivot"].append("z")
+
+    def toggle_random_pivot_y(self):
+        if "y" in config["random"]["pivot"]:
+            config["random"]["pivot"].remove("y")
+        else:
+            config["random"]["pivot"].append("y")
+
+    def toggle_random_environment_reflect(self):
+        if "reflect" in config["random"]["environment"]:
+            config["random"]["environment"].remove("reflect")
+        else:
+            config["random"]["environment"].append("reflect")
+
+    def toggle_random_environment_angle(self):
+        if "angle" in config["random"]["environment"]:
+            config["random"]["environment"].remove("angle")
+        else:
+            config["random"]["environment"].append("angle")
+
+    def toggle_random_environment_background(self):
+        if "background" in config["random"]["environment"]:
+            config["random"]["environment"].remove("background")
+        else:
+            config["random"]["environment"].append("background")
         
     def is_config_objects_empty(self):
         if config.get("objects") == None:
@@ -141,8 +184,6 @@ class Backend():
 
         config["background_color"] = color
 
-    def randomise_config():
-        pass
 
     def calculate_position(self, angle, distance):
         #calculate x/z based on y
@@ -163,12 +204,11 @@ class Backend():
         #print(starting[0])
         #working around 0 0 0 and pi/2 0 0  for now and distance of 5 
 
-        config = self.get_config()
-
         
         """ number_of_renders = config["render"]["number"]
         angle_changes = config["render"]["change"]  """
-        number_of_renders = 1
+
+        number_of_renders = config["renders"]
         angle_changes = [10, 0, 0]
 
         pivot_point = config["pivot"]["point"]  
@@ -208,11 +248,79 @@ class Backend():
             current_z_angle += z_change_angle
             current_y_angle += y_change_angle
     
+    def add_camera_poses_random():
+        randoms = config["random"]
+
+        pivot_distance = config["pivot"]["dis"]
+        pivot_point = config["pivot"]["point"]
+
+        starting_x_angle = np.pi / 2
+        starting_z_angle = 0
+        starting_y_angle = 0
+
+        current_x_angle = starting_x_angle
+        current_z_angle = starting_z_angle
+        current_y_angle = starting_y_angle
+
+        
+
+        for i in range(config["renders"]):
+            if "angle" in randoms["environment"]:
+                current_x_angle += np.deg2rad( random.randint(0,359) )
+                current_z_angle += np.deg2rad( random.randint(0,359) )
+                current_y_angle += np.deg2rad( random.randint(0,359) )
+            else:
+                current_x_angle = starting_x_angle
+                current_z_angle = starting_z_angle
+                current_y_angle = starting_y_angle
+            
+            if "background" in randoms["environment"]:
+                self.set_bg_color( [ random.randint(1,255) , random.randint(1,255) , random.randint(1,255) ] )
+            else:
+                pass
+
+            camera_rotation = [current_x_angle,current_z_angle,current_y_angle]
+
+
+            if "x" in randoms["pivot"]:
+               position[0] += random.randint(0,10)
+
+            if "z" in randoms["pivot"]:
+               position[1] += random.randint(0,10) 
+            
+            if "y" in randoms["pivot"]:
+               position[2] += random.randint(0,10) 
+            
+            
+
+            position = self.calculate_position(camera_rotation, pivot_distance)
+
+            
+           
+
+        
+            
+    """y_change_random_deg = random.randint(0,360)
+                y_change_random = np.deg2rad(y_change_random_deg)
+
+                current_y_angle += y_change_random"""
+    """
+        x_change_angle = -1 * np.deg2rad( angle_changes[0] )
+        starting_x_angle = np.pi / 2
+
+        z_change_angle = np.deg2rad( angle_changes[1] )
+        starting_z_angle = 0
+
+        y_change_angle = np.deg2rad( angle_changes[2] )
+        starting_y_angle = 0"""
 
 
     def populate_cameras(self):
         #VALIDATE ON FRONT END
-        self.add_camera_poses_linear()  
+        if (config["random"]["pivot"] or config["random"]["environment"]):
+            self.add_camera_poses_random()
+        else:
+            self.add_camera_poses_linear()  
 
 
 
