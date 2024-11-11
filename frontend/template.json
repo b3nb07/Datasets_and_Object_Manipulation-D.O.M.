@@ -23,11 +23,16 @@
     "random": [
       {
         "pivot": ["x","z","y"], 
-        "environment": ["reflect","angle","background"]
+        "environment": ["angle","background"]
+      }
+    ],
+    "render": [
+      {
+        "renders": 1,
+        "degree": [1,1,1]
       }
     ],
     "render_res": [1920, 1080],
     "background_color": [0,0,0],
-    "seed": 0,
-    "renders": 1
+    "seed": 0
 }

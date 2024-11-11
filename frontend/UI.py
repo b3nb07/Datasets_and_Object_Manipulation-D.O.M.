@@ -892,13 +892,6 @@ class Page3(Page):
         self.Z_Button2.stateChanged.connect(backend.toggle_random_pivot_z)
 
         #Fourth Section
-        self.Reflect_Label = QLabel(f"Reflect:", self)
-        self.Reflect_Label.setGeometry(450, 10, 150, 20)
-
-        self.Reflect_Button = QCheckBox("", self)
-        self.Reflect_Button.setGeometry(560, 10, 150, 20)
-        self.Reflect_Button.stateChanged.connect(backend.toggle_random_environment_reflect)
-
         self.AutoRotationAngle_Label = QLabel(f"Auto Rotation Angle:", self)
         self.AutoRotationAngle_Label.setGeometry(450, 30, 150, 20)
         
@@ -998,8 +991,6 @@ class Page3(Page):
         self.Z_Button2.setGeometry(int(window_width * 0.52), int(window_height * 0.3), 30, 20)
         
         # Fourth Section
-        self.Reflect_Label.setGeometry(int(window_width * 0.6), int(window_height * 0.1), int(window_width * 0.2), 20)
-        self.Reflect_Button.setGeometry(int(window_width * 0.73), int(window_height * 0.12), 30, 20)
 
         self.AutoRotationAngle_Label.setGeometry(int(window_width * 0.6), int(window_height * 0.3), int(window_width * 0.2), 20)
         self.AutoRotationAngle_Button.setGeometry(int(window_width * 0.73), int(window_height * 0.32), 30, 20)
@@ -1011,13 +1002,6 @@ class Page3(Page):
         x = max(self.RandomSeed_Label.width(), 125)  # Minimum width for RandomSettingSeed_Label
         self.RandomSettingSeed_Label.setGeometry(window_width - x - 10, int(window_height * 0.02), x, 20)
         self.RandomSeed_Label.setGeometry(window_width - self.RandomSeed_Label.width() - 10, int(window_height * 0.2), self.RandomSeed_Label.width(), 20)
-    
-
-
-    def decrease_count(self):
-        number_of_renders_value = int(self.Number_of_renders_input_field.text())
-        if number_of_renders_value > 1:  # Prevent negative values if needed
-                self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
 
 
     def set_all_random(self, state):
@@ -1097,11 +1081,13 @@ class Page4(Page):
         self.X_Degree_Label = QLabel("X:", self)
         self.X_Degree_input_field = QLineEdit(parent=self)
         self.X_Degree_input_field.setText("1")
+        self.X_Degree_input_field.textChanged.connect(self.set_angles)
         self.X_Degree_slider = QtWidgets.QSlider(self)
         self.X_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
         self.X_Degree_slider.setMinimum(1) 
         self.X_Degree_slider.setMaximum(360) 
         self.X_Degree_slider.setTickPosition(QSlider.TicksBelow)
+        
 
 
         # Y Degree
@@ -1109,6 +1095,7 @@ class Page4(Page):
         self.Y_Degree_input_field = QLineEdit(parent=self)
         self.Y_Degree_slider = QtWidgets.QSlider(self)
         self.Y_Degree_input_field.setText("1")
+        self.Y_Degree_input_field.textChanged.connect(self.set_angles)
         self.Y_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
         self.Y_Degree_slider.setMinimum(1)
         self.Y_Degree_slider.setMaximum(360)
@@ -1119,6 +1106,7 @@ class Page4(Page):
         self.Z_Degree_Label = QLabel("Z:", self)
         self.Z_Degree_input_field = QLineEdit(parent=self)
         self.Z_Degree_input_field.setText("1")
+        self.Z_Degree_input_field.textChanged.connect(self.set_angles)
         self.Z_Degree_slider = QtWidgets.QSlider(self)
         self.Z_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
         self.Z_Degree_slider.setMinimum(1)
@@ -1202,74 +1190,23 @@ class Page4(Page):
         # Generate Button 
         self.GenerateRenders_Button.setGeometry(self.width()-self.GenerateRenders_Button.width(), 10, self.GenerateRenders_Button.width(), 50)
 
-
-    def calculate_position(self, angle, distance):
-        """"
-        calculate x/z based on y
-        caluclate y based on x
-        z is a gangsta
-        """
-
-
-        r = np.sin(angle[0]) * distance
-
-        x_position = r * np.sin( angle[2] )   
-        z_position = -1 * r * np.cos( angle[2] )
-
-        y_position = np.cos(angle[0]) * distance
-
-        return [x_position, z_position, y_position]
-
-
-
-    def add_camera_poses_linear(self, pivot, distance_from_pivot):
-        """"
-        #print(starting[0])
-        #working around 0 0 0 and pi/2 0 0  for now and distance of 5 
-        
-        """
-
-        number_of_renders = int(self.Number_of_renders_input_field.text())        
-
-        x_change_angle = -1 * np.deg2rad( int(self.X_Degree_input_field.text()) )
-        starting_x_angle = pivot[1][0]
-
-        z_change_angle = np.deg2rad( int(self.Z_Degree_input_field.text()) )
-        starting_z_angle = pivot[1][1]
-
-        y_change_angle = np.deg2rad( int(self.Y_Degree_input_field.text()) )
-        starting_y_angle = pivot[1][2]
-
-
-
-        current_x_angle = starting_x_angle
-        current_z_angle = starting_z_angle
-        current_y_angle = starting_y_angle
-
-        for i in range(number_of_renders):
-            #Y CHANGE
-            camera_rotation = [current_x_angle,current_z_angle,current_y_angle]
-            #calculate position based on angle
-
-            position = self.calculate_position(camera_rotation, distance_from_pivot)
-
-            backend.add_cam_pose([position, camera_rotation])
-            print([position, camera_rotation])
-            #increment
-
-
-            current_x_angle += x_change_angle
-            current_z_angle += z_change_angle
-            current_y_angle += y_change_angle
     
-
-
         
     def generate_render(self):
         backend.render() 
 
     def set_renders(self):
-        backend.set_renders( int(self.Number_of_renders_input_field.text()))  
+        try: 
+            backend.set_renders( int(self.Number_of_renders_input_field.text()))  
+        except:
+            QMessageBox.warning(self, "Error Updating amount of renders", "You entered an invalid input.") 
+    
+    def set_angles(self):
+        try: 
+            backend.set_angles( [int(self.X_Degree_input_field.text()), int(self.Z_Degree_input_field.text()), int(self.Y_Degree_input_field.text())] )
+        except:
+            QMessageBox.warning(self, "Error Updating angle change", "You entered an invalid input.") 
+        
 
 
 
