@@ -28,7 +28,6 @@
       ],
     "random_objects":[ {
         "pos": ["x", "y", "z"], 
-        "rot": ["x", "y", "z"], 
         "sca": ["width", "height", "length"]
     }
       ],

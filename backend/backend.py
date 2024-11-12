@@ -43,8 +43,12 @@ class Backend():
         config["random"] = {
             "pivot": [],
             "environment": [],
-            "object":[]
         }
+        config["random_objects"] = [{
+            "pos": [], 
+            "sca": [],
+        
+        }]
         config["render"] = {
             "renders": 1,
             "degree": [1,1,1]
@@ -78,6 +82,7 @@ class Backend():
                         o = self.RenderObject(filepath = obj["filename"])
                     else:
                         o = self.RenderObject(primative = obj["primative"])
+                
 
                     o.set_loc(obj["pos"])
                     o.set_rotation(obj["rot"])
@@ -97,6 +102,9 @@ class Backend():
 
             if ("random" in temp):
                 config["random"] = temp["random"].copy()
+            
+            if ("random_objects" in temp):
+                config["random_objects"] = temp["random_objects"].copy()
 
             if ("render" in temp):
                 config["render"] = temp["render"].copy()
@@ -176,17 +184,14 @@ class Backend():
             config["random"]["environment"].remove("background")
         else:
             config["random"]["environment"].append("background")
-            
-    print(config["random_objects"][0]["pos"])
 
     def toggle_random_coord_x(self):
         """Toggles value for if object x coordinate is randomised"""
-        if "random_objects" in config and "pos" in config["random_objects"][0]:
-            if "x" in config["random_objects"][0]["pos"]:
-                config["random_objects"][0]["pos"].remove("x")
-            else:
-                config["random_objects"][0]["pos"].append("x")
-
+        if "x" in config["random_objects"][0]["pos"]:
+            config["random_objects"][0]["pos"].remove("x")
+        else:
+            config["random_objects"][0]["pos"].append("x")
+        self.random_object_properties()
 
     def toggle_random_coord_y(self):
         """Toggles value for if object y coordinate is randomised"""
@@ -195,6 +200,7 @@ class Backend():
                 config["random_objects"][0]["pos"].remove("y")
             else:
                 config["random_objects"][0]["pos"].append("y")
+            self.random_object_properties()
 
     def toggle_random_coord_z(self):
         """Toggles value for if object z coordinate is randomised"""
@@ -203,7 +209,7 @@ class Backend():
                 config["random_objects"][0]["pos"].remove("z")
             else:
                 config["random_objects"][0]["pos"].append("z")
-
+            self.random_object_properties()
 
     def toggle_random_width(self):
         if "width" in config["random"]["object"]:
@@ -211,6 +217,7 @@ class Backend():
         else:
             config["random"]["object"].append("width")
         print(f"Random object width toggled: {config['random']['object']}")
+        self.random_object_properties()
 
     def toggle_random_height(self):
         if "height" in config["random"]["object"]:
@@ -218,6 +225,7 @@ class Backend():
         else:
             config["random"]["object"].append("height")
         print(f"Random object height toggled: {config['random']['object']}")
+        self.random_object_properties()
 
     def toggle_random_length(self):
         if "length" in config["random"]["object"]:
@@ -225,8 +233,8 @@ class Backend():
         else:
             config["random"]["object"].append("length")
         print(f"Random object length toggled: {config['random']['object']}")
-    
-        
+        self.random_object_properties()
+  
     def is_config_objects_empty(self):
         if config.get("objects") == None:
             return False
@@ -333,51 +341,47 @@ class Backend():
                 current_x_angle += degree_change[0]
                 current_z_angle += degree_change[1]
                 current_y_angle += degree_change[2]
-    
-    def Random_Obj_Pos(self):
-        """Add object positions to generate render with randomized coordinates"""
+   
 
-        random_obj_coords = config["random_objects"][0]
+    def random_object_properties(self):
+        """Randomize object position values based on toggled settings."""
+        
+        random_object_pos = config["random_objects"][0]["pos"] 
+       
+        for obj in config["objects"]:
+            position = obj["pos"].copy() 
 
-        number_of_objects = len(config["objects"]) 
+        if not obj.get("randomized", False):
 
-        starting_x = 0
-        starting_z = 0
-        starting_y = 0
+            if "x" in random_object_pos:
+                original_x = position[0]
+                position[0] = random.uniform(1, 2) 
+                print(f"Original X: {original_x}, Randomized X: {position[0]}")
+            
+            if "y" in random_object_pos:
+                original_y = position[2]
+                position[2] = random.uniform(1, 2)
+                print(f"Original Y: {original_y}, Randomized Y: {position[2]}")
+            
+            if "z" in random_object_pos:
+                original_z = position[1]
+                position[1] = random.uniform(1, 2)
+                print(f"Original Z: {original_z}, Randomized Z: {position[1]}")
+                
+            randomized_positions = [position[0], position[1], position[2]]  # x, z, y format
 
-        current_x = starting_x
-        current_z = starting_z
-        current_y = starting_y
+            print(f"Randomized position: {randomized_positions}")  #test for seeing if it working
 
-        for i in range(number_of_objects): 
-            position2 = [current_x, current_z, current_y]
-
-
-            if "x" in random_obj_coords["pos"]:
-                position2[0] += random.randint(0, 2)  
+            if "filename" in obj:
+                 o = self.RenderObject(filepath=obj["filename"])
             else:
-                position2[0] = starting_x  
+                o = self.RenderObject(primative=obj["primative"])
 
-            if "z" in random_obj_coords["pos"]:
-                position2[1] += random.randint(0, 2)
-            else:
-                position2[1] = starting_z  
-
-            if "y" in random_obj_coords["pos"]:
-                position2[2] += random.randint(0, 2)  
-            else:
-                position2[2] = starting_y 
-
-            print(f"Updated position for object {i+1}: {position}")
-
-            self.set_loc(position)
-
-            current_x = position[0]
-            current_z = position[1]
-            current_y = position[2]
+            o.set_loc(randomized_positions)
+            #currently cant revert to original values 
 
 
-
+            
     def render(self):
         """Renders the scene and saves to file in the output folder."""
         self.add_camera_poses()
@@ -515,7 +519,6 @@ class Backend():
             """
             if (is_blender_environment):
                 self.light.set_location(location)
-                print(f'location updated to (x:{location[0]}, z:{location[1]}, y{location[2]})')
 
             config["light_sources"][self.light_pos]["pos"] = location
 

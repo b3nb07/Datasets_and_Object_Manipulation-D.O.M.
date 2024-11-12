@@ -849,17 +849,17 @@ class Page3(Page):
         
         self.Width_Button = QCheckBox("Width", self)
         self.Width_Button.setGeometry(150, 30, 65, 20)
-        self.Width_Button.toggled.connect(self.toggle_random_width)
+        self.Width_Button.toggled.connect(backend.toggle_random_width)
 
 
         self.Height_Button = QCheckBox("Height", self)
         self.Height_Button.setGeometry(150, 50, 65, 20)
-        self.Height_Button.toggled.connect(self.toggle_random_height)
+        self.Height_Button.toggled.connect(backend.toggle_random_height)
 
 
         self.Length_Button = QCheckBox("Length", self)
         self.Length_Button.setGeometry(150, 70, 65, 20)
-        self.Length_Button.toggled.connect(self.toggle_random_length)
+        self.Length_Button.toggled.connect(backend.toggle_random_length)
 
 
 
@@ -1021,41 +1021,6 @@ class Page3(Page):
         self.Width_Button.setChecked(is_checked)
         self.Height_Button.setChecked(is_checked)
         self.Length_Button.setChecked(is_checked)
-
-
-    def toggle_random_width(self):
-        """Toggle the randomization of width."""
-        if self.Width_Button.isChecked():
-            print("Width randomization enabled")
-            self.backend.randomize_width()
-        else:
-            print("Width randomization disabled")
-            # Optionally handle disabling or reverting to the original value if needed
-            # self.backend.set_width_to_default()
-
-    def toggle_random_height(self):
-        """Toggle the randomization of height."""
-        if self.Height_Button.isChecked():
-            print("Height randomization enabled")
-            self.backend.randomize_height()
-        else:
-            print("Height randomization disabled")
-            # self.backend.set_height_to_default()
-
-    def toggle_random_length(self):
-        """Toggle the randomization of length."""
-        if self.Length_Button.isChecked():
-            print("Length randomization enabled")
-            self.backend.randomize_length()
-        else:
-            print("Length randomization disabled")
-            # self.backend.set_length_to_default()
-
-
-
-
-
-
 
 
 class Page4(Page):
