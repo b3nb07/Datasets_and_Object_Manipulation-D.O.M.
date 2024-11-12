@@ -45,10 +45,9 @@ class Backend():
             "environment": []
         }
         config["render"] = {
-            "renders": 1,
+            "renders": 0,
             "degree": [0,0,0]
         }
-       
 
         new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
         self.set_seed(new_seed)
@@ -94,6 +93,12 @@ class Backend():
 
             if ("pivot" in temp):
                 config["pivot"] = temp["pivot"].copy()
+
+            if ("random" in temp):
+                config["random"] = temp["random"].copy()
+
+            if ("render" in temp):
+                config["render"] = temp["render"].copy()
 
     def add_cam_pose(self, pose):
         """Adds a position of a camera to the scene for rendering.
@@ -266,9 +271,7 @@ class Backend():
                position[2] += random.randint(0,10)
             else:
                 position[2] += pivot_point[2] 
-            
-        
-            
+
             self.add_cam_pose([position, camera_rotation])
 
             if "angle" in randoms["environment"]:
