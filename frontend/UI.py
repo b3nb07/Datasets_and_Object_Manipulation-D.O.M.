@@ -1194,7 +1194,8 @@ class Page4(Page):
     
         
     def generate_render(self):
-        backend.render() 
+        backend.render()
+
 
     def set_renders(self):
         try: 

@@ -184,21 +184,21 @@ class Backend():
             config["random"]["pos"].remove("x")
         else:
             config["random"]["pos"].append("x")
-        self.random_object_properties()
+        self.add_object_properties()
 
     def toggle_random_coord_y(self):
         if "y" in config["random"]["pos"]:
             config["random"]["pos"].remove("y")
         else:
             config["random"]["pos"].append("y")
-        self.random_object_properties()
+        self.add_object_properties()
 
     def toggle_random_coord_z(self):
         if "z" in config["random"]["pos"]:
             config["random"]["pos"].remove("z")
         else:
             config["random"]["pos"].append("z")
-        self.random_object_properties()
+        self.add_object_properties()
 
 
     def toggle_random_width(self):
@@ -206,21 +206,21 @@ class Backend():
             config["random"]["sca"].remove("width")
         else:
             config["random"]["sca"].append("width")
-        self.random_object_properties()
+        self.add_object_properties()
 
     def toggle_random_height(self):
         if "height" in config["random"]["sca"]:
             config["random"]["sca"].remove("height")
         else:
             config["random"]["sca"].append("height")
-        self.random_object_properties()
+        self.add_object_properties()
 
     def toggle_random_length(self):
         if "length" in config["random"]["sca"]:
             config["random"]["sca"].remove("length")
         else:
             config["random"]["sca"].append("length")
-        self.random_object_properties()
+        self.add_object_properties()
   
     def is_config_objects_empty(self):
         if config.get("objects") == None:
@@ -330,84 +330,62 @@ class Backend():
                 current_y_angle += degree_change[2]
    
 
-    def random_object_properties(self):
-        """Randomize object position values based on toggled settings."""
-        
-        random_object_pos = config["random"]["pos"]
-        random_object_scale = config["random"]["sca"]
- 
-       
+    def add_object_properties(self):
+        """Randomize object properties (position and scale) based on selected settings."""
+
+        randoms = config["random"]  # Read randomization settings from config
+        random_object_pos = randoms["pos"]
+        random_object_scale = randoms["sca"]
+
         for obj in config["objects"]:
             position = obj["pos"].copy()
             scale = obj["sca"].copy()
 
 
-        if not obj.get("randomized", False):
+            if "x" in random_object_pos and not obj.get("x_randomized", False):
+                position[0] = random.uniform(1, 10)  
+                print(f"Randomized X: {position[0]}")
+                obj["x_randomized"] = True  
 
-            if "x" in random_object_pos:
-                original_x = position[0]
-                position[0] = random.uniform(1, 2) 
-                print(f"Original X: {original_x}, Randomized X: {position[0]}")
+            if "y" in random_object_pos and not obj.get("y_randomized", False):
+                position[2] = random.uniform(1, 10)  
+                print(f"Randomized Y: {position[2]}")
+                obj["y_randomized"] = True  
+
+            if "z" in random_object_pos and not obj.get("z_randomized", False):
+                position[1] = random.uniform(1, 10)  
+                print(f"Randomized Z: {position[1]}")
+                obj["z_randomized"] = True  
+
+            if "width" in random_object_scale and not obj.get("width_randomized", False):
+                scale[0] = random.uniform(1, 100)  
+                print(f"Randomized width: {scale[0]}")
+                obj["width_randomized"] = True  
+
+            if "height" in random_object_scale and not obj.get("height_randomized", False):
+                scale[1] = random.uniform(1, 100)  
+                print(f"Randomized height: {scale[1]}")
+                obj["height_randomized"] = True  
+
             
-            if "y" in random_object_pos:
-                original_y = position[2]
-                position[2] = random.uniform(1, 2)
-                print(f"Original Y: {original_y}, Randomized Y: {position[2]}")
-            
-            if "z" in random_object_pos:
-                original_z = position[1]
-                position[1] = random.uniform(1, 2)
-                print(f"Original Z: {original_z}, Randomized Z: {position[1]}")
-                
-            randomized_positions = [position[0], position[1], position[2]]  # x, z, y format
+            if "length" in random_object_scale and not obj.get("length_randomized", False):
+                scale[2] = random.uniform(1, 100)  
+                print(f"Randomized length: {scale[2]}")
+                obj["length_randomized"] = True  
 
-            print(f"Randomized position: {randomized_positions}")  #test for seeing if it working
- 
-            if "width" in random_object_scale:
-                original_width = scale[0]
-                scale[0] = random.uniform(1, 2)  # Randomize width
-                print(f"Original width: {original_width}, Randomized width: {scale[0]}")
+            obj["pos"] = position
+            obj["sca"] = scale
 
-            if "height" in random_object_scale:
-                original_height = scale[1]
-                scale[1] = random.uniform(1, 2)  # Randomize height 
-                print(f"Original height: {original_height}, Randomized height: {scale[1]}")
+            if "object" in obj:
+                obj["object"].set_loc(position)
+                obj["object"].set_scale(scale)
 
-            if "length" in random_object_scale:
-                original_length = scale[2]
-                scale[2] = random.uniform(1, 2)  # Randomize length
-                print(f"Original length: {original_length}, Randomized length: {scale[2]}")
+            print(f"Object {obj['primative']} updated with randomized position {position} and scale {scale}")
 
-            randomized_scale = [scale[0], scale[2], scale[1]]  # width, length, height - x, z, y
-            print(f"Randomized dimensions: {randomized_scale}")  # test for working
-
-            if "filename" in obj:
-                 o = self.RenderObject(filepath=obj["filename"])
-            else:
-                o = self.RenderObject(primative=obj["primative"])
-
-            obj["randomized"] = True
-            obj["original_pos"] = obj["pos"].copy()  # Save the original position
-            obj["original_sca"] = obj["sca"].copy()  # Save the original scale
-
-        else:
-            obj["pos"] = obj["original_pos"].copy()  # Revert to original position
-            obj["sca"] = obj["original_sca"].copy()  # Revert to original scale
-
-            if "filename" in obj:
-                o = self.RenderObject(filepath=obj["filename"])
-            else:
-                o = self.RenderObject(primative=obj["primative"])
-
-            o.set_loc(obj["pos"])  # Set original position
-            o.set_scale(obj["sca"])  # Set original scale
-            obj["randomized"] = False
-            o.set_loc(randomized_positions)
-            o.set_scale(randomized_scale)  
-            
     def render(self):
         """Renders the scene and saves to file in the output folder."""
         self.add_camera_poses()
+        self.add_object_properties()
         
 
         with open("backend\\temp_export.json", "w") as export_file:
