@@ -2,6 +2,7 @@
 
 # import blenderproc as bproc
 import numpy as np
+import random
 import json
 import os
 
@@ -39,6 +40,18 @@ class Backend():
             "point": [0, 0, 0],
             "dis": 0
         }
+        config["random"] = {
+            "pivot": [],
+            "environment": []
+        }
+        config["render"] = {
+            "renders": 1,
+            "degree": [0,0,0]
+        }
+       
+
+        new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
+        self.set_seed(new_seed)
 
         if (json_filepath is not None):
             # load json objects into self
@@ -104,6 +117,59 @@ class Backend():
         
         :param dis: a float value determining the distance"""
         config["pivot"]["dis"] = dis
+
+    def set_seed(self,seed):
+        """ Sets a custom seed for generating random when adding camera poses.
+        
+        :param seed: int value indicating random seed"""
+        config["seed"] = seed
+
+    def set_renders(self, n):
+        """ Sets amount renders generated.
+        
+        :param n: int amount of renders"""
+        config["render"]["renders"] = n
+
+    def set_angles(self, angles):
+        """ Sets camera angle change per render in the config.
+        
+        :param angles: a list containing x z and y anlge change"""
+        config["render"]["degree"] = angles
+
+    def toggle_random_pivot_x(self):
+        """Toggles value for if pivot x coordinate is randomised"""
+        if "x" in config["random"]["pivot"]:
+            config["random"]["pivot"].remove("x")
+        else:
+            config["random"]["pivot"].append("x")
+
+    def toggle_random_pivot_z(self):
+        """Toggles value for if pivot z coordinate is randomised"""
+        if "z" in config["random"]["pivot"]:
+            config["random"]["pivot"].remove("z")
+        else:
+            config["random"]["pivot"].append("z")
+
+    def toggle_random_pivot_y(self):
+        """Toggles value for if pivot y coordinate is randomised"""
+        if "y" in config["random"]["pivot"]:
+            config["random"]["pivot"].remove("y")
+        else:
+            config["random"]["pivot"].append("y")
+
+    def toggle_random_environment_angle(self):
+        """Toggles value for if the angle is randomised during render"""
+        if "angle" in config["random"]["environment"]:
+            config["random"]["environment"].remove("angle")
+        else:
+            config["random"]["environment"].append("angle")
+
+    def toggle_random_environment_background(self):
+        """Toggles value for if background colour is randomised during render"""
+        if "background" in config["random"]["environment"]:
+            config["random"]["environment"].remove("background")
+        else:
+            config["random"]["environment"].append("background")
         
     def is_config_objects_empty(self):
         if config.get("objects") == None:
@@ -134,8 +200,93 @@ class Backend():
 
         config["background_color"] = color
 
+
+    def calculate_position(self, angle, distance):
+        """Calulates position of camera based on the angle of camera and distance from pivot point
+        
+        :param angle: a list containing the camera angle
+        :param distance: distance from pivot point
+
+        :return param position: list containing x,z,y position values for camera"""
+
+        r = np.sin(angle[0]) * distance
+
+        x_position = r * np.sin( angle[2] )    #calculate x and y positions based on y angle
+        z_position = -1 * r * np.cos( angle[2] )
+
+        y_position = np.cos(angle[0]) * distance #caluclate y angle based on x positions
+
+        position = [x_position, z_position, y_position]
+        return position
+
+    
+    def add_camera_poses(self):
+        """Add camera poses to generate render from"""
+
+        randoms = config["random"] #Read values from config
+
+        pivot_distance = config["pivot"]["dis"]
+        pivot_point = config["pivot"]["point"]
+
+        degree_change = config["render"]["degree"]
+
+        number_of_renders = config["render"]["renders"]
+
+        starting_x_angle = np.pi / 2 #No place in UI to set starting camera angle 
+        starting_z_angle = 0
+        starting_y_angle = 0
+
+        current_x_angle = starting_x_angle
+        current_z_angle = starting_z_angle
+        current_y_angle = starting_y_angle
+
+        
+
+        for i in range(number_of_renders): #Reads config and randomised parts of render meant to be rendered
+            
+            if "background" in randoms["environment"]:
+                self.set_bg_color( [ random.randint(1,255) , random.randint(1,255) , random.randint(1,255) ] )
+            else:
+                pass
+
+            camera_rotation = [current_x_angle,current_z_angle,current_y_angle]
+            position = self.calculate_position(camera_rotation, pivot_distance)
+
+            if "x" in randoms["pivot"]:
+               position[0] += random.randint(0,10)
+            else:
+                position[0] += pivot_point[0]
+
+            if "z" in randoms["pivot"]:
+               position[1] += random.randint(0,10)
+            else:
+                position[1] += pivot_point[1]
+            
+            if "y" in randoms["pivot"]:
+               position[2] += random.randint(0,10)
+            else:
+                position[2] += pivot_point[2] 
+            
+        
+            
+            self.add_cam_pose([position, camera_rotation])
+
+            if "angle" in randoms["environment"]:
+                current_x_angle += np.deg2rad( random.randint(0,359) )
+                current_z_angle += np.deg2rad( random.randint(0,359) )
+                current_y_angle += np.deg2rad( random.randint(0,359) )
+            else:
+                current_x_angle += degree_change[0]
+                current_z_angle += degree_change[1]
+                current_y_angle += degree_change[2]
+            
+
+
+
     def render(self):
         """Renders the scene and saves to file in the output folder."""
+        self.add_camera_poses()
+        
 
         with open("backend\\temp_export.json", "w") as export_file:
             json.dump(config, export_file)
