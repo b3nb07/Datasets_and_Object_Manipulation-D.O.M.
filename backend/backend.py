@@ -274,7 +274,7 @@ class Backend():
     def add_camera_poses(self):
         """Add camera poses to generate render from"""
 
-        random_obj_coords = config["random"] #Read values from config
+        randoms = config["random"] #Read values from config
 
         pivot_distance = config["pivot"]["dis"]
         pivot_point = config["pivot"]["point"]
@@ -295,7 +295,7 @@ class Backend():
 
         for i in range(number_of_renders): #Reads config and randomised parts of render meant to be rendered
             
-            if "background" in random_obj_coords["environment"]:
+            if "background" in randoms["environment"]:
                 self.set_bg_color( [ random.randint(1,255) , random.randint(1,255) , random.randint(1,255) ] )
             else:
                 pass
@@ -303,24 +303,24 @@ class Backend():
             camera_rotation = [current_x_angle,current_z_angle,current_y_angle]
             position = self.calculate_position(camera_rotation, pivot_distance)
 
-            if "x" in random_obj_coords["pivot"]:
+            if "x" in randoms["pivot"]:
                position[0] += random.randint(0,10)
             else:
                 position[0] += pivot_point[0]
 
-            if "z" in random_obj_coords["pivot"]:
+            if "z" in randoms["pivot"]:
                position[1] += random.randint(0,10)
             else:
                 position[1] += pivot_point[1]
             
-            if "y" in random_obj_coords["pivot"]:
+            if "y" in randoms["pivot"]:
                position[2] += random.randint(0,10)
             else:
                 position[2] += pivot_point[2] 
 
             self.add_cam_pose([position, camera_rotation])
 
-            if "angle" in random_obj_coords["environment"]:
+            if "angle" in randoms["environment"]:
                 current_x_angle += np.deg2rad( random.randint(0,359) )
                 current_z_angle += np.deg2rad( random.randint(0,359) )
                 current_y_angle += np.deg2rad( random.randint(0,359) )
