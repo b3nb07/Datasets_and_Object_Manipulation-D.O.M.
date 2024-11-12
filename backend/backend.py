@@ -46,8 +46,8 @@ class Backend():
             "object":[]
         }
         config["render"] = {
-            "renders": 0,
-            "degree": [0,0,0]
+            "renders": 1,
+            "degree": [1,1,1]
         }
 
         new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
