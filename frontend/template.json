@@ -20,17 +20,14 @@
     "camera_poses": [
       [[0,0,0], [0,0,0]]
     ],
-    "random": [
-      {
-        "pivot": ["x","z","y"], 
-        "environment": ["angle","background"]
-    }
-      ],
-    "random_objects":[ {
-        "pos": ["x", "y", "z"], 
+    "random": {
+      "pivot": ["x", "z", "y"],
+      "environment": ["angle", "background"],
+      "objects": {
+        "pos": ["x", "y", "z"],
         "sca": ["width", "height", "length"]
-    }
-      ],
+      }
+    },
   
     "render": [
       {
