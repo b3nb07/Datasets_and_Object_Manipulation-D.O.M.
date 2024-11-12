@@ -42,7 +42,8 @@ class Backend():
         }
         config["random"] = {
             "pivot": [],
-            "environment": []
+            "environment": [],
+            "object":[]
         }
         config["render"] = {
             "renders": 0,
@@ -175,6 +176,56 @@ class Backend():
             config["random"]["environment"].remove("background")
         else:
             config["random"]["environment"].append("background")
+            
+    print(config["random_objects"][0]["pos"])
+
+    def toggle_random_coord_x(self):
+        """Toggles value for if object x coordinate is randomised"""
+        if "random_objects" in config and "pos" in config["random_objects"][0]:
+            if "x" in config["random_objects"][0]["pos"]:
+                config["random_objects"][0]["pos"].remove("x")
+            else:
+                config["random_objects"][0]["pos"].append("x")
+
+
+    def toggle_random_coord_y(self):
+        """Toggles value for if object y coordinate is randomised"""
+        if "random_objects" in config and "pos" in config["random_objects"][0]:
+            if "y" in config["random_objects"][0]["pos"]:
+                config["random_objects"][0]["pos"].remove("y")
+            else:
+                config["random_objects"][0]["pos"].append("y")
+
+    def toggle_random_coord_z(self):
+        """Toggles value for if object z coordinate is randomised"""
+        if "random_objects" in config and "pos" in config["random_objects"][0]:
+            if "z" in config["random_objects"][0]["pos"]:
+                config["random_objects"][0]["pos"].remove("z")
+            else:
+                config["random_objects"][0]["pos"].append("z")
+
+
+    def toggle_random_width(self):
+        if "width" in config["random"]["object"]:
+            config["random"]["object"].remove("width")
+        else:
+            config["random"]["object"].append("width")
+        print(f"Random object width toggled: {config['random']['object']}")
+
+    def toggle_random_height(self):
+        if "height" in config["random"]["object"]:
+            config["random"]["object"].remove("height")
+        else:
+            config["random"]["object"].append("height")
+        print(f"Random object height toggled: {config['random']['object']}")
+
+    def toggle_random_length(self):
+        if "length" in config["random"]["object"]:
+            config["random"]["object"].remove("length")
+        else:
+            config["random"]["object"].append("length")
+        print(f"Random object length toggled: {config['random']['object']}")
+    
         
     def is_config_objects_empty(self):
         if config.get("objects") == None:
@@ -228,7 +279,7 @@ class Backend():
     def add_camera_poses(self):
         """Add camera poses to generate render from"""
 
-        randoms = config["random"] #Read values from config
+        random_obj_coords = config["random"] #Read values from config
 
         pivot_distance = config["pivot"]["dis"]
         pivot_point = config["pivot"]["point"]
@@ -249,7 +300,7 @@ class Backend():
 
         for i in range(number_of_renders): #Reads config and randomised parts of render meant to be rendered
             
-            if "background" in randoms["environment"]:
+            if "background" in random_obj_coords["environment"]:
                 self.set_bg_color( [ random.randint(1,255) , random.randint(1,255) , random.randint(1,255) ] )
             else:
                 pass
@@ -257,24 +308,24 @@ class Backend():
             camera_rotation = [current_x_angle,current_z_angle,current_y_angle]
             position = self.calculate_position(camera_rotation, pivot_distance)
 
-            if "x" in randoms["pivot"]:
+            if "x" in random_obj_coords["pivot"]:
                position[0] += random.randint(0,10)
             else:
                 position[0] += pivot_point[0]
 
-            if "z" in randoms["pivot"]:
+            if "z" in random_obj_coords["pivot"]:
                position[1] += random.randint(0,10)
             else:
                 position[1] += pivot_point[1]
             
-            if "y" in randoms["pivot"]:
+            if "y" in random_obj_coords["pivot"]:
                position[2] += random.randint(0,10)
             else:
                 position[2] += pivot_point[2] 
 
             self.add_cam_pose([position, camera_rotation])
 
-            if "angle" in randoms["environment"]:
+            if "angle" in random_obj_coords["environment"]:
                 current_x_angle += np.deg2rad( random.randint(0,359) )
                 current_z_angle += np.deg2rad( random.randint(0,359) )
                 current_y_angle += np.deg2rad( random.randint(0,359) )
@@ -282,7 +333,48 @@ class Backend():
                 current_x_angle += degree_change[0]
                 current_z_angle += degree_change[1]
                 current_y_angle += degree_change[2]
-            
+    
+    def Random_Obj_Pos(self):
+        """Add object positions to generate render with randomized coordinates"""
+
+        random_obj_coords = config["random_objects"][0]
+
+        number_of_objects = len(config["objects"]) 
+
+        starting_x = 0
+        starting_z = 0
+        starting_y = 0
+
+        current_x = starting_x
+        current_z = starting_z
+        current_y = starting_y
+
+        for i in range(number_of_objects): 
+            position2 = [current_x, current_z, current_y]
+
+
+            if "x" in random_obj_coords["pos"]:
+                position2[0] += random.randint(0, 2)  
+            else:
+                position2[0] = starting_x  
+
+            if "z" in random_obj_coords["pos"]:
+                position2[1] += random.randint(0, 2)
+            else:
+                position2[1] = starting_z  
+
+            if "y" in random_obj_coords["pos"]:
+                position2[2] += random.randint(0, 2)  
+            else:
+                position2[2] = starting_y 
+
+            print(f"Updated position for object {i+1}: {position}")
+
+            self.set_loc(position)
+
+            current_x = position[0]
+            current_z = position[1]
+            current_y = position[2]
 
 
 
@@ -371,7 +463,7 @@ class Backend():
             """
             if (is_blender_environment):
                 self.object.set_location(location)
-
+            
             config["objects"][self.object_pos]["pos"] = location
 
         def set_scale(self, scale):
@@ -381,7 +473,6 @@ class Backend():
             """
             if (is_blender_environment):
                 self.object.set_scale(scale)
-
             config["objects"][self.object_pos]["sca"] = scale
 
         def set_rotation(self, euler_rotation):

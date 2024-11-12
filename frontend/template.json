@@ -24,8 +24,15 @@
       {
         "pivot": ["x","z","y"], 
         "environment": ["angle","background"]
-      }
-    ],
+    }
+      ],
+    "random_objects":[ {
+        "pos": ["x", "y", "z"], 
+        "rot": ["x", "y", "z"], 
+        "sca": ["width", "height", "length"]
+    }
+      ],
+  
     "render": [
       {
         "renders": 1,
@@ -36,3 +43,5 @@
     "background_color": [0,0,0],
     "seed": 0
 }
+
+
