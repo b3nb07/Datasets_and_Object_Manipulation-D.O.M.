@@ -1021,6 +1021,14 @@ class Page3(Page):
         self.Width_Button.setChecked(is_checked)
         self.Height_Button.setChecked(is_checked)
         self.Length_Button.setChecked(is_checked)
+        self.X_Button.setChecked(is_checked)
+        self.Y_Button.setChecked(is_checked)
+        self.Z_Button.setChecked(is_checked)
+        self.X_Button2.setChecked(is_checked)
+        self.Y_Button2.setChecked(is_checked)
+        self.Z_Button2.setChecked(is_checked)
+        self.AutoRotationAngle_Button.setChecked(is_checked)
+        self.ImportEnvironment_Button.setChecked(is_checked)
 
 
 class Page4(Page):

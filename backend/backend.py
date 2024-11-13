@@ -331,9 +331,8 @@ class Backend():
    
 
     def add_object_properties(self):
-        """Randomize object properties (position and scale) based on selected settings."""
-
-        randoms = config["random"]  # Read randomization settings from config
+        #IF ANYONE WANTS ASSIGN VALUES TO RANDOM RANGE I JUST PUT PLACEHOLDER VALUES
+        randoms = config["random"]
         random_object_pos = randoms["pos"]
         random_object_scale = randoms["sca"]
 
@@ -341,46 +340,48 @@ class Backend():
             position = obj["pos"].copy()
             scale = obj["sca"].copy()
 
+            default_position = [0, 0, 0]  
+            default_scale = [1, 1, 1]
+            #Position propertis
+            if "x" in random_object_pos:
+                position[0] = random.uniform(1, 10) # random range of x coords - 1-10
+            else:
+                position[0] = default_position[0]
 
-            if "x" in random_object_pos and not obj.get("x_randomized", False):
-                position[0] = random.uniform(1, 10)  
-                print(f"Randomized X: {position[0]}")
-                obj["x_randomized"] = True  
+            if "y" in random_object_pos:
+                position[2] = random.uniform(1, 10)
+            else:
+                position[2] = default_position[2]
 
-            if "y" in random_object_pos and not obj.get("y_randomized", False):
-                position[2] = random.uniform(1, 10)  
-                print(f"Randomized Y: {position[2]}")
-                obj["y_randomized"] = True  
+            if "z" in random_object_pos:
+                position[1] = random.uniform(1, 10)
+            else:
+                position[1] = default_position[1]
 
-            if "z" in random_object_pos and not obj.get("z_randomized", False):
-                position[1] = random.uniform(1, 10)  
-                print(f"Randomized Z: {position[1]}")
-                obj["z_randomized"] = True  
+            #Scale properties
+            if "width" in random_object_scale:
+                scale[0] = random.uniform(1, 100) # random range of width - 1-100
+            else:
+                scale[0] = default_scale[0]
 
-            if "width" in random_object_scale and not obj.get("width_randomized", False):
-                scale[0] = random.uniform(1, 100)  
-                print(f"Randomized width: {scale[0]}")
-                obj["width_randomized"] = True  
+            if "height" in random_object_scale:
+                scale[1] = random.uniform(1, 100)
+            else:
+                scale[1] = default_scale[1]
 
-            if "height" in random_object_scale and not obj.get("height_randomized", False):
-                scale[1] = random.uniform(1, 100)  
-                print(f"Randomized height: {scale[1]}")
-                obj["height_randomized"] = True  
-
-            
-            if "length" in random_object_scale and not obj.get("length_randomized", False):
-                scale[2] = random.uniform(1, 100)  
-                print(f"Randomized length: {scale[2]}")
-                obj["length_randomized"] = True  
-
+            if "length" in random_object_scale:
+                scale[2] = random.uniform(1, 100)
+            else:
+                scale[2] = default_scale[2]
+                    
             obj["pos"] = position
             obj["sca"] = scale
 
             if "object" in obj:
                 obj["object"].set_loc(position)
                 obj["object"].set_scale(scale)
-
-            print(f"Object {obj['primative']} updated with randomized position {position} and scale {scale}")
+            
+            print(f"New object position: {position} and scale: {scale}") # displays randomised values when clicked
 
     def render(self):
         """Renders the scene and saves to file in the output folder."""
