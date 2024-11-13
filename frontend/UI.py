@@ -1506,7 +1506,10 @@ if __name__ == "__main__":
         else:
             objectSelected = Tutorial_Object(window.navbar)
             
+    """
     from Front_tests import Tests
     Tests(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend)
+    """
+    
     
     sys.exit(app.exec_())

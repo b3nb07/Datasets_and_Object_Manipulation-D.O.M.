@@ -208,6 +208,46 @@ def Page_4_Secion_2_Checker(window, shared_state, Page4, backend):
             val = random.randint(2,359)
             Sections[1].setSliderPosition(int(val))
             print(f"Expected {Sections[0].text()}, {'Correct' if Sections[0].text() == str(Sections[1].value()) else 'Incorrect'}")
+            
+def Illegal_Field_checker(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend):
+    Path = window.navbar.tabwizard.findChild(Page1)
+    
+    window.navbar.tabwizard.setTabEnabled(0, True)
+    window.navbar.tabwizard.setCurrentIndex(0)
+    val = "A"
+    
+    sections = [Path.XObj_pos_input_field, Path.YObj_pos_input_field, Path.ZObj_pos_input_field,
+                Path.Width_Obj_pos_input_field, Path.Length_Obj_pos_input_field, Path.Height_Obj_pos_input_field,
+                Path.X_Rotation_input_field, Path.Y_Rotation_input_field, Path.Z_Rotation_input_field]
+    
+    for Sections in sections:
+        Sections.setText(str(val))
+        
+        
+    window.navbar.tabwizard.setTabEnabled(1, True)
+    window.navbar.tabwizard.setCurrentIndex(1)
+        
+    Path = window.navbar.tabwizard.findChild(Page2)
+    sections = [Path.XPivot_point_input_field, Path.YPivot_point_input_field, Path.ZPivot_point_input_field,
+                Path.Distance_Pivot_input_field,
+                Path.XPivot_point_input_field, Path.YPivot_point_input_field, Path.ZPivot_point_input_field]
+    
+    for Sections in sections:
+        Sections.setText(str(val))
+        
+    window.navbar.tabwizard.setTabEnabled(2, True)
+    window.navbar.tabwizard.setCurrentIndex(2)
+    
+    Path = window.navbar.tabwizard.findChild(Page4)
+    sections = [Path.Number_of_renders_input_field,
+                Path.X_Degree_input_field, Path.Y_Degree_input_field,  Path.Z_Degree_input_field]
+    
+    window.navbar.tabwizard.setTabEnabled(3, True)
+    window.navbar.tabwizard.setCurrentIndex(3)
+    
+    for Sections in sections:
+        Sections.setText(str(val))
+
         
 def Tests(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend):
     print("Tab_Checker")
@@ -229,3 +269,5 @@ def Tests(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend):
     print("Page_4")
     Page_4_Secion_1_Checker(window, shared_state, Page4, backend)
     Page_4_Secion_2_Checker(window, shared_state, Page4, backend)
+    
+    Illegal_Field_checker(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend)
