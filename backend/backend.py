@@ -113,7 +113,7 @@ class Backend():
             "renders": 1,
             "degree": [1,1,1]
         }
-        config["background_color"] = [0,0,0]
+
         config["render_res"] = [1920,1080]
 
     def set_pivot_point(self, point):
@@ -342,39 +342,25 @@ class Backend():
             position = obj["pos"].copy()
             scale = obj["sca"].copy()
 
-            default_position = [0, 0, 0]  
-            default_scale = [1, 1, 1]
             #Position propertis
             if "x" in random_object_pos:
                 position[0] = random.uniform(1, 10) # random range of x coords - 1-10
-            else:
-                position[0] = default_position[0]
 
             if "y" in random_object_pos:
                 position[2] = random.uniform(1, 10)
-            else:
-                position[2] = default_position[2]
 
             if "z" in random_object_pos:
                 position[1] = random.uniform(1, 10)
-            else:
-                position[1] = default_position[1]
 
             #Scale properties
             if "width" in random_object_scale:
                 scale[0] = random.uniform(1, 100) # random range of width - 1-100
-            else:
-                scale[0] = default_scale[0]
 
             if "height" in random_object_scale:
                 scale[1] = random.uniform(1, 100)
-            else:
-                scale[1] = default_scale[1]
 
             if "length" in random_object_scale:
                 scale[2] = random.uniform(1, 100)
-            else:
-                scale[2] = default_scale[2]
                     
             obj["pos"] = position
             obj["sca"] = scale
