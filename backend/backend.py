@@ -8,10 +8,7 @@ import os
 
 # initialise config - will hold the config ready for export
 config = { 
-    "pivot": {
-        "point": [0, 0, 0],
-        "dis": 0
-    },
+    "pivot": {},
 }
 
 # remove linter wanrings that bproc is undefined (it's undefined due to vsc not running using blender's python interpreter)
@@ -34,22 +31,8 @@ class Backend():
         """
         if (is_blender_environment):
             bproc.init()
-            
-        config.clear() # reset config due to new initialisation
-        config["pivot"] = {
-            "point": [0, 0, 0],
-            "dis": 0
-        }
-        config["random"] = {
-            "pivot": [],
-            "environment": [],
-            "pos": [],
-            "sca": []
-        }
-        config["render"] = {
-            "renders": 1,
-            "degree": [1,1,1]
-        }
+        
+        self.initialise_cfg() # initialise config
 
         new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
         self.set_seed(new_seed)
@@ -113,7 +96,26 @@ class Backend():
 
         config.setdefault("camera_poses", [])
         config["camera_poses"].append(pose)
-        
+
+    def initialise_cfg(self):
+        config.clear() # reset config due to new initialisation
+        config["pivot"] = {
+            "point": [0, 0, 0],
+            "dis": 0
+        }
+        config["random"] = {
+            "pivot": [],
+            "environment": [],
+            "pos": [],
+            "sca": []
+        }
+        config["render"] = {
+            "renders": 1,
+            "degree": [1,1,1]
+        }
+        config["background_color"] = [0,0,0]
+        config["render_res"] = [1920,1080]
+
     def set_pivot_point(self, point):
         """ Sets a custom pivotpoint in the scene for rendering.
         
@@ -381,7 +383,7 @@ class Backend():
                 obj["object"].set_loc(position)
                 obj["object"].set_scale(scale)
             
-            print(f"New object position: {position} and scale: {scale}") # displays randomised values when clicked
+            # print(f"New object position: {position} and scale: {scale}") # displays randomised values when clicked
 
     def render(self):
         """Renders the scene and saves to file in the output folder."""
@@ -430,7 +432,6 @@ class Backend():
 
             :param filepath: Filepath to an object file.
             :param primative: Create object primatively, choose from one of ["CUBE", "CYLINDER", "CONE", "PLANE", "SPHERE", "MONKEY"].
-            :param object_id: Acts as a unique identifier for the object.
             """
             self.object_pos = len(config.setdefault("objects", []))
             config["objects"].append({})
@@ -511,7 +512,8 @@ class Backend():
                 "name": name,
                 "pos": [0, 0, 0],
                 "rot": [0, 0, 0],
-                "energy": 10
+                "energy": 10,
+                "color": [255, 255, 255]
             })
 
         def set_loc(self, location):
