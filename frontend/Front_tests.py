@@ -7,8 +7,8 @@ def Tab_Checker(window, shared_state, backend):
         print(f"{Tab_names[i]}: {'Correct' if Tab_names[i] == window.navbar.tabwizard.tabText(i) else 'Incorrect'}")
         
 
-def Page_1_Secion_1_Checker(window, shared_state, Page1, backend):
-    print("\n Page_1_Secion_1_Checker")
+def Page_1_Section_1_Checker(window, shared_state, Page1, backend):
+    print("\n Page_1_Section_1_Checker")
     """Tests if all functions in page 1 section 1 work, Input field is detectable and can be incremented and decremented"""
     ####
     obj = backend.RenderObject(primative = "Monkey")
@@ -38,8 +38,8 @@ def Page_1_Secion_1_Checker(window, shared_state, Page1, backend):
         
         
         
-def Page_1_Secion_2_Checker(window, shared_state, Page1, backend):
-    print("\n Page_1_Secion_2_Checker")
+def Page_1_Section_2_Checker(window, shared_state, Page1, backend):
+    print("\n Page_1_Section_2_Checker")
     ####
     obj = backend.RenderObject(primative = "Monkey")
     shared_state.add_item(obj)
@@ -61,8 +61,8 @@ def Page_1_Secion_2_Checker(window, shared_state, Page1, backend):
             
             print(f"Expected {Sections[0].text()}, {'Correct' if Sections[0].text() == str(Sections[1].value()) else 'Incorrect'}")
             
-def Page_1_Secion_3_Checker(window, shared_state, Page1, backend):
-    print("\n Page_1_Secion_3_Checker")
+def Page_1_Section_3_Checker(window, shared_state, Page1, backend):
+    print("\n Page_1_Section_3_Checker")
     ####
     Path = window.navbar.tabwizard.findChild(Page1)
 
@@ -80,8 +80,8 @@ def Page_1_Secion_3_Checker(window, shared_state, Page1, backend):
             
             print(f"Expected {Sections[0].text()}, {'Correct' if Sections[0].text() == str(Sections[1].value()) else 'Incorrect'}")
     
-def Page_2_Secion_1_Checker(window, shared_state, Page2, backend):
-    print("\n Page_2_Secion_1_Checker")
+def Page_2_Section_1_Checker(window, shared_state, Page2, backend):
+    print("\n Page_2_Section_1_Checker")
     """Tests if all functions in page 2 section 1 work, Input field is detectable and can be incremented and decremented"""
     ####
     ####
@@ -107,8 +107,8 @@ def Page_2_Secion_1_Checker(window, shared_state, Page2, backend):
             val = f"{float(val) - 1}"
             print(f"Expected {val}, {'Correct' if Sections[0].text() == val else 'Incorrect'}")
             
-def Page_2_Secion_2_Checker(window, shared_state, Page2, backend):
-    print("\n Page_2_Secion_2_Checker")
+def Page_2_Section_2_Checker(window, shared_state, Page2, backend):
+    print("\n Page_2_Section_2_Checker")
     ####
     ####
     Path = window.navbar.tabwizard.findChild(Page2)
@@ -128,8 +128,8 @@ def Page_2_Secion_2_Checker(window, shared_state, Page2, backend):
             
             print(f"Expected {Sections[0].text()}, {'Correct' if Sections[0].text() == str(Sections[1].value()) else 'Incorrect'}")
             
-def Page_2_Secion_3_Checker(window, shared_state, Page2, backend):
-    print("\n Page_2_Secion_3_Checker")
+def Page_2_Section_3_Checker(window, shared_state, Page2, backend):
+    print("\n Page_2_Section_3_Checker")
     ####
     ####
     Path = window.navbar.tabwizard.findChild(Page2)
@@ -149,8 +149,8 @@ def Page_2_Secion_3_Checker(window, shared_state, Page2, backend):
     for Section in sections:
         print(f"Field {Section}: {'Enabled Correct' if Section.isEnabled() else 'Disabled Incorrect'}")
         
-def Page_3_Secion_Checker(window, shared_state, Page3, backend):
-    print("\n Page_3_Secion_Checker")
+def Page_3_Section_Checker(window, shared_state, Page3, backend):
+    print("\n Page_3_Section_Checker")
     ####
     ####
     Path = window.navbar.tabwizard.findChild(Page3)
@@ -167,8 +167,8 @@ def Page_3_Secion_Checker(window, shared_state, Page3, backend):
     for check in All_Checks:
         print(f"{'Field is Checked: Correct' if check.isChecked() else 'Field is not Checked: Incorrect'}")
         
-def Page_4_Secion_1_Checker(window, shared_state, Page4, backend):
-    print("\n Page_4_Secion_1_Checker")
+def Page_4_Section_1_Checker(window, shared_state, Page4, backend):
+    print("\n Page_4_Section_1_Checker")
     ####
     ####
     Path = window.navbar.tabwizard.findChild(Page4)
@@ -191,8 +191,8 @@ def Page_4_Secion_1_Checker(window, shared_state, Page4, backend):
             val = float(val) - 1
             print(f"Expected {val} , {'Correct' if Sections[0].text() == str(val) else 'Incorrect'}")
         
-def Page_4_Secion_2_Checker(window, shared_state, Page4, backend):
-    print("\n Page_4_Secion_2_Checker")
+def Page_4_Section_2_Checker(window, shared_state, Page4, backend):
+    print("\n Page_4_Section_2_Checker")
     ####
     ####
     Path = window.navbar.tabwizard.findChild(Page4)
@@ -254,20 +254,20 @@ def Tests(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend):
     Tab_Checker(window, shared_state, backend)
     
     print("Page_1")
-    Page_1_Secion_1_Checker(window, shared_state, Page1, backend)
-    Page_1_Secion_2_Checker(window, shared_state, Page1, backend)
-    Page_1_Secion_3_Checker(window, shared_state, Page1, backend)
+    Page_1_Section_1_Checker(window, shared_state, Page1, backend)
+    Page_1_Section_2_Checker(window, shared_state, Page1, backend)
+    Page_1_Section_3_Checker(window, shared_state, Page1, backend)
     
     print("Page_2")
-    Page_2_Secion_1_Checker(window, shared_state, Page2, backend)
-    Page_2_Secion_2_Checker(window, shared_state, Page2, backend)
-    Page_2_Secion_3_Checker(window, shared_state, Page2, backend)
+    Page_2_Section_1_Checker(window, shared_state, Page2, backend)
+    Page_2_Section_2_Checker(window, shared_state, Page2, backend)
+    Page_2_Section_3_Checker(window, shared_state, Page2, backend)
     
     print("Page_3")
-    Page_3_Secion_Checker(window, shared_state, Page3, backend)
+    Page_3_Section_Checker(window, shared_state, Page3, backend)
     
     print("Page_4")
-    Page_4_Secion_1_Checker(window, shared_state, Page4, backend)
-    Page_4_Secion_2_Checker(window, shared_state, Page4, backend)
+    Page_4_Section_1_Checker(window, shared_state, Page4, backend)
+    Page_4_Section_2_Checker(window, shared_state, Page4, backend)
     
     Illegal_Field_checker(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend)
