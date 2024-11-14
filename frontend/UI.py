@@ -155,16 +155,6 @@ class Page1(Page):
     def __init__(self, parent=None):
         """
         Initialise "Page n"
-
-        Args:
-            Object_pos_title - QLabel : Title for object position
-            XObj_pos, YObj_pos, ZObj_pos - QLabel: Text for the X Y Z of object
-            XObj_pos_input_field, YObj_pos_input_field ZObj_pos_input_field - QLineEdit: Input fields for each axis position
-            X_button_minus X_button_plus Y_button_minus Y_button_plus, Z_button_minus, Z_button_plus - QPushButton: Buttons for incrementing or decrementing position values
-            Width_Obj_pos, Height_Obj_pos, Length_Obj_pos - QLabel: Text for object scale dimensions
-            Width_Obj_pos_input_field Height_Obj_pos_input_field Length_Obj_pos_input_field - QLineEdit: Input fields for object scale
-            W_slider H_slider L_slider - QSlider: Sliders to adjust scale
-            combo_box - QComboBox: Dropdown menu for object selection
         
         Methods:
             __init__: Initializes the page with necessary UI components and connections.
@@ -473,9 +463,7 @@ class Page1(Page):
     
         """
         Handles window resize event to dynamically change styling
-
-
-        Args:
+        :
             - Object Position:
                 - Object_pos_title: Label for object position.
                 - XObj_pos, YObj_pos, ZObj_pos: Labels for X Y Z positions
@@ -729,7 +717,7 @@ class Page2(Page):
         """
         Handles window resize event
 
-        Args:
+        :
                 -Pivot Position
                 -   Pivot_point_subtitle
                 -   XPivot_pos
@@ -805,24 +793,6 @@ class Page3(Page):
         generate random variables for objects and coords
             
         Args:
-            Set_All_Random_Button - QCheckBox -  Checkbox for setting ALL properties to random values
-            ObjectDimensions_Label - QLabel -  text for object dimensions
-            Width_Button, Height_Button, Length - QCheckBox - Checkboxes for width height and length
-            Object_Coords_Label - QLabel: text for object coordinates
-            X_Button, Y_Button, Z_Button - QCheckBox -  Checkboxes for Object X Y Z coordinates
-            PivotPoint_Label - QLabel -  text for pivot point coordinates
-            X_Button2, Y_Button2, Z_Button2 - QCheckBox: Checkboxes for pivot point coordinates
-            Reflect_Label - QLabel: Text for reflection option
-            Reflect_Button - QCheckBox: Checkbox for randomizing reflection
-            AutoRotationAngle_Label - QLabel -  Text for auto-rotation angle option
-            AutoRotationAngle_Button - QCheckBox -  Checkbox for enabling/disabling auto-rotation
-            ImportObjects_Label - QLabel -  text for importing objects option
-            ImportObjects_Button - QCheckBox -  Checkbox for importing objects
-            ImportEnvironment_Label - QLabel -  text for importing environment option
-            ImportEnvironment_Button - QCheckBox -  Checkbox for importing environment
-            RandomSettingSeed_Label - QLabel - text for random setting seed
-            RandomSeed_Label - QLabel - text displaying the random seed
-            combo_box - QComboBox -  Dropdown for selecting objects
 
         Methods:
             __init__(parent=None) - Initializes the page, setting up all UI components.                
@@ -965,13 +935,8 @@ class Page3(Page):
                 -   RandomSettingSeed_Label
                 -   RandomSeed_Label
                 -   
-    
-
 
             """
-
-
-
         window_width = self.width()
         window_height = self.height()
         
