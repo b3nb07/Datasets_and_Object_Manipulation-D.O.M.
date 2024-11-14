@@ -161,7 +161,7 @@ class Page1(Page):
             XObj_pos, YObj_pos, ZObj_pos - QLabel: Text for the X Y Z of object
             XObj_pos_input_field, YObj_pos_input_field ZObj_pos_input_field - QLineEdit: Input fields for each axis position
             X_button_minus X_button_plus Y_button_minus Y_button_plus, Z_button_minus, Z_button_plus - QPushButton: Buttons for incrementing or decrementing position values
-            Width_Obj_pos, Height_Obj_pos, Length_Obj_pos - QLabel - Text for object scale dimensions
+            Width_Obj_pos, Height_Obj_pos, Length_Obj_pos - QLabel: Text for object scale dimensions
             Width_Obj_pos_input_field Height_Obj_pos_input_field Length_Obj_pos_input_field - QLineEdit: Input fields for object scale
             W_slider H_slider L_slider - QSlider: Sliders to adjust scale
             combo_box - QComboBox: Dropdown menu for object selection
@@ -614,9 +614,7 @@ class Page2(Page):
         self.ZPivot_button_minus.clicked.connect(lambda: self.Minus_click(self.ZPivot_point_input_field))
         ###################
 
-        # Angle Change Section
-        self.Angle_Change_title = QLabel(f"Angle Change Between Images", self)
-        
+        # Angle Change Section        
         self.Distance_Pivot = QLabel("Distance:", self)
         self.Distance_Pivot_input_field = QLineEdit(parent=self)
         self.Distance_Pivot_input_field.setText("0")
@@ -786,9 +784,6 @@ class Page2(Page):
         self.ZPivot_button_minus.setGeometry(int(self.width() * 0.22), int(self.height() * 0.8), 25, 20)
         self.ZPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.8), 25, 20)
 
-        # Angle Change Section
-        self.Angle_Change_title.setGeometry(int(self.width() * 0.30), int(self.height() * 0.01), 200, 30)
-
         # Degrees
         self.Distance_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.01), 150, 30)
         self.Distance_Pivot_input_field.setGeometry(int(self.width() * 0.30), int(self.height() * 0.2), int(self.width() * 0.1), 20)
@@ -807,8 +802,7 @@ class Page3(Page):
         """
         Initialise "Page n"
         
-        This page allows the user to generate random values of properties for objects, including:
-        dimensions, coordinates, pivot point coordinates, reflection, rotation angles,
+        generate random variables for objects and coords
             
         Args:
             Set_All_Random_Button - QCheckBox -  Checkbox for setting ALL properties to random values
@@ -840,6 +834,8 @@ class Page3(Page):
 
         super().__init__(parent)
 
+        self.backend = backend
+
         # First Section
         self.Set_All_Random_Button = QCheckBox("Set all Random", self)
         self.Set_All_Random_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
@@ -853,12 +849,19 @@ class Page3(Page):
         
         self.Width_Button = QCheckBox("Width", self)
         self.Width_Button.setGeometry(150, 30, 65, 20)
+        self.Width_Button.toggled.connect(backend.toggle_random_width)
+
 
         self.Height_Button = QCheckBox("Height", self)
         self.Height_Button.setGeometry(150, 50, 65, 20)
+        self.Height_Button.toggled.connect(backend.toggle_random_height)
+
 
         self.Length_Button = QCheckBox("Length", self)
         self.Length_Button.setGeometry(150, 70, 65, 20)
+        self.Length_Button.toggled.connect(backend.toggle_random_length)
+
+
 
         #Third Section
         self.Object_Coords_Label = QLabel(f"Object x Co-ords:", self)
@@ -866,12 +869,20 @@ class Page3(Page):
 
         self.X_Button = QCheckBox("X", self)
         self.X_Button.setGeometry(215, 50, 30, 20)
+        self.X_Button.stateChanged.connect(backend.toggle_random_coord_x)
+
 
         self.Y_Button = QCheckBox("Y", self)
         self.Y_Button.setGeometry(315, 50, 30, 20)
+        self.Y_Button.stateChanged.connect(backend.toggle_random_coord_y)
+
 
         self.Z_Button = QCheckBox("Z", self)
         self.Z_Button.setGeometry(250, 50, 30, 20)
+        self.Z_Button.stateChanged.connect(backend.toggle_random_coord_z)
+
+
+
 
         self.PivotPoint_Label = QLabel(f"Pivot Point Co-ords:", self)
         self.PivotPoint_Label.setGeometry(275, 50, 120, 20)
@@ -1005,28 +1016,26 @@ class Page3(Page):
 
 
     def set_all_random(self, state):
-                
-        check_state = (state == Qt.Checked)
-        self.Width_Button.setChecked(check_state)
-        self.Height_Button.setChecked(check_state)
-        self.Length_Button.setChecked(check_state)
-        self.X_Button.setChecked(check_state)
-        self.Y_Button.setChecked(check_state)
-        self.Z_Button.setChecked(check_state)
-        self.X_Button2.setChecked(check_state)
-        self.Y_Button2.setChecked(check_state)
-        self.Z_Button2.setChecked(check_state)
-        self.Reflect_Button.setChecked(check_state)
-        self.AutoRotationAngle_Button.setChecked(check_state)
-        self.ImportEnvironment_Button.setChecked(check_state)
 
+        is_checked = state == Qt.Checked
+        self.Width_Button.setChecked(is_checked)
+        self.Height_Button.setChecked(is_checked)
+        self.Length_Button.setChecked(is_checked)
+        self.X_Button.setChecked(is_checked)
+        self.Y_Button.setChecked(is_checked)
+        self.Z_Button.setChecked(is_checked)
+        self.X_Button2.setChecked(is_checked)
+        self.Y_Button2.setChecked(is_checked)
+        self.Z_Button2.setChecked(is_checked)
+        self.AutoRotationAngle_Button.setChecked(is_checked)
+        self.ImportEnvironment_Button.setChecked(is_checked)
 
 
 class Page4(Page):
     """
     Page 4: Render
         
-        Generate 3D Renders
+        Generate Renders
 
         Args:
             GenerateRenders_Button - QPushButton - Button for Generating Renders
@@ -1044,7 +1053,7 @@ class Page4(Page):
             increase_count() - Increases number of renders for buttons
             decrease_count() - Decreases number of renders for buttons
             update_degree_input(slider, input_field) - Updates degree input
-            resizeEvent(event) - Dynamically adjusts the UI components' positions and sizes during window resize
+            resizeEvent(event) - handles resize event
         """
 
     def __init__(self, parent=None):
@@ -1193,7 +1202,8 @@ class Page4(Page):
     
         
     def generate_render(self):
-        backend.render() 
+        backend.render()
+
 
     def set_renders(self):
         try: 

@@ -42,7 +42,9 @@ class Backend():
         }
         config["random"] = {
             "pivot": [],
-            "environment": []
+            "environment": [],
+            "pos": [],
+            "sca": []
         }
         config["render"] = {
             "renders": 1,
@@ -77,6 +79,7 @@ class Backend():
                         o = self.RenderObject(filepath = obj["filename"])
                     else:
                         o = self.RenderObject(primative = obj["primative"])
+                
 
                     o.set_loc(obj["pos"])
                     o.set_rotation(obj["rot"])
@@ -175,7 +178,50 @@ class Backend():
             config["random"]["environment"].remove("background")
         else:
             config["random"]["environment"].append("background")
-        
+
+    def toggle_random_coord_x(self):
+        if "x" in config["random"]["pos"]:
+            config["random"]["pos"].remove("x")
+        else:
+            config["random"]["pos"].append("x")
+        self.add_object_properties()
+
+    def toggle_random_coord_y(self):
+        if "y" in config["random"]["pos"]:
+            config["random"]["pos"].remove("y")
+        else:
+            config["random"]["pos"].append("y")
+        self.add_object_properties()
+
+    def toggle_random_coord_z(self):
+        if "z" in config["random"]["pos"]:
+            config["random"]["pos"].remove("z")
+        else:
+            config["random"]["pos"].append("z")
+        self.add_object_properties()
+
+
+    def toggle_random_width(self):
+        if "width" in config["random"]["sca"]:
+            config["random"]["sca"].remove("width")
+        else:
+            config["random"]["sca"].append("width")
+        self.add_object_properties()
+
+    def toggle_random_height(self):
+        if "height" in config["random"]["sca"]:
+            config["random"]["sca"].remove("height")
+        else:
+            config["random"]["sca"].append("height")
+        self.add_object_properties()
+
+    def toggle_random_length(self):
+        if "length" in config["random"]["sca"]:
+            config["random"]["sca"].remove("length")
+        else:
+            config["random"]["sca"].append("length")
+        self.add_object_properties()
+  
     def is_config_objects_empty(self):
         if config.get("objects") == None:
             return False
@@ -282,13 +328,65 @@ class Backend():
                 current_x_angle += degree_change[0]
                 current_z_angle += degree_change[1]
                 current_y_angle += degree_change[2]
+   
+
+    def add_object_properties(self):
+        #IF ANYONE WANTS ASSIGN VALUES TO RANDOM RANGE I JUST PUT PLACEHOLDER VALUES
+        randoms = config["random"]
+        random_object_pos = randoms["pos"]
+        random_object_scale = randoms["sca"]
+
+        for obj in config["objects"]:
+            position = obj["pos"].copy()
+            scale = obj["sca"].copy()
+
+            default_position = [0, 0, 0]  
+            default_scale = [1, 1, 1]
+            #Position propertis
+            if "x" in random_object_pos:
+                position[0] = random.uniform(1, 10) # random range of x coords - 1-10
+            else:
+                position[0] = default_position[0]
+
+            if "y" in random_object_pos:
+                position[2] = random.uniform(1, 10)
+            else:
+                position[2] = default_position[2]
+
+            if "z" in random_object_pos:
+                position[1] = random.uniform(1, 10)
+            else:
+                position[1] = default_position[1]
+
+            #Scale properties
+            if "width" in random_object_scale:
+                scale[0] = random.uniform(1, 100) # random range of width - 1-100
+            else:
+                scale[0] = default_scale[0]
+
+            if "height" in random_object_scale:
+                scale[1] = random.uniform(1, 100)
+            else:
+                scale[1] = default_scale[1]
+
+            if "length" in random_object_scale:
+                scale[2] = random.uniform(1, 100)
+            else:
+                scale[2] = default_scale[2]
+                    
+            obj["pos"] = position
+            obj["sca"] = scale
+
+            if "object" in obj:
+                obj["object"].set_loc(position)
+                obj["object"].set_scale(scale)
             
-
-
+            print(f"New object position: {position} and scale: {scale}") # displays randomised values when clicked
 
     def render(self):
         """Renders the scene and saves to file in the output folder."""
         self.add_camera_poses()
+        self.add_object_properties()
         
 
         with open("backend\\temp_export.json", "w") as export_file:
@@ -371,7 +469,7 @@ class Backend():
             """
             if (is_blender_environment):
                 self.object.set_location(location)
-
+            
             config["objects"][self.object_pos]["pos"] = location
 
         def set_scale(self, scale):
@@ -381,7 +479,6 @@ class Backend():
             """
             if (is_blender_environment):
                 self.object.set_scale(scale)
-
             config["objects"][self.object_pos]["sca"] = scale
 
         def set_rotation(self, euler_rotation):
@@ -424,7 +521,6 @@ class Backend():
             """
             if (is_blender_environment):
                 self.light.set_location(location)
-                print(f'location updated to (x:{location[0]}, z:{location[1]}, y{location[2]})')
 
             config["light_sources"][self.light_pos]["pos"] = location
 
