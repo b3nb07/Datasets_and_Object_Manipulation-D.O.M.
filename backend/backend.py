@@ -365,12 +365,6 @@ class Backend():
             obj["pos"] = position
             obj["sca"] = scale
 
-            if "object" in obj:
-                obj["object"].set_loc(position)
-                obj["object"].set_scale(scale)
-            
-            # print(f"New object position: {position} and scale: {scale}") # displays randomised values when clicked
-
     def render(self):
         """Renders the scene and saves to file in the output folder."""
         self.add_camera_poses()
