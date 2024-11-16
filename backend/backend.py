@@ -114,7 +114,7 @@ class Backend():
             "degree": [1,1,1]
         }
 
-        config["render_res"] = [1920,1080]
+        config["render_res"] = [256,256]
 
     def set_pivot_point(self, point):
         """ Sets a custom pivotpoint in the scene for rendering.
