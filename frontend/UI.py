@@ -392,6 +392,7 @@ class Page1(Page):
             #print(obj)
             obj.set_loc(location)
         except:
+            QApplication.focusWidget().undo()
             QMessageBox.warning(self, "Error Updating Pos", "X, Y or Z value is invalid")
     
     def update_object_scale(self):
@@ -408,6 +409,7 @@ class Page1(Page):
             #print(obj)
             obj.set_scale(scale)
         except:
+            QApplication.focusWidget().undo()
             QMessageBox.warning(self, "Error Updating Scale", "Width, Height or Length value is invalid")
     
     def update_object_rotation(self):
@@ -425,6 +427,7 @@ class Page1(Page):
             #print(obj)
             obj.set_rotation(rotation)
         except:
+            QApplication.focusWidget().undo()
             QMessageBox.warning(self, "Error Updating Rotation", "X, Y or Z value is invalid")
     
     
@@ -609,13 +612,13 @@ class Page2(Page):
         
         self.Distance_Slider = QtWidgets.QSlider(self)
         self.Distance_Slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Distance_Slider.setRange(0, 1000)
+        self.Distance_Slider.setRange(0, 1000000)
 
         self.Distance_Pivot_input_field.textChanged.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
         self.Distance_Pivot_input_field.setText("0")
         
         #################
-        self.Distance_Slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
+        self.Distance_Slider.sliderMoved.connect(lambda: self.Slider_Update(self.Distance_Pivot_input_field))
         #################
         
         ################### 
@@ -640,7 +643,7 @@ class Page2(Page):
         
     def Update_slider(self, slider, val):
         try:
-            slider.setValue(int(round(float(val), 0)))
+            slider.setValue(int(round(float(val)*1000, 0)))
         except:
             print("Error")
         
@@ -680,6 +683,7 @@ class Page2(Page):
             point = [x,y,z]
             backend.set_pivot_point(point)
         except:
+            QApplication.focusWidget().undo()
             QMessageBox.warning(self, "Error Updating Pivot", "X, Y or Z value is invalid")
             
     def update_distance(self):
@@ -688,6 +692,7 @@ class Page2(Page):
             dis = float(self.Distance_Pivot_input_field.text() or 0)
             backend.set_pivot_distance(dis)
         except:
+            QApplication.focusWidget().undo()
             QMessageBox.warning(self, "Error Updating Distance", "You entered an invalid input.")
     
     
@@ -708,9 +713,10 @@ class Page2(Page):
         except:
             field.setText(str(0.0))
             
-    def Slider_Update(self, val, field):
+    def Slider_Update(self, field):
         """Sets field value to slider value"""
-        field.setText(str(val))
+        val = self.Distance_Slider.value()
+        field.setText(str(val/1000))
 
     def resizeEvent(self, event):
             
@@ -889,7 +895,7 @@ class Page3(Page):
 
         #Section 5
         
-        self.RandomSettingSeed_Label = QLabel(f"Random Setting Seed", self)
+        self.RandomSettingSeed_Label = QLabel(f"Random  Seed", self)
         self.RandomSeed_Label = QLabel(f"<Random Seed>", self)
         self.RandomSeed_Label.setText(str(backend.get_config()["seed"]))
 
@@ -1036,6 +1042,8 @@ class Page4(Page):
         self.Number_of_renders_input_field = QLineEdit(parent=self)
         self.Number_of_renders_input_field.setText("1")
         self.Number_of_renders_input_field.textChanged.connect(self.set_renders)
+        #num_renders_int_validator = QIntValidator(self)
+        #self.Number_of_renders_input_field.setValidator(num_renders_int_validator)
 
 
         self.Number_of_renders_minus = QPushButton('-', self)
@@ -1091,11 +1099,11 @@ class Page4(Page):
         self.Z_Degree_slider.valueChanged.connect(lambda: self.update_degree_input(self.Z_Degree_slider, self.Z_Degree_input_field))
     
     def increase_count(self):
-        number_of_renders_value = float(self.Number_of_renders_input_field.text())
+        number_of_renders_value = int(self.Number_of_renders_input_field.text())
         self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
 
     def decrease_count(self):
-        number_of_renders_value = float(self.Number_of_renders_input_field.text())
+        number_of_renders_value = int(self.Number_of_renders_input_field.text())
         if number_of_renders_value > 1:  # Prevent negative values if needed
             self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
 
@@ -1170,14 +1178,16 @@ class Page4(Page):
 
     def set_renders(self):
         try: 
-            backend.set_renders(float(self.Number_of_renders_input_field.text()))  
+            backend.set_renders(int(self.Number_of_renders_input_field.text()))  
         except:
-            QMessageBox.warning(self, "Error Updating amount of renders", "You entered an invalid input.") 
+            QApplication.focusWidget().undo()
+            QMessageBox.warning(self, "Error Updating amount of renders", "You entered an invalid input.")
     
     def set_angles(self):
         try: 
-            backend.set_angles( [int(self.X_Degree_input_field.text()), int(self.Z_Degree_input_field.text()), int(self.Y_Degree_input_field.text())] )
+            backend.set_angles( [float(self.X_Degree_input_field.text()), float(self.Z_Degree_input_field.text()), float(self.Y_Degree_input_field.text())] )
         except:
+            QApplication.focusWidget().undo()
             QMessageBox.warning(self, "Error Updating angle change", "You entered an invalid input.") 
         
 
