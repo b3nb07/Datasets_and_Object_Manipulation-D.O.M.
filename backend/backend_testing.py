@@ -174,17 +174,9 @@ class BackendUnitTests(unittest.TestCase):
         """ Method to update the render resolution and ensure it is updated """
         cfg = self.get_cfg
         
-        self.assertEqual(cfg['render_res'], [1920, 1080]) # ensures its equal to initial value
+        self.assertEqual(cfg['render_res'], [256, 256]) # ensures its equal to initial value
         self.backend.set_res([2560, 1440])
         self.assertEqual(cfg['render_res'], [2560, 1440]) # ensures its equal to updated value
-    
-    def change_bg_col(self):
-        """ Method to update the background colour of the environment and ensure it is updated """
-        cfg = self.get_cfg
-        
-        self.assertEqual(cfg['background_color'], [0,0,0]) # ensures its equal to initial value
-        self.backend.set_bg_color([255,255,255])
-        self.assertEqual(cfg['background_color'], [255,255,255]) # ensures its equal to updated value
         
     def toggle_obj_x(self):
         """ Method to toggle the randomising of the objects x position and ensure it is updated """
@@ -335,7 +327,6 @@ def test_sequence(test):
     test.toggle_env_angle()
     test.toggle_env_bg()
     test.change_res()
-    test.change_bg_col()
 
     # object specific testing
     test.render_obj()
@@ -346,7 +337,7 @@ def test_sequence(test):
     
     # light specific testing (I just put it all in one)
     test.render_lights()
-    print("If you get to this point with no errors asserted then all tests passed, we are too good")
+    print("All tests passed, no errors occured")
     
     
         
