@@ -85,6 +85,8 @@ class Backend():
 
             if ("render" in temp):
                 config["render"] = temp["render"].copy()
+            if ("seed" in temp):
+                self.set_seed(temp["seed"])
 
     def add_cam_pose(self, pose):
         """Adds a position of a camera to the scene for rendering.
