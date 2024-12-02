@@ -785,7 +785,7 @@ class Page3(Page):
     """
     Page 3: Generate Random
     """
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, ):
 
         """
         Initialise "Page n"
@@ -803,8 +803,9 @@ class Page3(Page):
         """
 
         super().__init__(parent)
+        
 
-        self.backend = backend
+        
 
         # First Section
         self.Set_All_Random_Button = QCheckBox("Set all Random", self)
@@ -818,17 +819,19 @@ class Page3(Page):
         
         self.Width_Button = QCheckBox("Width", self)
         self.Width_Button.setGeometry(150, 30, 65, 20)
-        self.Width_Button.toggled.connect(backend.toggle_random_width)
+        self.Width_Button.toggled.connect(self.on_width_toggle)
 
+
+        #if checked then change value of width text 
 
         self.Height_Button = QCheckBox("Height", self)
         self.Height_Button.setGeometry(150, 50, 65, 20)
-        self.Height_Button.toggled.connect(backend.toggle_random_height)
+        self.Height_Button.toggled.connect(self.on_height_toggle)
 
 
         self.Length_Button = QCheckBox("Length", self)
         self.Length_Button.setGeometry(150, 70, 65, 20)
-        self.Length_Button.toggled.connect(backend.toggle_random_length)
+        self.Length_Button.toggled.connect(self.on_length_toggle)
 
 
 
@@ -838,19 +841,17 @@ class Page3(Page):
 
         self.X_Button = QCheckBox("X", self)
         self.X_Button.setGeometry(215, 50, 30, 20)
-        self.X_Button.stateChanged.connect(backend.toggle_random_coord_x)
+        self.X_Button.toggled.connect(self.on_x_toggle)
 
 
         self.Y_Button = QCheckBox("Y", self)
         self.Y_Button.setGeometry(315, 50, 30, 20)
-        self.Y_Button.stateChanged.connect(backend.toggle_random_coord_y)
+        self.Y_Button.toggled.connect(self.on_y_toggle)
 
 
         self.Z_Button = QCheckBox("Z", self)
         self.Z_Button.setGeometry(250, 50, 30, 20)
-        self.Z_Button.stateChanged.connect(backend.toggle_random_coord_z)
-
-
+        self.Z_Button.toggled.connect(self.on_z_toggle)
 
 
         self.PivotPoint_Label = QLabel(f"Pivot Point Co-ords:", self)
@@ -895,10 +896,87 @@ class Page3(Page):
 
 
         #Third Section
+        self.object_toggle_states = {}
         self.combo_box = QComboBox(self)
-        Obj_list = ["Object 1", "Object 2", "Object 3"]
-        self.combo_box.addItems(Obj_list)
+        self.combo_box.setGeometry(200, 150, 200, 30)
+        #self.combo_box.addItems()
         
+        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        self.combo_box.activated.connect(lambda: self.object_selected())
+
+        self.update_combo_box_items(shared_state.items)
+        shared_state.update_items(items=[]) 
+        shared_state.update_selected(0)    
+
+    def update_combo_box_items(self, items):
+        """Update the combo box with the latest shared state items."""
+        self.combo_box.clear()
+        self.combo_box.addItems(map(lambda o: str(o), items))
+
+
+    def object_selected(self):
+        """Handle object selection from the combo box."""
+        
+        selected_index = self.combo_box.currentIndex()
+        self.reset_toggle_states()
+
+        #self.restore_states()
+
+    def reset_toggle_states(self):
+        """Reset all toggle states to unchecked state."""        
+        self.Width_Button.blockSignals(True)
+        self.Height_Button.blockSignals(True)
+        self.Length_Button.blockSignals(True)
+        self.X_Button.blockSignals(False)
+        self.Y_Button.blockSignals(False)
+        self.Z_Button.blockSignals(False)
+
+        self.Width_Button.setChecked(False)
+        self.Height_Button.setChecked(False)
+        self.Length_Button.setChecked(False)
+        self.X_Button.setChecked(False)
+        self.Y_Button.setChecked(False)
+        self.Z_Button.setChecked(False)
+        
+        self.Width_Button.blockSignals(False)
+        self.Height_Button.blockSignals(False)
+        self.Length_Button.blockSignals(False)
+        self.X_Button.blockSignals(False)
+        self.Y_Button.blockSignals(False)
+        self.Z_Button.blockSignals(False)
+
+    def on_width_toggle(self):
+        selected_index = self.combo_box.currentIndex()
+        if selected_index is not None:
+            backend.toggle_random_width(selected_index)
+
+    def on_height_toggle(self):
+        selected_index = self.combo_box.currentIndex()
+        if selected_index is not None:
+            backend.toggle_random_height(selected_index)
+
+    def on_length_toggle(self):
+        selected_index = self.combo_box.currentIndex()
+        if selected_index is not None:
+            backend.toggle_random_length(selected_index)
+
+    def on_x_toggle(self):
+        selected_index = self.combo_box.currentIndex()
+        if selected_index is not None:
+            backend.toggle_random_coord_x(selected_index)
+
+    def on_y_toggle(self):
+        selected_index = self.combo_box.currentIndex()
+        if selected_index is not None:
+            backend.toggle_random_coord_y(selected_index)
+
+    def on_z_toggle(self):
+        selected_index = self.combo_box.currentIndex()
+        if selected_index is not None:
+            backend.toggle_random_coord_z(selected_index)
+
+
 
 
     def resizeEvent(self, event):

@@ -181,48 +181,50 @@ class Backend():
         else:
             config["random"]["environment"].append("background")
 
-    def toggle_random_coord_x(self):
+    def toggle_random_coord_x(self,selected_index):
         if "x" in config["random"]["pos"]:
             config["random"]["pos"].remove("x")
         else:
             config["random"]["pos"].append("x")
-        self.add_object_properties()
+        self.add_object_properties(selected_index)
 
-    def toggle_random_coord_y(self):
+    def toggle_random_coord_y(self,selected_index):
         if "y" in config["random"]["pos"]:
             config["random"]["pos"].remove("y")
         else:
             config["random"]["pos"].append("y")
-        self.add_object_properties()
+        self.add_object_properties(selected_index)
 
-    def toggle_random_coord_z(self):
+    def toggle_random_coord_z(self,selected_index):
         if "z" in config["random"]["pos"]:
             config["random"]["pos"].remove("z")
         else:
             config["random"]["pos"].append("z")
-        self.add_object_properties()
+        self.add_object_properties(selected_index)
 
 
-    def toggle_random_width(self):
+    def toggle_random_width(self,selected_index):
         if "width" in config["random"]["sca"]:
             config["random"]["sca"].remove("width")
         else:
             config["random"]["sca"].append("width")
-        self.add_object_properties()
+        self.add_object_properties(selected_index)
+        
 
-    def toggle_random_height(self):
+
+    def toggle_random_height(self,selected_index):
         if "height" in config["random"]["sca"]:
             config["random"]["sca"].remove("height")
         else:
             config["random"]["sca"].append("height")
-        self.add_object_properties()
+        self.add_object_properties(selected_index)
 
-    def toggle_random_length(self):
+    def toggle_random_length(self,selected_index):
         if "length" in config["random"]["sca"]:
             config["random"]["sca"].remove("length")
         else:
             config["random"]["sca"].append("length")
-        self.add_object_properties()
+        self.add_object_properties(selected_index)
   
     def is_config_objects_empty(self):
         if config.get("objects") == None:
@@ -332,38 +334,43 @@ class Backend():
                 current_y_angle += degree_change[2]
    
 
-    def add_object_properties(self):
+    def add_object_properties(self,selected_index):
         #IF ANYONE WANTS ASSIGN VALUES TO RANDOM RANGE I JUST PUT PLACEHOLDER VALUES
+        obj = config["objects"][selected_index]
+
+        # Get randomization settings from the config
         randoms = config["random"]
         random_object_pos = randoms["pos"]
         random_object_scale = randoms["sca"]
 
-        for obj in config["objects"]:
-            position = obj["pos"].copy()
-            scale = obj["sca"].copy()
-
+        # Copy current position and scale values
+        position = obj["pos"].copy()
+        scale = obj["sca"].copy()
             #Position propertis
-            if "x" in random_object_pos:
-                position[0] = random.uniform(1, 10) # random range of x coords - 1-10
+        if "x" in random_object_pos:
+            position[0] = random.randint(1, 10) # random range of x coords - 1-10
+            
+        if "y" in random_object_pos:
+            position[2] = random.randint(1, 10)
 
-            if "y" in random_object_pos:
-                position[2] = random.uniform(1, 10)
-
-            if "z" in random_object_pos:
-                position[1] = random.uniform(1, 10)
+        if "z" in random_object_pos:
+            position[1] = random.randint(1, 10)
 
             #Scale properties
-            if "width" in random_object_scale:
-                scale[0] = random.uniform(1, 100) # random range of width - 1-100
+        if "width" in random_object_scale:
+            self.random_object_width = random.randint(1,100)
+            scale[0] = self.random_object_width # random range of width - 1-100
+            
+        if "height" in random_object_scale:
+            scale[1] = random.randint(1, 100)
 
-            if "height" in random_object_scale:
-                scale[1] = random.uniform(1, 100)
-
-            if "length" in random_object_scale:
-                scale[2] = random.uniform(1, 100)
+        if "length" in random_object_scale:
+            scale[2] = random.randint(1, 100)
                     
-            obj["pos"] = position
-            obj["sca"] = scale
+        obj["pos"] = position
+        obj["sca"] = scale
+        obj = config["objects"][selected_index]
+
 
     def render(self):
         """Renders the scene and saves to file in the output folder."""
