@@ -85,6 +85,8 @@ class Backend():
 
             if ("render" in temp):
                 config["render"] = temp["render"].copy()
+            if ("seed" in temp):
+                self.set_seed(temp["seed"])
 
     def add_cam_pose(self, pose):
         """Adds a position of a camera to the scene for rendering.
@@ -143,7 +145,7 @@ class Backend():
     def set_angles(self, angles):
         """ Sets camera angle change per render in the config.
         
-        :param angles: a list containing x z and y anlge change"""
+        :param angles: a list containing x z and y angle change"""
         config["render"]["degree"] = angles
 
     def toggle_random_pivot_x(self):
@@ -332,6 +334,11 @@ class Backend():
                 current_x_angle += degree_change[0]
                 current_z_angle += degree_change[1]
                 current_y_angle += degree_change[2]
+
+    def remove_camera_poses(self):
+        """Remove camera poses that have been used to generate renders"""
+
+        config["camera_poses"] = []
    
 
     def add_object_properties(self,selected_index):
@@ -393,9 +400,12 @@ class Backend():
             to_run.write("import blenderproc as bproc\n" + file_contents + f"""Backend("{path}\\\\temp_export.json")._render()""")
 
         os.system("blenderproc run backend/_temp.py")
-        os.system("blenderproc vis hdf5 output/0.hdf5")
+        for i in range(config["render"]["renders"]):
+            os.system("blenderproc vis hdf5 output/"+str(i)+".hdf5")
         os.remove("backend/_temp.py")
         os.remove("backend/temp_export.json")
+
+        self.remove_camera_poses()
         
     def _render(self):
         """Internal function for rendering. Don't call this normally, it's called for rendering internally."""

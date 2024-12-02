@@ -260,9 +260,9 @@ class Page1(Page):
 
         ########################################
 
-        self.W_slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Width_Obj_pos_input_field))
-        self.H_slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Height_Obj_pos_input_field))
-        self.L_slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Length_Obj_pos_input_field))
+        self.W_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Width_Obj_pos_input_field))
+        self.H_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Height_Obj_pos_input_field))
+        self.L_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Length_Obj_pos_input_field))
         
         ########################################
 
@@ -304,9 +304,9 @@ class Page1(Page):
         self.Y_Rotation_input_field.textChanged.connect(self.update_object_rotation)
         self.Z_Rotation_input_field.textChanged.connect(self.update_object_rotation)
         
-        self.X_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.X_Rotation_input_field))
-        self.Y_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.Y_Rotation_input_field))
-        self.Z_Rotation.valueChanged.connect(lambda val: self.Slider_Update(val, self.Z_Rotation_input_field))
+        self.X_Rotation.sliderMoved.connect(lambda val: self.Slider_Update(val, self.X_Rotation_input_field))
+        self.Y_Rotation.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Y_Rotation_input_field))
+        self.Z_Rotation.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Z_Rotation_input_field))
         
         #########################################
 
@@ -328,6 +328,10 @@ class Page1(Page):
         self.combo_box.addItems(map(lambda o: str(o), items))
         self.combo_box.activated.connect(self.update_label)
 
+    def update_ui_by_config(self):
+        """ Method that updates attributes in text field when the object index is change from combo box. """
+
+        self.on_object_selected(0)
     
     
     def on_object_selected(self, selected_object_pos):
@@ -368,13 +372,24 @@ class Page1(Page):
         self.X_Rotation_input_field.textChanged.connect(self.update_object_rotation)
         self.Y_Rotation_input_field.textChanged.connect(self.update_object_rotation)
         self.Z_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+
+        self.Update_slider(self.W_slider,self.Width_Obj_pos_input_field.text())
+        self.Update_slider(self.H_slider,self.Height_Obj_pos_input_field.text())
+        self.Update_slider(self.L_slider,self.Length_Obj_pos_input_field.text())
+        self.Update_slider(self.X_Rotation,self.X_Rotation_input_field.text())
+        self.Update_slider(self.Y_Rotation,self.Y_Rotation_input_field.text())
+        self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
         
     
     def Update_slider(self, slider, val):
         try:
             slider.setValue(int(round(float(val), 0)))
         except Exception as e:
-            print("Error", e)
+            try:
+                slider.setValue(0)
+            except:
+                print("Error", e)
+
             
     def update_object_pos(self):
         """ Method to dynamically update a targetted object's position """
@@ -392,7 +407,8 @@ class Page1(Page):
             #print(obj)
             obj.set_loc(location)
         except:
-            QMessageBox.warning(self, "Error Updating Pos", "X, Y or Z value is invalid")
+            #QApplication.focusWidget().undo()
+            print("Error Updating PosX, Y or Z value is invalid")
     
     def update_object_scale(self):
         """ Method to dynamically update a targetted object's scale """
@@ -408,7 +424,8 @@ class Page1(Page):
             #print(obj)
             obj.set_scale(scale)
         except:
-            QMessageBox.warning(self, "Error Updating Scale", "Width, Height or Length value is invalid")
+            #QApplication.focusWidget().undo()
+            print("Error Updating Scale, Width, Height or Length value is invalid")
     
     def update_object_rotation(self):
         """ Method to dynamically update a targetted object's rotation """
@@ -425,7 +442,8 @@ class Page1(Page):
             #print(obj)
             obj.set_rotation(rotation)
         except:
-            QMessageBox.warning(self, "Error Updating Rotation", "X, Y or Z value is invalid")
+            #QApplication.focusWidget().undo()
+            print("Error Updating Rotation, X, Y or Z value is invalid")
     
     
     def Plus_click(self, field):
@@ -609,13 +627,13 @@ class Page2(Page):
         
         self.Distance_Slider = QtWidgets.QSlider(self)
         self.Distance_Slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Distance_Slider.setRange(0, 1000)
+        self.Distance_Slider.setRange(0, 100)
 
         self.Distance_Pivot_input_field.textChanged.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
         self.Distance_Pivot_input_field.setText("0")
         
         #################
-        self.Distance_Slider.valueChanged.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
+        self.Distance_Slider.sliderMoved.connect(lambda: self.Slider_Update(self.Distance_Pivot_input_field))
         #################
         
         ################### 
@@ -637,12 +655,53 @@ class Page2(Page):
         self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
+
+    def update_ui_by_config(self):
+        """ Method that updates attributes in text field when the object index is change from combo box. """
+
+        cfg = backend.get_config()
+
+        # disconnects text fields
+        self.Distance_Pivot_input_field.textChanged.disconnect()
+        self.XPivot_point_input_field.textChanged.disconnect()
+        self.YPivot_point_input_field.textChanged.disconnect()
+        self.ZPivot_point_input_field.textChanged.disconnect()
+        self.Pivot_Point_Check.stateChanged.disconnect()
+        self.combo_box.activated.disconnect()
+        
+        self.Distance_Pivot_input_field.setText(str(cfg["pivot"]["dis"]))
+        self.XPivot_point_input_field.setText(str(cfg["pivot"]["point"][0]))
+        self.YPivot_point_input_field.setText(str(cfg["pivot"]["point"][1]))
+        self.ZPivot_point_input_field.setText(str(cfg["pivot"]["point"][2]))
+        self.Pivot_Point_Check.setChecked(True)
+        self.combo_box.setCurrentIndex(-1)
+        if cfg["objects"] != []:
+            self.combo_box.setCurrentIndex(0)
+            
+        # reconnects text fields
+        self.Distance_Pivot_input_field.textChanged.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
+        self.XPivot_point_input_field.textChanged.connect(self.update_pivot)
+        self.YPivot_point_input_field.textChanged.connect(self.update_pivot)
+        self.ZPivot_point_input_field.textChanged.connect(self.update_pivot)
+        self.Pivot_Point_Check.stateChanged.connect(lambda: self.state_changed(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
+        self.combo_box.activated.connect(lambda: self.Object_pivot_selected(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
+
+        self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text())
+        
         
     def Update_slider(self, slider, val):
         try:
             slider.setValue(int(round(float(val), 0)))
-        except:
-            print("Error")
+        except Exception as e:
+            try:
+                slider.setValue(0)
+            except:
+                print("Error", e)
+            
+    def Slider_Update(self, field):
+        """Sets field value to slider value"""
+        val = self.Distance_Slider.value()
+        field.setText(str(val))
         
     def Object_pivot_selected(self, Check, Fields, Buttons):
         "Set checkbox and associsated Fields and buttons False"
@@ -680,7 +739,8 @@ class Page2(Page):
             point = [x,y,z]
             backend.set_pivot_point(point)
         except:
-            QMessageBox.warning(self, "Error Updating Pivot", "X, Y or Z value is invalid")
+            #QApplication.focusWidget().undo()
+            print("Error Updating Pivot, X, Y or Z value is invalid")
             
     def update_distance(self):
         """ Method to dynamically update a targetted object's position """
@@ -688,7 +748,8 @@ class Page2(Page):
             dis = float(self.Distance_Pivot_input_field.text() or 0)
             backend.set_pivot_distance(dis)
         except:
-            QMessageBox.warning(self, "Error Updating Distance", "You entered an invalid input.")
+            #QApplication.focusWidget().undo()
+            print("Error Updating Distance, You entered an invalid input.")
     
     
     def Plus_click(self, field):
@@ -707,10 +768,6 @@ class Page2(Page):
             field.setText(str(val))
         except:
             field.setText(str(0.0))
-            
-    def Slider_Update(self, val, field):
-        """Sets field value to slider value"""
-        field.setText(str(val))
 
     def resizeEvent(self, event):
             
@@ -890,7 +947,7 @@ class Page3(Page):
 
         #Section 5
         
-        self.RandomSettingSeed_Label = QLabel(f"Random Setting Seed", self)
+        self.RandomSettingSeed_Label = QLabel(f"Random  Seed", self)
         self.RandomSeed_Label = QLabel(f"<Random Seed>", self)
         self.RandomSeed_Label.setText(str(backend.get_config()["seed"]))
 
@@ -1056,7 +1113,27 @@ class Page3(Page):
         self.RandomSettingSeed_Label.setGeometry(window_width - x - 10, int(window_height * 0.02), x, 20)
         self.RandomSeed_Label.setGeometry(window_width - self.RandomSeed_Label.width() - 10, int(window_height * 0.2), self.RandomSeed_Label.width(), 20)
 
+    def update_ui_by_config(self):
+        """ Method that updates attributes in text field when the object index is change from combo box. """
 
+        cfg = backend.get_config()
+        print("here")
+
+        self.RandomSeed_Label.setText(str(cfg["seed"]))
+        print("here 2")
+        '''self.Width_Button.setChecked(random_cfg[])
+        self.Height_Button.setChecked(is_checked)
+        self.Length_Button.setChecked(is_checked)
+        self.X_Button.setChecked(is_checked)
+        self.Y_Button.setChecked(is_checked)
+        self.Z_Button.setChecked(is_checked)
+        self.X_Button2.setChecked(is_checked)
+        self.Y_Button2.setChecked(is_checked)
+        self.Z_Button2.setChecked(is_checked)
+        self.AutoRotationAngle_Button.setChecked(is_checked)
+        self.ImportEnvironment_Button.setChecked(is_checked)
+        self.combo_box.setCurrentIndex(0)'''
+    
     def set_all_random(self, state):
         is_checked = state == Qt.Checked
         self.Width_Button.setChecked(is_checked)
@@ -1114,6 +1191,8 @@ class Page4(Page):
         self.Number_of_renders_input_field = QLineEdit(parent=self)
         self.Number_of_renders_input_field.setText("1")
         self.Number_of_renders_input_field.textChanged.connect(self.set_renders)
+        #num_renders_int_validator = QIntValidator(self)
+        #self.Number_of_renders_input_field.setValidator(num_renders_int_validator)
 
 
         self.Number_of_renders_minus = QPushButton('-', self)
@@ -1164,16 +1243,50 @@ class Page4(Page):
         self.Z_Degree_slider.setTickPosition(QSlider.TicksBelow)
 
 
-        self.X_Degree_slider.valueChanged.connect(lambda: self.update_degree_input(self.X_Degree_slider, self.X_Degree_input_field))
-        self.Y_Degree_slider.valueChanged.connect(lambda: self.update_degree_input(self.Y_Degree_slider, self.Y_Degree_input_field))
-        self.Z_Degree_slider.valueChanged.connect(lambda: self.update_degree_input(self.Z_Degree_slider, self.Z_Degree_input_field))
+        self.X_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.X_Degree_slider, self.X_Degree_input_field))
+        self.Y_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.Y_Degree_slider, self.Y_Degree_input_field))
+        self.Z_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.Z_Degree_slider, self.Z_Degree_input_field))
+
+    def update_ui_by_config(self):
+        """ Method that updates attributes in text field when the object index is change from combo box. """
+
+        cfg = backend.get_config()
+
+        self.X_Degree_input_field.textChanged.disconnect()
+        self.Y_Degree_input_field.textChanged.disconnect()
+        self.Z_Degree_input_field.textChanged.disconnect()
+        self.Number_of_renders_input_field.textChanged.disconnect()
+
+        self.X_Degree_input_field.setText(str(cfg["render"]["degree"][0]))
+        self.Y_Degree_input_field.setText(str(cfg["render"]["degree"][2]))
+        self.Z_Degree_input_field.setText(str(cfg["render"]["degree"][1]))
+        self.Number_of_renders_input_field.setText(str(cfg["render"]["renders"]))
+
+        self.X_Degree_input_field.textChanged.connect(self.set_angles)
+        self.Y_Degree_input_field.textChanged.connect(self.set_angles)
+        self.Z_Degree_input_field.textChanged.connect(self.set_angles)
+        self.Number_of_renders_input_field.textChanged.connect(self.set_renders)
+
+        self.Update_slider(self.X_Degree_slider,self.X_Degree_input_field.text())
+        self.Update_slider(self.Y_Degree_slider,self.Y_Degree_input_field.text())
+        self.Update_slider(self.Z_Degree_slider,self.Z_Degree_input_field.text())
+        
     
+    def Update_slider(self, slider, val):
+        try:
+            slider.setValue(int(round(float(val), 0)))
+        except Exception as e:
+            try:
+                slider.setValue(0)
+            except:
+                print("Error", e)
+
     def increase_count(self):
-        number_of_renders_value = float(self.Number_of_renders_input_field.text())
+        number_of_renders_value = int(self.Number_of_renders_input_field.text())
         self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
 
     def decrease_count(self):
-        number_of_renders_value = float(self.Number_of_renders_input_field.text())
+        number_of_renders_value = int(self.Number_of_renders_input_field.text())
         if number_of_renders_value > 1:  # Prevent negative values if needed
             self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
 
@@ -1248,15 +1361,20 @@ class Page4(Page):
 
     def set_renders(self):
         try: 
-            backend.set_renders(float(self.Number_of_renders_input_field.text()))  
+            backend.set_renders(int(self.Number_of_renders_input_field.text()))  
         except:
-            QMessageBox.warning(self, "Error Updating amount of renders", "You entered an invalid input.") 
+            #QApplication.focusWidget().undo()
+            print("Error")
     
     def set_angles(self):
+        self.Update_slider(self.X_Degree_slider,self.X_Degree_input_field.text())
+        self.Update_slider(self.Y_Degree_slider,self.Y_Degree_input_field.text())
+        self.Update_slider(self.Z_Degree_slider,self.Z_Degree_input_field.text())
         try: 
-            backend.set_angles( [int(self.X_Degree_input_field.text()), int(self.Z_Degree_input_field.text()), int(self.Y_Degree_input_field.text())] )
+            backend.set_angles( [float(self.X_Degree_input_field.text()), float(self.Z_Degree_input_field.text()), float(self.Y_Degree_input_field.text())] )
         except:
-            QMessageBox.warning(self, "Error Updating angle change", "You entered an invalid input.") 
+            #QApplication.focusWidget().undo()
+            print("Error")
         
 
 
@@ -1330,6 +1448,8 @@ class Page5(Page):
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0]
                 if (path == ""): return
                 backend = Backend(json_filepath = path)
+                for i in range(4):
+                    self.path.tabwizard.widget(i).update_ui_by_config()
             except Exception:
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
