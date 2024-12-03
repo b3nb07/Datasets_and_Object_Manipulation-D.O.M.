@@ -1,6 +1,9 @@
 """An example script for frontend to get an idea of how it works."""
 from backend import Backend
 import numpy as np
+from time import time
+
+N_RENDERS = 50
 
 # Initialise backend
 backend = Backend()
@@ -18,10 +21,11 @@ light.set_loc([5, -10, 0])
 light.set_energy(5)
 light.set_color([255, 0, 0])
 
-# Set the camera position and change output resolution to 1080p
-backend.add_cam_pose([[0, -10, 0], [np.pi / 2, 0, 0]])
-backend.add_cam_pose([[0, -20, 0], [np.pi / 2, 0, 0]])
-backend.set_res([1920, 1080])
+# Start the benchmark
+start_time = time()
+for _ in range(N_RENDERS):
+    backend.add_cam_pose([[0, -10, 0], [np.pi / 2, 0, 0]])
 
-# Start the render
-backend.render()
+backend.render(headless = True)
+
+print(f"Time taken for {N_RENDERS} renders was: {time() - start_time:.2f}s")
