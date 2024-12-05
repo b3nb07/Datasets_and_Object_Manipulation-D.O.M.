@@ -58,7 +58,7 @@ def Page_1_Section_2_Checker(window, shared_state, Page1, backend):
             
             val = random.randint(1,99)
             Sections[1].setSliderPosition(int(val))
-            
+            Sections[1].sliderMoved.emit(val)
             print(f"Expected {Sections[0].text()}, {'Correct' if Sections[0].text() == str(Sections[1].value()) else 'Incorrect'}")
             
 def Page_1_Section_3_Checker(window, shared_state, Page1, backend):
@@ -77,7 +77,7 @@ def Page_1_Section_3_Checker(window, shared_state, Page1, backend):
             
             val = random.randint(1,359)
             Sections[1].setSliderPosition(int(val))
-            
+            Sections[1].sliderMoved.emit(val)
             print(f"Expected {Sections[0].text()}, {'Correct' if Sections[0].text() == str(Sections[1].value()) else 'Incorrect'}")
     
 def Page_2_Section_1_Checker(window, shared_state, Page2, backend):
@@ -119,13 +119,13 @@ def Page_2_Section_2_Checker(window, shared_state, Page2, backend):
    
    
     for Sections in sections:
-            val = random.randint(1,1000)
+            val = random.randint(1,100)
             Sections[0].setText(str(val))
-            print(f"Expected {val}, {'Correct' if Sections[1].value() == int(val) else 'Incorrect'}") 
+            print(f"Expected {val}, {'Correct' if int(Sections[1].value()) == int(val) else 'Incorrect'}") 
             
-            val = random.randint(1,1000)
+            val = random.randint(1,100)
             Sections[1].setSliderPosition(int(val))
-            
+            Sections[1].sliderMoved.emit(val)
             print(f"Expected {Sections[0].text()}, {'Correct' if Sections[0].text() == str(Sections[1].value()) else 'Incorrect'}")
             
 def Page_2_Section_3_Checker(window, shared_state, Page2, backend):
@@ -181,14 +181,14 @@ def Page_4_Section_1_Checker(window, shared_state, Page4, backend):
             print(f"Expected 1, {'Correct' if Sections[0].text() == str(1) else 'Incorrect'}")
             
             val = random.randint(2,359)
-            val = f"{float(val)}"
+            val = f"{int(val)}"
             Sections[0].setText(str(val))
             print(f"Expected {val}, {'Correct' if Sections[0].text() == val else 'Incorrect'}")
             Sections[1].click()
-            val = float(val) + 1
+            val = int(val) + 1
             print(f"Expected {val} , {'Correct' if Sections[0].text() == str(val) else 'Incorrect'}")
             Sections[2].click()
-            val = float(val) - 1
+            val = int(val) - 1
             print(f"Expected {val} , {'Correct' if Sections[0].text() == str(val) else 'Incorrect'}")
         
 def Page_4_Section_2_Checker(window, shared_state, Page4, backend):
@@ -207,6 +207,7 @@ def Page_4_Section_2_Checker(window, shared_state, Page4, backend):
             
             val = random.randint(2,359)
             Sections[1].setSliderPosition(int(val))
+            Sections[1].sliderMoved.emit(val)
             print(f"Expected {Sections[0].text()}, {'Correct' if Sections[0].text() == str(Sections[1].value()) else 'Incorrect'}")
             
 def Illegal_Field_checker(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend):

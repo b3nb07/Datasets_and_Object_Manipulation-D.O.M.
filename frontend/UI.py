@@ -143,7 +143,7 @@ class Widget(QtWidgets.QWidget):
         self.tabwizard.setTabEnabled(3, False)
         
     def Object_detect(self):
-        State = Backend.is_config_objects_empty(self)
+        State = not Backend.is_config_objects_empty(self)
         for i in range(4):
             self.tabwizard.setTabEnabled(i, State)
 
@@ -1117,10 +1117,8 @@ class Page3(Page):
         """ Method that updates attributes in text field when the object index is change from combo box. """
 
         cfg = backend.get_config()
-        print("here")
 
         self.RandomSeed_Label.setText(str(cfg["seed"]))
-        print("here 2")
         '''self.Width_Button.setChecked(random_cfg[])
         self.Height_Button.setChecked(is_checked)
         self.Length_Button.setChecked(is_checked)
@@ -1282,13 +1280,21 @@ class Page4(Page):
                 print("Error", e)
 
     def increase_count(self):
-        number_of_renders_value = int(self.Number_of_renders_input_field.text())
-        self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
+        try:
+            number_of_renders_value = int(self.Number_of_renders_input_field.text())
+            self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
+        except:
+            number_of_renders_value = 0
+            self.Number_of_renders_input_field.setText(str(number_of_renders_value))
 
     def decrease_count(self):
-        number_of_renders_value = int(self.Number_of_renders_input_field.text())
-        if number_of_renders_value > 1:  # Prevent negative values if needed
-            self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
+        try:
+            number_of_renders_value = int(self.Number_of_renders_input_field.text())
+            if number_of_renders_value > 1:  # Prevent negative values if needed
+                self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
+        except:
+            number_of_renders_value = 0
+            self.Number_of_renders_input_field.setText(str(number_of_renders_value))
 
     def update_degree_input(self, slider, input_field):
         value = slider.value()
@@ -1361,9 +1367,8 @@ class Page4(Page):
 
     def set_renders(self):
         try: 
-            backend.set_renders(int(self.Number_of_renders_input_field.text()))  
+            backend.set_renders(int(self.Number_of_renders_input_field.text()))
         except:
-            #QApplication.focusWidget().undo()
             print("Error")
     
     def set_angles(self):
@@ -1373,7 +1378,6 @@ class Page4(Page):
         try: 
             backend.set_angles( [float(self.X_Degree_input_field.text()), float(self.Z_Degree_input_field.text()), float(self.Y_Degree_input_field.text())] )
         except:
-            #QApplication.focusWidget().undo()
             print("Error")
         
 
