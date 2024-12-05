@@ -143,7 +143,7 @@ class Widget(QtWidgets.QWidget):
         self.tabwizard.setTabEnabled(3, False)
         
     def Object_detect(self):
-        State = Backend.is_config_objects_empty(self)
+        State = not Backend.is_config_objects_empty(self)
         for i in range(4):
             self.tabwizard.setTabEnabled(i, State)
 
@@ -207,10 +207,10 @@ class Page1(Page):
 
         ##########################################################
         
-        # textChanged callbacks that updates backend
-        self.XObj_pos_input_field.textChanged.connect(self.update_object_pos)
-        self.YObj_pos_input_field.textChanged.connect(self.update_object_pos)
-        self.ZObj_pos_input_field.textChanged.connect(self.update_object_pos)
+        # editingFinished callbacks that updates backend
+        self.XObj_pos_input_field.editingFinished.connect(self.update_object_pos)
+        self.YObj_pos_input_field.editingFinished.connect(self.update_object_pos)
+        self.ZObj_pos_input_field.editingFinished.connect(self.update_object_pos)
         
         self.X_button_plus.clicked.connect(lambda: self.Plus_click(self.XObj_pos_input_field))
         self.X_button_minus.clicked.connect(lambda: self.Minus_click(self.XObj_pos_input_field))
@@ -249,14 +249,14 @@ class Page1(Page):
         self.L_slider.setRange(0, 100)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
         
-        self.Width_Obj_pos_input_field.textChanged.connect(lambda: self.Update_slider(self.W_slider, self.Width_Obj_pos_input_field.text()))
-        self.Height_Obj_pos_input_field.textChanged.connect(lambda: self.Update_slider(self.H_slider, self.Height_Obj_pos_input_field.text()))
-        self.Length_Obj_pos_input_field.textChanged.connect(lambda: self.Update_slider(self.L_slider, self.Length_Obj_pos_input_field.text()))
+        self.Width_Obj_pos_input_field.editingFinished.connect(lambda: self.Update_slider(self.W_slider, self.Width_Obj_pos_input_field.text()))
+        self.Height_Obj_pos_input_field.editingFinished.connect(lambda: self.Update_slider(self.H_slider, self.Height_Obj_pos_input_field.text()))
+        self.Length_Obj_pos_input_field.editingFinished.connect(lambda: self.Update_slider(self.L_slider, self.Length_Obj_pos_input_field.text()))
 
-        # textChanged callbacks that updates backend
-        self.Width_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
-        self.Height_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
-        self.Length_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
+        # editingFinished callbacks that updates backend
+        self.Width_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
+        self.Height_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
+        self.Length_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
 
         ########################################
 
@@ -293,16 +293,16 @@ class Page1(Page):
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
         self.Z_Rotation.setRange(0, 360)
         
-        self.X_Rotation_input_field.textChanged.connect(lambda: self.Update_slider(self.X_Rotation, self.X_Rotation_input_field.text()))
-        self.Y_Rotation_input_field.textChanged.connect(lambda: self.Update_slider(self.Y_Rotation, self.Y_Rotation_input_field.text()))
-        self.Z_Rotation_input_field.textChanged.connect(lambda: self.Update_slider(self.Z_Rotation, self.Z_Rotation_input_field.text()))
+        self.X_Rotation_input_field.editingFinished.connect(lambda: self.Update_slider(self.X_Rotation, self.X_Rotation_input_field.text()))
+        self.Y_Rotation_input_field.editingFinished.connect(lambda: self.Update_slider(self.Y_Rotation, self.Y_Rotation_input_field.text()))
+        self.Z_Rotation_input_field.editingFinished.connect(lambda: self.Update_slider(self.Z_Rotation, self.Z_Rotation_input_field.text()))
 
         #########################################
         
-        # textChanged callbacks that updates backend
-        self.X_Rotation_input_field.textChanged.connect(self.update_object_rotation)
-        self.Y_Rotation_input_field.textChanged.connect(self.update_object_rotation)
-        self.Z_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        # editingFinished callbacks that updates backend
+        self.X_Rotation_input_field.editingFinished.connect(self.update_object_rotation)
+        self.Y_Rotation_input_field.editingFinished.connect(self.update_object_rotation)
+        self.Z_Rotation_input_field.editingFinished.connect(self.update_object_rotation)
         
         self.X_Rotation.sliderMoved.connect(lambda val: self.Slider_Update(val, self.X_Rotation_input_field))
         self.Y_Rotation.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Y_Rotation_input_field))
@@ -341,15 +341,15 @@ class Page1(Page):
         if (selected_object is None): return
         
         # disconnects text fields
-        self.XObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
-        self.YObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
-        self.ZObj_pos_input_field.textChanged.disconnect(self.update_object_pos)
-        self.Width_Obj_pos_input_field.textChanged.disconnect(self.update_object_scale)
-        self.Height_Obj_pos_input_field.textChanged.disconnect(self.update_object_scale)
-        self.Length_Obj_pos_input_field.textChanged.disconnect(self.update_object_scale)
-        self.X_Rotation_input_field.textChanged.disconnect(self.update_object_rotation)
-        self.Y_Rotation_input_field.textChanged.disconnect(self.update_object_rotation)
-        self.Z_Rotation_input_field.textChanged.disconnect(self.update_object_rotation)
+        self.XObj_pos_input_field.editingFinished.disconnect(self.update_object_pos)
+        self.YObj_pos_input_field.editingFinished.disconnect(self.update_object_pos)
+        self.ZObj_pos_input_field.editingFinished.disconnect(self.update_object_pos)
+        self.Width_Obj_pos_input_field.editingFinished.disconnect(self.update_object_scale)
+        self.Height_Obj_pos_input_field.editingFinished.disconnect(self.update_object_scale)
+        self.Length_Obj_pos_input_field.editingFinished.disconnect(self.update_object_scale)
+        self.X_Rotation_input_field.editingFinished.disconnect(self.update_object_rotation)
+        self.Y_Rotation_input_field.editingFinished.disconnect(self.update_object_rotation)
+        self.Z_Rotation_input_field.editingFinished.disconnect(self.update_object_rotation)
         
         # sets the text as object attributes
         self.XObj_pos_input_field.setText(str(selected_object["pos"][0]))
@@ -363,15 +363,15 @@ class Page1(Page):
         self.Z_Rotation_input_field.setText(str(selected_object["rot"][2]))
         
         # reconnects text fields
-        self.XObj_pos_input_field.textChanged.connect(self.update_object_pos)
-        self.YObj_pos_input_field.textChanged.connect(self.update_object_pos)
-        self.ZObj_pos_input_field.textChanged.connect(self.update_object_pos)
-        self.Width_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
-        self.Height_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
-        self.Length_Obj_pos_input_field.textChanged.connect(self.update_object_scale)
-        self.X_Rotation_input_field.textChanged.connect(self.update_object_rotation)
-        self.Y_Rotation_input_field.textChanged.connect(self.update_object_rotation)
-        self.Z_Rotation_input_field.textChanged.connect(self.update_object_rotation)
+        self.XObj_pos_input_field.editingFinished.connect(self.update_object_pos)
+        self.YObj_pos_input_field.editingFinished.connect(self.update_object_pos)
+        self.ZObj_pos_input_field.editingFinished.connect(self.update_object_pos)
+        self.Width_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
+        self.Height_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
+        self.Length_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
+        self.X_Rotation_input_field.editingFinished.connect(self.update_object_rotation)
+        self.Y_Rotation_input_field.editingFinished.connect(self.update_object_rotation)
+        self.Z_Rotation_input_field.editingFinished.connect(self.update_object_rotation)
 
         self.Update_slider(self.W_slider,self.Width_Obj_pos_input_field.text())
         self.Update_slider(self.H_slider,self.Height_Obj_pos_input_field.text())
@@ -407,7 +407,6 @@ class Page1(Page):
             #print(obj)
             obj.set_loc(location)
         except:
-            #QApplication.focusWidget().undo()
             print("Error Updating PosX, Y or Z value is invalid")
     
     def update_object_scale(self):
@@ -424,7 +423,6 @@ class Page1(Page):
             #print(obj)
             obj.set_scale(scale)
         except:
-            #QApplication.focusWidget().undo()
             print("Error Updating Scale, Width, Height or Length value is invalid")
     
     def update_object_rotation(self):
@@ -442,7 +440,6 @@ class Page1(Page):
             #print(obj)
             obj.set_rotation(rotation)
         except:
-            #QApplication.focusWidget().undo()
             print("Error Updating Rotation, X, Y or Z value is invalid")
     
     
@@ -629,7 +626,7 @@ class Page2(Page):
         self.Distance_Slider.setOrientation(QtCore.Qt.Horizontal)
         self.Distance_Slider.setRange(0, 100)
 
-        self.Distance_Pivot_input_field.textChanged.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
+        self.Distance_Pivot_input_field.editingFinished.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
         self.Distance_Pivot_input_field.setText("0")
         
         #################
@@ -637,10 +634,10 @@ class Page2(Page):
         #################
         
         ################### 
-        # textChanged callbacks that updates backend
-        self.XPivot_point_input_field.textChanged.connect(self.update_pivot)
-        self.YPivot_point_input_field.textChanged.connect(self.update_pivot)
-        self.ZPivot_point_input_field.textChanged.connect(self.update_pivot)
+        # editingFinished callbacks that updates backend
+        self.XPivot_point_input_field.editingFinished.connect(self.update_pivot)
+        self.YPivot_point_input_field.editingFinished.connect(self.update_pivot)
+        self.ZPivot_point_input_field.editingFinished.connect(self.update_pivot)
 
         
         ################
@@ -662,10 +659,10 @@ class Page2(Page):
         cfg = backend.get_config()
 
         # disconnects text fields
-        self.Distance_Pivot_input_field.textChanged.disconnect()
-        self.XPivot_point_input_field.textChanged.disconnect()
-        self.YPivot_point_input_field.textChanged.disconnect()
-        self.ZPivot_point_input_field.textChanged.disconnect()
+        self.Distance_Pivot_input_field.editingFinished.disconnect()
+        self.XPivot_point_input_field.editingFinished.disconnect()
+        self.YPivot_point_input_field.editingFinished.disconnect()
+        self.ZPivot_point_input_field.editingFinished.disconnect()
         self.Pivot_Point_Check.stateChanged.disconnect()
         self.combo_box.activated.disconnect()
         
@@ -679,10 +676,10 @@ class Page2(Page):
             self.combo_box.setCurrentIndex(0)
             
         # reconnects text fields
-        self.Distance_Pivot_input_field.textChanged.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
-        self.XPivot_point_input_field.textChanged.connect(self.update_pivot)
-        self.YPivot_point_input_field.textChanged.connect(self.update_pivot)
-        self.ZPivot_point_input_field.textChanged.connect(self.update_pivot)
+        self.Distance_Pivot_input_field.editingFinished.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
+        self.XPivot_point_input_field.editingFinished.connect(self.update_pivot)
+        self.YPivot_point_input_field.editingFinished.connect(self.update_pivot)
+        self.ZPivot_point_input_field.editingFinished.connect(self.update_pivot)
         self.Pivot_Point_Check.stateChanged.connect(lambda: self.state_changed(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
         self.combo_box.activated.connect(lambda: self.Object_pivot_selected(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
 
@@ -727,7 +724,7 @@ class Page2(Page):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
         self.combo_box.addItems(map(lambda o: str(o), items))
-        self.Distance_Pivot_input_field.textChanged.connect(self.update_distance)
+        self.Distance_Pivot_input_field.editingFinished.connect(self.update_distance)
     
     def update_pivot(self):
         """ Method to dynamically update a targetted object's position """
@@ -739,7 +736,6 @@ class Page2(Page):
             point = [x,y,z]
             backend.set_pivot_point(point)
         except:
-            #QApplication.focusWidget().undo()
             print("Error Updating Pivot, X, Y or Z value is invalid")
             
     def update_distance(self):
@@ -748,7 +744,6 @@ class Page2(Page):
             dis = float(self.Distance_Pivot_input_field.text() or 0)
             backend.set_pivot_distance(dis)
         except:
-            #QApplication.focusWidget().undo()
             print("Error Updating Distance, You entered an invalid input.")
     
     
@@ -1190,7 +1185,7 @@ class Page4(Page):
         self.Number_of_renders_title = QLabel("Number of Renders", self)
         self.Number_of_renders_input_field = QLineEdit(parent=self)
         self.Number_of_renders_input_field.setText("1")
-        self.Number_of_renders_input_field.textChanged.connect(self.set_renders)
+        self.Number_of_renders_input_field.editingFinished.connect(self.set_renders)
         #num_renders_int_validator = QIntValidator(self)
         #self.Number_of_renders_input_field.setValidator(num_renders_int_validator)
 
@@ -1210,7 +1205,7 @@ class Page4(Page):
         self.X_Degree_Label = QLabel("X:", self)
         self.X_Degree_input_field = QLineEdit(parent=self)
         self.X_Degree_input_field.setText("1")
-        self.X_Degree_input_field.textChanged.connect(self.set_angles)
+        self.X_Degree_input_field.editingFinished.connect(self.set_angles)
         self.X_Degree_slider = QtWidgets.QSlider(self)
         self.X_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
         self.X_Degree_slider.setMinimum(1) 
@@ -1224,7 +1219,7 @@ class Page4(Page):
         self.Y_Degree_input_field = QLineEdit(parent=self)
         self.Y_Degree_slider = QtWidgets.QSlider(self)
         self.Y_Degree_input_field.setText("1")
-        self.Y_Degree_input_field.textChanged.connect(self.set_angles)
+        self.Y_Degree_input_field.editingFinished.connect(self.set_angles)
         self.Y_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
         self.Y_Degree_slider.setMinimum(1)
         self.Y_Degree_slider.setMaximum(360)
@@ -1235,7 +1230,7 @@ class Page4(Page):
         self.Z_Degree_Label = QLabel("Z:", self)
         self.Z_Degree_input_field = QLineEdit(parent=self)
         self.Z_Degree_input_field.setText("1")
-        self.Z_Degree_input_field.textChanged.connect(self.set_angles)
+        self.Z_Degree_input_field.editingFinished.connect(self.set_angles)
         self.Z_Degree_slider = QtWidgets.QSlider(self)
         self.Z_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
         self.Z_Degree_slider.setMinimum(1)
@@ -1252,20 +1247,20 @@ class Page4(Page):
 
         cfg = backend.get_config()
 
-        self.X_Degree_input_field.textChanged.disconnect()
-        self.Y_Degree_input_field.textChanged.disconnect()
-        self.Z_Degree_input_field.textChanged.disconnect()
-        self.Number_of_renders_input_field.textChanged.disconnect()
+        self.X_Degree_input_field.editingFinished.disconnect()
+        self.Y_Degree_input_field.editingFinished.disconnect()
+        self.Z_Degree_input_field.editingFinished.disconnect()
+        self.Number_of_renders_input_field.editingFinished.disconnect()
 
         self.X_Degree_input_field.setText(str(cfg["render"]["degree"][0]))
         self.Y_Degree_input_field.setText(str(cfg["render"]["degree"][2]))
         self.Z_Degree_input_field.setText(str(cfg["render"]["degree"][1]))
         self.Number_of_renders_input_field.setText(str(cfg["render"]["renders"]))
 
-        self.X_Degree_input_field.textChanged.connect(self.set_angles)
-        self.Y_Degree_input_field.textChanged.connect(self.set_angles)
-        self.Z_Degree_input_field.textChanged.connect(self.set_angles)
-        self.Number_of_renders_input_field.textChanged.connect(self.set_renders)
+        self.X_Degree_input_field.editingFinished.connect(self.set_angles)
+        self.Y_Degree_input_field.editingFinished.connect(self.set_angles)
+        self.Z_Degree_input_field.editingFinished.connect(self.set_angles)
+        self.Number_of_renders_input_field.editingFinished.connect(self.set_renders)
 
         self.Update_slider(self.X_Degree_slider,self.X_Degree_input_field.text())
         self.Update_slider(self.Y_Degree_slider,self.Y_Degree_input_field.text())
@@ -1282,11 +1277,11 @@ class Page4(Page):
                 print("Error", e)
 
     def increase_count(self):
-        number_of_renders_value = int(self.Number_of_renders_input_field.text())
+        number_of_renders_value = int(float(self.Number_of_renders_input_field.text()))
         self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
 
     def decrease_count(self):
-        number_of_renders_value = int(self.Number_of_renders_input_field.text())
+        number_of_renders_value = int(float(self.Number_of_renders_input_field.text()))
         if number_of_renders_value > 1:  # Prevent negative values if needed
             self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
 
@@ -1363,7 +1358,6 @@ class Page4(Page):
         try: 
             backend.set_renders(int(self.Number_of_renders_input_field.text()))  
         except:
-            #QApplication.focusWidget().undo()
             print("Error")
     
     def set_angles(self):
@@ -1373,7 +1367,6 @@ class Page4(Page):
         try: 
             backend.set_angles( [float(self.X_Degree_input_field.text()), float(self.Z_Degree_input_field.text()), float(self.Y_Degree_input_field.text())] )
         except:
-            #QApplication.focusWidget().undo()
             print("Error")
         
 

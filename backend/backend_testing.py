@@ -48,7 +48,8 @@ class BackendUnitTests(unittest.TestCase):
         self.assertEqual(cfg['render']['degree'], [1,1,1])
 
         # test objects is empty
-        self.assertEqual(self.backend.is_config_objects_empty(), False) # must fix this so on initilisation objects is empty
+        self.assertEqual(self.backend.is_config_objects_empty(), True)
+
         
     def pivot_update(self):
         """ Method to update the pivot point and ensure it is updated """
@@ -180,49 +181,61 @@ class BackendUnitTests(unittest.TestCase):
         
     def toggle_obj_x(self):
         """ Method to toggle the randomising of the objects x position and ensure it is updated """
+        self.obj = self.backend.RenderObject(primative = "MONKEY")
+
         cfg = self.get_cfg
         cfg['random']['pos']= [] # initilises to empty list
         
-        self.backend.toggle_random_coord_x()
+        self.backend.toggle_random_coord_x(0)
         self.assertNotEqual(cfg['random']['pos'], []) # ensures its not the initialised value
         self.assertEqual(cfg['random']['pos'], ['x']) # ensures its equal to toggled value
         
         # toggle it again
-        self.backend.toggle_random_coord_x()
+        self.backend.toggle_random_coord_x(0)
         self.assertEqual(cfg['random']['pos'], [])
+
+        self.obj.remove_object()
         
     def toggle_obj_y(self):
         """ Method to toggle the randomising of the objects y position and ensure it is updated """
+        self.obj = self.backend.RenderObject(primative = "MONKEY")
+
         cfg = self.get_cfg
         cfg['random']['pos']= [] # initilises to empty list
         
-        self.backend.toggle_random_coord_y()
+        self.backend.toggle_random_coord_y(0)
         self.assertNotEqual(cfg['random']['pos'], []) # ensures its not the initialised value
         self.assertEqual(cfg['random']['pos'], ['y']) # ensures its equal to toggled value
         
         # toggle it again
-        self.backend.toggle_random_coord_y()
+        self.backend.toggle_random_coord_y(0)
         self.assertEqual(cfg['random']['pos'], [])
+
+        self.obj.remove_object()
     
     def toggle_obj_z(self):
         """ Method to toggle the randomising of the objects z position and ensure it is updated """
+        self.obj = self.backend.RenderObject(primative = "MONKEY")
+
         cfg = self.get_cfg
         cfg['random']['pos']= [] # initilises to empty list
         
-        self.backend.toggle_random_coord_z()
+        self.backend.toggle_random_coord_z(0)
         self.assertNotEqual(cfg['random']['pos'], []) # ensures its not the initialised value
         self.assertEqual(cfg['random']['pos'], ['z']) # ensures its equal to toggled value
         
         # toggle it again
-        self.backend.toggle_random_coord_z()
+        self.backend.toggle_random_coord_z(0)
         self.assertEqual(cfg['random']['pos'], [])
+
+        self.obj.remove_object()
         
     def render_obj(self):
         """ Method to import a primitive object and shows config updates"""
         cfg = self.get_cfg
-        self.assertEqual(self.backend.is_config_objects_empty(), False) # no objects should be in cfg
+        self.assertEqual(self.backend.is_config_objects_empty(), True) # no objects should be in cfg
         self.backend.RenderObject(primative="MONKEY")
-        self.assertEqual(self.backend.is_config_objects_empty(), True) # object should be in cfg
+        self.assertEqual(self.backend.is_config_objects_empty(), False) # object should be in cfg
     
         self.backend.RenderObject(primative="CUBE")
         self.backend.RenderObject(primative="MONKEY")

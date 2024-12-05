@@ -230,9 +230,13 @@ class Backend():
   
     def is_config_objects_empty(self):
         if config.get("objects") == None:
-            return False
-        else:
             return True
+        
+        for obj in config.get("objects"):
+            if obj != None:
+                return False
+            
+        return True
         
     def get_config(self):
         return config
@@ -490,6 +494,12 @@ class Backend():
                 self.object.set_rotation_euler(euler_rotation)
 
             config["objects"][self.object_pos]["rot"] = euler_rotation
+
+        def remove_object(self):
+            """Remove the object from the scene"""
+
+            config["objects"][self.object_pos] = None
+
 
         #! TODO: Think of and implement more object manipulation methods
 
