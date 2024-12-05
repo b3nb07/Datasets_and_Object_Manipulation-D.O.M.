@@ -448,8 +448,10 @@ class Page1(Page):
         try:
             val = float(field.text()) + 1
             field.setText(str(val))
+            field.editingFinished.emit()
         except:
             field.setText(str(0.0))
+            field.editingFinished.emit()
         
         
     def Minus_click(self, field):
@@ -457,8 +459,10 @@ class Page1(Page):
         try:
             val = float(field.text()) - 1
             field.setText(str(val))
+            field.editingFinished.emit()
         except:
             field.setText(str(0.0))
+            field.editingFinished.emit()
             
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
@@ -752,8 +756,10 @@ class Page2(Page):
         try:
             val = float(field.text()) + 1
             field.setText(str(val))
+            field.editingFinished.emit()
         except:
             field.setText(str(0.0))
+            field.editingFinished.emit()
         
         
     def Minus_click(self, field):
@@ -761,8 +767,10 @@ class Page2(Page):
         try:
             val = float(field.text()) - 1
             field.setText(str(val))
+            field.editingFinished.emit()
         except:
             field.setText(str(0.0))
+            field.editingFinished.emit()
 
     def resizeEvent(self, event):
             
@@ -1279,11 +1287,13 @@ class Page4(Page):
     def increase_count(self):
         number_of_renders_value = int(float(self.Number_of_renders_input_field.text()))
         self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
+        self.Number_of_renders_input_field.editingFinished.emit()
 
     def decrease_count(self):
         number_of_renders_value = int(float(self.Number_of_renders_input_field.text()))
         if number_of_renders_value > 1:  # Prevent negative values if needed
             self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
+        self.Number_of_renders_input_field.editingFinished.emit()
 
     def update_degree_input(self, slider, input_field):
         value = slider.value()
