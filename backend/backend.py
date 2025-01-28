@@ -326,8 +326,7 @@ class Backend():
             else:
                 position[2] += pivot_point[2] 
 
-            if (position != [0, 0, 0]):
-                self.add_cam_pose([position, camera_rotation])
+            self.add_cam_pose([position, camera_rotation])
 
             if "angle" in randoms["environment"]:
                 current_x_angle += np.deg2rad( random.randint(0,359) )

@@ -123,6 +123,7 @@ def Page_2_Section_2_Checker(window, shared_state, Page2, backend):
     for Sections in sections:
             val = random.randint(1,100)
             Sections[0].setText(str(val))
+            Sections[0].editingFinished.emit()
             print(f"Expected {val}, {'Correct' if int(Sections[1].value()) == int(val) else 'Incorrect'}") 
             
             val = random.randint(1,100)

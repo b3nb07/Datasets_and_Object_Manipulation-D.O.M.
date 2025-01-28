@@ -1192,9 +1192,6 @@ class Page4(Page):
         self.Number_of_renders_input_field = QLineEdit(parent=self)
         self.Number_of_renders_input_field.setText("1")
         self.Number_of_renders_input_field.editingFinished.connect(self.set_renders)
-        #num_renders_int_validator = QIntValidator(self)
-        #self.Number_of_renders_input_field.setValidator(num_renders_int_validator)
-
 
         self.Number_of_renders_minus = QPushButton('-', self)
         self.Number_of_renders_plus = QPushButton('+', self)
@@ -1289,6 +1286,7 @@ class Page4(Page):
         except:
             number_of_renders_value = 0
             self.Number_of_renders_input_field.setText(str(number_of_renders_value))
+        self.Number_of_renders_input_field.editingFinished.emit()
 
     def decrease_count(self):
         try:
@@ -1298,6 +1296,7 @@ class Page4(Page):
         except:
             number_of_renders_value = 0
             self.Number_of_renders_input_field.setText(str(number_of_renders_value))
+        self.Number_of_renders_input_field.editingFinished.emit()
 
     def update_degree_input(self, slider, input_field):
         value = slider.value()
@@ -1686,10 +1685,10 @@ if __name__ == "__main__":
         else:
             objectSelected = Tutorial_Object(window.navbar)
             
-    """
+    
     from Front_tests import Tests
     Tests(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend)
-    """
+    
     
     
     sys.exit(app.exec_())
