@@ -385,7 +385,6 @@ class Backend():
     def render(self, headless = False):
         """Renders the scene and saves to file in the output folder."""
         self.add_camera_poses()
-        # self.add_object_properties()
         
 
         with open("backend\\temp_export.json", "w") as export_file:
@@ -497,6 +496,7 @@ class Backend():
             """Remove the object from the scene"""
 
             config["objects"][self.object_pos] = None
+
 
         #! TODO: Think of and implement more object manipulation methods
 

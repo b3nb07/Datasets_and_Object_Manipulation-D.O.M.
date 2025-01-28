@@ -12,21 +12,22 @@ Generating images of your 3D objects can become a tedious task when generating l
 Contents:
 
 Subject                                     Line
-Introduction	                            6
+Introduction	                              6
 Getting started	                            28
-How to import Objects	                    42
+How to import Objects	                      42
 How to delete an object	                    53
 How to import Settings	                    68
 How to export settings	                    81
 How to manipulate an object	                94
-How to set a pivot point	                117
+How to set a pivot point	                  117
 How to Render an image	                    140
 How to generate random variable values	    159
 
 
 
 Getting started
-To run the program, all you need to do is run the UI.py file in the frontend folder.
+
+In order to run DOM, all you need to do is run the UI.py file in the frontend folder
 
 To begin with you will see a pop-up box prompting you to either enter your custom object – or pick from our tutorial objects if you are just wanting to run a test through the program.
 

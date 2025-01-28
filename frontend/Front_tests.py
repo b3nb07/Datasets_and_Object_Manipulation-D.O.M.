@@ -54,6 +54,7 @@ def Page_1_Section_2_Checker(window, shared_state, Page1, backend):
     for Sections in sections:
             val = random.randint(1,99)
             Sections[0].setText(str(val))
+            Sections[0].editingFinished.emit()
             print(f"Expected {val}, {'Correct' if Sections[1].value() == int(val) else 'Incorrect'}") 
             
             val = random.randint(1,99)
@@ -73,6 +74,7 @@ def Page_1_Section_3_Checker(window, shared_state, Page1, backend):
     for Sections in sections:
             val = random.randint(1,359)
             Sections[0].setText(str(val))
+            Sections[0].editingFinished.emit()
             print(f"Expected {val}, {'Correct' if Sections[1].value() == int(val) else 'Incorrect'}") 
             
             val = random.randint(1,359)
@@ -183,6 +185,7 @@ def Page_4_Section_1_Checker(window, shared_state, Page4, backend):
             val = random.randint(2,359)
             val = f"{int(val)}"
             Sections[0].setText(str(val))
+            Sections[0].editingFinished.emit()
             print(f"Expected {val}, {'Correct' if Sections[0].text() == val else 'Incorrect'}")
             Sections[1].click()
             val = int(val) + 1
@@ -203,6 +206,7 @@ def Page_4_Section_2_Checker(window, shared_state, Page4, backend):
     for Sections in sections:
             val = random.randint(2,359)
             Sections[0].setText(str(val))
+            Sections[0].editingFinished.emit()
             print(f"Expected {val}, {'Correct' if Sections[0].text() == str(val) else 'Incorrect'}") 
             
             val = random.randint(2,359)

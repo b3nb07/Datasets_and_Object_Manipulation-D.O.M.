@@ -3,7 +3,7 @@ from backend import Backend
 import numpy as np
 from time import time
 
-N_RENDERS = 50
+N_RENDERS = 100
 
 # Initialise backend
 backend = Backend()
