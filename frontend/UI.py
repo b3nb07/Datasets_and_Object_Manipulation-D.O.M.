@@ -1120,10 +1120,8 @@ class Page3(Page):
         """ Method that updates attributes in text field when the object index is change from combo box. """
 
         cfg = backend.get_config()
-        print("here")
 
         self.RandomSeed_Label.setText(str(cfg["seed"]))
-        print("here 2")
         '''self.Width_Button.setChecked(random_cfg[])
         self.Height_Button.setChecked(is_checked)
         self.Length_Button.setChecked(is_checked)
@@ -1194,9 +1192,6 @@ class Page4(Page):
         self.Number_of_renders_input_field = QLineEdit(parent=self)
         self.Number_of_renders_input_field.setText("1")
         self.Number_of_renders_input_field.editingFinished.connect(self.set_renders)
-        #num_renders_int_validator = QIntValidator(self)
-        #self.Number_of_renders_input_field.setValidator(num_renders_int_validator)
-
 
         self.Number_of_renders_minus = QPushButton('-', self)
         self.Number_of_renders_plus = QPushButton('+', self)
@@ -1285,14 +1280,22 @@ class Page4(Page):
                 print("Error", e)
 
     def increase_count(self):
-        number_of_renders_value = int(float(self.Number_of_renders_input_field.text()))
-        self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
+        try:
+            number_of_renders_value = int(self.Number_of_renders_input_field.text())
+            self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
+        except:
+            number_of_renders_value = 0
+            self.Number_of_renders_input_field.setText(str(number_of_renders_value))
         self.Number_of_renders_input_field.editingFinished.emit()
 
     def decrease_count(self):
-        number_of_renders_value = int(float(self.Number_of_renders_input_field.text()))
-        if number_of_renders_value > 1:  # Prevent negative values if needed
-            self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
+        try:
+            number_of_renders_value = int(self.Number_of_renders_input_field.text())
+            if number_of_renders_value > 1:  # Prevent negative values if needed
+                self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
+        except:
+            number_of_renders_value = 0
+            self.Number_of_renders_input_field.setText(str(number_of_renders_value))
         self.Number_of_renders_input_field.editingFinished.emit()
 
     def update_degree_input(self, slider, input_field):
@@ -1366,7 +1369,7 @@ class Page4(Page):
 
     def set_renders(self):
         try: 
-            backend.set_renders(int(self.Number_of_renders_input_field.text()))  
+            backend.set_renders(int(self.Number_of_renders_input_field.text()))
         except:
             print("Error")
     
@@ -1682,10 +1685,10 @@ if __name__ == "__main__":
         else:
             objectSelected = Tutorial_Object(window.navbar)
             
-    """
+    
     from Front_tests import Tests
     Tests(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend)
-    """
+    
     
     
     sys.exit(app.exec_())

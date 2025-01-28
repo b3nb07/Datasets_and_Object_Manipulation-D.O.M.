@@ -48,8 +48,6 @@ class Backend():
             if (poses):
                 for pose in poses:
                     self.add_cam_pose(pose)
-            else:
-                self.add_cam_pose([[0, 0, 0], [np.pi / 2, 0, 0]])
             if ("background_color" in temp):
                 self.set_bg_color(temp["background_color"])
             if ("render_res" in temp):
@@ -328,8 +326,7 @@ class Backend():
             else:
                 position[2] += pivot_point[2] 
 
-            if (position != [0, 0, 0]):
-                self.add_cam_pose([position, camera_rotation])
+            self.add_cam_pose([position, camera_rotation])
 
             if "angle" in randoms["environment"]:
                 current_x_angle += np.deg2rad( random.randint(0,359) )
