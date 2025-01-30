@@ -1274,7 +1274,7 @@ class Page4(Page):
         self.Z_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.Z_Degree_slider, self.Z_Degree_input_field))
 
 
-        
+        self.rendering = False
 
     def update_ui_by_config(self):
         """ Method that updates attributes in text field when the object index is change from combo box. """
@@ -1395,13 +1395,21 @@ class Page4(Page):
     
         
     def generate_render(self):
-        self.thread = RenderThread()
+        if not self.rendering:
+            self.rendering = True
+            self.thread = RenderThread()
 
-        self.thread.progress.connect(self.update_loading)
-        self.thread.finished.connect(self.complete_loading)
+            self.thread.progress.connect(self.update_loading)
+            self.thread.finished.connect(self.complete_loading)
 
-        self.thread.start()
-        self.windowUp()
+            self.thread.start()
+            self.windowUp()
+
+            self.thread.quit()
+        else:
+            renderingBox = QMessageBox()
+            renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
+            renderingBox.exec()
         
     
     def windowUp(self):
@@ -1415,6 +1423,7 @@ class Page4(Page):
         self.LoadingBox.update_text(text)
     
     def complete_loading(self):
+        self.rendering = False
         self.LoadingBox.update_text("Rendering complete")
 
 
