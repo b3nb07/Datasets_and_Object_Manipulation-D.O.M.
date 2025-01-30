@@ -16,6 +16,7 @@ path.append("backend")
 from backend import Backend
 import numpy as np
 
+
 """"
     Comment info - 
     Comment at start of class with :""" """" to signify the args,methods within class
@@ -1149,6 +1150,33 @@ class Page3(Page):
         self.AutoRotationAngle_Button.setChecked(is_checked)
         self.ImportEnvironment_Button.setChecked(is_checked)
 
+class RenderThread(QThread):
+    finished = pyqtSignal()
+    progress = pyqtSignal(str)
+
+    def run(self):
+        self.progress.emit("Rendering...")
+        backend.render(headless = True)
+        self.finished.emit()
+        
+class LoadingScreen(QDialog):
+    def __init__(self, text, parent=None):
+        super().__init__(parent)
+
+
+        self.setWindowTitle("Rendering...")
+        self.setWindowModality(Qt.NonModal)
+        self.setGeometry(250, 250, 250, 200)
+
+        layout = QVBoxLayout()
+        self.label = QLabel(text)
+        layout.addWidget(self.label)
+
+        self.setLayout(layout)
+
+    def update_text(self, text):
+        self.label.setText(text)
+
 
 class Page4(Page):
     """
@@ -1244,6 +1272,9 @@ class Page4(Page):
         self.X_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.X_Degree_slider, self.X_Degree_input_field))
         self.Y_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.Y_Degree_slider, self.Y_Degree_input_field))
         self.Z_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.Z_Degree_slider, self.Z_Degree_input_field))
+
+
+        
 
     def update_ui_by_config(self):
         """ Method that updates attributes in text field when the object index is change from combo box. """
@@ -1364,7 +1395,28 @@ class Page4(Page):
     
         
     def generate_render(self):
-        backend.render()
+        self.thread = RenderThread()
+
+        self.thread.progress.connect(self.update_loading)
+        self.thread.finished.connect(self.complete_loading)
+
+        self.thread.start()
+        self.windowUp()
+        
+    
+    def windowUp(self):
+        self.LoadingBox = LoadingScreen("")
+        self.LoadingBox.update_text("")
+        
+
+        self.LoadingBox.show()
+
+    def update_loading(self,text):
+        self.LoadingBox.update_text(text)
+    
+    def complete_loading(self):
+        self.LoadingBox.update_text("Rendering complete")
+
 
 
     def set_renders(self):
@@ -1686,8 +1738,8 @@ if __name__ == "__main__":
             objectSelected = Tutorial_Object(window.navbar)
             
     
-    from Front_tests import Tests
-    Tests(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend)
+    #from Front_tests import Tests
+    #Tests(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend)
     
     
     
