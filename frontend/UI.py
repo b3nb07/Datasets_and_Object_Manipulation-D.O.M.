@@ -631,11 +631,13 @@ class Page2(Page):
         self.Distance_Slider.setOrientation(QtCore.Qt.Horizontal)
         self.Distance_Slider.setRange(0, 100)
 
-        self.Distance_Pivot_input_field.editingFinished.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
+        self.Distance_Pivot_input_field.textChanged.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
+        self.Distance_Pivot_input_field.editingFinished.connect(self.update_distance)
         self.Distance_Pivot_input_field.setText("0")
         
         #################
         self.Distance_Slider.sliderMoved.connect(lambda: self.Slider_Update(self.Distance_Pivot_input_field))
+        self.Distance_Slider.sliderReleased.connect(self.update_distance)
         #################
         
         ################### 
@@ -664,6 +666,7 @@ class Page2(Page):
         cfg = backend.get_config()
 
         # disconnects text fields
+        self.Distance_Pivot_input_field.textChanged.disconnect()
         self.Distance_Pivot_input_field.editingFinished.disconnect()
         self.XPivot_point_input_field.editingFinished.disconnect()
         self.YPivot_point_input_field.editingFinished.disconnect()
@@ -681,7 +684,8 @@ class Page2(Page):
             self.combo_box.setCurrentIndex(0)
             
         # reconnects text fields
-        self.Distance_Pivot_input_field.editingFinished.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
+        self.Distance_Pivot_input_field.textChanged.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
+        self.Distance_Pivot_input_field.editingFinished.connect(self.update_distance)
         self.XPivot_point_input_field.editingFinished.connect(self.update_pivot)
         self.YPivot_point_input_field.editingFinished.connect(self.update_pivot)
         self.ZPivot_point_input_field.editingFinished.connect(self.update_pivot)
@@ -729,7 +733,6 @@ class Page2(Page):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
         self.combo_box.addItems(map(lambda o: str(o), items))
-        self.Distance_Pivot_input_field.editingFinished.connect(self.update_distance)
     
     def update_pivot(self):
         """ Method to dynamically update a targetted object's position """
