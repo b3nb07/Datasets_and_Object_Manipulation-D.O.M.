@@ -17,6 +17,7 @@ from backend import Backend
 import numpy as np
 
 
+
 """"
     Comment info - 
     Comment at start of class with :""" """" to signify the args,methods within class
@@ -1558,6 +1559,14 @@ class Page5(Page):
         self.Delete_Object_Button.setGeometry(750, 10, 125, 50)
         self.Delete_Object_Button.clicked.connect(delete_object)
 
+        def select_render_folder():
+            path = QFileDialog.getExistingDirectory(self, "Select Folder")
+            print(path)
+            backend.set_render_output_folder(path)
+
+        self.Select_Render_Folder_Button = QPushButton('Select Render Folder', self)
+        self.Select_Render_Folder_Button.setGeometry(750, 10, 125, 50)
+        self.Select_Render_Folder_Button.clicked.connect(select_render_folder)
 class MainWindow(QMainWindow):
     """
     Main Window for all the elements

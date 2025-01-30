@@ -85,6 +85,12 @@ class Backend():
                 config["render"] = temp["render"].copy()
             if ("seed" in temp):
                 self.set_seed(temp["seed"])
+            if ("render_folder" in temp):
+                config["render_folder"] = temp["render_folder"]
+
+    def set_render_output_folder(self, path):
+        config["render_folder"] = path
+
 
     def add_cam_pose(self, pose):
         """Adds a position of a camera to the scene for rendering.
@@ -413,13 +419,16 @@ class Backend():
         """Internal function for rendering. Don't call this normally, it's called for rendering internally."""
         data = bproc.renderer.render()
 
-        bproc.writer.write_hdf5("output/", data)
+        bproc.writer.write_hdf5(config["render_folder"], data)
 
     def export(self, filename="export.json"):
         """Exports the current scene setup to a JSON file.
         
         :param filename: The filename of the exported config, defaults to export.json."
         """
+
+        config["render_folder"] = ""
+
         with open(filename, "w") as export_file:
             json.dump(config, export_file, indent = 2)
 
