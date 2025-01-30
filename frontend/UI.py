@@ -1507,10 +1507,23 @@ class Page5(Page):
         self.BrowseFiles_Button = QPushButton('Generate Data Set', self)
         self.BrowseFiles_Button.setGeometry(300, 10, 125, 50)
 
+        def Export_Settings():
+            try:
+                export_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+
+                if (export_path == "" or export_path == None):
+                    pass
+                else:
+                    backend.export(export_path)
+
+            except:
+                ErrorBox = QMessageBox()
+                ErrorBox.setText("There was an error selecting folder, please try again.")
+
         #Fourth Section
         self.ExportSettings_Button = QPushButton('Export Settings', self)
         self.ExportSettings_Button.setGeometry(450, 10, 125, 50)
-        self.ExportSettings_Button.clicked.connect(lambda: backend.export())
+        self.ExportSettings_Button.clicked.connect(Export_Settings)
 
         #Fifth Section
         def Get_Settings_Filepath():
