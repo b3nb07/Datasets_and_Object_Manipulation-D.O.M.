@@ -1560,9 +1560,20 @@ class Page5(Page):
         self.Delete_Object_Button.clicked.connect(delete_object)
 
         def select_render_folder():
-            path = QFileDialog.getExistingDirectory(self, "Select Folder")
-            print(path)
-            backend.set_render_output_folder(path)
+            try:
+                path = QFileDialog.getExistingDirectory(self, "Select Folder")
+
+                if (path == "" or path == None):
+                    pass
+                else:
+                    backend.set_render_output_folder(path)
+
+            except:
+                ErrorBox = QMessageBox()
+                ErrorBox.setText("There was an error selecting folder, please try again.")
+
+            
+
 
         self.Select_Render_Folder_Button = QPushButton('Select Render Folder', self)
         self.Select_Render_Folder_Button.setGeometry(750, 10, 125, 50)
