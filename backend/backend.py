@@ -415,12 +415,14 @@ class Backend():
 
         bproc.writer.write_hdf5("output/", data)
 
-    def export(self, filename="export.json"):
+    def export(self, path, filename="export.json"):
         """Exports the current scene setup to a JSON file.
         
         :param filename: The filename of the exported config, defaults to export.json."
         """
-        with open(filename, "w") as export_file:
+        fp = path + "/" + filename
+        print(fp)
+        with open(fp, "w") as export_file:
             json.dump(config, export_file, indent = 2)
 
     class RenderObject():
