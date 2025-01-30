@@ -1512,19 +1512,14 @@ class Page5(Page):
                     pass
                 else:
                     backend.export(export_path)
-                    #print(export_path)
 
             except:
                 ErrorBox = QMessageBox()
                 ErrorBox.setText("There was an error selecting folder, please try again.")
 
-            
-
-
         #Fourth Section
         self.ExportSettings_Button = QPushButton('Export Settings', self)
         self.ExportSettings_Button.setGeometry(450, 10, 125, 50)
-        #self.ExportSettings_Button.clicked.connect(lambda: backend.export())
         self.ExportSettings_Button.clicked.connect(Export_Settings)
 
         #Fifth Section
