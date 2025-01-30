@@ -29,6 +29,8 @@ class Backend():
 
         :param json_filepath: Filepath to a JSON configuration file.
         """
+        
+
         if (is_blender_environment):
             bproc.init()
         
@@ -119,6 +121,7 @@ class Backend():
             "renders": 1,
             "degree": [1,1,1]
         }
+        config["render_folder"] = ""
 
         config["render_res"] = [256,256]
 
@@ -418,8 +421,10 @@ class Backend():
     def _render(self):
         """Internal function for rendering. Don't call this normally, it's called for rendering internally."""
         data = bproc.renderer.render()
-
-        bproc.writer.write_hdf5(config["render_folder"], data)
+        if config["render_folder"] == "":
+            bproc.writer.write_hdf5("output/", data)
+        else:
+            bproc.writer.write_hdf5(config["render_folder"], data)
 
     def export(self, filename="export.json"):
         """Exports the current scene setup to a JSON file.

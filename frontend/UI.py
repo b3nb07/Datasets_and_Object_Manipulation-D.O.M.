@@ -1463,6 +1463,8 @@ class Page5(Page):
 
         """
         super().__init__(parent)
+        
+
 
         #First Section
         def Get_Object_Filepath():
@@ -1561,12 +1563,12 @@ class Page5(Page):
 
         def select_render_folder():
             try:
-                path = QFileDialog.getExistingDirectory(self, "Select Folder")
+                new_path = QFileDialog.getExistingDirectory(self, "Select Folder")
 
-                if (path == "" or path == None):
+                if (new_path == "" or new_path == None):
                     pass
                 else:
-                    backend.set_render_output_folder(path)
+                    backend.set_render_output_folder(new_path)
 
             except:
                 ErrorBox = QMessageBox()
