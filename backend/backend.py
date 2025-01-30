@@ -29,6 +29,8 @@ class Backend():
 
         :param json_filepath: Filepath to a JSON configuration file.
         """
+        
+
         if (is_blender_environment):
             bproc.init()
         
@@ -85,6 +87,12 @@ class Backend():
                 config["render"] = temp["render"].copy()
             if ("seed" in temp):
                 self.set_seed(temp["seed"])
+            if ("render_folder" in temp):
+                config["render_folder"] = temp["render_folder"]
+
+    def set_render_output_folder(self, path):
+        config["render_folder"] = path
+
 
     def add_cam_pose(self, pose):
         """Adds a position of a camera to the scene for rendering.
@@ -113,6 +121,7 @@ class Backend():
             "renders": 1,
             "degree": [1,1,1]
         }
+        config["render_folder"] = ""
 
         config["render_res"] = [256,256]
 
@@ -412,8 +421,10 @@ class Backend():
     def _render(self):
         """Internal function for rendering. Don't call this normally, it's called for rendering internally."""
         data = bproc.renderer.render()
-
-        bproc.writer.write_hdf5("output/", data)
+        if config["render_folder"] == "":
+            bproc.writer.write_hdf5("output/", data)
+        else:
+            bproc.writer.write_hdf5(config["render_folder"], data)
 
     def export(self, path, filename="export.json"):
         """Exports the current scene setup to a JSON file.
