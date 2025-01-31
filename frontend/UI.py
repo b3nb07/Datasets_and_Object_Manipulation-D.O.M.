@@ -966,6 +966,9 @@ class Render(QWidget):
         self.Y_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.Y_Degree_slider, self.Y_Degree_input_field))
         self.Z_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.Z_Degree_slider, self.Z_Degree_input_field))
 
+        self.unlimited_render_button = QPushButton("Unlimited Renders", self)
+        self.unlimited_render_button.setCheckable(True)
+        self.unlimited_render_button.clicked.connect(self.unlimitedrender)
 
         self.rendering = False
 
@@ -991,9 +994,25 @@ class Render(QWidget):
         main_layout.addWidget(self.Z_Degree_input_field, 1, 6)
         main_layout.addWidget(self.Z_Degree_slider, 2, 6)
 
+        main_layout.addWidget(self.unlimited_render_button, 1, 7)
+
         main_layout.addWidget(self.GenerateRenders_Button, 0, 7)
 
         self.setLayout(main_layout)
+
+    def unlimitedrender(self):
+        test = True
+        while True:
+            if (self.rendering):
+                loop = QEventLoop()
+                QTimer.singleShot(2000, loop.quit)
+                loop.exec()
+                continue
+            if self.unlimited_render_button.isChecked():
+                self.Number_of_renders_input_field.setText("1")
+                self.generate_render()
+            else:
+                test = False
 
 
 
@@ -1160,7 +1179,7 @@ class Port(QWidget):
 
         #Fourth Section
         self.ExportSettings_Button = QPushButton('Export Settings', self)
-        self.ExportSettings_Button.clicked.connect(lambda: backend.export())
+        self.ExportSettings_Button.clicked.connect(Export_Settings)
 
         #Fifth Section
         def Get_Settings_Filepath():
@@ -1206,6 +1225,26 @@ class Port(QWidget):
         self.Delete_Object_Button = QPushButton('Delete Object', self)
 
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget))
+        
+        
+        def select_render_folder():
+            try:
+                new_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+
+                if (new_path == "" or new_path == None):
+                    pass
+                else:
+                    backend.set_render_output_folder(new_path)
+
+            except:
+                ErrorBox = QMessageBox()
+                ErrorBox.setText("There was an error selecting folder, please try again.")
+
+        self.SelectRenderFolder_Button = QPushButton('Change Render Folder', self)
+        self.SelectRenderFolder_Button.clicked.connect(select_render_folder)
+
+
+
 
         def Object_detect(tab_widget):
             State = not Backend.is_config_objects_empty(tab_widget)
@@ -1220,6 +1259,7 @@ class Port(QWidget):
         main_layout.addWidget(self.ImportSettings_Button, 0, 3)
         main_layout.addWidget(self.Delete_Object_Button, 0, 4)
         main_layout.addWidget(self.BrowseFiles_Button, 0, 5)
+        main_layout.addWidget(self.SelectRenderFolder_Button, 0, 6)
 
         self.setLayout(main_layout)
 
