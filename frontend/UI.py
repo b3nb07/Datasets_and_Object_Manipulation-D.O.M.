@@ -60,6 +60,33 @@ class ComboBoxState(QObject):
         # maybe delete
         self.selection_changed.emit(index)
 
+class RenderThread(QThread):
+    finished = pyqtSignal()
+    progress = pyqtSignal(str)
+
+    def run(self):
+        self.progress.emit("Rendering...")
+        backend.render(headless = True)
+        self.finished.emit()
+
+class LoadingScreen(QDialog):
+    def __init__(self, text, parent=None):
+        super().__init__(parent)
+
+
+        self.setWindowTitle("Rendering...")
+        self.setWindowModality(Qt.NonModal)
+        self.setGeometry(250, 250, 250, 200)
+
+        layout = QVBoxLayout()
+        self.label = QLabel(text)
+        layout.addWidget(self.label)
+
+        self.setLayout(layout)
+
+    def update_text(self, text):
+        self.label.setText(text)
+
 # creates this shared state
 shared_state = ComboBoxState()
 
@@ -1068,7 +1095,6 @@ class Render(QWidget):
             backend.set_angles( [float(self.X_Degree_input_field.text()), float(self.Z_Degree_input_field.text()), float(self.Y_Degree_input_field.text())] )
         except:
             print("Error")
-
 
 class Port(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
