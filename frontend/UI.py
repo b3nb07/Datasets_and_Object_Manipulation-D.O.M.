@@ -1003,6 +1003,11 @@ class Render(QWidget):
 
         self.setLayout(main_layout)
 
+
+
+
+
+    
     def unlimitedrender(self):
         test = True
         while True:
@@ -1127,7 +1132,6 @@ class Port(QWidget):
         super().__init__(parent)
         
 
-
         #First Section
         def Get_Object_Filepath():
             try:
@@ -1137,6 +1141,11 @@ class Port(QWidget):
                 shared_state.add_item(backend.RenderObject(filepath = path))
                 
                 Object_detect(tab_widget)
+
+                success_box = QMessageBox()
+                success_box.setWindowTitle("Success")
+                success_box.setText("Object successfully imported.")
+                success_box.exec()
 
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
@@ -1156,8 +1165,20 @@ class Port(QWidget):
             Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
 
             Tutorial_Box.exec()
-            obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-            shared_state.add_item(obj)
+            try:
+                obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+                shared_state.add_item(obj)
+
+                success_box = QMessageBox()
+                success_box.setWindowTitle("Success")
+                success_box.setText("Object successfully imported.")
+                success_box.exec()
+                
+            except:
+                error_box = QMessageBox()
+                error_box.setWindowTitle("Error")
+                error_box.setText("Error loading tutorial object.")
+                error_box.exec()
     
             Object_detect(tab_widget)
 
@@ -1175,10 +1196,17 @@ class Port(QWidget):
                     pass
                 else:
                     backend.export(export_path)
+                    success_box = QMessageBox()
+                    success_box.setWindowTitle("Success")
+                    success_box.setText("Setting successfully exported.")
+                    success_box.exec()
+                   
+
 
             except:
-                ErrorBox = QMessageBox()
-                ErrorBox.setText("There was an error selecting folder, please try again.")
+                error_box = QMessageBox()
+                error_box.setText("There was an error selecting folder, please try again.")
+                error_box.exec()
 
         #Fourth Section
         self.ExportSettings_Button = QPushButton('Export Settings', self)
@@ -1192,6 +1220,22 @@ class Port(QWidget):
                 backend = Backend(json_filepath = path)
                 for i in range(4):
                     self.path.tabwizard.widget(i).update_ui_by_config()
+                
+                success_box = QMessageBox()
+                success_box.setWindowTitle("Success")
+                success_box.setText("Setting successfully imported.")
+                success_box.exec()
+
+            """
+                HELLO FUTURE ILYA
+                IMPORT SETTINGS DOESNT WORK
+                :SHRUG:
+                MAYBE RE DO IT
+
+                QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
+
+                TRY THIS BUT NOT WARNING INSTEAD OF YOUR 100% TOO LONG BS
+            """
             except Exception:
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
@@ -1211,7 +1255,19 @@ class Port(QWidget):
             to_delete.exec()
             obj_index = int(to_delete.clickedButton().text()[-1]) - 1
             obj = shared_state.items[obj_index]
-            shared_state.remove_item(obj)
+            try:
+                shared_state.remove_item(obj)
+
+                success_box = QMessageBox()
+                success_box.setWindowTitle("Success")
+                success_box.setText("Object deleted.")
+                success_box.exec()
+            except:
+                error_box = QMessageBox()
+                error_box.setWindowTitle("Error")
+                error_box.setText("Error deleting object.")
+                error_box.exec()
+
             del backend.get_config()["objects"][obj.object_pos]
             # shift objects after this one down by one
             for i in range(obj_index, len(shared_state.items)):
@@ -1238,10 +1294,17 @@ class Port(QWidget):
                     pass
                 else:
                     backend.set_render_output_folder(new_path)
+                    success_box = QMessageBox()
+                    success_box.setWindowTitle("Success")
+                    success_box.setText("Render folder changed.")
+                    success_box.exec()
 
             except:
-                ErrorBox = QMessageBox()
-                ErrorBox.setText("There was an error selecting folder, please try again.")
+                error_box = QMessageBox()
+                error_box.setWindowTitle("Error")
+                error_box.setText("There was an error selecting folder, please try again.")
+                error_box.exec()
+
 
         self.SelectRenderFolder_Button = QPushButton('Change Render Folder', self)
         self.SelectRenderFolder_Button.clicked.connect(select_render_folder)
