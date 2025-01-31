@@ -16,6 +16,13 @@ path.append("backend")
 from backend import Backend
 import numpy as np
 
+""""
+    Comment info - 
+    Comment at start of class with :""" """" to signify the args,methods within class
+    Add comment at start of methods describing their purpose
+    Add green comments during parts of code you need to explain
+
+"""
 # Initialise backend
 backend = Backend()
 
@@ -1073,6 +1080,8 @@ class Render(QWidget):
 class Port(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
+        
+
 
         #First Section
         def Get_Object_Filepath():
@@ -1112,6 +1121,19 @@ class Port(QWidget):
 
         #Third Section --> LEFT FOR NOW
         self.BrowseFiles_Button = QPushButton('Generate Data Set', self)
+
+        def Export_Settings():
+            try:
+                export_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+
+                if (export_path == "" or export_path == None):
+                    pass
+                else:
+                    backend.export(export_path)
+
+            except:
+                ErrorBox = QMessageBox()
+                ErrorBox.setText("There was an error selecting folder, please try again.")
 
         #Fourth Section
         self.ExportSettings_Button = QPushButton('Export Settings', self)
@@ -1159,6 +1181,7 @@ class Port(QWidget):
     
         #Sixth section
         self.Delete_Object_Button = QPushButton('Delete Object', self)
+
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget))
 
         def Object_detect(tab_widget):
