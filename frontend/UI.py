@@ -969,6 +969,9 @@ class Render(QWidget):
         self.Y_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.Y_Degree_slider, self.Y_Degree_input_field))
         self.Z_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.Z_Degree_slider, self.Z_Degree_input_field))
 
+        self.unlimited_render_button = QPushButton("Unlimited Renders", self)
+        self.unlimited_render_button.setCheckable(True)
+        self.unlimited_render_button.clicked.connect(self.unlimitedrender)
 
         self.rendering = False
 
@@ -994,9 +997,25 @@ class Render(QWidget):
         main_layout.addWidget(self.Z_Degree_input_field, 1, 6)
         main_layout.addWidget(self.Z_Degree_slider, 2, 6)
 
+        main_layout.addWidget(self.unlimited_render_button, 1, 7)
+
         main_layout.addWidget(self.GenerateRenders_Button, 0, 7)
 
         self.setLayout(main_layout)
+
+    def unlimitedrender(self):
+        test = True
+        while True:
+            if (self.rendering):
+                loop = QEventLoop()
+                QTimer.singleShot(2000, loop.quit)
+                loop.exec()
+                continue
+            if self.unlimited_render_button.isChecked():
+                self.Number_of_renders_input_field.setText("1")
+                self.generate_render()
+            else:
+                test = False
 
 
 
