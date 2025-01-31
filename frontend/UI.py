@@ -16,7 +16,6 @@ path.append("backend")
 from backend import Backend
 import numpy as np
 
-
 """"
     Comment info - 
     Comment at start of class with :""" """" to signify the args,methods within class
@@ -24,28 +23,19 @@ import numpy as np
     Add green comments during parts of code you need to explain
 
 """
-
-
-
 # Initialise backend
 backend = Backend()
 
-
-
 class ComboBoxState(QObject):
-
     """"
     ComboBoxState is a child of QObject, used to handle and maintain the shared box states
     Args:
-
 
     Methods:
         update_items
         add_item
         remove_item
         Update_selected
-
-
     """
     # Defines basic signals for items and selection updates
     items_updated = pyqtSignal(list) # signal to send when items are updated
@@ -78,111 +68,71 @@ class ComboBoxState(QObject):
         self.selection_changed.emit(index)
 
 
+class RenderThread(QThread):
+    finished = pyqtSignal()
+    progress = pyqtSignal(str)
+
+    def run(self):
+        self.progress.emit("Rendering...")
+        backend.render(headless = True)
+        self.finished.emit()
+
+class LoadingScreen(QDialog):
+    def __init__(self, text, parent=None):
+        super().__init__(parent)
+
+
+        self.setWindowTitle("Rendering...")
+        self.setWindowModality(Qt.NonModal)
+        self.setGeometry(250, 250, 250, 200)
+
+        layout = QVBoxLayout()
+        self.label = QLabel(text)
+        layout.addWidget(self.label)
+
+        self.setLayout(layout)
+
+    def update_text(self, text):
+        self.label.setText(text)
+
 # creates this shared state
 shared_state = ComboBoxState()
 
-class Page(QtWidgets.QWidget):
-    """
-    Navbar page creation class
-    """
-    completeChanged = QtCore.pyqtSignal()
-
-    def __init__(self, parent=None):
-        """
-        Intialise page class
-        """
+class TabDialog(QWidget):
+    def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        lay = QtWidgets.QVBoxLayout(self)
-        lay.addWidget(self.container)
+        self.setWindowTitle("Datasets and Object Modeling")
+        """stream = QtCore.QFile("Style\DarkMode.qss")
+        stream.open(QtCore.QIODevice.ReadOnly)
+        self.setStyleSheet(QtCore.QTextStream(stream).readAll())"""
 
-    @cached_property
-    def container(self):
-        return QtWidgets.QWidget()
+        tab_widget = QTabWidget()
+        tab_widget.addTab(ObjectTab(self), "Object")
+        tab_widget.addTab(PivotTab(self), "Pivot Point")
+        tab_widget.addTab(Random(self), "Random")
+        tab_widget.addTab(Render(self), "Render")
+        tab_widget.addTab(Port(self, tab_widget), "Import/Export")
 
-class TabWizard(QTabWidget):
-    """
-    creates a tab like widget For the Navbar
-    """
-    def __init__(self, parent=None):
-        super().__init__(parent)
+        tab_widget.setTabEnabled(0, False)
+        tab_widget.setTabEnabled(1, False)
+        tab_widget.setTabEnabled(2, False)
+        tab_widget.setTabEnabled(3, False)
 
-    def addPage(self, page, title):
-        """
 
-        """
-        if not isinstance(page, Page):
-            raise TypeError(f"{page} must be a Page object")
-        self.addTab(page, title)
+        tab_widget.setFixedHeight(200)
+        # enviroment
+        environment = QWidget()
+        environment.setStyleSheet("background-color: black;")
+        self.setMinimumSize(920, 700) # minimum size of program
 
-class Widget(QtWidgets.QWidget):
-    """
-    Class to Add all pages into a tabwizard
-    """
-    def __init__(self):
-        """
-        Initialise widget class for Navbar
-        """
-        super().__init__()
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(tab_widget)
+        main_layout.addWidget(environment)
+        self.setLayout(main_layout)
 
-        #nav bar widget adding
-        self.tabwizard = TabWizard()
-        lay = QVBoxLayout(self)
-        lay.addWidget(self.tabwizard)
 
-        #applying stlyes
-        self.tabwizard.setStyleSheet(GlobalStyles.style())
-
-        
-        #pages
-        self.tabwizard.addPage(Page1(), "Object")
-        self.tabwizard.addPage(Page2(), "Pivot Point")
-        self.tabwizard.addPage(Page3(), "Generate Random")
-        self.tabwizard.addPage(Page4(), "Render")
-        self.tabwizard.addPage(Page5(self), "Import and Export")
-        self.tabwizard.setTabEnabled(0, False)
-        self.tabwizard.setTabEnabled(1, False)
-        self.tabwizard.setTabEnabled(2, False)
-        self.tabwizard.setTabEnabled(3, False)
-        
-    def Object_detect(self):
-        State = not Backend.is_config_objects_empty(self)
-        for i in range(4):
-            self.tabwizard.setTabEnabled(i, State)
-
-        
-class Page1(Page):
-    """
-    Page 1: Objects
-    """
-    def __init__(self, parent=None):
-        """
-        Initialise "Page n"
-        
-        Methods:
-            __init__: Initializes the page with necessary UI components and connections.
-            update_combo_box_items: Updates items in the combo box.
-            on_object_selected: Changes displayed attributes when a new object is selected.
-            Update_slider: Syncs text input to slider position.
-            update_object_pos: Updates object position based on input fields.
-            update_object_scale: Updates object scale dynamically.
-            update_object_rotation: Adjusts object rotation as per input fields.
-            Plus_click: Increments input field by 1.
-            Minus_click: Decrements input field by 1.
-            Slider_Update: Sets input field to slider value.
-            update_label: Updates labels for position, scale, and rotation sections.
-            resizeEvent: Adjusts component positions on window resize.
-        
-        """
-
-    def __init__(self, parent=None):
-        """
-        Initialize Page 1:Object Manipulation UI components and buttons for object interaction
-        
-        Args:
-            parent (QWidget, optional): Parent widget for this page.
-        """
-
-        
+class ObjectTab(QWidget):
+    def __init__(self, parent: QWidget):
         super().__init__(parent)
 
         self.Object_pos_title = QLabel(f"Object 1 Co-ords", self)
@@ -206,24 +156,7 @@ class Page1(Page):
 
         self.Z_button_minus = QPushButton('-', self)
         self.Z_button_plus = QPushButton('+', self)
-
-        ##########################################################
-        
-        # editingFinished callbacks that updates backend
-        self.XObj_pos_input_field.editingFinished.connect(self.update_object_pos)
-        self.YObj_pos_input_field.editingFinished.connect(self.update_object_pos)
-        self.ZObj_pos_input_field.editingFinished.connect(self.update_object_pos)
-        
-        self.X_button_plus.clicked.connect(lambda: self.Plus_click(self.XObj_pos_input_field))
-        self.X_button_minus.clicked.connect(lambda: self.Minus_click(self.XObj_pos_input_field))
-        
-        self.Y_button_plus.clicked.connect(lambda: self.Plus_click(self.YObj_pos_input_field))
-        self.Y_button_minus.clicked.connect(lambda: self.Minus_click(self.YObj_pos_input_field))
-        
-        self.Z_button_plus.clicked.connect(lambda: self.Plus_click(self.ZObj_pos_input_field))
-        self.Z_button_minus.clicked.connect(lambda: self.Minus_click(self.ZObj_pos_input_field))
-        
-        ##########################################################
+        ####################################################################
         self.Object_scale_title = QLabel(f"Object 1 Scale", self)
 
         self.Width_Obj_pos = QLabel("Width:", self)
@@ -253,27 +186,6 @@ class Page1(Page):
         self.L_slider.setRange(0, 100)
         self.L_slider.setPageStep(0)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
-        
-        self.Width_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.W_slider, self.Width_Obj_pos_input_field.text()))
-        self.Height_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.H_slider, self.Height_Obj_pos_input_field.text()))
-        self.Length_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.L_slider, self.Length_Obj_pos_input_field.text()))
-
-        # editingFinished callbacks that updates backend
-        self.Width_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
-        self.Height_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
-        self.Length_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
-
-        ########################################
-        
-        self.W_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Width_Obj_pos_input_field))
-        self.H_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Height_Obj_pos_input_field))
-        self.L_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Length_Obj_pos_input_field))
-
-        self.W_slider.sliderReleased.connect(self.update_object_scale)
-        self.H_slider.sliderReleased.connect(self.update_object_scale)
-        self.L_slider.sliderReleased.connect(self.update_object_scale)
-        
-        ########################################
 
         self.Object_rotation_title = QLabel(f"Object 1 Rotation", self)
 
@@ -303,12 +215,111 @@ class Page1(Page):
         self.Z_Rotation.setPageStep(0)
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
         self.Z_Rotation.setRange(0, 360)
+
+        # create initial combo_box
+        self.combo_box = QComboBox(self)
+        # connecting shared state updates to combo box
+        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        self.combo_box.currentIndexChanged.connect(self.on_object_selected)
+
+        # initialise items
+        self.update_combo_box_items(shared_state.items)
+        shared_state.update_items(items=[])
+        shared_state.update_selected(0)
+
+        ####################################################
+
+        main_layout = QGridLayout()
+        main_layout.addWidget(self.Object_pos_title, 0, 0)
+
+        main_layout.addWidget(self.XObj_pos, 1, 0)
+        main_layout.addWidget(self.XObj_pos_input_field, 1, 1)
+        main_layout.addWidget(self.X_button_minus, 1, 2)
+        main_layout.addWidget(self.X_button_plus, 1, 3)
+
+        main_layout.addWidget(self.YObj_pos, 2, 0)
+        main_layout.addWidget(self.YObj_pos_input_field, 2, 1)
+        main_layout.addWidget(self.Y_button_minus, 2, 2)
+        main_layout.addWidget(self.Y_button_plus, 2, 3)
+
+        main_layout.addWidget(self.ZObj_pos, 3, 0)
+        main_layout.addWidget(self.ZObj_pos_input_field, 3, 1)
+        main_layout.addWidget(self.Z_button_minus, 3, 2)
+        main_layout.addWidget(self.Z_button_plus, 3, 3)
+        #############################################################
+
+        main_layout.addWidget(self.Object_rotation_title, 0, 4)
+
+        main_layout.addWidget(self.X_Rotation_Label, 1, 4)
+        main_layout.addWidget(self.X_Rotation_input_field, 1, 5)
+        main_layout.addWidget(self.X_Rotation, 1, 6)
+
+        main_layout.addWidget(self.Y_Rotation_Label, 2, 4)
+        main_layout.addWidget(self.Y_Rotation_input_field, 2, 5)
+        main_layout.addWidget(self.Y_Rotation, 2, 6)
+
+        main_layout.addWidget(self.Z_Rotation_Label, 3, 4)
+        main_layout.addWidget(self.Z_Rotation_input_field, 3, 5)
+        main_layout.addWidget(self.Z_Rotation, 3, 6)
+
+        ##################################################################
+
+        main_layout.addWidget(self.Object_scale_title, 0, 7)
+
+        main_layout.addWidget(self.Width_Obj_pos, 1, 7)
+        main_layout.addWidget(self.Width_Obj_pos_input_field, 1, 8)
+        main_layout.addWidget(self.W_slider, 1, 9)
+
+        main_layout.addWidget(self.Height_Obj_pos, 2, 7)
+        main_layout.addWidget(self.Height_Obj_pos_input_field, 2, 8)
+        main_layout.addWidget(self.H_slider, 2, 9)
+
+        main_layout.addWidget(self.Length_Obj_pos, 3, 7)
+        main_layout.addWidget(self.Length_Obj_pos_input_field, 3, 8)
+        main_layout.addWidget(self.L_slider, 3, 9)
+
+        main_layout.addWidget(self.combo_box, 0, 9)
+        self.setLayout(main_layout)
+
+        # editingFinished callbacks that updates backend
+        self.XObj_pos_input_field.editingFinished.connect(self.update_object_pos)
+        self.YObj_pos_input_field.editingFinished.connect(self.update_object_pos)
+        self.ZObj_pos_input_field.editingFinished.connect(self.update_object_pos)
         
+        self.X_button_plus.clicked.connect(lambda: self.Plus_click(self.XObj_pos_input_field))
+        self.X_button_minus.clicked.connect(lambda: self.Minus_click(self.XObj_pos_input_field))
+        
+        self.Y_button_plus.clicked.connect(lambda: self.Plus_click(self.YObj_pos_input_field))
+        self.Y_button_minus.clicked.connect(lambda: self.Minus_click(self.YObj_pos_input_field))
+        
+        self.Z_button_plus.clicked.connect(lambda: self.Plus_click(self.ZObj_pos_input_field))
+        self.Z_button_minus.clicked.connect(lambda: self.Minus_click(self.ZObj_pos_input_field))
+
+        self.Width_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.W_slider, self.Width_Obj_pos_input_field.text()))
+        self.Height_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.H_slider, self.Height_Obj_pos_input_field.text()))
+        self.Length_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.L_slider, self.Length_Obj_pos_input_field.text()))
+
+        # editingFinished callbacks that updates backend
+        self.Width_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
+        self.Height_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
+        self.Length_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
+
+        ########################################
+        
+        self.W_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Width_Obj_pos_input_field))
+        self.H_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Height_Obj_pos_input_field))
+        self.L_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Length_Obj_pos_input_field))
+
+        self.W_slider.sliderReleased.connect(self.update_object_scale)
+        self.H_slider.sliderReleased.connect(self.update_object_scale)
+        self.L_slider.sliderReleased.connect(self.update_object_scale)
+
+        #########################################
+  
         self.X_Rotation_input_field.textEdited.connect(lambda: self.Update_slider(self.X_Rotation, self.X_Rotation_input_field.text()))
         self.Y_Rotation_input_field.textEdited.connect(lambda: self.Update_slider(self.Y_Rotation, self.Y_Rotation_input_field.text()))
         self.Z_Rotation_input_field.textEdited.connect(lambda: self.Update_slider(self.Z_Rotation, self.Z_Rotation_input_field.text()))
-
-        #########################################
         
         # editingFinished callbacks that updates backend
         self.X_Rotation_input_field.editingFinished.connect(self.update_object_rotation)
@@ -336,7 +347,7 @@ class Page1(Page):
         self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
-    
+
     def update_combo_box_items(self, items):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
@@ -475,105 +486,8 @@ class Page1(Page):
         self.Object_rotation_title.setText(f"{Title} Rotation")
 
 
-    def resizeEvent(self, event):
-    
-        """
-        Handles window resize event to dynamically change styling
-        :
-            - Object Position:
-                - Object_pos_title: Label for object position.
-                - XObj_pos, YObj_pos, ZObj_pos: Labels for X Y Z positions
-                - XObj_pos_input_field, YObj_pos_input_field, ZObj_pos_input_field - Input for X Y Z positions.
-                - X_button_minus/plus, Y_button_minus/plus, Z_button_minus/plus - Buttons to increase/decrease X Y Z positions.
-            
-            - Object Scale:
-                - Object_scale_title: Label for object scale.
-                - Width_Obj_pos, Height_Obj_pos, Length_Obj_pos: Labels for width, 
-                height, and length scales.
-                - Width_Obj_pos_input_field, Height_Obj_pos_input_field, 
-                Length_Obj_pos_input_field: Input fields for width, height, 
-                length scales.
-                - W_slider, H_slider, L_slider: Sliders for width, height, and length.
-            
-            - Object Rotation:
-                - Object_rotation_title: Label for object rotation.
-                - X_Rotation_Label, Y_Rotation_Label, Z_Rotation_Label: Labels for 
-                rotation on X, Y, Z axes.
-                - X_Rotation_input_field, Y_Rotation_input_field, Z_Rotation_input_field:
-                Input fields for rotation on X, Y, Z axes.
-                - X_Rotation, Y_Rotation, Z_Rotation: Sliders for rotation on X, Y, Z axes.
-            
-            - combo_box: Dropdown menu for object selection, anchored to the top-right.
-        
-          """
-    
-        self.Object_pos_title.setGeometry(int(self.width()*0.01), int(self.height()*0.01), 200, 30)
-
-        self.XObj_pos.setGeometry(int(self.width()*0.01), int(self.height()*0.25),15, 30)
-        self.XObj_pos_input_field.setGeometry(int(self.width()*0.03), int(self.height()*0.25), int(self.width()*0.1), 20)
-        
-        self.X_button_minus.setGeometry(int(self.width()*0.13), int(self.height()*0.25), int(self.width()*0.025), 20)
-        self.X_button_plus.setGeometry(int(self.width()*0.13+int(self.width()*0.025)), int(self.height()*0.25), int(self.width()*0.025), 20)
-
-        self.YObj_pos.setGeometry(int(self.width()*0.01), int(self.height()*0.50),15, 30)
-        self.YObj_pos_input_field.setGeometry(int(self.width()*0.03), int(self.height()*0.5), int(self.width()*0.1), 20)
-
-        self.Y_button_minus.setGeometry(int(self.width()*0.13), int(self.height()*0.50), int(self.width()*0.025), 20)
-        self.Y_button_plus.setGeometry(int(self.width()*0.13+int(self.width()*0.025)), int(self.height()*0.50), int(self.width()*0.025), 20)
-
-        self.ZObj_pos.setGeometry(int(self.width()*0.01), int(self.height()*0.75),15, 30)
-        self.ZObj_pos_input_field.setGeometry(int(self.width()*0.03), int(self.height()*0.75), int(self.width()*0.1), 20)
-
-        self.Z_button_minus.setGeometry(int(self.width()*0.13), int(self.height()*0.75), int(self.width()*0.025), 20)
-        self.Z_button_plus.setGeometry(int(self.width()*0.13+int(self.width()*0.025)), int(self.height()*0.75), int(self.width()*0.025), 20)
-    
-
-        ##########################################################
-
-        self.Object_scale_title.setGeometry(int(self.width()*0.20), int(self.height()*0.01), 200, 30)
-
-        self.Width_Obj_pos.setGeometry(int(self.width()*0.20), int(self.height()*0.2), 50, 30)
-        self.Width_Obj_pos_input_field.setGeometry(int(self.width()*0.25), int(self.height()*0.25), int(self.width()*0.1), 20)
-        self.W_slider.setGeometry(QtCore.QRect(int(self.width()*0.38), int(self.height()*0.28), int(self.width()*0.2), 16))
-
-        self.Height_Obj_pos.setGeometry(int(self.width()*0.20), int(self.height()*0.45), 50, 30)
-        self.Height_Obj_pos_input_field.setGeometry(int(self.width()*0.25), int(self.height()*0.5), int(self.width()*0.1), 20)
-        self.H_slider.setGeometry(QtCore.QRect(int(self.width()*0.38), int(self.height()*0.52), int(self.width()*0.2), 16))
-
-        self.Length_Obj_pos.setGeometry(int(self.width()*0.20), int(self.height()*0.7), 50, 30)
-        self.Length_Obj_pos_input_field.setGeometry(int(self.width()*0.25), int(self.height()*0.75), int(self.width()*0.1), 20)
-        self.L_slider.setGeometry(QtCore.QRect(int(self.width()*0.38), int(self.height()*0.77), int(self.width()*0.2), 16))
-
-        ################################################################
-
-
-        self.Object_rotation_title.setGeometry(int(self.width()*0.60), int(self.height()*0.01), 200, 30)
-        self.X_Rotation_Label.setGeometry(int(self.width()*0.60), int(self.height()*0.2), 50, 30)
-        self.X_Rotation_input_field.setGeometry(int(self.width()*0.65), int(self.height()*0.25), int(self.width()*0.1), 20)
-        self.X_Rotation.setGeometry(QtCore.QRect(int(self.width()*0.78), int(self.height()*0.28), int(self.width()*0.2), 16))
-
-        self.Y_Rotation_Label.setGeometry(int(self.width()*0.60), int(self.height()*0.45), 50, 30)
-        self.Y_Rotation_input_field.setGeometry(int(self.width()*0.65), int(self.height()*0.5), int(self.width()*0.1), 20)
-        self.Y_Rotation.setGeometry(QtCore.QRect(int(self.width()*0.78), int(self.height()*0.52), int(self.width()*0.2), 16))
-
-        self.Z_Rotation_Label.setGeometry(int(self.width()*0.60), int(self.height()*0.7), 50, 30)
-        self.Z_Rotation_input_field.setGeometry(int(self.width()*0.65), int(self.height()*0.75), int(self.width()*0.1), 20)
-        self.Z_Rotation.setGeometry(QtCore.QRect(int(self.width()*0.78), int(self.height()*0.77), int(self.width()*0.2), 16))
-
-        ###############################################################
-        self.combo_box.setGeometry(self.width()-self.combo_box.width(), 0, self.combo_box.width(), self.combo_box.height())
-
-class Page2(Page):
-    """
-    Page 2: Pivot Point
-    """
-
-    def __init__(self, parent=None):
-        """
-        Initialise "Page n"
-
-
-        """
+class PivotTab(QWidget):
+    def __init__(self, parent: QWidget):
         super().__init__(parent)
 
         # Pivot Point Coords Section
@@ -656,6 +570,36 @@ class Page2(Page):
         self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
+
+        #################
+        main_layout = QGridLayout()
+
+        main_layout.addWidget(self.Pivot_Point_Check, 0, 0)
+
+        main_layout.addWidget(self.XPivot_pos, 1, 0)
+        main_layout.addWidget(self.XPivot_point_input_field, 1, 1)
+        main_layout.addWidget(self.XPivot_button_minus, 1, 2)
+        main_layout.addWidget(self.XPivot_button_plus, 1, 3)
+
+        main_layout.addWidget(self.YPivot_pos, 2, 0)
+        main_layout.addWidget(self.YPivot_point_input_field, 2, 1)
+        main_layout.addWidget(self.YPivot_button_minus, 2, 2)
+        main_layout.addWidget(self.YPivot_button_plus, 2, 3)
+
+        main_layout.addWidget(self.ZPivot_pos, 3, 0)
+        main_layout.addWidget(self.ZPivot_point_input_field, 3, 1)
+        main_layout.addWidget(self.ZPivot_button_minus, 3, 2)
+        main_layout.addWidget(self.ZPivot_button_plus, 3, 3)
+
+        main_layout.addWidget(self.Distance_Pivot, 4, 0)
+        main_layout.addWidget(self.Distance_Pivot_input_field, 4, 1)
+        main_layout.addWidget(self.Distance_Slider, 4, 2)
+
+        main_layout.addWidget(self.combo_box, 0, 4)
+
+        self.setLayout(main_layout)
+
+
 
     def update_ui_by_config(self):
         """ Method that updates attributes in text field when the object index is change from combo box. """
@@ -757,180 +701,66 @@ class Page2(Page):
             field.setText(str(0.0))
             field.editingFinished.emit()
 
-    def resizeEvent(self, event):
-            
-        """
-        Handles window resize event
-
-        :
-                -Pivot Position
-                -   Pivot_point_subtitle
-                -   XPivot_pos
-                -   XPivot
-                -   XPivot_button_minus
-                -   XPivot_button_plus
-                
-                -   YPivot_pos
-                -   YPivot_point_input_field
-                -   YPivot_button_minus
-                -   YPivot_button_plus
-            
-
-                -   ZPivot_pos
-                -   ZPivot_point_input_field
-                -   ZPivot_button_minus
-                -   ZPivot_button_plus
-
-            -Degree of Angle Change
-                -   Angle_change_title
-                -   Degrees_pivot
-                -   Degrees_pivot_input_field
-                -   Degrees_Slider
-
-            -Number of rotaions
-                -   Num_Rotations
-                -   Num_Rotations_input_field
-                -   Num_Rotations_minus
-                -   Num_Rotations_plus
-            
-        """
-
-        
-        # Title Position
-        self.Pivot_Point_Check.setGeometry(int(self.width() * 0.01), int(self.height() * 0.00), 120, 30)
-
-        # X Pivot Point
-        self.XPivot_pos.setGeometry(int(self.width() * 0.05), int(self.height() * 0.2), 20, 30)
-        self.XPivot_point_input_field.setGeometry(int(self.width() * 0.1), int(self.height() * 0.2), int(self.width() * 0.1), 20)
-        self.XPivot_button_minus.setGeometry(int(self.width() * 0.22), int(self.height() * 0.2), 25, 20)
-        self.XPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.2), 25, 20)
-
-        # Y Pivot Point
-        self.YPivot_pos.setGeometry(int(self.width() * 0.05), int(self.height() * 0.5), 20, 30)
-        self.YPivot_point_input_field.setGeometry(int(self.width() * 0.1), int(self.height() * 0.5), int(self.width() * 0.1), 20)
-        self.YPivot_button_minus.setGeometry(int(self.width() * 0.22), int(self.height() * 0.5), 25, 20)
-        self.YPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.5), 25, 20)
-
-        # Z Pivot Point
-        self.ZPivot_pos.setGeometry(int(self.width() * 0.05), int(self.height() * 0.8), 20, 30)
-        self.ZPivot_point_input_field.setGeometry(int(self.width() * 0.1), int(self.height() * 0.8), int(self.width() * 0.1), 20)
-        self.ZPivot_button_minus.setGeometry(int(self.width() * 0.22), int(self.height() * 0.8), 25, 20)
-        self.ZPivot_button_plus.setGeometry(int(self.width() * 0.25), int(self.height() * 0.8), 25, 20)
-
-        # Degrees
-        self.Distance_Pivot.setGeometry(int(self.width() * 0.30), int(self.height() * 0.01), 150, 30)
-        self.Distance_Pivot_input_field.setGeometry(int(self.width() * 0.30), int(self.height() * 0.2), int(self.width() * 0.1), 20)
-        self.Distance_Slider.setGeometry(QtCore.QRect(int(self.width() * 0.425), int(self.height() * 0.21), int(self.width() * 0.3), 16))
-        
-        self.combo_box.setGeometry(self.width()-self.combo_box.width(), 0, self.combo_box.width(), self.combo_box.height())
-
-        super().resizeEvent(event)  # Call the parent class's resizeEvent
-
-class Page3(Page):
-    """
-    Page 3: Generate Random
-    """
-    def __init__(self, parent=None, ):
-
-        """
-        Initialise "Page n"
-        
-        generate random variables for objects and coords
-            
-        Args:
-
-        Methods:
-            __init__(parent=None) - Initializes the page, setting up all UI components.                
-            resizeEvent(event) -  Adjusts component positions on window resize.
-            decrease_count() -  Decreases the number of renders.
-            set_all_random(state) -  Sets all randomization checkboxes based on the state.
-
-        """
-
+class Random(QWidget):
+    def __init__(self, parent: QWidget):
         super().__init__(parent)
-        
-
-        
 
         # First Section
         self.Set_All_Random_Button = QCheckBox("Set all Random", self)
-        self.Set_All_Random_Button.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.Set_All_Random_Button.setGeometry(0, 0, 125, 30)
         self.Set_All_Random_Button.stateChanged.connect(self.set_all_random)
 
         # Second Section
         self.ObjectDimensions_Label = QLabel(f"Object Dimensions", self)
-        self.ObjectDimensions_Label.setGeometry(150, 10, 125, 20)
         
         self.Width_Button = QCheckBox("Width", self)
-        self.Width_Button.setGeometry(150, 30, 65, 20)
         self.Width_Button.toggled.connect(self.on_width_toggle)
 
 
         #if checked then change value of width text 
 
         self.Height_Button = QCheckBox("Height", self)
-        self.Height_Button.setGeometry(150, 50, 65, 20)
         self.Height_Button.toggled.connect(self.on_height_toggle)
-
-
         self.Length_Button = QCheckBox("Length", self)
-        self.Length_Button.setGeometry(150, 70, 65, 20)
         self.Length_Button.toggled.connect(self.on_length_toggle)
 
 
 
         #Third Section
         self.Object_Coords_Label = QLabel(f"Object x Co-ords:", self)
-        self.Object_Coords_Label.setGeometry(275, 10, 100, 20)
 
         self.X_Button = QCheckBox("X", self)
-        self.X_Button.setGeometry(215, 50, 30, 20)
         self.X_Button.toggled.connect(self.on_x_toggle)
 
 
         self.Y_Button = QCheckBox("Y", self)
-        self.Y_Button.setGeometry(315, 50, 30, 20)
         self.Y_Button.toggled.connect(self.on_y_toggle)
 
 
         self.Z_Button = QCheckBox("Z", self)
-        self.Z_Button.setGeometry(250, 50, 30, 20)
         self.Z_Button.toggled.connect(self.on_z_toggle)
 
 
         self.PivotPoint_Label = QLabel(f"Pivot Point Co-ords:", self)
-        self.PivotPoint_Label.setGeometry(275, 50, 120, 20)
 
         self.X_Button2 = QCheckBox("X", self)
-        self.X_Button2.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.X_Button2.setGeometry(275, 70, 30, 20)
         self.X_Button2.stateChanged.connect(backend.toggle_random_pivot_x)
 
         self.Y_Button2 = QCheckBox("Y", self)
-        self.Y_Button2.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.Y_Button2.setGeometry(315, 70, 30, 20)
         self.Y_Button2.stateChanged.connect(backend.toggle_random_pivot_y)
 
         self.Z_Button2 = QCheckBox("Z", self)
-        self.Z_Button2.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
-        self.Z_Button2.setGeometry(350, 70, 30, 20)
         self.Z_Button2.stateChanged.connect(backend.toggle_random_pivot_z)
 
         #Fourth Section
         self.AutoRotationAngle_Label = QLabel(f"Auto Rotation Angle:", self)
-        self.AutoRotationAngle_Label.setGeometry(450, 30, 150, 20)
         
 
         self.AutoRotationAngle_Button = QCheckBox("", self)
-        self.AutoRotationAngle_Button.setGeometry(560, 30, 150, 20)
         self.AutoRotationAngle_Button.stateChanged.connect(backend.toggle_random_environment_angle)
 
         self.ImportEnvironment_Label = QLabel(f"Import Environment:", self)
-        self.ImportEnvironment_Label.setGeometry(450, 70, 150, 20)
 
         self.ImportEnvironment_Button = QCheckBox("", self)
-        self.ImportEnvironment_Button.setGeometry(560, 70, 150, 20)
         self.ImportEnvironment_Button.stateChanged.connect(backend.toggle_random_environment_background)
 
         #Section 5
@@ -943,7 +773,6 @@ class Page3(Page):
         #Third Section
         self.object_toggle_states = {}
         self.combo_box = QComboBox(self)
-        self.combo_box.setGeometry(200, 150, 200, 30)
         #self.combo_box.addItems()
         
         shared_state.items_updated.connect(self.update_combo_box_items)
@@ -953,6 +782,40 @@ class Page3(Page):
         self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[]) 
         shared_state.update_selected(0)    
+
+        main_layout = QGridLayout()
+        
+        main_layout.addWidget(self.Set_All_Random_Button, 0, 0)
+        main_layout.addWidget(self.ObjectDimensions_Label, 0, 1)
+
+        main_layout.addWidget(self.Width_Button, 1, 1)
+        main_layout.addWidget(self.Height_Button, 2, 1)
+        main_layout.addWidget(self.Length_Button, 3, 1)
+
+        main_layout.addWidget(self.Object_Coords_Label, 0, 2)
+
+        main_layout.addWidget(self.X_Button, 1, 2)
+        main_layout.addWidget(self.Y_Button, 2, 2)
+        main_layout.addWidget(self.Z_Button, 3, 2)
+
+        main_layout.addWidget(self.PivotPoint_Label, 0, 3)
+
+        main_layout.addWidget(self.X_Button2, 1, 3)
+        main_layout.addWidget(self.Y_Button2, 2, 3)
+        main_layout.addWidget(self.Z_Button2, 3, 3)
+
+        main_layout.addWidget(self.AutoRotationAngle_Label, 0, 4)
+        main_layout.addWidget(self.AutoRotationAngle_Button, 1, 4)
+
+        main_layout.addWidget(self.ImportEnvironment_Label, 0, 5)
+        main_layout.addWidget(self.ImportEnvironment_Button, 1, 5)
+
+        main_layout.addWidget(self.RandomSettingSeed_Label, 0, 6)
+        main_layout.addWidget(self.RandomSeed_Label, 1, 6)
+
+        main_layout.addWidget(self.combo_box, 0, 7)
+
+        self.setLayout(main_layout)
 
     def update_combo_box_items(self, items):
         """Update the combo box with the latest shared state items."""
@@ -1021,105 +884,6 @@ class Page3(Page):
         if selected_index is not None:
             backend.toggle_random_coord_z(selected_index)
 
-
-
-
-    def resizeEvent(self, event):
-
-
-        """
-        Handles window resize event
-
-        Args:
-            - Random Object Dimensions
-                -   Object_Dimensions_Label
-                -   Width_button
-                -   Height_button
-                -   Length
-            - Random Object Co-ords
-                -   X_button
-                -   Y_button
-                -   Z_button
-
-            - Random Pivot Point Co-ords
-                -   PivotPoint_Label
-                -   X_Button2
-                -   Y_Button2
-                -   Z_Button2
-
-
-            - Random Properties
-                -   Reflect_Label
-                -   Reflect_Button
-                -?
-                -?
-
-            - Titles and Text
-                -   RandomSettingSeed_Label
-                -   RandomSeed_Label
-                -   
-
-            """
-        window_width = self.width()
-        window_height = self.height()
-        
-        # First Section
-        self.Set_All_Random_Button.setGeometry(int(window_width * 0), int(window_height * 0.02), int(window_width * 0.12), 20)
-        
-
-        # Second Section
-        self.ObjectDimensions_Label.setGeometry(int(window_width * 0.15), int(window_height * 0.02), int(window_width * 0.2), 20)
-
-
-        self.Width_Button.setGeometry(int(window_width * 0.15), int(window_height * 0.3), int(window_width * 0.15), 20)
-        self.Height_Button.setGeometry(int(window_width * 0.22), int(window_height * 0.3), int(window_width * 0.15), 20)
-        self.Length_Button.setGeometry(int(window_width * 0.29), int(window_height * 0.3), int(window_width * 0.15), 20)
-
-
-        # Third Section
-        self.combo_box.setGeometry(int(window_width * 0.01), int(window_height * 0.3), int(window_width * 0.12), 20)
-        
-        self.X_Button.setGeometry(int(window_width * 0.15), int(window_height * 0.6), 30, 20)
-        self.Y_Button.setGeometry(int(window_width * 0.22), int(window_height * 0.60), 30, 20)
-        self.Z_Button.setGeometry(int(window_width * 0.29), int(window_height * 0.60), 30, 20)
-        
-        self.PivotPoint_Label.setGeometry(int(window_width * 0.40), int(window_height * 0.02), int(window_width * 0.2), 20)
-        self.X_Button2.setGeometry(int(window_width * 0.38), int(window_height * 0.3), 30, 20)
-        self.Y_Button2.setGeometry(int(window_width * 0.45), int(window_height * 0.3), 30, 20)
-        self.Z_Button2.setGeometry(int(window_width * 0.52), int(window_height * 0.3), 30, 20)
-        
-        # Fourth Section
-
-        self.AutoRotationAngle_Label.setGeometry(int(window_width * 0.6), int(window_height * 0.3), int(window_width * 0.2), 20)
-        self.AutoRotationAngle_Button.setGeometry(int(window_width * 0.73), int(window_height * 0.32), 30, 20)
-
-        self.ImportEnvironment_Label.setGeometry(int(window_width * 0.6), int(window_height * 0.7), int(window_width * 0.2), 20)
-        self.ImportEnvironment_Button.setGeometry(int(window_width * 0.73), int(window_height * 0.72), 30, 20)
-
-        # Fifth Section
-        x = max(self.RandomSeed_Label.width(), 125)  # Minimum width for RandomSettingSeed_Label
-        self.RandomSettingSeed_Label.setGeometry(window_width - x - 10, int(window_height * 0.02), x, 20)
-        self.RandomSeed_Label.setGeometry(window_width - self.RandomSeed_Label.width() - 10, int(window_height * 0.2), self.RandomSeed_Label.width(), 20)
-
-    def update_ui_by_config(self):
-        """ Method that updates attributes in text field when the object index is change from combo box. """
-
-        cfg = backend.get_config()
-
-        self.RandomSeed_Label.setText(str(cfg["seed"]))
-        '''self.Width_Button.setChecked(random_cfg[])
-        self.Height_Button.setChecked(is_checked)
-        self.Length_Button.setChecked(is_checked)
-        self.X_Button.setChecked(is_checked)
-        self.Y_Button.setChecked(is_checked)
-        self.Z_Button.setChecked(is_checked)
-        self.X_Button2.setChecked(is_checked)
-        self.Y_Button2.setChecked(is_checked)
-        self.Z_Button2.setChecked(is_checked)
-        self.AutoRotationAngle_Button.setChecked(is_checked)
-        self.ImportEnvironment_Button.setChecked(is_checked)
-        self.combo_box.setCurrentIndex(0)'''
-    
     def set_all_random(self, state):
         is_checked = state == Qt.Checked
         self.Width_Button.setChecked(is_checked)
@@ -1134,68 +898,13 @@ class Page3(Page):
         self.AutoRotationAngle_Button.setChecked(is_checked)
         self.ImportEnvironment_Button.setChecked(is_checked)
 
-class RenderThread(QThread):
-    finished = pyqtSignal()
-    progress = pyqtSignal(str)
 
-    def run(self):
-        self.progress.emit("Rendering...")
-        backend.render(headless = True)
-        self.finished.emit()
-        
-class LoadingScreen(QDialog):
-    def __init__(self, text, parent=None):
-        super().__init__(parent)
-
-
-        self.setWindowTitle("Rendering...")
-        self.setWindowModality(Qt.NonModal)
-        self.setGeometry(250, 250, 250, 200)
-
-        layout = QVBoxLayout()
-        self.label = QLabel(text)
-        layout.addWidget(self.label)
-
-        self.setLayout(layout)
-
-    def update_text(self, text):
-        self.label.setText(text)
-
-
-class Page4(Page):
-    """
-    Page 4: Render
-        
-        Generate Renders
-
-        Args:
-            GenerateRenders_Button - QPushButton - Button for Generating Renders
-            Number_of_renders_title - QLabel - Title for number of renders
-            Number_of_renders_input_field - QLineEdit - Field to input number of renders
-            Number_of_renders_minus - QPushButton -  Button to decrease number of renders
-            Number_of_renders_plus - QPushButton - Button to increase number of renders
-            Degree_Change_title - QLabel: Title for degrees of change section
-            X_Degree_Label, Y_Degree_Label, Z_Degree_Label - QLabel -  Text for angles of rotation 
-            X_Degree_input_field, Y_Degree_input_field, Z_Degree_input_field - QLineEdit - Fields to input degree values
-            X_Degree_slider, Y_Degree_slider, Z_Degree_slider - QSlider - Sliders to adjust rotation angles
-            
-        Methods:
-            __init__(parent=None)
-            increase_count() - Increases number of renders for buttons
-            decrease_count() - Decreases number of renders for buttons
-            update_degree_input(slider, input_field) - Updates degree input
-            resizeEvent(event) - handles resize event
-        """
-
-    def __init__(self, parent=None):
-        """
-        Initialize Page 4
-        """
+class Render(QWidget):
+    def __init__(self, parent: QWidget):
         super().__init__(parent)
 
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
         self.GenerateRenders_Button.clicked.connect(self.generate_render)
-        self.GenerateRenders_Button.setGeometry(0, 10, 125, 50)
         
 
 
@@ -1211,9 +920,6 @@ class Page4(Page):
         self.Number_of_renders_minus.clicked.connect(self.decrease_count)
         self.Number_of_renders_plus.clicked.connect(self.increase_count)
 
-
-
-
         self.Degree_Change_title = QLabel("Degrees of Change", self)
 
         # X Degree
@@ -1226,8 +932,6 @@ class Page4(Page):
         self.X_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
         self.X_Degree_slider.setMinimum(1) 
         self.X_Degree_slider.setMaximum(360)
-        
-
 
         # Y Degree
         self.Y_Degree_Label = QLabel("Y:", self)
@@ -1239,7 +943,6 @@ class Page4(Page):
         self.Y_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
         self.Y_Degree_slider.setMinimum(1)
         self.Y_Degree_slider.setMaximum(360)
-
 
         # Z Degree
         self.Z_Degree_Label = QLabel("Z:", self)
@@ -1264,8 +967,55 @@ class Page4(Page):
         self.Y_Degree_slider.sliderReleased.connect(self.set_angles)
         self.Z_Degree_slider.sliderReleased.connect(self.set_angles)
 
+        self.unlimited_render_button = QPushButton("Unlimited Renders", self)
+        self.unlimited_render_button.setCheckable(True)
+        self.unlimited_render_button.clicked.connect(self.unlimitedrender)
 
         self.rendering = False
+
+        main_layout = QGridLayout()
+
+        main_layout.addWidget(self.Number_of_renders_title, 0, 0)
+
+        main_layout.addWidget(self.Number_of_renders_input_field, 1, 0)
+        main_layout.addWidget(self.Number_of_renders_minus, 1, 1)
+        main_layout.addWidget(self.Number_of_renders_plus, 1, 2)
+
+        main_layout.addWidget(self.Degree_Change_title, 0, 3)
+
+        main_layout.addWidget(self.X_Degree_Label, 0, 4)
+        main_layout.addWidget(self.X_Degree_input_field, 1, 4)
+        main_layout.addWidget(self.X_Degree_slider, 2, 4)
+
+        main_layout.addWidget(self.Y_Degree_Label, 0, 5)
+        main_layout.addWidget(self.Y_Degree_input_field, 1, 5)
+        main_layout.addWidget(self.Y_Degree_slider, 2, 5)
+
+        main_layout.addWidget(self.Z_Degree_Label, 0, 6)
+        main_layout.addWidget(self.Z_Degree_input_field, 1, 6)
+        main_layout.addWidget(self.Z_Degree_slider, 2, 6)
+
+        main_layout.addWidget(self.unlimited_render_button, 1, 7)
+
+        main_layout.addWidget(self.GenerateRenders_Button, 0, 7)
+
+        self.setLayout(main_layout)
+
+    def unlimitedrender(self):
+        test = True
+        while True:
+            if (self.rendering):
+                loop = QEventLoop()
+                QTimer.singleShot(2000, loop.quit)
+                loop.exec()
+                continue
+            if self.unlimited_render_button.isChecked():
+                self.Number_of_renders_input_field.setText("1")
+                self.generate_render()
+            else:
+                test = False
+
+
 
     def update_ui_by_config(self):
         """ Method that updates attributes in text field when the object index is change from combo box. """
@@ -1317,66 +1067,6 @@ class Page4(Page):
             self.Number_of_renders_input_field.setText(str(number_of_renders_value))
         self.Number_of_renders_input_field.editingFinished.emit()
 
-    def resizeEvent(self, event):
-
-        """
-        Handles window resize event
-
-        Args:
-            - Number of renders
-                -   
-                -   
-                -   
-                -   
-            - Degree Change
-                -   
-                -   
-                -   
-                -  
-                -
-                -
-                -
-
-            - Generate Button
-                -   
-                -   
-                -   
-    
-
-
-            """
-
-
-        # Number of Renders Title Position
-        self.Number_of_renders_title.setGeometry(int(self.width() * 0.025), int(self.height() * 0.01), 150, 20)
-
-        # Number of renders
-        self.Number_of_renders_input_field.setGeometry(int(self.width() * 0.025), int(self.height() * 0.25), int(self.width() * 0.1), 20)
-        self.Number_of_renders_minus.setGeometry(int(self.width() * 0.14), int(self.height() * 0.25), 25, 20)
-        self.Number_of_renders_plus.setGeometry(int(self.width() * 0.17), int(self.height() * 0.25), 25, 20)
-
-        # Degree Change title position
-        self.Degree_Change_title.setGeometry(int(self.width() * 0.25), int(self.height() * 0.01), 150, 20)
-
-        # X Degree
-        self.X_Degree_Label.setGeometry(int(self.width() * 0.25), int(self.height() * 0.2), 50, 30)
-        self.X_Degree_input_field.setGeometry(int(self.width() * 0.30), int(self.height() * 0.25), int(self.width() * 0.1), 20)
-        self.X_Degree_slider.setGeometry(QtCore.QRect(int(self.width() * 0.43), int(self.height() * 0.28), int(self.width() * 0.2), 16))
-
-        # Y Degree
-        self.Y_Degree_Label.setGeometry(int(self.width() * 0.25), int(self.height() * 0.45), 50, 30)
-        self.Y_Degree_input_field.setGeometry(int(self.width() * 0.30), int(self.height() * 0.5), int(self.width() * 0.1), 20)
-        self.Y_Degree_slider.setGeometry(QtCore.QRect(int(self.width() * 0.43), int(self.height() * 0.52), int(self.width() * 0.2), 16))
-
-        # Z Degree
-        self.Z_Degree_Label.setGeometry(int(self.width() * 0.25), int(self.height() * 0.7), 50, 30)
-        self.Z_Degree_input_field.setGeometry(int(self.width() * 0.30), int(self.height() * 0.75), int(self.width() * 0.1), 20)
-        self.Z_Degree_slider.setGeometry(QtCore.QRect(int(self.width() * 0.43), int(self.height() * 0.77), int(self.width() * 0.2), 16))
-        
-        # Generate Button 
-        self.GenerateRenders_Button.setGeometry(self.width()-self.GenerateRenders_Button.width(), 10, self.GenerateRenders_Button.width(), 50)
-
-    
         
     def generate_render(self):
         if not self.rendering:
@@ -1399,8 +1089,6 @@ class Page4(Page):
     def windowUp(self):
         self.LoadingBox = LoadingScreen("")
         self.LoadingBox.update_text("")
-        
-
         self.LoadingBox.show()
 
     def update_loading(self,text):
@@ -1409,8 +1097,6 @@ class Page4(Page):
     def complete_loading(self):
         self.rendering = False
         self.LoadingBox.update_text("Rendering complete")
-
-
 
     def set_renders(self):
         try: 
@@ -1423,26 +1109,12 @@ class Page4(Page):
             backend.set_angles( [float(self.X_Degree_input_field.text()), float(self.Z_Degree_input_field.text()), float(self.Y_Degree_input_field.text())] )
         except:
             print("Error")
+
+class Port(QWidget):
+    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
+        super().__init__(parent)
         
 
-
-
-class Page5(Page):
-    """
-    Page 5:
-    """
-    def __init__(self, path, parent=None):
-        self.path = path
-        """
-        Initialise "Page n"
-
-        Args:
-            parent
-            
-        Methods:
-
-        """
-        super().__init__(parent)
 
         #First Section
         def Get_Object_Filepath():
@@ -1452,12 +1124,12 @@ class Page5(Page):
                 # add the object to the shared state
                 shared_state.add_item(backend.RenderObject(filepath = path))
                 
-                self.path.Object_detect()
+                Object_detect(tab_widget)
+
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
 
         self.Import_Object_Button = QPushButton("Import Object", self)
-        self.Import_Object_Button.setGeometry(0, 10, 125, 50)
         self.Import_Object_Button.clicked.connect(Get_Object_Filepath)
 
         #Second Section
@@ -1475,20 +1147,30 @@ class Page5(Page):
             obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
             shared_state.add_item(obj)
     
-            self.path.Object_detect()
+            Object_detect(tab_widget)
 
         self.TutorialObjects_Button = QPushButton('Tutorial Objects', self)
-        self.TutorialObjects_Button.setGeometry(150, 10, 125, 50)
         self.TutorialObjects_Button.clicked.connect(Tutorial_Object)
 
         #Third Section --> LEFT FOR NOW
         self.BrowseFiles_Button = QPushButton('Generate Data Set', self)
-        self.BrowseFiles_Button.setGeometry(300, 10, 125, 50)
+
+        def Export_Settings():
+            try:
+                export_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+
+                if (export_path == "" or export_path == None):
+                    pass
+                else:
+                    backend.export(export_path)
+
+            except:
+                ErrorBox = QMessageBox()
+                ErrorBox.setText("There was an error selecting folder, please try again.")
 
         #Fourth Section
         self.ExportSettings_Button = QPushButton('Export Settings', self)
-        self.ExportSettings_Button.setGeometry(450, 10, 125, 50)
-        self.ExportSettings_Button.clicked.connect(lambda: backend.export())
+        self.ExportSettings_Button.clicked.connect(Export_Settings)
 
         #Fifth Section
         def Get_Settings_Filepath():
@@ -1502,10 +1184,9 @@ class Page5(Page):
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
         self.ImportSettings_Button = QPushButton('Import Settings', self)
-        self.ImportSettings_Button.setGeometry(600, 10, 125, 50)
         self.ImportSettings_Button.clicked.connect(Get_Settings_Filepath)
 
-        def delete_object():
+        def delete_object(tab_widget):
             to_delete = QMessageBox()
             to_delete.setText("Please select an object to remove from below")
 
@@ -1528,209 +1209,55 @@ class Page5(Page):
             shared_state.items_updated.emit(shared_state.items)
             # The last object was deleted
             if (not shared_state.items):
-                self.path.tabwizard.setTabEnabled(0, False)
-                self.path.tabwizard.setTabEnabled(1, False)
-                self.path.tabwizard.setTabEnabled(2, False)
-                self.path.tabwizard.setTabEnabled(3, False)
+                Object_detect(tab_widget)
                 QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
     
         #Sixth section
         self.Delete_Object_Button = QPushButton('Delete Object', self)
-        self.Delete_Object_Button.setGeometry(750, 10, 125, 50)
-        self.Delete_Object_Button.clicked.connect(delete_object)
 
-class MainWindow(QMainWindow):
-    """
-    Main Window for all the elements
-    """
-    def __init__(self):
-        """
-        Initialise all elements of the Program
-        """
-        super().__init__()
-
-
-        self.setWindowTitle('CS 3028 Project')
-        screen = QApplication.primaryScreen()
-        screen_geometry = screen.geometry()
-        self.setGeometry(
-            screen_geometry.width() // 4,  # x position to center the window
-            screen_geometry.height() // 4,  # y position to center the window
-            screen_geometry.width() // 2,
-            screen_geometry.height() // 2
-        )
-
-        central_widget = QWidget(self)
-        self.setCentralWidget(central_widget)
-        self.layout = QVBoxLayout(central_widget)
-        central_widget.setStyleSheet("background-color: #9bc1bc;")
+        self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget))
         
-        # Nav bar
-        # margins need to be removed to match enviroment
-        self.navbar = Widget()
-        self.layout.addWidget(self.navbar)
-        self.navbar.setFixedHeight(int(self.height()*0.2))
-
         
-        ############
-        
-        #Set image background - dont delete will use later
+        def select_render_folder():
+            try:
+                new_path = QFileDialog.getExistingDirectory(self, "Select Folder")
 
-        #self.navbar.setStyleSheet("""
-        #background-image: url(frontend/background.jpg); 
-        #background-attachment: fixed;
-        #""")
+                if (new_path == "" or new_path == None):
+                    pass
+                else:
+                    backend.set_render_output_folder(new_path)
 
-        ############
+            except:
+                ErrorBox = QMessageBox()
+                ErrorBox.setText("There was an error selecting folder, please try again.")
 
-
-
-        # enviroment
-        self.environment = QWidget()
-        self.layout.addWidget(self.environment)
-        self.environment.setStyleSheet("background-color: black;")
-
-        central_widget.setLayout(self.layout)
-        self.setMinimumSize(920, 500) # minimum size of program
-        self.show()
-
-    def resizeEvent(self, event):
-        """
-        Handles window resize event
-
-        #On re sizing all elements in the program should be re-adjusted to fit
-
-        Args:
-            event
-        """
-        window_height = self.height() # get screen height
-        navbar_height = 150
-        self.navbar.setFixedHeight(navbar_height) # emviroment
-        super().resizeEvent(event)  # handle resize event
+        self.SelectRenderFolder_Button = QPushButton('Change Render Folder', self)
+        self.SelectRenderFolder_Button.clicked.connect(select_render_folder)
 
 
-class GlobalStyles:
-    """
-    Class for global styling
-    """
 
 
-    @staticmethod
+        def Object_detect(tab_widget):
+            State = not Backend.is_config_objects_empty(tab_widget)
+            for i in range(4):
+                tab_widget.setTabEnabled(i, State)
 
-    def style():
-        return """
-        QTabBar::tab { 
-            background-color: #D3D3D3; 
-            padding: 5px;
-            border: 1px solid black;
-            border-radius: 3px;
-            font-weight: bold;
-            min-width: 120px;
-        }
-        
+        main_layout = QGridLayout()
 
-        QTabBar::tab:selected {
-            background-color: #A9A9A9;  
-        }
-        QTabWidget::pane {
-            border: 1px solid black;
-        }
+        main_layout.addWidget(self.TutorialObjects_Button, 0, 0)
+        main_layout.addWidget(self.Import_Object_Button, 0, 1)
+        main_layout.addWidget(self.ExportSettings_Button, 0, 2)
+        main_layout.addWidget(self.ImportSettings_Button, 0, 3)
+        main_layout.addWidget(self.Delete_Object_Button, 0, 4)
+        main_layout.addWidget(self.BrowseFiles_Button, 0, 5)
+        main_layout.addWidget(self.SelectRenderFolder_Button, 0, 6)
 
-        QPushButton {
-            background-color: white;
-            color: black;
-            border: 1px solid black;
-            border-radius: 5px;
-            font-weight: bold;
-        }
-        QPushButton:hover {
-            background-color: #A9A9A9; 
-        }
-        QPushButton:checked {
-            background-color: #A9A9A9;  
-        }
-        QLineEdit {
-            border: 1px solid black; 
-            border-radius: 5px;       
-            background-color: white; 
-            color: black;            
-        }
-        QLabel {
-            font-weight: bold;
-        }
-        QCheckBox {
-            font-weight: bold;
-            background:transparent;
-
-        }
-        QWidget {
-        background-color:#e6ebe0;
-        }
-        QSlider {
-        background: transparent; 
-        }
-        
-        """
-
+        self.setLayout(main_layout)
 
 
 if __name__ == "__main__":
-    
-    
-
     app = QApplication(sys.argv)
-    # creates this shared state
-    # shared_state = ComboBoxState()
-    window = MainWindow()
-    window.show()
+    tab_dialog = TabDialog()
+    tab_dialog.show()
 
-    def Get_Object_Filepath(self):
-        try:
-            path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
-            if (path == ""): return False
-            # add the object to the shared state
-            shared_state.add_item(backend.RenderObject(filepath = path))
-            
-            self.Object_detect()
-            return True
-        except Exception:
-            QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
-
-
-    def Tutorial_Object(self):
-        Tutorial_Box = QMessageBox()
-        Tutorial_Box.setText("Please select a tutorial object from below")
-        Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
-        Tutorial_Box.addButton("Cylinder", QMessageBox.ActionRole)
-        Tutorial_Box.addButton("Cone", QMessageBox.ActionRole)
-        Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
-        Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
-        Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
-
-        Tutorial_Box.exec()
-        obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-        shared_state.add_item(obj)
-
-        self.Object_detect()
-        return True
-
-    objectSelected = False
-    while not objectSelected:
-        Initial_Object = QMessageBox()
-        Initial_Object.setText("Please select an initial object from below")
-        Initial_Object.addButton("Custom Object", QMessageBox.ActionRole)
-        Initial_Object.addButton("Tutorial Object", QMessageBox.ActionRole)
-
-        Initial_Object.exec_()
-        if Initial_Object.clickedButton().text() == "Custom Object":
-            objectSelected = Get_Object_Filepath(window.navbar)
-        else:
-            objectSelected = Tutorial_Object(window.navbar)
-            
-    
-    #from Front_tests import Tests
-    #Tests(window, shared_state, Page1, Page2, Page3, Page4, Page5, backend)
-    
-    
-    
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
