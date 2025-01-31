@@ -366,24 +366,35 @@ class Backend():
         scale = obj["sca"].copy()
             #Position propertis
         if "x" in random_object_pos:
-            position[0] = random.randint(1, 10) # random range of x coords - 1-10
+            position[0] = random.uniform(1, 10) # random range of x coords - 1-10
+            print(f"Randomized Object X: {scale[0]}")
             
         if "y" in random_object_pos:
-            position[2] = random.randint(1, 10)
+            position[2] = random.uniform(1, 10)
+            print(f"Randomized Object y: {position[2]}")
+
 
         if "z" in random_object_pos:
-            position[1] = random.randint(1, 10)
+            position[1] = random.uniform(1, 10)
+            print(f"Randomized Object Z: {position[1]}")
+
 
             #Scale properties
         if "width" in random_object_scale:
-            self.random_object_width = random.randint(1,100)
+            self.random_object_width = random.uniform(1,5)
             scale[0] = self.random_object_width # random range of width - 1-100
+            print(f"Randomized Width: {scale[0]}")
+
             
         if "height" in random_object_scale:
-            scale[1] = random.randint(1, 100)
+            scale[1] = random.uniform(1, 5)
+            print(f"Randomized Height: {scale[1]}")
+
 
         if "length" in random_object_scale:
-            scale[2] = random.randint(1, 100)
+            scale[2] = random.uniform(1, 5)
+            print(f"Randomized Length: {scale[2]}")
+
                     
         obj["pos"] = position
         obj["sca"] = scale
