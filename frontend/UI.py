@@ -73,7 +73,7 @@ class RenderThread(QThread):
 
     def run(self):
         self.progress.emit("Rendering...")
-        backend.render(headless = True)
+        backend.render(headless = False)
         self.finished.emit()
 
 class LoadingScreen(QDialog):
@@ -842,9 +842,6 @@ class Random(QWidget):
 
     def reset_toggle_states(self):
         """Reset all toggle states to unchecked state."""        
-        self.Width_Button.blockSignals(True)
-        self.Height_Button.blockSignals(True)
-        self.Length_Button.blockSignals(True)
         self.X_Button.blockSignals(False)
         self.Y_Button.blockSignals(False)
         self.Z_Button.blockSignals(False)
