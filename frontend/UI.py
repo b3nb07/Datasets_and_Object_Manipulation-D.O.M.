@@ -1163,7 +1163,7 @@ class Port(QWidget):
 
         #Fourth Section
         self.ExportSettings_Button = QPushButton('Export Settings', self)
-        self.ExportSettings_Button.clicked.connect(lambda: backend.export())
+        self.ExportSettings_Button.clicked.connect(Export_Settings)
 
         #Fifth Section
         def Get_Settings_Filepath():
@@ -1209,6 +1209,26 @@ class Port(QWidget):
         self.Delete_Object_Button = QPushButton('Delete Object', self)
 
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget))
+        
+        
+        def select_render_folder():
+            try:
+                new_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+
+                if (new_path == "" or new_path == None):
+                    pass
+                else:
+                    backend.set_render_output_folder(new_path)
+
+            except:
+                ErrorBox = QMessageBox()
+                ErrorBox.setText("There was an error selecting folder, please try again.")
+
+        self.SelectRenderFolder_Button = QPushButton('Change Render Folder', self)
+        self.SelectRenderFolder_Button.clicked.connect(select_render_folder)
+
+
+
 
         def Object_detect(tab_widget):
             State = not Backend.is_config_objects_empty(tab_widget)
@@ -1223,6 +1243,7 @@ class Port(QWidget):
         main_layout.addWidget(self.ImportSettings_Button, 0, 3)
         main_layout.addWidget(self.Delete_Object_Button, 0, 4)
         main_layout.addWidget(self.BrowseFiles_Button, 0, 5)
+        main_layout.addWidget(self.SelectRenderFolder_Button, 0, 6)
 
         self.setLayout(main_layout)
 
