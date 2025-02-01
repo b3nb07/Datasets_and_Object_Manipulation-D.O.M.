@@ -414,18 +414,6 @@ class ObjectTab(QWidget):
         
         #########################################
 
-        # create initial combo_box
-        self.combo_box = QComboBox(self)
-        # connecting shared state updates to combo box
-        shared_state.items_updated.connect(self.update_combo_box_items)
-        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
-        self.combo_box.currentIndexChanged.connect(self.on_object_selected)
-
-        # initialise items
-        self.update_combo_box_items(shared_state.items)
-        shared_state.update_items(items=[])
-        shared_state.update_selected(0)
-
     def update_combo_box_items(self, items):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
