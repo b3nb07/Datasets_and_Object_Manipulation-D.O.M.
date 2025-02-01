@@ -107,7 +107,7 @@ class TabDialog(QWidget):
         self.setStyleSheet(QtCore.QTextStream(stream).readAll())"""
 
         tab_widget = QTabWidget()
-        tab_widget.addTab(ObjectTab(self), "Object")
+        tab_widget.addTab(ObjectTab(self, tab_widget), "Object")
         tab_widget.addTab(PivotTab(self), "Pivot Point")
         tab_widget.addTab(Random(self), "Random")
         tab_widget.addTab(Render(self), "Render")
@@ -132,7 +132,7 @@ class TabDialog(QWidget):
 
 
 class ObjectTab(QWidget):
-    def __init__(self, parent: QWidget):
+    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
 
         self.Object_pos_title = QLabel(f"Object 1 Co-ords", self)
@@ -216,6 +216,74 @@ class ObjectTab(QWidget):
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
         self.Z_Rotation.setRange(0, 360)
 
+        def Get_Object_Filepath():
+            try:
+                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
+                if (path == ""): return
+                # add the object to the shared state
+                shared_state.add_item(backend.RenderObject(filepath = path))
+                
+                Object_detect(tab_widget)
+
+            except Exception:
+                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
+
+        self.Import_Object_Button = QPushButton("Import Object", self)
+        self.Import_Object_Button.clicked.connect(Get_Object_Filepath)
+
+        def Tutorial_Object():
+            Tutorial_Box = QMessageBox()
+            Tutorial_Box.setText("Please select a tutorial object from below")
+            Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Cylinder", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Cone", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
+
+            Tutorial_Box.exec()
+            obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+            shared_state.add_item(obj)
+
+            Object_detect(tab_widget)
+
+        self.TutorialObjects_Button = QPushButton('Tutorial Objects', self)
+        self.TutorialObjects_Button.clicked.connect(Tutorial_Object)
+    
+        def delete_object(tab_widget):
+            to_delete = QMessageBox()
+            to_delete.setText("Please select an object to remove from below")
+
+            if (not shared_state.items):
+                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
+
+            for obj in shared_state.items:
+                to_delete.addButton(str(obj), QMessageBox.ActionRole)
+            
+            to_delete.addButton("Cancel", QMessageBox.ActionRole)
+
+            to_delete.exec()
+            choice = str(to_delete.clickedButton().text())
+
+            if choice != "Cancel":
+                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
+                obj = shared_state.items[obj_index]
+                shared_state.remove_item(obj)
+                del backend.get_config()["objects"][obj.object_pos]
+                # shift objects after this one down by one
+                for i in range(obj_index, len(shared_state.items)):
+                    obj = shared_state.items[i]
+                    obj.object_pos = i
+
+                shared_state.items_updated.emit(shared_state.items)
+                # The last object was deleted
+                if (not shared_state.items):
+                    Object_detect(tab_widget)
+                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
+
+        self.Delete_Object_Button = QPushButton('Delete Object', self)
+        self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget))
+
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
@@ -280,7 +348,17 @@ class ObjectTab(QWidget):
         main_layout.addWidget(self.L_slider, 3, 9)
 
         main_layout.addWidget(self.combo_box, 0, 9)
+
+        main_layout.addWidget(self.Import_Object_Button, 4, 9)
+        main_layout.addWidget(self.TutorialObjects_Button, 4, 8)
+        main_layout.addWidget(self.Delete_Object_Button, 5, 9)
+
         self.setLayout(main_layout)
+
+        def Object_detect(tab_widget):
+            State = not Backend.is_config_objects_empty(tab_widget)
+            for i in range(4):
+                tab_widget.setTabEnabled(i, State)
 
         # editingFinished callbacks that updates backend
         self.XObj_pos_input_field.editingFinished.connect(self.update_object_pos)
@@ -484,7 +562,6 @@ class ObjectTab(QWidget):
         self.Object_pos_title.setText(f"{Title} Co-ords")
         self.Object_scale_title.setText(f"{Title} Scale")
         self.Object_rotation_title.setText(f"{Title} Rotation")
-
 
 class PivotTab(QWidget):
     def __init__(self, parent: QWidget):
@@ -1012,8 +1089,6 @@ class Render(QWidget):
             else:
                 test = False
 
-
-
     def update_ui_by_config(self):
         """ Method that updates attributes in text field when the object index is change from combo box. """
 
@@ -1192,22 +1267,27 @@ class Port(QWidget):
 
             for obj in shared_state.items:
                 to_delete.addButton(str(obj), QMessageBox.ActionRole)
+            
+            to_delete.addButton("Cancel", QMessageBox.ActionRole)
 
             to_delete.exec()
-            obj_index = int(to_delete.clickedButton().text()[-1]) - 1
-            obj = shared_state.items[obj_index]
-            shared_state.remove_item(obj)
-            del backend.get_config()["objects"][obj.object_pos]
-            # shift objects after this one down by one
-            for i in range(obj_index, len(shared_state.items)):
-                obj = shared_state.items[i]
-                obj.object_pos = i
+            choice = str(to_delete.clickedButton().text())
 
-            shared_state.items_updated.emit(shared_state.items)
-            # The last object was deleted
-            if (not shared_state.items):
-                Object_detect(tab_widget)
-                QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
+            if choice != "Cancel":
+                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
+                obj = shared_state.items[obj_index]
+                shared_state.remove_item(obj)
+                del backend.get_config()["objects"][obj.object_pos]
+                # shift objects after this one down by one
+                for i in range(obj_index, len(shared_state.items)):
+                    obj = shared_state.items[i]
+                    obj.object_pos = i
+
+                shared_state.items_updated.emit(shared_state.items)
+                # The last object was deleted
+                if (not shared_state.items):
+                    Object_detect(tab_widget)
+                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
     
         #Sixth section
         self.Delete_Object_Button = QPushButton('Delete Object', self)
@@ -1243,9 +1323,9 @@ class Port(QWidget):
 
         main_layout.addWidget(self.TutorialObjects_Button, 0, 0)
         main_layout.addWidget(self.Import_Object_Button, 0, 1)
-        main_layout.addWidget(self.ExportSettings_Button, 0, 2)
-        main_layout.addWidget(self.ImportSettings_Button, 0, 3)
-        main_layout.addWidget(self.Delete_Object_Button, 0, 4)
+        main_layout.addWidget(self.Delete_Object_Button, 0, 2)
+        main_layout.addWidget(self.ExportSettings_Button, 0, 3)
+        main_layout.addWidget(self.ImportSettings_Button, 0, 4)
         main_layout.addWidget(self.BrowseFiles_Button, 0, 5)
         main_layout.addWidget(self.SelectRenderFolder_Button, 0, 6)
 
