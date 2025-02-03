@@ -67,13 +67,14 @@ class ComboBoxState(QObject):
         # maybe delete
         self.selection_changed.emit(index)
 
+
 class RenderThread(QThread):
     finished = pyqtSignal()
     progress = pyqtSignal(str)
 
     def run(self):
         self.progress.emit("Rendering...")
-        backend.render(headless = True)
+        backend.render(headless = False)
         self.finished.emit()
 
 class LoadingScreen(QDialog):
@@ -106,7 +107,7 @@ class TabDialog(QWidget):
         self.setStyleSheet(QtCore.QTextStream(stream).readAll())"""
 
         tab_widget = QTabWidget()
-        tab_widget.addTab(ObjectTab(self), "Object")
+        tab_widget.addTab(ObjectTab(self, tab_widget), "Object")
         tab_widget.addTab(PivotTab(self), "Pivot Point")
         tab_widget.addTab(Random(self), "Random")
         tab_widget.addTab(Render(self), "Render")
@@ -131,7 +132,7 @@ class TabDialog(QWidget):
 
 
 class ObjectTab(QWidget):
-    def __init__(self, parent: QWidget):
+    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
 
         self.Object_pos_title = QLabel(f"Object 1 Co-ords", self)
@@ -165,6 +166,7 @@ class ObjectTab(QWidget):
         
         self.W_slider = QtWidgets.QSlider(self)
         self.W_slider.setRange(0, 100)
+        self.W_slider.setPageStep(0)
         self.W_slider.setOrientation(QtCore.Qt.Horizontal)
 
         self.Height_Obj_pos = QLabel("Height:", self)
@@ -173,6 +175,7 @@ class ObjectTab(QWidget):
 
         self.H_slider = QtWidgets.QSlider(self)
         self.H_slider.setRange(0, 100)
+        self.H_slider.setPageStep(0)
         self.H_slider.setOrientation(QtCore.Qt.Horizontal)
         
         self.Length_Obj_pos = QLabel("Length:", self)
@@ -181,9 +184,8 @@ class ObjectTab(QWidget):
 
         self.L_slider = QtWidgets.QSlider(self)
         self.L_slider.setRange(0, 100)
+        self.L_slider.setPageStep(0)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
-
-        ############################################################
 
         self.Object_rotation_title = QLabel(f"Object 1 Rotation", self)
 
@@ -192,7 +194,7 @@ class ObjectTab(QWidget):
         self.X_Rotation_input_field.setText("0.0")
         
         self.X_Rotation = QtWidgets.QSlider(self)
-        
+        self.X_Rotation.setPageStep(0)
         self.X_Rotation.setOrientation(QtCore.Qt.Horizontal)
         self.X_Rotation.setRange(0, 360)
         
@@ -201,6 +203,7 @@ class ObjectTab(QWidget):
         self.Y_Rotation_input_field.setText("0.0")
         
         self.Y_Rotation = QtWidgets.QSlider(self)
+        self.Y_Rotation.setPageStep(0)
         self.Y_Rotation.setOrientation(QtCore.Qt.Horizontal)
         self.Y_Rotation.setRange(0, 360)
 
@@ -209,8 +212,77 @@ class ObjectTab(QWidget):
         self.Z_Rotation_input_field.setText("0.0")
         
         self.Z_Rotation = QtWidgets.QSlider(self)
+        self.Z_Rotation.setPageStep(0)
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
         self.Z_Rotation.setRange(0, 360)
+
+        def Get_Object_Filepath():
+            try:
+                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
+                if (path == ""): return
+                # add the object to the shared state
+                shared_state.add_item(backend.RenderObject(filepath = path))
+                
+                Object_detect(tab_widget)
+
+            except Exception:
+                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
+
+        self.Import_Object_Button = QPushButton("Import Object", self)
+        self.Import_Object_Button.clicked.connect(Get_Object_Filepath)
+
+        def Tutorial_Object():
+            Tutorial_Box = QMessageBox()
+            Tutorial_Box.setText("Please select a tutorial object from below")
+            Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Cylinder", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Cone", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
+
+            Tutorial_Box.exec()
+            obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+            shared_state.add_item(obj)
+
+            Object_detect(tab_widget)
+
+        self.TutorialObjects_Button = QPushButton('Tutorial Objects', self)
+        self.TutorialObjects_Button.clicked.connect(Tutorial_Object)
+    
+        def delete_object(tab_widget):
+            to_delete = QMessageBox()
+            to_delete.setText("Please select an object to remove from below")
+
+            if (not shared_state.items):
+                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
+
+            for obj in shared_state.items:
+                to_delete.addButton(str(obj), QMessageBox.ActionRole)
+            
+            to_delete.addButton("Cancel", QMessageBox.ActionRole)
+
+            to_delete.exec()
+            choice = str(to_delete.clickedButton().text())
+
+            if choice != "Cancel":
+                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
+                obj = shared_state.items[obj_index]
+                shared_state.remove_item(obj)
+                del backend.get_config()["objects"][obj.object_pos]
+                # shift objects after this one down by one
+                for i in range(obj_index, len(shared_state.items)):
+                    obj = shared_state.items[i]
+                    obj.object_pos = i
+
+                shared_state.items_updated.emit(shared_state.items)
+                # The last object was deleted
+                if (not shared_state.items):
+                    Object_detect(tab_widget)
+                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
+
+        self.Delete_Object_Button = QPushButton('Delete Object', self)
+        self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget))
 
         # create initial combo_box
         self.combo_box = QComboBox(self)
@@ -276,9 +348,19 @@ class ObjectTab(QWidget):
         main_layout.addWidget(self.L_slider, 3, 9)
 
         main_layout.addWidget(self.combo_box, 0, 9)
+
+        main_layout.addWidget(self.Import_Object_Button, 4, 9)
+        main_layout.addWidget(self.TutorialObjects_Button, 4, 8)
+        main_layout.addWidget(self.Delete_Object_Button, 5, 9)
+
         self.setLayout(main_layout)
 
-    # editingFinished callbacks that updates backend
+        def Object_detect(tab_widget):
+            State = not Backend.is_config_objects_empty(tab_widget)
+            for i in range(4):
+                tab_widget.setTabEnabled(i, State)
+
+        # editingFinished callbacks that updates backend
         self.XObj_pos_input_field.editingFinished.connect(self.update_object_pos)
         self.YObj_pos_input_field.editingFinished.connect(self.update_object_pos)
         self.ZObj_pos_input_field.editingFinished.connect(self.update_object_pos)
@@ -292,9 +374,9 @@ class ObjectTab(QWidget):
         self.Z_button_plus.clicked.connect(lambda: self.Plus_click(self.ZObj_pos_input_field))
         self.Z_button_minus.clicked.connect(lambda: self.Minus_click(self.ZObj_pos_input_field))
 
-        self.Width_Obj_pos_input_field.editingFinished.connect(lambda: self.Update_slider(self.W_slider, self.Width_Obj_pos_input_field.text()))
-        self.Height_Obj_pos_input_field.editingFinished.connect(lambda: self.Update_slider(self.H_slider, self.Height_Obj_pos_input_field.text()))
-        self.Length_Obj_pos_input_field.editingFinished.connect(lambda: self.Update_slider(self.L_slider, self.Length_Obj_pos_input_field.text()))
+        self.Width_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.W_slider, self.Width_Obj_pos_input_field.text()))
+        self.Height_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.H_slider, self.Height_Obj_pos_input_field.text()))
+        self.Length_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.L_slider, self.Length_Obj_pos_input_field.text()))
 
         # editingFinished callbacks that updates backend
         self.Width_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
@@ -302,16 +384,20 @@ class ObjectTab(QWidget):
         self.Length_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
 
         ########################################
-
+        
         self.W_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Width_Obj_pos_input_field))
         self.H_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Height_Obj_pos_input_field))
         self.L_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Length_Obj_pos_input_field))
 
-        self.X_Rotation_input_field.editingFinished.connect(lambda: self.Update_slider(self.X_Rotation, self.X_Rotation_input_field.text()))
-        self.Y_Rotation_input_field.editingFinished.connect(lambda: self.Update_slider(self.Y_Rotation, self.Y_Rotation_input_field.text()))
-        self.Z_Rotation_input_field.editingFinished.connect(lambda: self.Update_slider(self.Z_Rotation, self.Z_Rotation_input_field.text()))
+        self.W_slider.sliderReleased.connect(self.update_object_scale)
+        self.H_slider.sliderReleased.connect(self.update_object_scale)
+        self.L_slider.sliderReleased.connect(self.update_object_scale)
 
         #########################################
+  
+        self.X_Rotation_input_field.textEdited.connect(lambda: self.Update_slider(self.X_Rotation, self.X_Rotation_input_field.text()))
+        self.Y_Rotation_input_field.textEdited.connect(lambda: self.Update_slider(self.Y_Rotation, self.Y_Rotation_input_field.text()))
+        self.Z_Rotation_input_field.textEdited.connect(lambda: self.Update_slider(self.Z_Rotation, self.Z_Rotation_input_field.text()))
         
         # editingFinished callbacks that updates backend
         self.X_Rotation_input_field.editingFinished.connect(self.update_object_rotation)
@@ -322,10 +408,11 @@ class ObjectTab(QWidget):
         self.Y_Rotation.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Y_Rotation_input_field))
         self.Z_Rotation.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Z_Rotation_input_field))
 
-        # initialise items
-        self.update_combo_box_items(shared_state.items)
-        shared_state.update_items(items=[])
-        shared_state.update_selected(0)
+        self.X_Rotation.sliderReleased.connect(self.update_object_rotation)
+        self.Y_Rotation.sliderReleased.connect(self.update_object_rotation)
+        self.Z_Rotation.sliderReleased.connect(self.update_object_rotation)
+        
+        #########################################
 
     def update_combo_box_items(self, items):
         """ Method could be called to update combo_box_items. Maybe Delete. """
@@ -345,17 +432,6 @@ class ObjectTab(QWidget):
         selected_object = backend.get_config()["objects"][selected_object_pos]
         if (selected_object is None): return
         
-        # disconnects text fields
-        self.XObj_pos_input_field.editingFinished.disconnect(self.update_object_pos)
-        self.YObj_pos_input_field.editingFinished.disconnect(self.update_object_pos)
-        self.ZObj_pos_input_field.editingFinished.disconnect(self.update_object_pos)
-        self.Width_Obj_pos_input_field.editingFinished.disconnect(self.update_object_scale)
-        self.Height_Obj_pos_input_field.editingFinished.disconnect(self.update_object_scale)
-        self.Length_Obj_pos_input_field.editingFinished.disconnect(self.update_object_scale)
-        self.X_Rotation_input_field.editingFinished.disconnect(self.update_object_rotation)
-        self.Y_Rotation_input_field.editingFinished.disconnect(self.update_object_rotation)
-        self.Z_Rotation_input_field.editingFinished.disconnect(self.update_object_rotation)
-        
         # sets the text as object attributes
         self.XObj_pos_input_field.setText(str(selected_object["pos"][0]))
         self.YObj_pos_input_field.setText(str(selected_object["pos"][2]))
@@ -367,17 +443,6 @@ class ObjectTab(QWidget):
         self.Y_Rotation_input_field.setText(str(selected_object["rot"][1]))
         self.Z_Rotation_input_field.setText(str(selected_object["rot"][2]))
         
-        # reconnects text fields
-        self.XObj_pos_input_field.editingFinished.connect(self.update_object_pos)
-        self.YObj_pos_input_field.editingFinished.connect(self.update_object_pos)
-        self.ZObj_pos_input_field.editingFinished.connect(self.update_object_pos)
-        self.Width_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
-        self.Height_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
-        self.Length_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
-        self.X_Rotation_input_field.editingFinished.connect(self.update_object_rotation)
-        self.Y_Rotation_input_field.editingFinished.connect(self.update_object_rotation)
-        self.Z_Rotation_input_field.editingFinished.connect(self.update_object_rotation)
-
         self.Update_slider(self.W_slider,self.Width_Obj_pos_input_field.text())
         self.Update_slider(self.H_slider,self.Height_Obj_pos_input_field.text())
         self.Update_slider(self.L_slider,self.Length_Obj_pos_input_field.text())
@@ -471,7 +536,11 @@ class ObjectTab(QWidget):
             
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
-        field.setText(str(val))
+        if field.text() == '':
+            field.setText('0')
+        if float(field.text()) > val or float(field.text()) + 0.5 < val:
+            field.setText(str(val))
+        
         
     def update_label(self):
         """Updates labels on object change"""
@@ -481,7 +550,6 @@ class ObjectTab(QWidget):
         self.Object_pos_title.setText(f"{Title} Co-ords")
         self.Object_scale_title.setText(f"{Title} Scale")
         self.Object_rotation_title.setText(f"{Title} Rotation")
-
 
 class PivotTab(QWidget):
     def __init__(self, parent: QWidget):
@@ -535,14 +603,17 @@ class PivotTab(QWidget):
         self.Distance_Pivot_input_field.setText("0")
         
         self.Distance_Slider = QtWidgets.QSlider(self)
+        self.Distance_Slider.setPageStep(0)
         self.Distance_Slider.setOrientation(QtCore.Qt.Horizontal)
         self.Distance_Slider.setRange(0, 100)
 
-        self.Distance_Pivot_input_field.editingFinished.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
+        self.Distance_Pivot_input_field.textEdited.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
+        self.Distance_Pivot_input_field.editingFinished.connect(self.update_distance)
         self.Distance_Pivot_input_field.setText("0")
         
         #################
-        self.Distance_Slider.sliderMoved.connect(lambda: self.Slider_Update(self.Distance_Pivot_input_field))
+        self.Distance_Slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
+        self.Distance_Slider.sliderReleased.connect(self.update_distance)
         #################
         
         ################### 
@@ -599,14 +670,6 @@ class PivotTab(QWidget):
         """ Method that updates attributes in text field when the object index is change from combo box. """
 
         cfg = backend.get_config()
-
-        # disconnects text fields
-        self.Distance_Pivot_input_field.editingFinished.disconnect()
-        self.XPivot_point_input_field.editingFinished.disconnect()
-        self.YPivot_point_input_field.editingFinished.disconnect()
-        self.ZPivot_point_input_field.editingFinished.disconnect()
-        self.Pivot_Point_Check.stateChanged.disconnect()
-        self.combo_box.activated.disconnect()
         
         self.Distance_Pivot_input_field.setText(str(cfg["pivot"]["dis"]))
         self.XPivot_point_input_field.setText(str(cfg["pivot"]["point"][0]))
@@ -616,14 +679,6 @@ class PivotTab(QWidget):
         self.combo_box.setCurrentIndex(-1)
         if cfg["objects"] != []:
             self.combo_box.setCurrentIndex(0)
-            
-        # reconnects text fields
-        self.Distance_Pivot_input_field.editingFinished.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
-        self.XPivot_point_input_field.editingFinished.connect(self.update_pivot)
-        self.YPivot_point_input_field.editingFinished.connect(self.update_pivot)
-        self.ZPivot_point_input_field.editingFinished.connect(self.update_pivot)
-        self.Pivot_Point_Check.stateChanged.connect(lambda: self.state_changed(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
-        self.combo_box.activated.connect(lambda: self.Object_pivot_selected(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
 
         self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text())
         
@@ -637,10 +692,12 @@ class PivotTab(QWidget):
             except:
                 print("Error", e)
             
-    def Slider_Update(self, field):
-        """Sets field value to slider value"""
-        val = self.Distance_Slider.value()
-        field.setText(str(val))
+    def Slider_Update(self, val, field):
+        """Set Field value to slider value"""
+        if field.text() == '':
+            field.setText('0')
+        if float(field.text()) > val or float(field.text()) + 0.5 < val:
+            field.setText(str(val))
         
     def Object_pivot_selected(self, Check, Fields, Buttons):
         "Set checkbox and associsated Fields and buttons False"
@@ -666,7 +723,6 @@ class PivotTab(QWidget):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
         self.combo_box.addItems(map(lambda o: str(o), items))
-        self.Distance_Pivot_input_field.editingFinished.connect(self.update_distance)
     
     def update_pivot(self):
         """ Method to dynamically update a targetted object's position """
@@ -842,9 +898,6 @@ class Random(QWidget):
 
     def reset_toggle_states(self):
         """Reset all toggle states to unchecked state."""        
-        self.Width_Button.blockSignals(True)
-        self.Height_Button.blockSignals(True)
-        self.Length_Button.blockSignals(True)
         self.X_Button.blockSignals(False)
         self.Y_Button.blockSignals(False)
         self.Z_Button.blockSignals(False)
@@ -937,10 +990,10 @@ class Render(QWidget):
         self.X_Degree_input_field.setText("1")
         self.X_Degree_input_field.editingFinished.connect(self.set_angles)
         self.X_Degree_slider = QtWidgets.QSlider(self)
+        self.X_Degree_slider.setPageStep(0)
         self.X_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
         self.X_Degree_slider.setMinimum(1) 
-        self.X_Degree_slider.setMaximum(360) 
-        self.X_Degree_slider.setTickPosition(QSlider.TicksBelow)
+        self.X_Degree_slider.setMaximum(360)
 
         # Y Degree
         self.Y_Degree_Label = QLabel("Y:", self)
@@ -948,10 +1001,10 @@ class Render(QWidget):
         self.Y_Degree_slider = QtWidgets.QSlider(self)
         self.Y_Degree_input_field.setText("1")
         self.Y_Degree_input_field.editingFinished.connect(self.set_angles)
+        self.Y_Degree_slider.setPageStep(0)
         self.Y_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
         self.Y_Degree_slider.setMinimum(1)
         self.Y_Degree_slider.setMaximum(360)
-        self.Y_Degree_slider.setTickPosition(QSlider.TicksBelow)
 
         # Z Degree
         self.Z_Degree_Label = QLabel("Z:", self)
@@ -959,15 +1012,22 @@ class Render(QWidget):
         self.Z_Degree_input_field.setText("1")
         self.Z_Degree_input_field.editingFinished.connect(self.set_angles)
         self.Z_Degree_slider = QtWidgets.QSlider(self)
+        self.Z_Degree_slider.setPageStep(0)
         self.Z_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
         self.Z_Degree_slider.setMinimum(1)
         self.Z_Degree_slider.setMaximum(360)
-        self.Z_Degree_slider.setTickPosition(QSlider.TicksBelow)
 
+        self.X_Degree_input_field.textEdited.connect(lambda: self.Update_slider(self.X_Degree_slider, self.X_Degree_input_field.text()))
+        self.Y_Degree_input_field.textEdited.connect(lambda: self.Update_slider(self.Y_Degree_slider, self.Y_Degree_input_field.text()))
+        self.Z_Degree_input_field.textEdited.connect(lambda: self.Update_slider(self.Z_Degree_slider, self.Z_Degree_input_field.text()))
 
-        self.X_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.X_Degree_slider, self.X_Degree_input_field))
-        self.Y_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.Y_Degree_slider, self.Y_Degree_input_field))
-        self.Z_Degree_slider.sliderMoved.connect(lambda: self.update_degree_input(self.Z_Degree_slider, self.Z_Degree_input_field))
+        self.X_Degree_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.X_Degree_input_field))
+        self.Y_Degree_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Y_Degree_input_field))
+        self.Z_Degree_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Z_Degree_input_field))
+
+        self.X_Degree_slider.sliderReleased.connect(self.set_angles)
+        self.Y_Degree_slider.sliderReleased.connect(self.set_angles)
+        self.Z_Degree_slider.sliderReleased.connect(self.set_angles)
 
         self.unlimited_render_button = QPushButton("Unlimited Renders", self)
         self.unlimited_render_button.setCheckable(True)
@@ -1022,27 +1082,15 @@ class Render(QWidget):
             else:
                 test = False
 
-
-
     def update_ui_by_config(self):
         """ Method that updates attributes in text field when the object index is change from combo box. """
 
         cfg = backend.get_config()
 
-        self.X_Degree_input_field.editingFinished.disconnect()
-        self.Y_Degree_input_field.editingFinished.disconnect()
-        self.Z_Degree_input_field.editingFinished.disconnect()
-        self.Number_of_renders_input_field.editingFinished.disconnect()
-
         self.X_Degree_input_field.setText(str(cfg["render"]["degree"][0]))
         self.Y_Degree_input_field.setText(str(cfg["render"]["degree"][2]))
         self.Z_Degree_input_field.setText(str(cfg["render"]["degree"][1]))
         self.Number_of_renders_input_field.setText(str(cfg["render"]["renders"]))
-
-        self.X_Degree_input_field.editingFinished.connect(self.set_angles)
-        self.Y_Degree_input_field.editingFinished.connect(self.set_angles)
-        self.Z_Degree_input_field.editingFinished.connect(self.set_angles)
-        self.Number_of_renders_input_field.editingFinished.connect(self.set_renders)
 
         self.Update_slider(self.X_Degree_slider,self.X_Degree_input_field.text())
         self.Update_slider(self.Y_Degree_slider,self.Y_Degree_input_field.text())
@@ -1057,6 +1105,13 @@ class Render(QWidget):
                 slider.setValue(0)
             except:
                 print("Error", e)
+            
+    def Slider_Update(self, val, field):
+        """Set Field value to slider value"""
+        if field.text() == '':
+            field.setText('0')
+        if float(field.text()) > val or float(field.text()) + 0.5 < val:
+            field.setText(str(val))
 
     def increase_count(self):
         try:
@@ -1076,10 +1131,6 @@ class Render(QWidget):
             number_of_renders_value = 0
             self.Number_of_renders_input_field.setText(str(number_of_renders_value))
         self.Number_of_renders_input_field.editingFinished.emit()
-
-    def update_degree_input(self, slider, input_field):
-        value = slider.value()
-        input_field.setText(str(value))
 
         
     def generate_render(self):
@@ -1119,9 +1170,6 @@ class Render(QWidget):
             print("Error")
     
     def set_angles(self):
-        self.Update_slider(self.X_Degree_slider,self.X_Degree_input_field.text())
-        self.Update_slider(self.Y_Degree_slider,self.Y_Degree_input_field.text())
-        self.Update_slider(self.Z_Degree_slider,self.Z_Degree_input_field.text())
         try: 
             backend.set_angles( [float(self.X_Degree_input_field.text()), float(self.Z_Degree_input_field.text()), float(self.Y_Degree_input_field.text())] )
         except:
@@ -1240,27 +1288,34 @@ class Port(QWidget):
 
             for obj in shared_state.items:
                 to_delete.addButton(str(obj), QMessageBox.ActionRole)
+            
+            to_delete.addButton("Cancel", QMessageBox.ActionRole)
 
             to_delete.exec()
-            obj_index = int(to_delete.clickedButton().text()[-1]) - 1
-            obj = shared_state.items[obj_index]
-            try:
-                shared_state.remove_item(obj)
 
-                success_box = ilyaMessageBox("Object successfully deleted", "Success")
-            except:
-                error_box = ilyaMessageBox("Error deleting object", "Error")
-            del backend.get_config()["objects"][obj.object_pos]
-            # shift objects after this one down by one
-            for i in range(obj_index, len(shared_state.items)):
-                obj = shared_state.items[i]
-                obj.object_pos = i
+            choice = str(to_delete.clickedButton().text())
 
-            shared_state.items_updated.emit(shared_state.items)
-            # The last object was deleted
-            if (not shared_state.items):
-                Object_detect(tab_widget)
-                QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
+            if choice != "Cancel":
+                
+                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
+                obj = shared_state.items[obj_index]
+                try:
+                    shared_state.remove_item(obj)
+                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
+                    
+                    del backend.get_config()["objects"][obj.object_pos]
+                    # shift objects after this one down by one
+                    for i in range(obj_index, len(shared_state.items)):
+                        obj = shared_state.items[i]
+                        obj.object_pos = i
+                except:
+                    error_box = ilyaMessageBox("Error deleting object", "Error")
+
+                shared_state.items_updated.emit(shared_state.items)
+                # The last object was deleted
+                if (not shared_state.items):
+                    Object_detect(tab_widget)
+                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
     
         #Sixth section
         self.Delete_Object_Button = QPushButton('Delete Object', self)
@@ -1299,9 +1354,9 @@ class Port(QWidget):
 
         main_layout.addWidget(self.TutorialObjects_Button, 0, 0)
         main_layout.addWidget(self.Import_Object_Button, 0, 1)
-        main_layout.addWidget(self.ExportSettings_Button, 0, 2)
-        main_layout.addWidget(self.ImportSettings_Button, 0, 3)
-        main_layout.addWidget(self.Delete_Object_Button, 0, 4)
+        main_layout.addWidget(self.Delete_Object_Button, 0, 2)
+        main_layout.addWidget(self.ExportSettings_Button, 0, 3)
+        main_layout.addWidget(self.ImportSettings_Button, 0, 4)
         main_layout.addWidget(self.BrowseFiles_Button, 0, 5)
         main_layout.addWidget(self.SelectRenderFolder_Button, 0, 6)
 
