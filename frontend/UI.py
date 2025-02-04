@@ -111,12 +111,15 @@ class TabDialog(QWidget):
         tab_widget.addTab(PivotTab(self), "Pivot Point")
         tab_widget.addTab(Random(self), "Random")
         tab_widget.addTab(Render(self), "Render")
+        tab_widget.addTab(Lighting(self), "Lighting")
         tab_widget.addTab(Port(self, tab_widget), "Import/Export")
 
+    
         tab_widget.setTabEnabled(0, False)
         tab_widget.setTabEnabled(1, False)
         tab_widget.setTabEnabled(2, False)
         tab_widget.setTabEnabled(3, False)
+        #tab_widget.setTabEnabled(4, False)
 
 
         tab_widget.setFixedHeight(200)
@@ -1233,18 +1236,19 @@ class Port(QWidget):
         self.ExportSettings_Button.clicked.connect(Export_Settings)
 
         #Fifth Section
-        def Get_Settings_Filepath():
-            try:
+        def Get_Settings_Filepath(tab_widget):
+            #try:
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0]
                 if (path == ""): return
                 backend = Backend(json_filepath = path)
                 for i in range(4):
-                    self.path.tabwizard.widget(i).update_ui_by_config()
-            except Exception:
-                QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
+                    if i != 2:
+                        tab_widget.widget(i).update_ui_by_config
+            #except Exception:
+             #   QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
         self.ImportSettings_Button = QPushButton('Import Settings', self)
-        self.ImportSettings_Button.clicked.connect(Get_Settings_Filepath)
+        self.ImportSettings_Button.clicked.connect(lambda: Get_Settings_Filepath(tab_widget))
 
         def delete_object(tab_widget):
             to_delete = QMessageBox()
@@ -1304,7 +1308,7 @@ class Port(QWidget):
 
         def Object_detect(tab_widget):
             State = not Backend.is_config_objects_empty(tab_widget)
-            for i in range(4):
+            for i in range(5):
                 tab_widget.setTabEnabled(i, State)
 
         main_layout = QGridLayout()
@@ -1319,6 +1323,167 @@ class Port(QWidget):
 
         self.setLayout(main_layout)
 
+
+
+
+class Lighting(QWidget):
+    def __init__(self, parent: QWidget):
+        super().__init__(parent)
+
+
+        ###
+        self.colour_label = QLabel("Colour:", self)
+        self.colour_select_button = QPushButton("Select colour", self)
+        self.colour_select_button.clicked.connect(self.getColour)
+
+        self.lighting_colour = QLineEdit(self)
+        self.colour_example = QLabel(self)
+        ###
+
+
+        ###
+        self.lighting_strength_label = QLabel("Strength: ", self)
+        self.lighting_strength_input_field = QLineEdit(self)
+        self.lighting_strength_input_field.setText("1")
+
+        self.strength_slider = QSlider(self)
+        self.strength_slider.setRange(0,100)
+        self.strength_slider.setOrientation(QtCore.Qt.Horizontal)
+        ###
+
+        self.light_coords_label = QLabel("Lighting Co-ords:", self)
+        ###
+        self.Xlight_coords_label = QLabel("X:", self)
+        self.Xlight_coords_input_field = QLineEdit(self)
+
+        self.Xlight_coords_button_plus = QPushButton("+", self)
+        self.Xlight_coords_button_minus = QPushButton("-", self)
+        ###
+
+
+        ###
+        self.radius_label = QLabel("Radius", self)
+        self.radius_input_field = QLineEdit(self)
+        self.radius_button_minus = QPushButton("-", self)
+        self.radius_button_plus = QPushButton("+", self)
+
+
+        ###
+
+
+        ###
+        self.Ylight_coords_label = QLabel("Y:", self)
+        self.Ylight_coords_input_field = QLineEdit(self)
+
+        self.Ylight_coords_button_plus = QPushButton("+", self)
+        self.Ylight_coords_button_minus = QPushButton("-", self)
+        ###
+
+        ###
+        self.Zlight_coords_label = QLabel("Z:", self)
+        self.Zlight_coords_input_field = QLineEdit(self)
+
+        self.Zlight_coords_button_plus = QPushButton("+", self)
+        self.Zlight_coords_button_minus = QPushButton("-", self)
+        ###
+
+        self.light_angle_label = QLabel("Lighting Angle:", self)
+        ###
+        self.Xlight_angle_label = QLabel("X:", self)
+        self.Xlight_angle_input_field = QLineEdit(self)
+
+        self.Xlight_angle_button_plus = QPushButton("+", self)
+        self.Xlight_angle_button_minus = QPushButton("-", self)
+        ###
+
+        ###
+        self.Ylight_angle_label = QLabel("Y:", self)
+        self.Ylight_angle_input_field = QLineEdit(self)
+
+        self.Ylight_angle_button_plus = QPushButton("+", self)
+        self.Ylight_angle_button_minus = QPushButton("-", self)
+        ###
+
+        ###
+        self.Zlight_angle_label = QLabel("Z:", self)
+        self.Zlight_angle_input_field = QLineEdit(self)
+
+        self.Zlight_angle_button_plus = QPushButton("+", self)
+        self.Zlight_angle_button_minus = QPushButton("-", self)
+        ###
+
+        
+
+
+        main_layout = QGridLayout()
+
+        main_layout.addWidget(self.lighting_strength_label, 0, 0)
+        main_layout.addWidget(self.lighting_strength_input_field, 0, 1)
+        main_layout.addWidget(self.strength_slider, 0, 2)
+
+        
+        
+        main_layout.addWidget(self.light_coords_label, 0, 4)      
+
+
+        main_layout.addWidget(self.Xlight_coords_label, 1, 4)
+        main_layout.addWidget(self.Xlight_coords_input_field, 1, 5)
+        main_layout.addWidget(self.Xlight_coords_button_plus, 1, 7)
+        main_layout.addWidget(self.Xlight_coords_button_minus, 1, 6)
+
+        main_layout.addWidget(self.Ylight_coords_label, 2, 4)
+        main_layout.addWidget(self.Ylight_coords_input_field, 2, 5)
+        main_layout.addWidget(self.Ylight_coords_button_plus, 2, 7)
+        main_layout.addWidget(self.Ylight_coords_button_minus, 2, 6)
+
+        main_layout.addWidget(self.Zlight_coords_label, 3, 4)
+        main_layout.addWidget(self.Zlight_coords_input_field, 3, 5)
+        main_layout.addWidget(self.Zlight_coords_button_plus, 3, 7)
+        main_layout.addWidget(self.Zlight_coords_button_minus, 3, 6)
+
+
+
+        main_layout.addWidget(self.light_angle_label, 0, 8)      
+
+
+        main_layout.addWidget(self.Xlight_angle_label, 1, 8)
+        main_layout.addWidget(self.Xlight_angle_input_field, 1, 9)
+        main_layout.addWidget(self.Xlight_angle_button_plus, 1, 11)
+        main_layout.addWidget(self.Xlight_angle_button_minus, 1, 10)
+
+        main_layout.addWidget(self.Ylight_angle_label, 2, 8)
+        main_layout.addWidget(self.Ylight_angle_input_field, 2, 9)
+        main_layout.addWidget(self.Ylight_angle_button_plus, 2, 11)
+        main_layout.addWidget(self.Ylight_angle_button_minus, 2, 10)
+
+        main_layout.addWidget(self.Zlight_angle_label, 3, 8)
+        main_layout.addWidget(self.Zlight_angle_input_field, 3, 9)
+        main_layout.addWidget(self.Zlight_angle_button_plus, 3, 11)
+        main_layout.addWidget(self.Zlight_angle_button_minus, 3, 10)
+
+        main_layout.addWidget(self.colour_select_button, 1, 1)
+        main_layout.addWidget(self.lighting_colour, 1, 2)
+        main_layout.addWidget(self.colour_example, 1 , 3)
+        main_layout.addWidget(self.colour_label, 1, 0)
+
+        main_layout.addWidget(self.radius_label, 2, 0)
+        main_layout.addWidget(self.radius_input_field, 2, 1)
+        main_layout.addWidget(self.radius_button_minus, 2, 2)
+        main_layout.addWidget(self.radius_button_plus, 2, 3)
+
+        self.setLayout(main_layout)
+
+
+    def getColour(self):
+        colour = QColorDialog.getColor()
+        print(colour.name()[1::])
+        self.lighting_colour.setText(colour.name())
+        self.colour_example.setStyleSheet(("background-color: {c}").format(c = colour.name()))
+        
+        
+
+
+        
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
