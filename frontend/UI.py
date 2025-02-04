@@ -5,6 +5,7 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 from functools import cached_property
 
+import os
 from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox
 from PyQt5.QtCore import * 
 from PyQt5.QtGui import * 
@@ -1174,22 +1175,48 @@ class Port(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
         
-
-
         #First Section
         def Get_Object_Filepath():
+            import_box = QMessageBox()
+            import_box.setText("How would you like to import objects?")
+            import_box.addButton("Multiple Files", QMessageBox.ActionRole)
+            import_box.addButton("Entire Folder", QMessageBox.ActionRole)
+            import_box.addButton("Cancel", QMessageBox.RejectRole)
+            
+            import_box.exec()
+            clicked_button = import_box.clickedButton().text()
+            
             try:
-                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
-                if (path == ""): return
-                # add the object to the shared state
-                shared_state.add_item(backend.RenderObject(filepath = path))
-                
+                if clicked_button == "Multiple Files":
+                    paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
+                    if not paths:
+                        return
+                    
+                    for path in paths:
+                        obj = backend.RenderObject(filepath=path)
+                        shared_state.add_item(obj)
+
+                elif clicked_button == "Entire Folder":
+                    folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
+                    if not folder_path:
+                        return
+                    
+                    # maybe have a global constant of supported extensions?
+                    supported_extensions = ['.blend', '.stl', '.obj']
+                    # go through each file in directory
+                    for root, _, files in os.walk(folder_path):
+                        for file in files:
+                            if any(file.lower().endswith(ext) for ext in supported_extensions):
+                                full_path = os.path.join(root, file)
+                                obj = backend.RenderObject(filepath=full_path)
+                                shared_state.add_item(obj)
+
                 Object_detect(tab_widget)
 
-            except Exception:
-                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
-
-        self.Import_Object_Button = QPushButton("Import Object", self)
+            except Exception as e:
+                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
+                
+        self.Import_Object_Button = QPushButton("Import Objects", self)
         self.Import_Object_Button.clicked.connect(Get_Object_Filepath)
 
         #Second Section
