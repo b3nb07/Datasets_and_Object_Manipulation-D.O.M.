@@ -102,10 +102,11 @@ class TabDialog(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.setWindowTitle("Datasets and Object Modeling")
-        """stream = QtCore.QFile("Style\DarkMode.qss")
+        """
+        stream = QtCore.QFile("Style\DarkMode.qss")
         stream.open(QtCore.QIODevice.ReadOnly)
-        self.setStyleSheet(QtCore.QTextStream(stream).readAll())"""
-
+        self.setStyleSheet(QtCore.QTextStream(stream).readAll())
+        """
         tab_widget = QTabWidget()
         tab_widget.addTab(ObjectTab(self, tab_widget), "Object")
         tab_widget.addTab(PivotTab(self), "Pivot Point")
@@ -118,8 +119,8 @@ class TabDialog(QWidget):
         tab_widget.setTabEnabled(2, False)
         tab_widget.setTabEnabled(3, False)
 
-
-        tab_widget.setFixedHeight(300)
+        tab_widget.setFixedHeight(200)
+        
         # enviroment
         environment = QWidget()
         environment.setStyleSheet("background-color: black;")
@@ -609,8 +610,8 @@ class PivotTab(QWidget):
 
         self.Distance_Pivot_input_field.textEdited.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
         self.Distance_Pivot_input_field.editingFinished.connect(self.update_distance)
-        self.Distance_Pivot_input_field.setText("0")
-        
+        self.Distance_Pivot_input_field.setText("10")
+        self.Distance_Slider.setValue(10)
         #################
         self.Distance_Slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
         self.Distance_Slider.sliderReleased.connect(self.update_distance)
@@ -656,11 +657,11 @@ class PivotTab(QWidget):
         main_layout.addWidget(self.ZPivot_button_minus, 3, 2)
         main_layout.addWidget(self.ZPivot_button_plus, 3, 3)
 
-        main_layout.addWidget(self.Distance_Pivot, 4, 0)
-        main_layout.addWidget(self.Distance_Pivot_input_field, 4, 1)
-        main_layout.addWidget(self.Distance_Slider, 4, 2)
+        main_layout.addWidget(self.Distance_Pivot, 1, 4)
+        main_layout.addWidget(self.Distance_Pivot_input_field, 1, 5)
+        main_layout.addWidget(self.Distance_Slider, 1, 6)
 
-        main_layout.addWidget(self.combo_box, 0, 4)
+        main_layout.addWidget(self.combo_box, 0, 7)
 
         self.setLayout(main_layout)
 
@@ -770,8 +771,6 @@ class RandomTabDialog(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
 
-        self.setWindowTitle("Datasets and Object Modeling")
-
         tab_widget = QTabWidget()
         tab_widget.addTab(RandomDefault(self, tab_widget), "Base")
         tab_widget.addTab(RandomObject(self), "Object")
@@ -789,9 +788,14 @@ class RandomDefault(QWidget):
 
         main_layout = QGridLayout()
         Field = QCheckBox("Set ALL random", self)
-        main_layout.addWidget(Field)
+        RandomSeed = QLineEdit("", self)
+        RandomSeed.setFixedWidth(100)
+        main_layout.addWidget(Field, 0, 0)
+        main_layout.addWidget(RandomSeed, 1, 0)
+        main_layout.setAlignment(Qt.AlignTop | Qt.AlignRight)
         Field.toggled.connect(lambda state: self.checkUpdate(tab_widget, state))
-
+        
+        self.setLayout(main_layout)
     def checkUpdate(self, tab_widget, State):
         for i in range(1, tab_widget.count()):
             widget = tab_widget.widget(i)
@@ -808,10 +812,21 @@ class RandomObject(QWidget):
         self.UpperBounds = {}
 
         main_layout = QGridLayout()
+        
+        # create initial combo_box
+        self.combo_box = QComboBox(self)
+        # connecting shared state updates to combo box
+        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
-        main_layout.addWidget(QComboBox(), 0, 10)
-        main_layout.itemAtPosition(0, 10).widget().addItem("Object1")
-        main_layout.itemAtPosition(0, 10).widget().addItem("Object2")
+        # initialise items
+        self.update_combo_box_items(shared_state.items)
+        shared_state.update_items(items=[])
+        shared_state.update_selected(0)
+        
+        main_layout.addWidget(self.combo_box, 0, 10)
+        
         main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
         main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
              self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
@@ -830,6 +845,8 @@ class RandomObject(QWidget):
         self.gen_field("Width", main_layout, 6, 1)
         self.gen_field("Height", main_layout, 6, 2)
         self.gen_field("Length", main_layout, 6, 3)
+        
+        
 
         #print(main_layout.itemAtPosition(0, 0).widget().setText("Electric boogalo"))
         #how to change values
@@ -868,6 +885,14 @@ class RandomObject(QWidget):
         for keys in self.CheckBoxes.keys():
             main_layout.itemAtPosition(self.CheckBoxes[keys][1], self.CheckBoxes[keys][0]).widget().setChecked(State)
 
+    def update_combo_box_items(self, items):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        self.combo_box.clear()
+        self.combo_box.addItems(map(lambda o: str(o), items))
+        
+    def on_object_selected(self, selected_object_pos):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        pass
 
 class RandomPivot(QWidget):
     def __init__(self, parent: QWidget):
@@ -878,10 +903,21 @@ class RandomPivot(QWidget):
         self.UpperBounds = {}
 
         main_layout = QGridLayout()
+        
+        # create initial combo_box
+        self.combo_box = QComboBox(self)
+        # connecting shared state updates to combo box
+        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
-        main_layout.addWidget(QComboBox(), 0, 10)
-        main_layout.itemAtPosition(0, 10).widget().addItem("Object1")
-        main_layout.itemAtPosition(0, 10).widget().addItem("Object2")
+        # initialise items
+        self.update_combo_box_items(shared_state.items)
+        shared_state.update_items(items=[])
+        shared_state.update_selected(0)
+
+        main_layout.addWidget(self.combo_box, 0, 10)
+
         main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
         main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
              self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
@@ -932,7 +968,14 @@ class RandomPivot(QWidget):
         for keys in self.CheckBoxes.keys():
             main_layout.itemAtPosition(self.CheckBoxes[keys][1], self.CheckBoxes[keys][0]).widget().setChecked(State)
 
-
+    def update_combo_box_items(self, items):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        self.combo_box.clear()
+        self.combo_box.addItems(map(lambda o: str(o), items))
+        
+    def on_object_selected(self, selected_object_pos):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        pass
 
 class RandomRender(QWidget):
     def __init__(self, parent: QWidget):
@@ -943,10 +986,21 @@ class RandomRender(QWidget):
         self.UpperBounds = {}
 
         main_layout = QGridLayout()
+        
+        # create initial combo_box
+        self.combo_box = QComboBox(self)
+        # connecting shared state updates to combo box
+        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
-        main_layout.addWidget(QComboBox(), 0, 10)
-        main_layout.itemAtPosition(0, 10).widget().addItem("Object1")
-        main_layout.itemAtPosition(0, 10).widget().addItem("Object2")
+        # initialise items
+        self.update_combo_box_items(shared_state.items)
+        shared_state.update_items(items=[])
+        shared_state.update_selected(0)
+
+        main_layout.addWidget(self.combo_box, 0, 10)
+        
         main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
         main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
              self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
@@ -997,6 +1051,14 @@ class RandomRender(QWidget):
         for keys in self.CheckBoxes.keys():
             main_layout.itemAtPosition(self.CheckBoxes[keys][1], self.CheckBoxes[keys][0]).widget().setChecked(State)
 
+    def update_combo_box_items(self, items):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        self.combo_box.clear()
+        self.combo_box.addItems(map(lambda o: str(o), items))
+        
+    def on_object_selected(self, selected_object_pos):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        pass
 
 class RandomLight(QWidget):
     def __init__(self, parent: QWidget):
@@ -1007,10 +1069,21 @@ class RandomLight(QWidget):
         self.UpperBounds = {}
 
         main_layout = QGridLayout()
+        
+        # create initial combo_box
+        self.combo_box = QComboBox(self)
+        # connecting shared state updates to combo box
+        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
-        main_layout.addWidget(QComboBox(), 0, 12)
-        main_layout.itemAtPosition(0, 12).widget().addItem("Object1")
-        main_layout.itemAtPosition(0, 12).widget().addItem("Object2")
+        # initialise items
+        self.update_combo_box_items(shared_state.items)
+        shared_state.update_items(items=[])
+        shared_state.update_selected(0)
+
+        main_layout.addWidget(self.combo_box, 0, 12)
+        
         main_layout.addWidget(QCheckBox("Set all random", self), 1, 12)
         main_layout.itemAtPosition(1, 12).widget().toggled.connect(lambda:
              self.set_all_random(main_layout, main_layout.itemAtPosition(1, 12).widget().isChecked()))
@@ -1068,6 +1141,15 @@ class RandomLight(QWidget):
     def set_all_random(self, main_layout, State):
         for keys in self.CheckBoxes.keys():
             main_layout.itemAtPosition(self.CheckBoxes[keys][1], self.CheckBoxes[keys][0]).widget().setChecked(State)
+            
+    def update_combo_box_items(self, items):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        self.combo_box.clear()
+        self.combo_box.addItems(map(lambda o: str(o), items))
+        
+    def on_object_selected(self, selected_object_pos):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        pass
 
 
 
@@ -1155,17 +1237,17 @@ class Render(QWidget):
 
         main_layout.addWidget(self.Degree_Change_title, 0, 3)
 
-        main_layout.addWidget(self.X_Degree_Label, 0, 4)
+        main_layout.addWidget(self.X_Degree_Label, 1, 3)
         main_layout.addWidget(self.X_Degree_input_field, 1, 4)
-        main_layout.addWidget(self.X_Degree_slider, 2, 4)
+        main_layout.addWidget(self.X_Degree_slider, 1, 5)
 
-        main_layout.addWidget(self.Y_Degree_Label, 0, 5)
-        main_layout.addWidget(self.Y_Degree_input_field, 1, 5)
+        main_layout.addWidget(self.Y_Degree_Label, 2, 3)
+        main_layout.addWidget(self.Y_Degree_input_field, 2, 4)
         main_layout.addWidget(self.Y_Degree_slider, 2, 5)
 
-        main_layout.addWidget(self.Z_Degree_Label, 0, 6)
-        main_layout.addWidget(self.Z_Degree_input_field, 1, 6)
-        main_layout.addWidget(self.Z_Degree_slider, 2, 6)
+        main_layout.addWidget(self.Z_Degree_Label, 3, 3)
+        main_layout.addWidget(self.Z_Degree_input_field, 3, 4)
+        main_layout.addWidget(self.Z_Degree_slider, 3, 5)
 
         main_layout.addWidget(self.unlimited_render_button, 1, 7)
 
@@ -1283,8 +1365,6 @@ class Render(QWidget):
 class Port(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
-        
-
 
         #First Section
         def Get_Object_Filepath():
