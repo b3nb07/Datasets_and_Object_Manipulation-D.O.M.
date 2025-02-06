@@ -525,32 +525,35 @@ class ObjectTab(QWidget):
     
     
     def Plus_click(self, field):
-        """Updates field value"""
-        try:
-            val = float(field.text()) + 1
-            field.setText(str(val))
-            field.editingFinished.emit()
-        except:
-            field.setText(str(0.0))
-            field.editingFinished.emit()
+        if field.isEnabled():
+            """Updates field value"""
+            try:
+                val = float(field.text()) + 1
+                field.setText(str(val))
+                field.editingFinished.emit()
+            except:
+                field.setText(str(0.0))
+                field.editingFinished.emit()
         
         
     def Minus_click(self, field):
-        """Updates field value"""
-        try:
-            val = float(field.text()) - 1
-            field.setText(str(val))
-            field.editingFinished.emit()
-        except:
-            field.setText(str(0.0))
-            field.editingFinished.emit()
+        if field.isEnabled():
+            """Updates field value"""
+            try:
+                val = float(field.text()) - 1
+                field.setText(str(val))
+                field.editingFinished.emit()
+            except:
+                field.setText(str(0.0))
+                field.editingFinished.emit()
             
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
-        if field.text() == '':
-            field.setText('0')
-        if float(field.text()) > val or float(field.text()) + 0.5 < val:
-            field.setText(str(val))
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                field.setText(str(val))
         
         
     def update_label(self):
@@ -705,10 +708,11 @@ class PivotTab(QWidget):
             
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
-        if field.text() == '':
-            field.setText('0')
-        if float(field.text()) > val or float(field.text()) + 0.5 < val:
-            field.setText(str(val))
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                field.setText(str(val))
         
     def Object_pivot_selected(self, Check, Fields, Buttons):
         "Set checkbox and associsated Fields and buttons False"
@@ -758,24 +762,26 @@ class PivotTab(QWidget):
     
     def Plus_click(self, field):
         """Updates Field value"""
-        try:
-            val = float(field.text()) + 1
-            field.setText(str(val))
-            field.editingFinished.emit()
-        except:
-            field.setText(str(0.0))
-            field.editingFinished.emit()
+        if field.isEnabled():
+            try:
+                val = float(field.text()) + 1
+                field.setText(str(val))
+                field.editingFinished.emit()
+            except:
+                field.setText(str(0.0))
+                field.editingFinished.emit()
         
         
     def Minus_click(self, field):
         """Updates Field value"""
-        try:
-            val = float(field.text()) - 1
-            field.setText(str(val))
-            field.editingFinished.emit()
-        except:
-            field.setText(str(0.0))
-            field.editingFinished.emit()
+        if field.isEnabled():
+            try:
+                val = float(field.text()) - 1
+                field.setText(str(val))
+                field.editingFinished.emit()
+            except:
+                field.setText(str(0.0))
+                field.editingFinished.emit()
 
 class RandomTabDialog(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
@@ -1341,29 +1347,32 @@ class Render(QWidget):
             
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
-        if field.text() == '':
-            field.setText('0')
-        if float(field.text()) > val or float(field.text()) + 0.5 < val:
-            field.setText(str(val))
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                field.setText(str(val))
 
     def increase_count(self):
-        try:
-            number_of_renders_value = int(self.Number_of_renders_input_field.text())
-            self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
-        except:
-            number_of_renders_value = 0
-            self.Number_of_renders_input_field.setText(str(number_of_renders_value))
-        self.Number_of_renders_input_field.editingFinished.emit()
+        if self.Number_of_renders_input_field.isEnabled():
+            try:
+                number_of_renders_value = int(self.Number_of_renders_input_field.text())
+                self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
+            except:
+                number_of_renders_value = 0
+                self.Number_of_renders_input_field.setText(str(number_of_renders_value))
+            self.Number_of_renders_input_field.editingFinished.emit()
 
     def decrease_count(self):
-        try:
-            number_of_renders_value = int(self.Number_of_renders_input_field.text())
-            if number_of_renders_value > 1:  # Prevent negative values if needed
-                self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
-        except:
-            number_of_renders_value = 0
-            self.Number_of_renders_input_field.setText(str(number_of_renders_value))
-        self.Number_of_renders_input_field.editingFinished.emit()
+        if self.Number_of_renders_input_field.isEnabled():
+            try:
+                number_of_renders_value = int(self.Number_of_renders_input_field.text())
+                if number_of_renders_value > 1:  # Prevent negative values if needed
+                    self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
+            except:
+                number_of_renders_value = 0
+                self.Number_of_renders_input_field.setText(str(number_of_renders_value))
+            self.Number_of_renders_input_field.editingFinished.emit()
 
         
     def generate_render(self):
