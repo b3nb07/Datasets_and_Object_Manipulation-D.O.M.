@@ -542,15 +542,31 @@ class Backend():
                 "pos": [0, 0, 0],
                 "rot": [0, 0, 0],
                 "energy": 10,
-                "color": [255, 255, 255]
+                "color": [255, 255, 255],
+                "radius": 0
             })
+
+        def set_type(self, type):
+            #print(config)
+            if (is_blender_environment):
+                self.light.set_type(type)
+
+            config["light_sources"][self.light_pos]["type"] = type
+
+        def set_radius(self, radius):
+            #print(radius)
+            if (is_blender_environment):
+                self.light.set_radius(radius)
+
+            config["light_sources"][self.light_pos]["radius"] = radius
+
 
         def set_loc(self, location):
             """Set the location of a light source in the scene.
             
             :param location: A list containing [x,z,y] where x,z,y is an integer or float. This determines the coordinates of the light's location.
             """
-
+            #print("location changed")
             if (is_blender_environment):
                 self.light.set_location(location)
 
@@ -561,7 +577,7 @@ class Backend():
 
             :param rotation: A list [x,z,y] with values for the rotation to be applied to the light.
             """
-
+            #print("angle changed")
             rotRad = []
             for x in rotation:
                 rotRad.append(np.deg2rad(int(x)))
@@ -577,7 +593,7 @@ class Backend():
             
             :param energy: The energy to set it as. Interpreted as watts.
             """
-
+            #print("energy changed")
             if (is_blender_environment):
                 self.light.set_energy(energy)
 
@@ -603,7 +619,7 @@ class Backend():
             
             :param color: A list [r,g,b] containing the values of the red, green and blue attributes from 0 to 255 inclusive.
             """
-            #print(color)
+            print(color)
             colour = self.hex_to_rgba(color)
             #print(colour)
             if (is_blender_environment):
