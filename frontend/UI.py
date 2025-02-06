@@ -1330,14 +1330,17 @@ class Lighting(QWidget):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
 
+        self.light = backend.RenderLight()
 
         ###
         self.colour_label = QLabel("Colour:", self)
         self.colour_select_button = QPushButton("Select colour", self)
         self.colour_select_button.clicked.connect(self.getColour)
 
-        self.lighting_colour = QLineEdit(self)
+        self.lighting_colour = QLineEdit(self) #f789886 & bullshit
+        self.lighting_colour.textEdited.connect(lambda: self.update_colour_example_text(self.lighting_colour.text()))
         self.colour_example = QLabel(self)
+        self.lighting_colour.setText("#000000")
         ###
 
 
@@ -1345,72 +1348,104 @@ class Lighting(QWidget):
         self.lighting_strength_label = QLabel("Strength: ", self)
         self.lighting_strength_input_field = QLineEdit(self)
         self.lighting_strength_input_field.setText("1")
+        self.lighting_strength_input_field.textEdited.connect(lambda: self.Update_slider(self.strength_slider, self.lighting_strength_input_field.text()))
 
         self.strength_slider = QSlider(self)
         self.strength_slider.setRange(0,100)
         self.strength_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.strength_slider.sliderMoved.connect(lambda val: self.set_strength(val, self.lighting_strength_input_field))
         ###
+        
+        ###
+        self.radius_label = QLabel("Radius", self)
+        self.radius_input_field = QLineEdit(self)
+        self.radius_input_field.setText("0")
+        self.radius_button_minus = QPushButton("-", self)
+        self.radius_button_minus.clicked.connect(lambda: self.Minus_click(self.radius_input_field))
+
+        self.radius_button_plus = QPushButton("+", self)
+        self.radius_button_plus.clicked.connect(lambda: self.Plus_click(self.radius_input_field))
+
+
+
+        ###
+
 
         self.light_coords_label = QLabel("Lighting Co-ords:", self)
         ###
         self.Xlight_coords_label = QLabel("X:", self)
         self.Xlight_coords_input_field = QLineEdit(self)
+        self.Xlight_coords_input_field.setText("0")
 
         self.Xlight_coords_button_plus = QPushButton("+", self)
+        self.Xlight_coords_button_plus.clicked.connect(lambda: self.set_loc("Plus", self.Xlight_coords_input_field))
+
         self.Xlight_coords_button_minus = QPushButton("-", self)
+        self.Xlight_coords_button_minus.clicked.connect(lambda: self.set_loc("Minus", self.Xlight_coords_input_field))
         ###
 
 
-        ###
-        self.radius_label = QLabel("Radius", self)
-        self.radius_input_field = QLineEdit(self)
-        self.radius_button_minus = QPushButton("-", self)
-        self.radius_button_plus = QPushButton("+", self)
-
-
-        ###
+    
 
 
         ###
         self.Ylight_coords_label = QLabel("Y:", self)
         self.Ylight_coords_input_field = QLineEdit(self)
+        self.Ylight_coords_input_field.setText("0")
 
         self.Ylight_coords_button_plus = QPushButton("+", self)
+        self.Ylight_coords_button_plus.clicked.connect(lambda: self.set_loc("Plus", self.Ylight_coords_input_field))
+
         self.Ylight_coords_button_minus = QPushButton("-", self)
+        self.Ylight_coords_button_minus.clicked.connect(lambda: self.set_loc("Minus", self.Ylight_coords_input_field))
         ###
 
         ###
         self.Zlight_coords_label = QLabel("Z:", self)
         self.Zlight_coords_input_field = QLineEdit(self)
+        self.Zlight_coords_input_field.setText("0")
 
         self.Zlight_coords_button_plus = QPushButton("+", self)
+        self.Zlight_coords_button_plus.clicked.connect(lambda: self.set_loc("Plus", self.Zlight_coords_input_field))
+        
         self.Zlight_coords_button_minus = QPushButton("-", self)
+        self.Zlight_coords_button_minus.clicked.connect(lambda: self.set_loc("Minus", self.Zlight_coords_input_field))
         ###
 
         self.light_angle_label = QLabel("Lighting Angle:", self)
         ###
         self.Xlight_angle_label = QLabel("X:", self)
         self.Xlight_angle_input_field = QLineEdit(self)
+        self.Xlight_angle_input_field.setText("0")
+        self.Xlight_angle_input_field.textEdited.connect(lambda: self.Update_slider(self.Xlight_angle_slider, self.Xlight_angle_input_field.text()))
 
-        self.Xlight_angle_button_plus = QPushButton("+", self)
-        self.Xlight_angle_button_minus = QPushButton("-", self)
-        ###
+        self.Xlight_angle_slider = QSlider(self)
+        self.Xlight_angle_slider.setRange(0,100)
+        self.Xlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.Xlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Xlight_angle_input_field))
+
 
         ###
         self.Ylight_angle_label = QLabel("Y:", self)
         self.Ylight_angle_input_field = QLineEdit(self)
+        self.Ylight_angle_input_field.setText("0")
+        self.Ylight_angle_input_field.textEdited.connect(lambda: self.Update_slider(self.Ylight_angle_slider, self.Ylight_angle_input_field.text()))
 
-        self.Ylight_angle_button_plus = QPushButton("+", self)
-        self.Ylight_angle_button_minus = QPushButton("-", self)
-        ###
-
+        self.Ylight_angle_slider = QSlider(self)
+        self.Ylight_angle_slider.setRange(0,100)
+        self.Ylight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.Ylight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Ylight_angle_input_field))
         ###
         self.Zlight_angle_label = QLabel("Z:", self)
         self.Zlight_angle_input_field = QLineEdit(self)
+        self.Zlight_angle_input_field.setText("0")
+        self.Zlight_angle_input_field.textEdited.connect(lambda: self.Update_slider(self.Zlight_angle_slider, self.Zlight_angle_input_field.text()))
 
-        self.Zlight_angle_button_plus = QPushButton("+", self)
-        self.Zlight_angle_button_minus = QPushButton("-", self)
-        ###
+        self.Zlight_angle_slider = QSlider(self)
+        self.Zlight_angle_slider.setRange(0,100)
+        self.Zlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.Zlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Zlight_angle_input_field))
+       
 
         
 
@@ -1448,18 +1483,15 @@ class Lighting(QWidget):
 
         main_layout.addWidget(self.Xlight_angle_label, 1, 8)
         main_layout.addWidget(self.Xlight_angle_input_field, 1, 9)
-        main_layout.addWidget(self.Xlight_angle_button_plus, 1, 11)
-        main_layout.addWidget(self.Xlight_angle_button_minus, 1, 10)
+        main_layout.addWidget(self.Xlight_angle_slider, 1, 10)
 
         main_layout.addWidget(self.Ylight_angle_label, 2, 8)
         main_layout.addWidget(self.Ylight_angle_input_field, 2, 9)
-        main_layout.addWidget(self.Ylight_angle_button_plus, 2, 11)
-        main_layout.addWidget(self.Ylight_angle_button_minus, 2, 10)
+        main_layout.addWidget(self.Ylight_angle_slider, 2, 10)
 
         main_layout.addWidget(self.Zlight_angle_label, 3, 8)
         main_layout.addWidget(self.Zlight_angle_input_field, 3, 9)
-        main_layout.addWidget(self.Zlight_angle_button_plus, 3, 11)
-        main_layout.addWidget(self.Zlight_angle_button_minus, 3, 10)
+        main_layout.addWidget(self.Zlight_angle_slider, 3, 10)
 
         main_layout.addWidget(self.colour_select_button, 1, 1)
         main_layout.addWidget(self.lighting_colour, 1, 2)
@@ -1473,17 +1505,89 @@ class Lighting(QWidget):
 
         self.setLayout(main_layout)
 
+    def set_strength(self, val, field):
+        self.Slider_Update(val, field)
+        self.light.set_energy(field.text())
+
+    def set_loc(self, direction, field):
+        if direction == "Plus":
+            self.Plus_click(field)
+        elif direction == "Minus":
+            self.Minus_click(field)
+
+        x = self.Xlight_coords_input_field.text()
+        y = self.Ylight_coords_input_field.text()
+        z = self.Zlight_coords_input_field.text()
+
+        self.light.set_loc([x,z,y])
+
+    def set_rotation(self, val, field):
+        self.Slider_Update(val, field)
+
+        x = self.Xlight_angle_input_field.text()
+        y = self.Ylight_angle_input_field.text()
+        z = self.Zlight_angle_input_field.text()
+
+        self.light.set_rotation([x,z,y])
+        
 
     def getColour(self):
         colour = QColorDialog.getColor()
-        print(colour.name()[1::])
+
         self.lighting_colour.setText(colour.name())
         self.colour_example.setStyleSheet(("background-color: {c}").format(c = colour.name()))
-        
-        
+
+        self.light.set_color(colour.name())
 
 
-        
+    def Minus_click(self, field):
+        """Updates field value"""
+        try:
+            val = float(field.text()) - 1
+            field.setText(str(val))
+            field.editingFinished.emit()
+        except:
+            field.setText(str(0.0))
+            field.editingFinished.emit()
+    
+    def Plus_click(self, field):
+        """Updates field value"""
+        try:
+            val = float(field.text()) + 1
+            field.setText(str(val))
+            field.editingFinished.emit()
+        except:
+            field.setText(str(0.0))
+            field.editingFinished.emit()
+
+    def Slider_Update(self, val, field):
+        """Set Field value to slider value"""
+        if field.text() == '':
+            field.setText('0')
+        if float(field.text()) > val or float(field.text()) + 0.5 < val:
+            field.setText(str(val))
+
+    def Update_slider(self, slider, val):
+        try:
+            slider.setValue(int(round(float(val), 0)))
+        except Exception as e:
+            try:
+                slider.setValue(0)
+            except:
+                print("Error", e)
+
+
+    def update_colour_example_text(self, colour):
+        if colour[0] != "#":
+            colour = "#" + colour
+        self.colour_example.setStyleSheet(("background-color: {c}").format(c = colour))
+
+    def update_colour_example(self):
+        colour = self.lighting_strength_input_field.text()
+        self.lighting_colour.setText(colour.name())
+        self.colour_example.setStyleSheet(("background-color: {c}").format(c = colour.name()))
+
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
