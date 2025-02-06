@@ -130,7 +130,7 @@ class TabDialog(QWidget):
         tab_widget.setTabEnabled(2, False)
         tab_widget.setTabEnabled(3, False)
 
-        tab_widget.setFixedHeight(200)
+        tab_widget.setFixedHeight(250)
         
         # enviroment
         environment = QWidget()
