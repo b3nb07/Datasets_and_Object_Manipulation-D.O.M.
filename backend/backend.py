@@ -452,7 +452,6 @@ class Backend():
         
         def __init__(self, filepath=None, primative=None):
             """Initialise a render object.
-
             :param filepath: Filepath to an object file.
             :param primative: Create object primatively, choose from one of ["CUBE", "CYLINDER", "CONE", "PLANE", "SPHERE", "MONKEY"].
             """
@@ -461,7 +460,9 @@ class Backend():
                         
             if (filepath is not None):
                 if (is_blender_environment):
-                    self.object = bproc.loader.load_blend(filepath) if filepath.endswith(".blend") else bproc.loader.load_obj(filepath)
+                    # handle the objects list
+                    loaded_objects = bproc.loader.load_blend(filepath) if filepath.endswith(".blend") else bproc.loader.load_obj(filepath)
+                    self.object = loaded_objects[0] if isinstance(loaded_objects, list) else loaded_objects
                 config["objects"][self.object_pos] = {
                     "filename": filepath,
                     "pos": [0, 0, 0],
