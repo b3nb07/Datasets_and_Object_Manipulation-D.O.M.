@@ -1545,7 +1545,7 @@ class Port(QWidget):
 
         #Fifth Section
         def Get_Settings_Filepath(tab_widget):
-            #try:
+            try:
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0]
                 if (path == ""): return
                 backend = Backend(json_filepath = path)
