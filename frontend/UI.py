@@ -102,24 +102,35 @@ class TabDialog(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.setWindowTitle("Datasets and Object Modeling")
-        """stream = QtCore.QFile("Style\DarkMode.qss")
+        """
+        stream = QtCore.QFile("Style\DarkMode.qss")
         stream.open(QtCore.QIODevice.ReadOnly)
-        self.setStyleSheet(QtCore.QTextStream(stream).readAll())"""
-
+        self.setStyleSheet(QtCore.QTextStream(stream).readAll())
+        """
         tab_widget = QTabWidget()
+
+        # Add all other tabs first
         tab_widget.addTab(ObjectTab(self, tab_widget), "Object")
         tab_widget.addTab(PivotTab(self), "Pivot Point")
-        tab_widget.addTab(Random(self), "Random")
         tab_widget.addTab(Render(self), "Render")
+        
+        Temp_index = tab_widget.addTab(QWidget(), "Random")
         tab_widget.addTab(Port(self, tab_widget), "Import/Export")
 
+        random_tab = RandomTabDialog(self, tab_widget)
+        tab_widget.removeTab(Temp_index)
+        tab_widget.insertTab(Temp_index, random_tab, "Random")
+
+        
+        #tab_widget.widget(0).layout().itemAtPosition(1, 1).widget().setEnabled(False)
+        
         tab_widget.setTabEnabled(0, False)
         tab_widget.setTabEnabled(1, False)
         tab_widget.setTabEnabled(2, False)
         tab_widget.setTabEnabled(3, False)
 
-
         tab_widget.setFixedHeight(200)
+        
         # enviroment
         environment = QWidget()
         environment.setStyleSheet("background-color: black;")
@@ -514,32 +525,35 @@ class ObjectTab(QWidget):
     
     
     def Plus_click(self, field):
-        """Updates field value"""
-        try:
-            val = float(field.text()) + 1
-            field.setText(str(val))
-            field.editingFinished.emit()
-        except:
-            field.setText(str(0.0))
-            field.editingFinished.emit()
+        if field.isEnabled():
+            """Updates field value"""
+            try:
+                val = float(field.text()) + 1
+                field.setText(str(val))
+                field.editingFinished.emit()
+            except:
+                field.setText(str(0.0))
+                field.editingFinished.emit()
         
         
     def Minus_click(self, field):
-        """Updates field value"""
-        try:
-            val = float(field.text()) - 1
-            field.setText(str(val))
-            field.editingFinished.emit()
-        except:
-            field.setText(str(0.0))
-            field.editingFinished.emit()
+        if field.isEnabled():
+            """Updates field value"""
+            try:
+                val = float(field.text()) - 1
+                field.setText(str(val))
+                field.editingFinished.emit()
+            except:
+                field.setText(str(0.0))
+                field.editingFinished.emit()
             
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
-        if field.text() == '':
-            field.setText('0')
-        if float(field.text()) > val or float(field.text()) + 0.5 < val:
-            field.setText(str(val))
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                field.setText(str(val))
         
         
     def update_label(self):
@@ -609,8 +623,8 @@ class PivotTab(QWidget):
 
         self.Distance_Pivot_input_field.textEdited.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
         self.Distance_Pivot_input_field.editingFinished.connect(self.update_distance)
-        self.Distance_Pivot_input_field.setText("0")
-        
+        self.Distance_Pivot_input_field.setText("10")
+        self.Distance_Slider.setValue(10)
         #################
         self.Distance_Slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
         self.Distance_Slider.sliderReleased.connect(self.update_distance)
@@ -656,11 +670,11 @@ class PivotTab(QWidget):
         main_layout.addWidget(self.ZPivot_button_minus, 3, 2)
         main_layout.addWidget(self.ZPivot_button_plus, 3, 3)
 
-        main_layout.addWidget(self.Distance_Pivot, 4, 0)
-        main_layout.addWidget(self.Distance_Pivot_input_field, 4, 1)
-        main_layout.addWidget(self.Distance_Slider, 4, 2)
+        main_layout.addWidget(self.Distance_Pivot, 1, 4)
+        main_layout.addWidget(self.Distance_Pivot_input_field, 1, 5)
+        main_layout.addWidget(self.Distance_Slider, 1, 6)
 
-        main_layout.addWidget(self.combo_box, 0, 4)
+        main_layout.addWidget(self.combo_box, 0, 7)
 
         self.setLayout(main_layout)
 
@@ -694,10 +708,11 @@ class PivotTab(QWidget):
             
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
-        if field.text() == '':
-            field.setText('0')
-        if float(field.text()) > val or float(field.text()) + 0.5 < val:
-            field.setText(str(val))
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                field.setText(str(val))
         
     def Object_pivot_selected(self, Check, Fields, Buttons):
         "Set checkbox and associsated Fields and buttons False"
@@ -747,218 +762,447 @@ class PivotTab(QWidget):
     
     def Plus_click(self, field):
         """Updates Field value"""
-        try:
-            val = float(field.text()) + 1
-            field.setText(str(val))
-            field.editingFinished.emit()
-        except:
-            field.setText(str(0.0))
-            field.editingFinished.emit()
+        if field.isEnabled():
+            try:
+                val = float(field.text()) + 1
+                field.setText(str(val))
+                field.editingFinished.emit()
+            except:
+                field.setText(str(0.0))
+                field.editingFinished.emit()
         
         
     def Minus_click(self, field):
         """Updates Field value"""
-        try:
-            val = float(field.text()) - 1
-            field.setText(str(val))
-            field.editingFinished.emit()
-        except:
-            field.setText(str(0.0))
-            field.editingFinished.emit()
+        if field.isEnabled():
+            try:
+                val = float(field.text()) - 1
+                field.setText(str(val))
+                field.editingFinished.emit()
+            except:
+                field.setText(str(0.0))
+                field.editingFinished.emit()
 
-class Random(QWidget):
-    def __init__(self, parent: QWidget):
+class RandomTabDialog(QWidget):
+    def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
 
-        # First Section
-        self.Set_All_Random_Button = QCheckBox("Set all Random", self)
-        self.Set_All_Random_Button.stateChanged.connect(self.set_all_random)
-
-        # Second Section
-        self.ObjectDimensions_Label = QLabel(f"Object Dimensions", self)
-        
-        self.Width_Button = QCheckBox("Width", self)
-        self.Width_Button.toggled.connect(self.on_width_toggle)
-
-
-        #if checked then change value of width text 
-
-        self.Height_Button = QCheckBox("Height", self)
-        self.Height_Button.toggled.connect(self.on_height_toggle)
-        self.Length_Button = QCheckBox("Length", self)
-        self.Length_Button.toggled.connect(self.on_length_toggle)
-
-
-
-        #Third Section
-        self.Object_Coords_Label = QLabel(f"Object x Co-ords:", self)
-
-        self.X_Button = QCheckBox("X", self)
-        self.X_Button.toggled.connect(self.on_x_toggle)
-
-
-        self.Y_Button = QCheckBox("Y", self)
-        self.Y_Button.toggled.connect(self.on_y_toggle)
-
-
-        self.Z_Button = QCheckBox("Z", self)
-        self.Z_Button.toggled.connect(self.on_z_toggle)
-
-
-        self.PivotPoint_Label = QLabel(f"Pivot Point Co-ords:", self)
-
-        self.X_Button2 = QCheckBox("X", self)
-        self.X_Button2.stateChanged.connect(backend.toggle_random_pivot_x)
-
-        self.Y_Button2 = QCheckBox("Y", self)
-        self.Y_Button2.stateChanged.connect(backend.toggle_random_pivot_y)
-
-        self.Z_Button2 = QCheckBox("Z", self)
-        self.Z_Button2.stateChanged.connect(backend.toggle_random_pivot_z)
-
-        #Fourth Section
-        self.AutoRotationAngle_Label = QLabel(f"Auto Rotation Angle:", self)
+        tab_widget = QTabWidget()
+        tab_widget.addTab(RandomDefault(self, tab_widget), "Base")
+        tab_widget.addTab(RandomObject(self, ParentTab), "Object")
+        tab_widget.addTab(RandomPivot(self, ParentTab), "Pivot Point")
+        tab_widget.addTab(RandomRender(self, ParentTab), "Render")
+        tab_widget.addTab(RandomLight(self, ParentTab), "Light")
         
 
-        self.AutoRotationAngle_Button = QCheckBox("", self)
-        self.AutoRotationAngle_Button.stateChanged.connect(backend.toggle_random_environment_angle)
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(tab_widget)
+        self.setLayout(main_layout)
 
-        self.ImportEnvironment_Label = QLabel(f"Import Environment:", self)
+class RandomDefault(QWidget):
+    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
+        super().__init__(parent)
 
-        self.ImportEnvironment_Button = QCheckBox("", self)
-        self.ImportEnvironment_Button.stateChanged.connect(backend.toggle_random_environment_background)
-
-        #Section 5
+        main_layout = QGridLayout()
+        Field = QCheckBox("Set ALL random", self)
         
-        self.RandomSettingSeed_Label = QLabel(f"Random  Seed", self)
-        self.RandomSeed_Label = QLabel(f"<Random Seed>", self)
-        self.RandomSeed_Label.setText(str(backend.get_config()["seed"]))
-
-
-        #Third Section
-        self.object_toggle_states = {}
-        self.combo_box = QComboBox(self)
-        #self.combo_box.addItems()
+        RandomSeed = QLineEdit("", self)
+        RandomSeed.setText(str(backend.get_config()["seed"]))
+        RandomSeed.setFixedWidth(100)
         
-        shared_state.items_updated.connect(self.update_combo_box_items)
-        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
-        self.combo_box.activated.connect(lambda: self.object_selected())
+        main_layout.addWidget(Field, 0, 0)
+        main_layout.addWidget(RandomSeed, 1, 0)
+        main_layout.setAlignment(Qt.AlignTop | Qt.AlignRight)
+        
+        Field.toggled.connect(lambda state: self.checkUpdate(tab_widget, state))
+        RandomSeed.editingFinished.connect(lambda: self.SeedEdit(RandomSeed))
+        
+        self.setLayout(main_layout)
+        
+    def checkUpdate(self, tab_widget, State):
+        """Method to update all Random checkboxes"""
+        """
+        Tab navbar -> Page -> QgridLayout -> Widget(Y position, X position) -> QCheckBox -> State
+        tab_widget -> tab_widget.widget(i) -> widget.layout() -> widget.layout().itemAtPosition(position[1], position[0]) -> widget.layout().itemAtPosition(position[1], position[0]).widget() -> widget.layout().itemAtPosition(position[1], position[0]).widget().setChecked(State)
+        """
+        for i in range(1, tab_widget.count()):
+            widget = tab_widget.widget(i)
+            for Field, position in widget.CheckBoxes.items():
+                widget.layout().itemAtPosition(position[1], position[0]).widget().setChecked(State)
+                
+    def SeedEdit(self, field):
+        """Updates field value"""
+        try:
+            val = int(field.text())
+            field.setText(str(val))
+        except ValueError:
+            field.setText(str(backend.get_config()["seed"]))
+                            
+class RandomObject(QWidget):
+    def __init__(self, parent: QWidget, ParentTab: QTabWidget):
+        super().__init__(parent)
 
-        self.update_combo_box_items(shared_state.items)
-        shared_state.update_items(items=[]) 
-        shared_state.update_selected(0)    
+        self.CheckBoxes = {}
+        self.LowerBounds = {}
+        self.UpperBounds = {}
 
         main_layout = QGridLayout()
         
-        main_layout.addWidget(self.Set_All_Random_Button, 0, 0)
-        main_layout.addWidget(self.ObjectDimensions_Label, 0, 1)
+        # create initial combo_box
+        self.combo_box = QComboBox(self)
+        # connecting shared state updates to combo box
+        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
-        main_layout.addWidget(self.Width_Button, 1, 1)
-        main_layout.addWidget(self.Height_Button, 2, 1)
-        main_layout.addWidget(self.Length_Button, 3, 1)
+        # initialise items
+        self.update_combo_box_items(shared_state.items)
+        shared_state.update_items(items=[])
+        shared_state.update_selected(0)
+        
+        main_layout.addWidget(self.combo_box, 0, 10)
+        
+        main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
+        main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
+             self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
+        
+        main_layout.addWidget(QLabel("Co-ords:", self), 0, 0)
+        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
+        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
+        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
 
-        main_layout.addWidget(self.Object_Coords_Label, 0, 2)
+        main_layout.addWidget(QLabel("Rotation", self), 0, 3)
+        self.gen_field("Pitch", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
+        self.gen_field("Roll", main_layout, 3, 2, self.connFields(ParentTab, 5, 2))
+        self.gen_field("Yaw", main_layout, 3, 3, self.connFields(ParentTab, 5, 3))
+        
+        main_layout.addWidget(QLabel("Scale", self), 0, 7)
+        self.gen_field("Width", main_layout, 6, 1, self.connFields(ParentTab, 8, 1))
+        self.gen_field("Height", main_layout, 6, 2, self.connFields(ParentTab, 8, 2))
+        self.gen_field("Length", main_layout, 6, 3, self.connFields(ParentTab, 8, 3))
+        
+        self.setLayout(main_layout)
 
-        main_layout.addWidget(self.X_Button, 1, 2)
-        main_layout.addWidget(self.Y_Button, 2, 2)
-        main_layout.addWidget(self.Z_Button, 3, 2)
+    def gen_field(self, Fieldname, Layout, X, Y, ConField):
+        """Generate a field including checkbox and 2 input fields"""
+        Field = QCheckBox(Fieldname, self)
+        Field_LowerBound = QLineEdit(parent=self)
+        Field_UpperBound = QLineEdit(parent=self)
 
-        main_layout.addWidget(self.PivotPoint_Label, 0, 3)
+        self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
+        self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
+        self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
 
-        main_layout.addWidget(self.X_Button2, 1, 3)
-        main_layout.addWidget(self.Y_Button2, 2, 3)
-        main_layout.addWidget(self.Z_Button2, 3, 3)
+        Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
+        self.un_checked(False, Field_LowerBound, Field_UpperBound)
+        
+    def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
+        """Generate checkbox"""
+        Layout.addWidget(Field, Y, X)
+        self.CheckBoxes[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+        Layout.itemAtPosition(Y, X).widget().toggled.connect(lambda: self.setAbled(ConField, Layout.itemAtPosition(Y, X).widget().isChecked()))
+        
+    def setAbled(self, Field, State):
+        """Connect Checkbox to correlating page field"""
+        Field.setEnabled(not State)
+        
+    def connFields(self, ParentTab, X, Y):
+        return ParentTab.widget(0).layout().itemAtPosition(Y, X).widget()
 
-        main_layout.addWidget(self.AutoRotationAngle_Label, 0, 4)
-        main_layout.addWidget(self.AutoRotationAngle_Button, 1, 4)
+    def addLower(self, Field, Fieldname, Layout, X, Y):
+        """Generate Lowerbound Field"""
+        Layout.addWidget(Field, Y, X)
+        self.LowerBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+        
+    def addUpper(self, Field, Fieldname, Layout, X, Y):
+        """Generate Upperbound Field"""
+        Layout.addWidget(Field, Y, X)
+        self.UpperBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
 
-        main_layout.addWidget(self.ImportEnvironment_Label, 0, 5)
-        main_layout.addWidget(self.ImportEnvironment_Button, 1, 5)
+    def un_checked(self, State, Field_LowerBound, Field_UpperBound):
+        "Sets field to checkbox status"
+        Field_LowerBound.setEnabled(State)
+        Field_UpperBound.setEnabled(State)
 
-        main_layout.addWidget(self.RandomSettingSeed_Label, 0, 6)
-        main_layout.addWidget(self.RandomSeed_Label, 1, 6)
+    def set_all_random(self, main_layout, State):
+        """Set all elements on page to active"""
+        for keys in self.CheckBoxes.keys():
+            main_layout.itemAtPosition(self.CheckBoxes[keys][1], self.CheckBoxes[keys][0]).widget().setChecked(State)
 
-        main_layout.addWidget(self.combo_box, 0, 7)
+    def update_combo_box_items(self, items):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        self.combo_box.clear()
+        self.combo_box.addItems(map(lambda o: str(o), items))
+        
+    def on_object_selected(self, selected_object_pos):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        pass
+
+class RandomPivot(QWidget):
+    def __init__(self, parent: QWidget, ParentTab: QTabWidget):
+        super().__init__(parent)
+
+        self.CheckBoxes = {}
+        self.LowerBounds = {}
+        self.UpperBounds = {}
+
+        main_layout = QGridLayout()
+        
+        # create initial combo_box
+        self.combo_box = QComboBox(self)
+        # connecting shared state updates to combo box
+        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
+
+        # initialise items
+        self.update_combo_box_items(shared_state.items)
+        shared_state.update_items(items=[])
+        shared_state.update_selected(0)
+
+        main_layout.addWidget(self.combo_box, 0, 10)
+
+        main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
+        main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
+             self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
+
+        main_layout.addWidget(QLabel("Co-ords:", self), 0, 0)
+        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
+        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
+        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
+
+        main_layout.addWidget(QLabel("Distnace", self), 0, 3)
+        self.gen_field("Measurement", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
+        
+        self.setLayout(main_layout)
+
+    def gen_field(self, Fieldname, Layout, X, Y, ConField):
+        Field = QCheckBox(Fieldname, self)
+        Field_LowerBound = QLineEdit(parent=self)
+        Field_UpperBound = QLineEdit(parent=self)
+
+        self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
+        self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
+        self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
+
+        Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
+        self.un_checked(False, Field_LowerBound, Field_UpperBound)
+        
+    def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
+        Layout.addWidget(Field, Y, X)
+        self.CheckBoxes[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+        Layout.itemAtPosition(Y, X).widget().toggled.connect(lambda: self.setAbled(ConField, Layout.itemAtPosition(Y, X).widget().isChecked()))
+        
+    def setAbled(self, Field, State):
+        """Connect Checkbox to correlating page field"""
+        Field.setEnabled(not State)
+        
+    def connFields(self, ParentTab, X, Y):
+        return ParentTab.widget(1).layout().itemAtPosition(Y, X).widget()
+    
+    def addLower(self, Field, Fieldname, Layout, X, Y):
+        Layout.addWidget(Field, Y, X)
+        self.LowerBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+        
+    def addUpper(self, Field, Fieldname, Layout, X, Y):
+        Layout.addWidget(Field, Y, X)
+        self.UpperBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+
+    def un_checked(self, State, Field_LowerBound, Field_UpperBound):
+        Field_LowerBound.setEnabled(State)
+        Field_UpperBound.setEnabled(State)
+
+    def set_all_random(self, main_layout, State):
+        for keys in self.CheckBoxes.keys():
+            main_layout.itemAtPosition(self.CheckBoxes[keys][1], self.CheckBoxes[keys][0]).widget().setChecked(State)
+
+    def update_combo_box_items(self, items):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        self.combo_box.clear()
+        self.combo_box.addItems(map(lambda o: str(o), items))
+        
+    def on_object_selected(self, selected_object_pos):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        pass
+
+class RandomRender(QWidget):
+    def __init__(self, parent: QWidget, ParentTab: QTabWidget):
+        super().__init__(parent)
+
+        self.CheckBoxes = {}
+        self.LowerBounds = {}
+        self.UpperBounds = {}
+
+        main_layout = QGridLayout()
+        
+        # create initial combo_box
+        self.combo_box = QComboBox(self)
+        # connecting shared state updates to combo box
+        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
+
+        # initialise items
+        self.update_combo_box_items(shared_state.items)
+        shared_state.update_items(items=[])
+        shared_state.update_selected(0)
+
+        main_layout.addWidget(self.combo_box, 0, 10)
+        
+        main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
+        main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
+             self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
+
+        main_layout.addWidget(QLabel("Degrees of Change:", self), 0, 0)
+        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 4, 1))
+        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 4, 2))
+        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 4, 3))
+
+        main_layout.addWidget(QLabel("Render", self), 0, 3)
+        self.gen_field("Quantity", main_layout, 3, 1, self.connFields(ParentTab, 0, 1))
 
         self.setLayout(main_layout)
 
+    def gen_field(self, Fieldname, Layout, X, Y, ConField):
+        Field = QCheckBox(Fieldname, self)
+        Field_LowerBound = QLineEdit(parent=self)
+        Field_UpperBound = QLineEdit(parent=self)
+
+        self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
+        self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
+        self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
+
+        Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
+        self.un_checked(False, Field_LowerBound, Field_UpperBound)
+        
+    def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
+        Layout.addWidget(Field, Y, X)
+        self.CheckBoxes[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+        Layout.itemAtPosition(Y, X).widget().toggled.connect(lambda: self.setAbled(ConField, Layout.itemAtPosition(Y, X).widget().isChecked()))
+        
+    def setAbled(self, Field, State):
+        """Connect Checkbox to correlating page field"""
+        Field.setEnabled(not State)
+        
+    def connFields(self, ParentTab, X, Y):
+        return ParentTab.widget(2).layout().itemAtPosition(Y, X).widget()
+
+    def addLower(self, Field, Fieldname, Layout, X, Y):
+        Layout.addWidget(Field, Y, X)
+        self.LowerBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+        
+    def addUpper(self, Field, Fieldname, Layout, X, Y):
+        Layout.addWidget(Field, Y, X)
+        self.UpperBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+
+    def un_checked(self, State, Field_LowerBound, Field_UpperBound):
+        Field_LowerBound.setEnabled(State)
+        Field_UpperBound.setEnabled(State)
+
+    def set_all_random(self, main_layout, State):
+        for keys in self.CheckBoxes.keys():
+            main_layout.itemAtPosition(self.CheckBoxes[keys][1], self.CheckBoxes[keys][0]).widget().setChecked(State)
+
     def update_combo_box_items(self, items):
-        """Update the combo box with the latest shared state items."""
+        """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
         self.combo_box.addItems(map(lambda o: str(o), items))
-
-
-    def object_selected(self):
-        """Handle object selection from the combo box."""
         
-        selected_index = self.combo_box.currentIndex()
-        self.reset_toggle_states()
+    def on_object_selected(self, selected_object_pos):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        pass
 
-        #self.restore_states()
+class RandomLight(QWidget):
+    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
+        super().__init__(parent)
 
-    def reset_toggle_states(self):
-        """Reset all toggle states to unchecked state."""        
-        self.X_Button.blockSignals(False)
-        self.Y_Button.blockSignals(False)
-        self.Z_Button.blockSignals(False)
+        self.CheckBoxes = {}
+        self.LowerBounds = {}
+        self.UpperBounds = {}
 
-        self.Width_Button.setChecked(False)
-        self.Height_Button.setChecked(False)
-        self.Length_Button.setChecked(False)
-        self.X_Button.setChecked(False)
-        self.Y_Button.setChecked(False)
-        self.Z_Button.setChecked(False)
+        main_layout = QGridLayout()
         
-        self.Width_Button.blockSignals(False)
-        self.Height_Button.blockSignals(False)
-        self.Length_Button.blockSignals(False)
-        self.X_Button.blockSignals(False)
-        self.Y_Button.blockSignals(False)
-        self.Z_Button.blockSignals(False)
+        # create initial combo_box
+        self.combo_box = QComboBox(self)
+        # connecting shared state updates to combo box
+        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
+        #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
-    def on_width_toggle(self):
-        selected_index = self.combo_box.currentIndex()
-        if selected_index is not None:
-            backend.toggle_random_width(selected_index)
+        # initialise items
+        self.update_combo_box_items(shared_state.items)
+        shared_state.update_items(items=[])
+        shared_state.update_selected(0)
 
-    def on_height_toggle(self):
-        selected_index = self.combo_box.currentIndex()
-        if selected_index is not None:
-            backend.toggle_random_height(selected_index)
+        main_layout.addWidget(self.combo_box, 0, 12)
+        
+        main_layout.addWidget(QCheckBox("Set all random", self), 1, 12)
+        main_layout.itemAtPosition(1, 12).widget().toggled.connect(lambda:
+             self.set_all_random(main_layout, main_layout.itemAtPosition(1, 12).widget().isChecked()))
 
-    def on_length_toggle(self):
-        selected_index = self.combo_box.currentIndex()
-        if selected_index is not None:
-            backend.toggle_random_length(selected_index)
+        main_layout.addWidget(QLabel("Co-ords:", self), 0, 0)
+        self.gen_field("X", main_layout, 0, 1)
+        self.gen_field("Y", main_layout, 0, 2)
+        self.gen_field("Z", main_layout, 0, 3)
 
-    def on_x_toggle(self):
-        selected_index = self.combo_box.currentIndex()
-        if selected_index is not None:
-            backend.toggle_random_coord_x(selected_index)
+        main_layout.addWidget(QLabel("Angle", self), 0, 3)
+        self.gen_field("Pitch", main_layout, 3, 1)
+        self.gen_field("Roll", main_layout, 3, 2)
+        self.gen_field("Yaw", main_layout, 3, 3)
+        
+        main_layout.addWidget(QLabel("Angle", self), 0, 7)
+        self.gen_field("Strength", main_layout, 6, 1)
+        self.gen_field("Radius", main_layout, 6, 2)
+        self.gen_field("Colour", main_layout, 6, 3)
 
-    def on_y_toggle(self):
-        selected_index = self.combo_box.currentIndex()
-        if selected_index is not None:
-            backend.toggle_random_coord_y(selected_index)
+        self.gen_field("BackGround-Colour", main_layout, 9, 1)
 
-    def on_z_toggle(self):
-        selected_index = self.combo_box.currentIndex()
-        if selected_index is not None:
-            backend.toggle_random_coord_z(selected_index)
+        #print(main_layout.itemAtPosition(0, 0).widget().setText("Electric boogalo"))
+        #how to change values
 
-    def set_all_random(self, state):
-        is_checked = state == Qt.Checked
-        self.Width_Button.setChecked(is_checked)
-        self.Height_Button.setChecked(is_checked)
-        self.Length_Button.setChecked(is_checked)
-        self.X_Button.setChecked(is_checked)
-        self.Y_Button.setChecked(is_checked)
-        self.Z_Button.setChecked(is_checked)
-        self.X_Button2.setChecked(is_checked)
-        self.Y_Button2.setChecked(is_checked)
-        self.Z_Button2.setChecked(is_checked)
-        self.AutoRotationAngle_Button.setChecked(is_checked)
-        self.ImportEnvironment_Button.setChecked(is_checked)
+        self.setLayout(main_layout)
+
+    def gen_field(self, Fieldname, Layout, X, Y):
+        Field = QCheckBox(Fieldname, self)
+        Field_LowerBound = QLineEdit(parent=self)
+        Field_UpperBound = QLineEdit(parent=self)
+
+        self.addCheck(Field, Fieldname, Layout, X, Y)
+        self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
+        self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
+
+        Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
+        self.un_checked(False, Field_LowerBound, Field_UpperBound)
+        
+    def addCheck(self, Field, Fieldname, Layout, X, Y):
+        Layout.addWidget(Field, Y, X)
+        self.CheckBoxes[f"{Layout.itemAtPosition(0, 12).widget().currentText()}{Fieldname}"] = (X, Y)
+
+    def addLower(self, Field, Fieldname, Layout, X, Y):
+        Layout.addWidget(Field, Y, X)
+        self.LowerBounds[f"{Layout.itemAtPosition(0, 12).widget().currentText()}{Fieldname}"] = (X, Y)
+        
+    def addUpper(self, Field, Fieldname, Layout, X, Y):
+        Layout.addWidget(Field, Y, X)
+        self.UpperBounds[f"{Layout.itemAtPosition(0, 12).widget().currentText()}{Fieldname}"] = (X, Y)
+
+    def un_checked(self, State, Field_LowerBound, Field_UpperBound):
+        Field_LowerBound.setEnabled(State)
+        Field_UpperBound.setEnabled(State)
+
+    def set_all_random(self, main_layout, State):
+        for keys in self.CheckBoxes.keys():
+            main_layout.itemAtPosition(self.CheckBoxes[keys][1], self.CheckBoxes[keys][0]).widget().setChecked(State)
+            
+    def update_combo_box_items(self, items):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        self.combo_box.clear()
+        self.combo_box.addItems(map(lambda o: str(o), items))
+        
+    def on_object_selected(self, selected_object_pos):
+        """ Method could be called to update combo_box_items. Maybe Delete. """
+        pass
+
 
 
 class Render(QWidget):
@@ -1045,17 +1289,17 @@ class Render(QWidget):
 
         main_layout.addWidget(self.Degree_Change_title, 0, 3)
 
-        main_layout.addWidget(self.X_Degree_Label, 0, 4)
+        main_layout.addWidget(self.X_Degree_Label, 1, 3)
         main_layout.addWidget(self.X_Degree_input_field, 1, 4)
-        main_layout.addWidget(self.X_Degree_slider, 2, 4)
+        main_layout.addWidget(self.X_Degree_slider, 1, 5)
 
-        main_layout.addWidget(self.Y_Degree_Label, 0, 5)
-        main_layout.addWidget(self.Y_Degree_input_field, 1, 5)
+        main_layout.addWidget(self.Y_Degree_Label, 2, 3)
+        main_layout.addWidget(self.Y_Degree_input_field, 2, 4)
         main_layout.addWidget(self.Y_Degree_slider, 2, 5)
 
-        main_layout.addWidget(self.Z_Degree_Label, 0, 6)
-        main_layout.addWidget(self.Z_Degree_input_field, 1, 6)
-        main_layout.addWidget(self.Z_Degree_slider, 2, 6)
+        main_layout.addWidget(self.Z_Degree_Label, 3, 3)
+        main_layout.addWidget(self.Z_Degree_input_field, 3, 4)
+        main_layout.addWidget(self.Z_Degree_slider, 3, 5)
 
         main_layout.addWidget(self.unlimited_render_button, 1, 7)
 
@@ -1108,29 +1352,32 @@ class Render(QWidget):
             
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
-        if field.text() == '':
-            field.setText('0')
-        if float(field.text()) > val or float(field.text()) + 0.5 < val:
-            field.setText(str(val))
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                field.setText(str(val))
 
     def increase_count(self):
-        try:
-            number_of_renders_value = int(self.Number_of_renders_input_field.text())
-            self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
-        except:
-            number_of_renders_value = 0
-            self.Number_of_renders_input_field.setText(str(number_of_renders_value))
-        self.Number_of_renders_input_field.editingFinished.emit()
+        if self.Number_of_renders_input_field.isEnabled():
+            try:
+                number_of_renders_value = int(self.Number_of_renders_input_field.text())
+                self.Number_of_renders_input_field.setText(str(number_of_renders_value + 1))
+            except:
+                number_of_renders_value = 0
+                self.Number_of_renders_input_field.setText(str(number_of_renders_value))
+            self.Number_of_renders_input_field.editingFinished.emit()
 
     def decrease_count(self):
-        try:
-            number_of_renders_value = int(self.Number_of_renders_input_field.text())
-            if number_of_renders_value > 1:  # Prevent negative values if needed
-                self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
-        except:
-            number_of_renders_value = 0
-            self.Number_of_renders_input_field.setText(str(number_of_renders_value))
-        self.Number_of_renders_input_field.editingFinished.emit()
+        if self.Number_of_renders_input_field.isEnabled():
+            try:
+                number_of_renders_value = int(self.Number_of_renders_input_field.text())
+                if number_of_renders_value > 1:  # Prevent negative values if needed
+                    self.Number_of_renders_input_field.setText(str(number_of_renders_value - 1))
+            except:
+                number_of_renders_value = 0
+                self.Number_of_renders_input_field.setText(str(number_of_renders_value))
+            self.Number_of_renders_input_field.editingFinished.emit()
 
         
     def generate_render(self):
@@ -1178,6 +1425,7 @@ class Render(QWidget):
 class Port(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
+
         
         class ilyaMessageBox(QMessageBox):
                 def __init__(self, text, title):
@@ -1185,8 +1433,6 @@ class Port(QWidget):
                     self.setText(text)
                     self.setWindowTitle(title)
                     self.exec()
-
-
 
         #First Section
         def Get_Object_Filepath():
