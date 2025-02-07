@@ -3,7 +3,6 @@
 from functools import cached_property
 import sys
 from PyQt5 import QtCore, QtWidgets
-from functools import cached_property
 
 import os
 from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox
