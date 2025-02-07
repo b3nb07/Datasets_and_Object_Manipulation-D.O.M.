@@ -543,14 +543,31 @@ class Backend():
                 "pos": [0, 0, 0],
                 "rot": [0, 0, 0],
                 "energy": 10,
-                "color": [255, 255, 255]
+                "color": [255, 255, 255],
+                "radius": 0
             })
+
+        def set_type(self, type):
+            #print(config)
+            if (is_blender_environment):
+                self.light.set_type(type)
+
+            config["light_sources"][self.light_pos]["type"] = type
+
+        def set_radius(self, radius):
+            #print(radius)
+            if (is_blender_environment):
+                self.light.set_radius(radius)
+
+            config["light_sources"][self.light_pos]["radius"] = radius
+
 
         def set_loc(self, location):
             """Set the location of a light source in the scene.
             
             :param location: A list containing [x,z,y] where x,z,y is an integer or float. This determines the coordinates of the light's location.
             """
+            #print("location changed")
             if (is_blender_environment):
                 self.light.set_location(location)
 
@@ -561,8 +578,14 @@ class Backend():
 
             :param rotation: A list [x,z,y] with values for the rotation to be applied to the light.
             """
+            #print("angle changed")
+            rotRad = []
+            for x in rotation:
+                rotRad.append(np.deg2rad(int(x)))
+
+
             if (is_blender_environment):
-                self.light.set_rotation_euler(rotation)
+                self.light.set_rotation_euler(rotRad)
 
             config["light_sources"][self.light_pos]["rot"] = rotation
 
@@ -571,17 +594,37 @@ class Backend():
             
             :param energy: The energy to set it as. Interpreted as watts.
             """
+            #print("energy changed")
             if (is_blender_environment):
                 self.light.set_energy(energy)
 
             config["light_sources"][self.light_pos]["energy"] = energy
+
+
+        def hex_to_rgba(self, hex_value: str):
+            """ Converts the given hex string to rgba color values.
+
+            :param hex_value: The hex string, describing rgb.
+            :return: The rgba color, in form of a list. Values between 0 and 1.
+
+            THIS HAS BEEN BORROWED PERMENETLY FROM THE BPROC SOURCE CODE!
+            I COULDN'T FIGURE OUT HOW TO CALL IT
+            SOMEONE FIX IF YOU WANT TO
+            OR WE REFERENCE
+            :SHRUG:
+            """
+            return [x / 255 for x in bytes.fromhex(hex_value[-6:])]
 
         def set_color(self, color):
             """Sets the color of the light using the RGB colour space.
             
             :param color: A list [r,g,b] containing the values of the red, green and blue attributes from 0 to 255 inclusive.
             """
+            print(color)
+            colour = self.hex_to_rgba(color)
+            #print(colour)
             if (is_blender_environment):
-                self.light.set_color(color)
+                self.light.set_color(colour)
 
             config["light_sources"][self.light_pos]["color"] = color
+# Empty line required

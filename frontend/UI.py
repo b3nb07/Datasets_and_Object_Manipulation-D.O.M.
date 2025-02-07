@@ -114,7 +114,8 @@ class TabDialog(QWidget):
         tab_widget.addTab(ObjectTab(self, tab_widget), "Object")
         tab_widget.addTab(PivotTab(self), "Pivot Point")
         tab_widget.addTab(Render(self), "Render")
-        
+        tab_widget.addTab(Lighting(self), "Lighting")
+ 
         Temp_index = tab_widget.addTab(QWidget(), "Random")
         tab_widget.addTab(Port(self, tab_widget), "Import/Export")
 
@@ -124,11 +125,12 @@ class TabDialog(QWidget):
 
         
         #tab_widget.widget(0).layout().itemAtPosition(1, 1).widget().setEnabled(False)
-        
+
         tab_widget.setTabEnabled(0, False)
         tab_widget.setTabEnabled(1, False)
         tab_widget.setTabEnabled(2, False)
         tab_widget.setTabEnabled(3, False)
+        #tab_widget.setTabEnabled(4, False)
 
         tab_widget.setFixedHeight(250)
         
@@ -1604,7 +1606,7 @@ class Port(QWidget):
         self.ExportSettings_Button.clicked.connect(Export_Settings)
 
         #Fifth Section
-        def Get_Settings_Filepath():
+        def Get_Settings_Filepath(tab_widget):
             try:
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0]
                 if (path == ""): return
@@ -1617,8 +1619,9 @@ class Port(QWidget):
             except Exception:
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
+
         self.ImportSettings_Button = QPushButton('Import Settings', self)
-        self.ImportSettings_Button.clicked.connect(Get_Settings_Filepath)
+        self.ImportSettings_Button.clicked.connect(lambda: Get_Settings_Filepath(tab_widget))
 
         def delete_object(tab_widget):
             to_delete = QMessageBox()
@@ -1688,7 +1691,7 @@ class Port(QWidget):
 
         def Object_detect(tab_widget):
             State = not Backend.is_config_objects_empty(tab_widget)
-            for i in range(4):
+            for i in range(5):
                 tab_widget.setTabEnabled(i, State)
 
         main_layout = QGridLayout()
@@ -1702,6 +1705,344 @@ class Port(QWidget):
         main_layout.addWidget(self.SelectRenderFolder_Button, 0, 6)
 
         self.setLayout(main_layout)
+
+
+
+
+class Lighting(QWidget):
+    def __init__(self, parent: QWidget):
+        super().__init__(parent)
+
+        self.light = backend.RenderLight()
+
+        ###
+        self.colour_label = QLabel("Colour:", self)
+        self.colour_select_button = QPushButton("Select colour", self)
+        self.colour_select_button.clicked.connect(self.getColour)
+
+        self.lighting_colour = QLineEdit(self) #f789886 & bullshit
+        self.lighting_colour.textEdited.connect(lambda: self.update_colour_example_text(self.lighting_colour.text()))
+        self.colour_example = QLabel(self)
+        self.lighting_colour.setText("#000000")
+        ###
+
+
+        ###
+        self.lighting_strength_label = QLabel("Strength: ", self)
+        self.lighting_strength_input_field = QLineEdit(self)
+        self.lighting_strength_input_field.setText("1")
+        self.lighting_strength_input_field.textEdited.connect(lambda: self.Update_slider(self.strength_slider, self.lighting_strength_input_field.text()))
+
+        self.strength_slider = QSlider(self)
+        self.strength_slider.setRange(0,100)
+        self.strength_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.strength_slider.sliderMoved.connect(lambda val: self.set_strength(val, self.lighting_strength_input_field))
+        ###
+        
+        ###
+        self.radius_label = QLabel("Radius", self)
+        self.radius_input_field = QLineEdit(self)
+        self.radius_input_field.setText("0")
+        self.radius_input_field.textChanged.connect(lambda: self.set_radius_from_field(self.radius_input_field))
+        self.radius_button_minus = QPushButton("-", self)
+        #self.radius_button_minus.clicked.connect(lambda: self.Minus_click(self.radius_input_field))
+        #set_radius
+        self.radius_button_minus.clicked.connect(lambda: self.set_radius("Minus", self.radius_input_field))
+
+        self.radius_button_plus = QPushButton("+", self)
+        #self.radius_button_plus.clicked.connect(lambda: self.Plus_click(self.radius_input_field))
+        self.radius_button_plus.clicked.connect(lambda: self.set_radius("Plus", self.radius_input_field))
+
+
+
+        ###
+
+
+        self.light_coords_label = QLabel("Lighting Co-ords:", self)
+        ###
+        self.Xlight_coords_label = QLabel("X:", self)
+        self.Xlight_coords_input_field = QLineEdit(self)
+        self.Xlight_coords_input_field.setText("0")
+        self.Xlight_coords_input_field.textChanged.connect(self.set_loc_from_field)
+
+        self.Xlight_coords_button_plus = QPushButton("+", self)
+        self.Xlight_coords_button_plus.clicked.connect(lambda: self.set_loc("Plus", self.Xlight_coords_input_field))
+
+        self.Xlight_coords_button_minus = QPushButton("-", self)
+        self.Xlight_coords_button_minus.clicked.connect(lambda: self.set_loc("Minus", self.Xlight_coords_input_field))
+        ###
+
+
+        ###
+        self.Ylight_coords_label = QLabel("Y:", self)
+        self.Ylight_coords_input_field = QLineEdit(self)
+        self.Ylight_coords_input_field.setText("0")
+        self.Ylight_coords_input_field.textChanged.connect(self.set_loc_from_field)
+
+        self.Ylight_coords_button_plus = QPushButton("+", self)
+        self.Ylight_coords_button_plus.clicked.connect(lambda: self.set_loc("Plus", self.Ylight_coords_input_field))
+
+        self.Ylight_coords_button_minus = QPushButton("-", self)
+        self.Ylight_coords_button_minus.clicked.connect(lambda: self.set_loc("Minus", self.Ylight_coords_input_field))
+        ###
+
+        ###
+        self.Zlight_coords_label = QLabel("Z:", self)
+        self.Zlight_coords_input_field = QLineEdit(self)
+        self.Zlight_coords_input_field.setText("0")
+        self.Zlight_coords_input_field.textChanged.connect(self.set_loc_from_field)
+
+        self.Zlight_coords_button_plus = QPushButton("+", self)
+        self.Zlight_coords_button_plus.clicked.connect(lambda: self.set_loc("Plus", self.Zlight_coords_input_field))
+        
+        self.Zlight_coords_button_minus = QPushButton("-", self)
+        self.Zlight_coords_button_minus.clicked.connect(lambda: self.set_loc("Minus", self.Zlight_coords_input_field))
+        ###
+
+        self.light_angle_label = QLabel("Lighting Angle:", self)
+        ###
+        self.Xlight_angle_label = QLabel("X:", self)
+        self.Xlight_angle_input_field = QLineEdit(self)
+        self.Xlight_angle_input_field.setText("0")
+        self.Xlight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Xlight_angle_slider, self.Xlight_angle_input_field.text()))
+
+
+        self.Xlight_angle_slider = QSlider(self)
+        self.Xlight_angle_slider.setRange(0,100)
+        self.Xlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.Xlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Xlight_angle_input_field))
+
+
+        ###
+        self.Ylight_angle_label = QLabel("Y:", self)
+        self.Ylight_angle_input_field = QLineEdit(self)
+        self.Ylight_angle_input_field.setText("0")
+        self.Ylight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Ylight_angle_slider, self.Ylight_angle_input_field.text()))
+
+        self.Ylight_angle_slider = QSlider(self)
+        self.Ylight_angle_slider.setRange(0,100)
+        self.Ylight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.Ylight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Ylight_angle_input_field))
+        ###
+        self.Zlight_angle_label = QLabel("Z:", self)
+        self.Zlight_angle_input_field = QLineEdit(self)
+        self.Zlight_angle_input_field.setText("0")
+        self.Zlight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Zlight_angle_slider, self.Zlight_angle_input_field.text()))
+
+        self.Zlight_angle_slider = QSlider(self)
+        self.Zlight_angle_slider.setRange(0,100)
+        self.Zlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.Zlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Zlight_angle_input_field))
+       
+        self.light_type_label = QLabel("Type: ", self)
+        self.light_type_combobox = QComboBox(self)
+        self.light_type_combobox.addItems(["POINT", "SUN", "SPOT", "AREA"])
+        self.light_type_combobox.currentIndexChanged.connect(self.change_type)
+
+
+        main_layout = QGridLayout()
+
+        main_layout.addWidget(self.lighting_strength_label, 0, 0)
+        main_layout.addWidget(self.lighting_strength_input_field, 0, 1)
+        main_layout.addWidget(self.strength_slider, 0, 2)
+
+        
+        
+        main_layout.addWidget(self.light_coords_label, 0, 4)    
+
+        main_layout.addWidget(self.light_type_label, 3, 0)
+        main_layout.addWidget(self.light_type_combobox, 3, 1)  
+
+
+        main_layout.addWidget(self.Xlight_coords_label, 1, 4)
+        main_layout.addWidget(self.Xlight_coords_input_field, 1, 5)
+        main_layout.addWidget(self.Xlight_coords_button_plus, 1, 7)
+        main_layout.addWidget(self.Xlight_coords_button_minus, 1, 6)
+
+        main_layout.addWidget(self.Ylight_coords_label, 2, 4)
+        main_layout.addWidget(self.Ylight_coords_input_field, 2, 5)
+        main_layout.addWidget(self.Ylight_coords_button_plus, 2, 7)
+        main_layout.addWidget(self.Ylight_coords_button_minus, 2, 6)
+
+        main_layout.addWidget(self.Zlight_coords_label, 3, 4)
+        main_layout.addWidget(self.Zlight_coords_input_field, 3, 5)
+        main_layout.addWidget(self.Zlight_coords_button_plus, 3, 7)
+        main_layout.addWidget(self.Zlight_coords_button_minus, 3, 6)
+
+
+        main_layout.addWidget(self.light_angle_label, 0, 8)      
+
+
+        main_layout.addWidget(self.Xlight_angle_label, 1, 8)
+        main_layout.addWidget(self.Xlight_angle_input_field, 1, 9)
+        main_layout.addWidget(self.Xlight_angle_slider, 1, 10)
+
+        main_layout.addWidget(self.Ylight_angle_label, 2, 8)
+        main_layout.addWidget(self.Ylight_angle_input_field, 2, 9)
+        main_layout.addWidget(self.Ylight_angle_slider, 2, 10)
+
+        main_layout.addWidget(self.Zlight_angle_label, 3, 8)
+        main_layout.addWidget(self.Zlight_angle_input_field, 3, 9)
+        main_layout.addWidget(self.Zlight_angle_slider, 3, 10)
+
+        main_layout.addWidget(self.colour_select_button, 1, 1)
+        main_layout.addWidget(self.lighting_colour, 1, 2)
+        main_layout.addWidget(self.colour_example, 1 , 3)
+        main_layout.addWidget(self.colour_label, 1, 0)
+
+        main_layout.addWidget(self.radius_label, 2, 0)
+        main_layout.addWidget(self.radius_input_field, 2, 1)
+        main_layout.addWidget(self.radius_button_minus, 2, 2)
+        main_layout.addWidget(self.radius_button_plus, 2, 3)
+
+        self.setLayout(main_layout)
+
+
+    def change_type(self):
+        self.light.set_type(self.light_type_combobox.currentText())
+
+
+    def set_strength(self, val, field):
+        self.Slider_Update(val, field)
+        try:
+            self.light.set_energy(float(field.text()))
+        except:
+            pass
+
+
+    def set_loc(self, direction, field):
+        if direction == "Plus":
+            self.Plus_click(field)
+        elif direction == "Minus":
+            self.Minus_click(field)
+
+        x = self.Xlight_coords_input_field.text()
+        y = self.Ylight_coords_input_field.text()
+        z = self.Zlight_coords_input_field.text()
+        try:
+            self.light.set_loc([float(x),float(z),float(y)])
+        except:
+            pass
+    
+    def set_loc_from_field(self,):
+
+        x = self.Xlight_coords_input_field.text()
+        y = self.Ylight_coords_input_field.text()
+        z = self.Zlight_coords_input_field.text()
+        try:
+            self.light.set_loc([float(x),float(z),float(y)])
+        except:
+            pass
+        
+
+
+    def set_radius(self, direction, field):
+        if direction == "Plus":
+            self.Plus_click(field)
+        elif direction == "Minus":
+            self.Minus_click(field)
+
+        self.light.set_radius(field.text())
+
+    def set_radius_from_field(self, field):
+        try:
+            self.light.set_radius(float(field.text()))
+        except:
+            pass
+
+    def set_rotation(self, val, field):
+        self.Slider_Update(val, field)
+
+        x = self.Xlight_angle_input_field.text()
+        y = self.Ylight_angle_input_field.text()
+        z = self.Zlight_angle_input_field.text()
+
+        self.light.set_rotation([float(x),float(z),float(y)])
+        
+
+    def getColour(self):
+        colour = QColorDialog.getColor()
+
+        self.lighting_colour.setText(colour.name())
+        self.colour_example.setStyleSheet(("background-color: {c}").format(c = colour.name()))
+
+        try:
+            self.light.set_color(colour.name())
+        except:
+            pass
+
+
+    def Minus_click(self, field):
+        """Updates field value"""
+        try:
+            val = float(field.text()) - 1
+            field.setText(str(val))
+            field.editingFinished.emit()
+        except:
+            field.setText(str(0.0))
+            field.editingFinished.emit()
+    
+    def Plus_click(self, field):
+        """Updates field value"""
+        try:
+            val = float(field.text()) + 1
+            field.setText(str(val))
+            field.editingFinished.emit()
+        except:
+            field.setText(str(0.0))
+            field.editingFinished.emit()
+
+    def Slider_Update(self, val, field):
+        """Set Field value to slider value"""
+        if field.text() == '':
+            field.setText('0')
+        if float(field.text()) > val or float(field.text()) + 0.5 < val:
+            field.setText(str(val))
+    
+    def set_rotation_from_field(self, slider, val):
+        try:
+            self.Update_slider(slider, val)
+
+            x = self.Xlight_angle_input_field.text()
+            y = self.Ylight_angle_input_field.text()
+            z = self.Zlight_angle_input_field.text()
+            
+            self.light.set_rotation([float(x),float(z),float(y)])
+        except:
+            pass
+
+
+    def Update_slider(self, slider, val):
+        try:
+            slider.setValue(int(round(float(val), 0)))
+        except Exception as e:
+            try:
+                slider.setValue(0)
+            except:
+                print("Error", e)
+
+
+    def update_colour_example_text(self, colour):
+        try:
+            if (len(colour) == 6 and colour[0] != "#") or (len(colour) == 7 and colour[0] == "#"): 
+                if colour[0] != "#":
+                    colour = "#" + colour
+
+                
+                self.light.set_color(colour)
+                #print("CHANGED BACKEND")
+                self.colour_example.setStyleSheet(("background-color: {c}").format(c = colour))
+        except:
+            pass
+
+    def update_colour_example(self):
+        try:
+            colour = self.lighting_strength_input_field.text()
+            self.lighting_colour.setText(colour.name())
+            self.colour_example.setStyleSheet(("background-color: {c}").format(c = colour.name()))
+        except:
+            pass
+
 
 
 if __name__ == "__main__":
