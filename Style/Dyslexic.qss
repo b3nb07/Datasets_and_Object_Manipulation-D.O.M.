@@ -1,0 +1,5 @@
+QWidget {
+    font-family: OpenDyslexic, Arial, sans-serif;
+    background-color: #F5EFD7;
+    color: #333333;
+}
