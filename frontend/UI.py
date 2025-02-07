@@ -16,6 +16,7 @@ path.append("backend")
 """Importing"""
 from backend import Backend
 import numpy as np
+from re import search as regex
 
 """"
     Comment info - 
@@ -1723,7 +1724,11 @@ class Lighting(QWidget):
         self.lighting_colour = QLineEdit(self) #f789886 & bullshit
         self.lighting_colour.textEdited.connect(lambda: self.update_colour_example_text(self.lighting_colour.text()))
         self.colour_example = QLabel(self)
-        self.lighting_colour.setText("#000000")
+        self.lighting_colour.setText("#ffffff")
+        
+        
+        #self.light.set_color("#000000")
+        self.colour_example.setStyleSheet(("background-color: {c}").format(c = "#ffffff"))
         ###
 
 
@@ -1808,7 +1813,7 @@ class Lighting(QWidget):
 
 
         self.Xlight_angle_slider = QSlider(self)
-        self.Xlight_angle_slider.setRange(0,100)
+        self.Xlight_angle_slider.setRange(0,359)
         self.Xlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
         self.Xlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Xlight_angle_input_field))
 
@@ -1820,7 +1825,7 @@ class Lighting(QWidget):
         self.Ylight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Ylight_angle_slider, self.Ylight_angle_input_field.text()))
 
         self.Ylight_angle_slider = QSlider(self)
-        self.Ylight_angle_slider.setRange(0,100)
+        self.Ylight_angle_slider.setRange(0,359)
         self.Ylight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
         self.Ylight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Ylight_angle_input_field))
         ###
@@ -1830,7 +1835,7 @@ class Lighting(QWidget):
         self.Zlight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Zlight_angle_slider, self.Zlight_angle_input_field.text()))
 
         self.Zlight_angle_slider = QSlider(self)
-        self.Zlight_angle_slider.setRange(0,100)
+        self.Zlight_angle_slider.setRange(0,359)
         self.Zlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
         self.Zlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Zlight_angle_input_field))
        
@@ -2024,7 +2029,7 @@ class Lighting(QWidget):
 
     def update_colour_example_text(self, colour):
         try:
-            if (len(colour) == 6 and colour[0] != "#") or (len(colour) == 7 and colour[0] == "#"): 
+            if bool(regex("(([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f]))", colour)) or bool(regex("#(([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f]))", colour)):
                 if colour[0] != "#":
                     colour = "#" + colour
 
