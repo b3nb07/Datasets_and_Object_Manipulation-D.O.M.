@@ -4,6 +4,8 @@ from functools import cached_property
 import sys
 from PyQt5 import QtCore, QtWidgets
 from functools import cached_property
+from PyQt5.QtCore import QSettings
+
 
 import os
 from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox
@@ -127,12 +129,13 @@ class TabDialog(QWidget):
 
         
         #tab_widget.widget(0).layout().itemAtPosition(1, 1).widget().setEnabled(False)
+        
 
         tab_widget.setTabEnabled(0, False)
         tab_widget.setTabEnabled(1, False)
         tab_widget.setTabEnabled(2, False)
         tab_widget.setTabEnabled(3, False)
-        #tab_widget.setTabEnabled(4, False)
+        tab_widget.setTabEnabled(4, False)
 
         tab_widget.setFixedHeight(250)
         
@@ -256,6 +259,7 @@ class ObjectTab(QWidget):
             Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
             Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
             Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
+            Tutorial_Box.addButton(QMessageBox.Cancel)
 
             Tutorial_Box.exec()
             obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
@@ -268,6 +272,7 @@ class ObjectTab(QWidget):
     
         def delete_object(tab_widget):
             to_delete = QMessageBox()
+
             to_delete.setText("Please select an object to remove from below")
 
             if (not shared_state.items):
@@ -1562,8 +1567,10 @@ class Port(QWidget):
             Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
             Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
             Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
+            Tutorial_Box.addButton(QMessageBox.Cancel)
 
             Tutorial_Box.exec()
+
             try:
                 obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
                 shared_state.add_item(obj)
@@ -2053,20 +2060,24 @@ class Settings(QWidget):
         main_layout = QGridLayout()
         self.colour_scheme_button = QPushButton('Colour Theme', self)
         self.Help_button = QPushButton('Help', self)
-        self.Guides = QPushButton('Guides', self)
+        self.Languages = QPushButton('Languages', self)
         self.Secret_button = QPushButton('Button', self)
         
 
         #button clicks
         self.colour_scheme_button.clicked.connect(self.Colour_Scheme_Press)
-       
+        self.Languages.clicked.connect(self.Language_button_press)
+
         
         #button Layout
-        main_layout.addWidget(self.colour_scheme_button)
-        main_layout.addWidget(self.Help_button)
-        main_layout.addWidget(self.Guides)
-        main_layout.addWidget(self.Secret_button)
+        main_layout.addWidget(self.colour_scheme_button, 0, 1)
+        main_layout.addWidget(self.Help_button, 0, 2)
+        main_layout.addWidget(self.Languages, 0, 3)
+        main_layout.addWidget(self.Secret_button, 0, 4)
         self.setLayout(main_layout)
+
+        self.load_settings()
+
 
     def Colour_Scheme_Press(self):
         """Opens colour scheme options"""
@@ -2077,23 +2088,24 @@ class Settings(QWidget):
         # Add buttons for different styles
         dark_mode = colour_box.addButton("Dark Mode", QMessageBox.ActionRole)
         light_mode = colour_box.addButton("Light Mode", QMessageBox.ActionRole)
-        colourblind1 = colour_box.addButton("Colourblind 1", QMessageBox.ActionRole)
-        colourblind2 = colour_box.addButton("Colourblind 2", QMessageBox.ActionRole)
+        colourblind1 = colour_box.addButton("Factory New", QMessageBox.ActionRole)
+        default = colour_box.addButton("Colourblind 2", QMessageBox.ActionRole)
         dyslexic = colour_box.addButton("Dyslexic Friendly", QMessageBox.ActionRole)
         colour_scheme1 = colour_box.addButton("Colour Mode 1", QMessageBox.ActionRole)
         Image_test = colour_box.addButton("Imagetest", QMessageBox.ActionRole)
-        # Show the dialog
+        colour_box.addButton(QMessageBox.Cancel)
+
         colour_box.exec()
 
         # Apply styles based on button clicked
         if colour_box.clickedButton() == dark_mode:
-            self.apply_stylesheet("Dark.qss")
+            self.apply_stylesheet("DarkMode.qss")
         elif colour_box.clickedButton() == light_mode:
             self.apply_stylesheet("LightMode.qss")
         elif colour_box.clickedButton() == colourblind1:
             self.apply_stylesheet("colourblind1.qss")
-        elif colour_box.clickedButton() == colourblind2:
-            self.apply_stylesheet("colourblind2.qss")
+        elif colour_box.clickedButton() == default:
+            self.apply_stylesheet("default.qss")
         elif colour_box.clickedButton() == dyslexic:
             self.apply_stylesheet("Dyslexic.qss")
         elif colour_box.clickedButton() == colour_scheme1:
@@ -2101,15 +2113,59 @@ class Settings(QWidget):
         elif colour_box.clickedButton() == Image_test:
             self.apply_stylesheet("ImageTest.qss")
 
+
+    def Language_button_press(self):
+        language_box = QMessageBox(self)
+        language_box.setWindowTitle("Select a Language")
+        language_box.setText("Please select a Language:")
+
+        # Add buttons for different styles
+        English = language_box.addButton("English", QMessageBox.ActionRole)
+        Spanish = language_box.addButton("Spanish", QMessageBox.ActionRole)
+        Portuguese = language_box.addButton("Portuguese", QMessageBox.ActionRole)
+        Mandarin = language_box.addButton("Mandarin", QMessageBox.ActionRole)
+        Language5 = language_box.addButton("Language 5", QMessageBox.ActionRole)
+        Language6 = language_box.addButton("Language 6", QMessageBox.ActionRole)
+        Language7 = language_box.addButton("Imagetest", QMessageBox.ActionRole)
+        language_box.addButton(QMessageBox.Cancel)
+        language_box.exec()
+
+        # Apply styles based on button clicked
+        if language_box.clickedButton() == English:
+            self.apply_Language
+        elif language_box.clickedButton() == Spanish:
+            self.apply_Language()
+        elif language_box.clickedButton() == Portuguese:
+            self.apply_Language()
+        elif language_box.clickedButton() == Mandarin:
+            self.apply_Language()
+        elif language_box.clickedButton() == Language5:
+            self.apply_Language()
+        elif language_box.clickedButton() == Language6:
+            self.apply_Language()
+        elif language_box.clickedButton() == Language7:
+            self.apply_Language()
+
     def apply_stylesheet(self, filename):
-        "loads styles from style folder"
+        """Loads and applies stylesheet, then saves the choice"""
         qss_path = os.path.join(os.path.dirname(__file__), "..", "Style", filename)
         try:
             with open(qss_path, "r") as file:
                 qss = file.read()
-                QApplication.instance().setStyleSheet(qss)  # Apply globally
+                QApplication.instance().setStyleSheet(qss)  
+                self.save_settings(filename)  # Save the colour theme choice
         except FileNotFoundError:
-            print(f"Error: {filename} not found!")
+            print(f"Error: {filename} not found")
+
+    def save_settings(self, Colour_Setup):
+        settings = QSettings("UserSettings")
+        settings.setValue("theme", Colour_Setup)
+        settings.sync()
+
+    def load_settings(self):
+        settings = QSettings("UserSettings")
+        Colour_Setup = settings.value("theme", "LightMode.qss")  # default mode is light mode 
+        self.apply_stylesheet(Colour_Setup)
 
 
 if __name__ == "__main__":
