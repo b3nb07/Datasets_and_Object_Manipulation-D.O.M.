@@ -5,6 +5,7 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 from functools import cached_property
 
+import os
 from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox
 from PyQt5.QtCore import * 
 from PyQt5.QtGui import * 
@@ -1307,6 +1308,11 @@ class Render(QWidget):
 
         self.setLayout(main_layout)
 
+
+
+
+
+    
     def unlimitedrender(self):
         test = True
         while True:
@@ -1421,20 +1427,63 @@ class Port(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
 
+        
+        class ilyaMessageBox(QMessageBox):
+                def __init__(self, text, title):
+                    super().__init__()
+                    self.setText(text)
+                    self.setWindowTitle(title)
+                    self.exec()
+
         #First Section
         def Get_Object_Filepath():
+            import_box = QMessageBox()
+            import_box.setText("How would you like to import objects?")
+            import_box.addButton("Multiple Files", QMessageBox.ActionRole)
+            import_box.addButton("Entire Folder", QMessageBox.ActionRole)
+            import_box.addButton("Cancel", QMessageBox.RejectRole)
+            
+            import_box.exec()
+            clicked_button = import_box.clickedButton().text()
+            
             try:
-                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
-                if (path == ""): return
-                # add the object to the shared state
-                shared_state.add_item(backend.RenderObject(filepath = path))
-                
+                if clicked_button == "Multiple Files":
+                    paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
+                    if not paths:
+                        return
+                    
+                    for path in paths:
+                        obj = backend.RenderObject(filepath=path)
+                        shared_state.add_item(obj)
+
+                elif clicked_button == "Entire Folder":
+                    folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
+                    if not folder_path:
+                        return
+                    
+                    # maybe have a global constant of supported extensions?
+                    supported_extensions = ['.blend', '.stl', '.obj']
+                    # go through each file in directory
+                    for root, _, files in os.walk(folder_path):
+                        for file in files:
+                            if any(file.lower().endswith(ext) for ext in supported_extensions):
+                                full_path = os.path.join(root, file)
+                                obj = backend.RenderObject(filepath=full_path)
+                                shared_state.add_item(obj)
+
+
                 Object_detect(tab_widget)
+
+                success_box = ilyaMessageBox("Object imported successfully.", "Success")
 
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
 
-        self.Import_Object_Button = QPushButton("Import Object", self)
+
+            except Exception as e:
+                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
+                
+        self.Import_Object_Button = QPushButton("Import Objects", self)
         self.Import_Object_Button.clicked.connect(Get_Object_Filepath)
 
         #Second Section
@@ -1449,8 +1498,21 @@ class Port(QWidget):
             Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
 
             Tutorial_Box.exec()
-            obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-            shared_state.add_item(obj)
+            try:
+                obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+                shared_state.add_item(obj)
+
+                success_box = ilyaMessageBox("Object imported successfully.", "Success")
+                
+                
+            except:
+                error_box = QMessageBox()
+                error_box.setWindowTitle("Error")
+                error_box.setText("Error loading tutorial object.")
+                error_box.exec()
+
+                error_box = ilyaMessageBox("Error loading tutorial object.", "Error")
+                
     
             Object_detect(tab_widget)
 
@@ -1468,10 +1530,12 @@ class Port(QWidget):
                     pass
                 else:
                     backend.export(export_path)
+                    success_box = ilyaMessageBox("Setting exported successfully.", "Success")
+                   
+
 
             except:
-                ErrorBox = QMessageBox()
-                ErrorBox.setText("There was an error selecting folder, please try again.")
+                error_box = ilyaMessageBox("There was an error selecting folder, please try again.", "Error")
 
         #Fourth Section
         self.ExportSettings_Button = QPushButton('Export Settings', self)
@@ -1484,7 +1548,10 @@ class Port(QWidget):
                 if (path == ""): return
                 backend = Backend(json_filepath = path)
                 for i in range(4):
-                    self.path.tabwizard.widget(i).update_ui_by_config()
+                    #self.path.tabwizard.widget(i).update_ui_by_config()
+                    tab_widget(i).update_ui_by_config()
+
+                success_box = ilyaMessageBox("Setting imported successfully.", "Success")
             except Exception:
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
@@ -1504,17 +1571,24 @@ class Port(QWidget):
             to_delete.addButton("Cancel", QMessageBox.ActionRole)
 
             to_delete.exec()
+
             choice = str(to_delete.clickedButton().text())
 
             if choice != "Cancel":
+                
                 obj_index = int(to_delete.clickedButton().text()[-1]) - 1
                 obj = shared_state.items[obj_index]
-                shared_state.remove_item(obj)
-                del backend.get_config()["objects"][obj.object_pos]
-                # shift objects after this one down by one
-                for i in range(obj_index, len(shared_state.items)):
-                    obj = shared_state.items[i]
-                    obj.object_pos = i
+                try:
+                    shared_state.remove_item(obj)
+                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
+                    
+                    del backend.get_config()["objects"][obj.object_pos]
+                    # shift objects after this one down by one
+                    for i in range(obj_index, len(shared_state.items)):
+                        obj = shared_state.items[i]
+                        obj.object_pos = i
+                except:
+                    error_box = ilyaMessageBox("Error deleting object", "Error")
 
                 shared_state.items_updated.emit(shared_state.items)
                 # The last object was deleted
@@ -1529,6 +1603,9 @@ class Port(QWidget):
         
         
         def select_render_folder():
+            
+
+                    
             try:
                 new_path = QFileDialog.getExistingDirectory(self, "Select Folder")
 
@@ -1536,10 +1613,10 @@ class Port(QWidget):
                     pass
                 else:
                     backend.set_render_output_folder(new_path)
+                    success_box = ilyaMessageBox("Render folder changed", "Success")
 
             except:
-                ErrorBox = QMessageBox()
-                ErrorBox.setText("There was an error selecting folder, please try again.")
+                error_box = ilyaMessageBox("Error deleting object", "Error")
 
         self.SelectRenderFolder_Button = QPushButton('Change Render Folder', self)
         self.SelectRenderFolder_Button.clicked.connect(select_render_folder)
