@@ -627,3 +627,4 @@ class Backend():
                 self.light.set_color(colour)
 
             config["light_sources"][self.light_pos]["color"] = color
+# Empty line required
