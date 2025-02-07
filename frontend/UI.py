@@ -137,7 +137,7 @@ class TabDialog(QWidget):
         # enviroment
         environment = QWidget()
         environment.setStyleSheet("background-color: black;")
-        self.setMinimumSize(920, 700) # minimum size of program
+        self.setMinimumSize(1350, 700) # minimum size of program
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(tab_widget)
@@ -179,7 +179,7 @@ class ObjectTab(QWidget):
         self.Width_Obj_pos_input_field.setText("0.0")
         
         self.W_slider = QtWidgets.QSlider(self)
-        self.W_slider.setRange(0, 100)
+        self.W_slider.setRange(-100, 100)
         self.W_slider.setPageStep(0)
         self.W_slider.setOrientation(QtCore.Qt.Horizontal)
 
@@ -188,7 +188,7 @@ class ObjectTab(QWidget):
         self.Height_Obj_pos_input_field.setText("0.0")
 
         self.H_slider = QtWidgets.QSlider(self)
-        self.H_slider.setRange(0, 100)
+        self.H_slider.setRange(-100, 100)
         self.H_slider.setPageStep(0)
         self.H_slider.setOrientation(QtCore.Qt.Horizontal)
         
@@ -197,7 +197,7 @@ class ObjectTab(QWidget):
         self.Length_Obj_pos_input_field.setText("0.0")
 
         self.L_slider = QtWidgets.QSlider(self)
-        self.L_slider.setRange(0, 100)
+        self.L_slider.setRange(-100, 100)
         self.L_slider.setPageStep(0)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
 
@@ -807,20 +807,43 @@ class RandomDefault(QWidget):
         super().__init__(parent)
 
         main_layout = QGridLayout()
-        Field = QCheckBox("Set ALL random", self)
+        Field = QCheckBox("Set ALL", self)
+
+        SetSetCheck = QCheckBox("Set per SET")
+        SetFrameCheck = QCheckBox("Set per FRAME")
         
         RandomSeed = QLineEdit("", self)
         RandomSeed.setText(str(backend.get_config()["seed"]))
-        RandomSeed.setFixedWidth(100)
+        RandomSeed.setMaximumWidth(200)
         
         main_layout.addWidget(Field, 0, 0)
-        main_layout.addWidget(RandomSeed, 1, 0)
+        main_layout.addWidget(SetSetCheck, 1, 0)
+        main_layout.addWidget(SetFrameCheck, 2, 0)
+        SetSetCheck.toggled.connect(lambda: self.SetSETChecks(main_layout))
+        SetFrameCheck.toggled.connect(lambda: self.SetFRAMEChecks(main_layout))
+        SetSetCheck.setChecked(True)
+        main_layout.addWidget(RandomSeed, 3, 0)
         main_layout.setAlignment(Qt.AlignTop | Qt.AlignRight)
         
         Field.toggled.connect(lambda state: self.checkUpdate(tab_widget, state))
         RandomSeed.editingFinished.connect(lambda: self.SeedEdit(RandomSeed))
         
         self.setLayout(main_layout)
+
+
+    def SetSETChecks(self, Layout):
+        if Layout.itemAtPosition(1, 0).widget().isChecked():
+            Layout.itemAtPosition(2, 0).widget().setChecked(False)
+        self.notXOR(Layout)
+    
+    def SetFRAMEChecks(self, Layout):
+        if Layout.itemAtPosition(2, 0).widget().isChecked():
+            Layout.itemAtPosition(1, 0).widget().setChecked(False)
+        self.notXOR(Layout)
+
+    def notXOR(self, Layout):
+        if (not Layout.itemAtPosition(1, 0).widget().isChecked()) == (not Layout.itemAtPosition(2, 0).widget().isChecked()):
+            Layout.itemAtPosition(1, 0).widget().setChecked(True)
         
     def checkUpdate(self, tab_widget, State):
         """Method to update all Random checkboxes"""
@@ -895,6 +918,8 @@ class RandomObject(QWidget):
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
+        Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
@@ -931,6 +956,15 @@ class RandomObject(QWidget):
         """Set all elements on page to active"""
         for keys in self.CheckBoxes.keys():
             main_layout.itemAtPosition(self.CheckBoxes[keys][1], self.CheckBoxes[keys][0]).widget().setChecked(State)
+
+    def validation(self, Field):
+        if Field.isEnabled():
+            """Updates field value"""
+            try:
+                val = float(Field.text())
+                Field.setText(str(val))
+            except:
+                Field.setText("")
 
     def update_combo_box_items(self, items):
         """ Method could be called to update combo_box_items. Maybe Delete. """
@@ -987,9 +1021,20 @@ class RandomPivot(QWidget):
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
+        Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
+
+    def validation(self, Field):
+        if Field.isEnabled():
+            """Updates field value"""
+            try:
+                val = float(Field.text())
+                Field.setText(str(val))
+            except:
+                Field.setText("")
         
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
         Layout.addWidget(Field, Y, X)
@@ -1074,6 +1119,8 @@ class RandomRender(QWidget):
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
+        Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
@@ -1082,7 +1129,16 @@ class RandomRender(QWidget):
         Layout.addWidget(Field, Y, X)
         self.CheckBoxes[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
         Layout.itemAtPosition(Y, X).widget().toggled.connect(lambda: self.setAbled(ConField, Layout.itemAtPosition(Y, X).widget().isChecked()))
-        
+    
+    def validation(self, Field):
+        if Field.isEnabled():
+            """Updates field value"""
+            try:
+                val = float(Field.text())
+                Field.setText(str(val))
+            except:
+                Field.setText("")
+
     def setAbled(self, Field, State):
         """Connect Checkbox to correlating page field"""
         Field.setEnabled(not State)
@@ -1114,6 +1170,7 @@ class RandomRender(QWidget):
     def on_object_selected(self, selected_object_pos):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         pass
+
 
 class RandomLight(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
@@ -1158,7 +1215,7 @@ class RandomLight(QWidget):
         self.gen_field("Radius", main_layout, 6, 2)
         self.gen_field("Colour", main_layout, 6, 3)
 
-        self.gen_field("BackGround-Colour", main_layout, 9, 1)
+        self.gen_field("BackGround", main_layout, 9, 1)
 
         #print(main_layout.itemAtPosition(0, 0).widget().setText("Electric boogalo"))
         #how to change values
@@ -1173,10 +1230,21 @@ class RandomLight(QWidget):
         self.addCheck(Field, Fieldname, Layout, X, Y)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
+        Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
-        
+
+    def validation(self, Field):
+        if Field.isEnabled():
+            """Updates field value"""
+            try:
+                val = float(Field.text())
+                Field.setText(str(val))
+            except:
+                Field.setText("")
+
     def addCheck(self, Field, Fieldname, Layout, X, Y):
         Layout.addWidget(Field, Y, X)
         self.CheckBoxes[f"{Layout.itemAtPosition(0, 12).widget().currentText()}{Fieldname}"] = (X, Y)
@@ -1205,7 +1273,6 @@ class RandomLight(QWidget):
     def on_object_selected(self, selected_object_pos):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         pass
-
 
 
 class Render(QWidget):
@@ -1309,11 +1376,6 @@ class Render(QWidget):
         main_layout.addWidget(self.GenerateRenders_Button, 0, 7)
 
         self.setLayout(main_layout)
-
-
-
-
-
     
     def unlimitedrender(self):
         test = True
