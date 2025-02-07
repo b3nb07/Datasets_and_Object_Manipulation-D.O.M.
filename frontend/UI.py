@@ -135,7 +135,7 @@ class TabDialog(QWidget):
         # enviroment
         environment = QWidget()
         environment.setStyleSheet("background-color: black;")
-        self.setMinimumSize(920, 700) # minimum size of program
+        self.setMinimumSize(1350, 700) # minimum size of program
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(tab_widget)
@@ -916,6 +916,8 @@ class RandomObject(QWidget):
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
+        Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
@@ -952,6 +954,15 @@ class RandomObject(QWidget):
         """Set all elements on page to active"""
         for keys in self.CheckBoxes.keys():
             main_layout.itemAtPosition(self.CheckBoxes[keys][1], self.CheckBoxes[keys][0]).widget().setChecked(State)
+
+    def validation(self, Field):
+        if Field.isEnabled():
+            """Updates field value"""
+            try:
+                val = float(Field.text())
+                Field.setText(str(val))
+            except:
+                Field.setText("")
 
     def update_combo_box_items(self, items):
         """ Method could be called to update combo_box_items. Maybe Delete. """
@@ -1008,9 +1019,20 @@ class RandomPivot(QWidget):
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
+        Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
+
+    def validation(self, Field):
+        if Field.isEnabled():
+            """Updates field value"""
+            try:
+                val = float(Field.text())
+                Field.setText(str(val))
+            except:
+                Field.setText("")
         
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
         Layout.addWidget(Field, Y, X)
@@ -1095,6 +1117,8 @@ class RandomRender(QWidget):
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
+        Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
@@ -1103,7 +1127,16 @@ class RandomRender(QWidget):
         Layout.addWidget(Field, Y, X)
         self.CheckBoxes[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
         Layout.itemAtPosition(Y, X).widget().toggled.connect(lambda: self.setAbled(ConField, Layout.itemAtPosition(Y, X).widget().isChecked()))
-        
+    
+    def validation(self, Field):
+        if Field.isEnabled():
+            """Updates field value"""
+            try:
+                val = float(Field.text())
+                Field.setText(str(val))
+            except:
+                Field.setText("")
+
     def setAbled(self, Field, State):
         """Connect Checkbox to correlating page field"""
         Field.setEnabled(not State)
@@ -1135,6 +1168,7 @@ class RandomRender(QWidget):
     def on_object_selected(self, selected_object_pos):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         pass
+
 
 class RandomLight(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
@@ -1179,7 +1213,7 @@ class RandomLight(QWidget):
         self.gen_field("Radius", main_layout, 6, 2)
         self.gen_field("Colour", main_layout, 6, 3)
 
-        self.gen_field("BackGround-Colour", main_layout, 9, 1)
+        self.gen_field("BackGround", main_layout, 9, 1)
 
         #print(main_layout.itemAtPosition(0, 0).widget().setText("Electric boogalo"))
         #how to change values
@@ -1194,10 +1228,21 @@ class RandomLight(QWidget):
         self.addCheck(Field, Fieldname, Layout, X, Y)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
+        Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
-        
+
+    def validation(self, Field):
+        if Field.isEnabled():
+            """Updates field value"""
+            try:
+                val = float(Field.text())
+                Field.setText(str(val))
+            except:
+                Field.setText("")
+
     def addCheck(self, Field, Fieldname, Layout, X, Y):
         Layout.addWidget(Field, Y, X)
         self.CheckBoxes[f"{Layout.itemAtPosition(0, 12).widget().currentText()}{Fieldname}"] = (X, Y)
@@ -1226,7 +1271,6 @@ class RandomLight(QWidget):
     def on_object_selected(self, selected_object_pos):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         pass
-
 
 
 class Render(QWidget):
@@ -1330,11 +1374,6 @@ class Render(QWidget):
         main_layout.addWidget(self.GenerateRenders_Button, 0, 7)
 
         self.setLayout(main_layout)
-
-
-
-
-
     
     def unlimitedrender(self):
         test = True
