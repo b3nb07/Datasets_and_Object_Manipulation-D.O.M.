@@ -806,19 +806,42 @@ class RandomDefault(QWidget):
 
         main_layout = QGridLayout()
         Field = QCheckBox("Set ALL", self)
+
+        SetSetCheck = QCheckBox("Set per SET")
+        SetFrameCheck = QCheckBox("Set per FRAME")
         
         RandomSeed = QLineEdit("", self)
         RandomSeed.setText(str(backend.get_config()["seed"]))
-        RandomSeed.setFixedWidth(100)
+        RandomSeed.setMaximumWidth(200)
         
         main_layout.addWidget(Field, 0, 0)
-        main_layout.addWidget(RandomSeed, 1, 0)
+        main_layout.addWidget(SetSetCheck, 1, 0)
+        main_layout.addWidget(SetFrameCheck, 2, 0)
+        SetSetCheck.toggled.connect(lambda: self.SetSETChecks(main_layout))
+        SetFrameCheck.toggled.connect(lambda: self.SetFRAMEChecks(main_layout))
+        SetSetCheck.setChecked(True)
+        main_layout.addWidget(RandomSeed, 3, 0)
         main_layout.setAlignment(Qt.AlignTop | Qt.AlignRight)
         
         Field.toggled.connect(lambda state: self.checkUpdate(tab_widget, state))
         RandomSeed.editingFinished.connect(lambda: self.SeedEdit(RandomSeed))
         
         self.setLayout(main_layout)
+
+
+    def SetSETChecks(self, Layout):
+        if Layout.itemAtPosition(1, 0).widget().isChecked():
+            Layout.itemAtPosition(2, 0).widget().setChecked(False)
+        self.notXOR(Layout)
+    
+    def SetFRAMEChecks(self, Layout):
+        if Layout.itemAtPosition(2, 0).widget().isChecked():
+            Layout.itemAtPosition(1, 0).widget().setChecked(False)
+        self.notXOR(Layout)
+
+    def notXOR(self, Layout):
+        if (not Layout.itemAtPosition(1, 0).widget().isChecked()) == (not Layout.itemAtPosition(2, 0).widget().isChecked()):
+            Layout.itemAtPosition(1, 0).widget().setChecked(True)
         
     def checkUpdate(self, tab_widget, State):
         """Method to update all Random checkboxes"""
