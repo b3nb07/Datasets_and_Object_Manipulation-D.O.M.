@@ -129,7 +129,7 @@ class TabDialog(QWidget):
         tab_widget.setTabEnabled(2, False)
         tab_widget.setTabEnabled(3, False)
 
-        tab_widget.setFixedHeight(200)
+        tab_widget.setFixedHeight(250)
         
         # enviroment
         environment = QWidget()
@@ -176,7 +176,7 @@ class ObjectTab(QWidget):
         self.Width_Obj_pos_input_field.setText("0.0")
         
         self.W_slider = QtWidgets.QSlider(self)
-        self.W_slider.setRange(0, 100)
+        self.W_slider.setRange(-100, 100)
         self.W_slider.setPageStep(0)
         self.W_slider.setOrientation(QtCore.Qt.Horizontal)
 
@@ -185,7 +185,7 @@ class ObjectTab(QWidget):
         self.Height_Obj_pos_input_field.setText("0.0")
 
         self.H_slider = QtWidgets.QSlider(self)
-        self.H_slider.setRange(0, 100)
+        self.H_slider.setRange(-100, 100)
         self.H_slider.setPageStep(0)
         self.H_slider.setOrientation(QtCore.Qt.Horizontal)
         
@@ -194,7 +194,7 @@ class ObjectTab(QWidget):
         self.Length_Obj_pos_input_field.setText("0.0")
 
         self.L_slider = QtWidgets.QSlider(self)
-        self.L_slider.setRange(0, 100)
+        self.L_slider.setRange(-100, 100)
         self.L_slider.setPageStep(0)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
 
@@ -804,7 +804,7 @@ class RandomDefault(QWidget):
         super().__init__(parent)
 
         main_layout = QGridLayout()
-        Field = QCheckBox("Set ALL random", self)
+        Field = QCheckBox("Set ALL", self)
         
         RandomSeed = QLineEdit("", self)
         RandomSeed.setText(str(backend.get_config()["seed"]))
