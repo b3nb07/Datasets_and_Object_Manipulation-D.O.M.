@@ -118,6 +118,8 @@ class TabDialog(QWidget):
  
         Temp_index = tab_widget.addTab(QWidget(), "Random")
         tab_widget.addTab(Port(self, tab_widget), "Import/Export")
+        tab_widget.addTab(Settings(self, tab_widget), "Settings")
+
 
         random_tab = RandomTabDialog(self, tab_widget)
         tab_widget.removeTab(Temp_index)
@@ -2043,6 +2045,71 @@ class Lighting(QWidget):
         except:
             pass
 
+class Settings(QWidget):
+    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
+        super().__init__(parent)
+        
+        #Button Labels
+        main_layout = QGridLayout()
+        self.colour_scheme_button = QPushButton('Colour Theme', self)
+        self.Help_button = QPushButton('Help', self)
+        self.Guides = QPushButton('Guides', self)
+        self.Secret_button = QPushButton('Button', self)
+        
+
+        #button clicks
+        self.colour_scheme_button.clicked.connect(self.Colour_Scheme_Press)
+       
+        
+        #button Layout
+        main_layout.addWidget(self.colour_scheme_button)
+        main_layout.addWidget(self.Help_button)
+        main_layout.addWidget(self.Guides)
+        main_layout.addWidget(self.Secret_button)
+        self.setLayout(main_layout)
+
+    def Colour_Scheme_Press(self):
+        """Opens colour scheme options"""
+        colour_box = QMessageBox(self)
+        colour_box.setWindowTitle("Select Colour Scheme")
+        colour_box.setText("Please select a colour scheme:")
+
+        # Add buttons for different styles
+        dark_mode = colour_box.addButton("Dark Mode", QMessageBox.ActionRole)
+        light_mode = colour_box.addButton("Light Mode", QMessageBox.ActionRole)
+        colourblind1 = colour_box.addButton("Colourblind 1", QMessageBox.ActionRole)
+        colourblind2 = colour_box.addButton("Colourblind 2", QMessageBox.ActionRole)
+        dyslexic = colour_box.addButton("Dyslexic Friendly", QMessageBox.ActionRole)
+        colour_scheme1 = colour_box.addButton("Colour Mode 1", QMessageBox.ActionRole)
+        Image_test = colour_box.addButton("Imagetest", QMessageBox.ActionRole)
+        # Show the dialog
+        colour_box.exec()
+
+        # Apply styles based on button clicked
+        if colour_box.clickedButton() == dark_mode:
+            self.apply_stylesheet("Dark.qss")
+        elif colour_box.clickedButton() == light_mode:
+            self.apply_stylesheet("LightMode.qss")
+        elif colour_box.clickedButton() == colourblind1:
+            self.apply_stylesheet("colourblind1.qss")
+        elif colour_box.clickedButton() == colourblind2:
+            self.apply_stylesheet("colourblind2.qss")
+        elif colour_box.clickedButton() == dyslexic:
+            self.apply_stylesheet("Dyslexic.qss")
+        elif colour_box.clickedButton() == colour_scheme1:
+            self.apply_stylesheet("ColourScheme1.qss")
+        elif colour_box.clickedButton() == Image_test:
+            self.apply_stylesheet("ImageTest.qss")
+
+    def apply_stylesheet(self, filename):
+        "loads styles from style folder"
+        qss_path = os.path.join(os.path.dirname(__file__), "..", "Style", filename)
+        try:
+            with open(qss_path, "r") as file:
+                qss = file.read()
+                QApplication.instance().setStyleSheet(qss)  # Apply globally
+        except FileNotFoundError:
+            print(f"Error: {filename} not found!")
 
 
 if __name__ == "__main__":
