@@ -50,8 +50,8 @@ class ComboBoxState(QObject):
         self.items = items
         self.items_updated.emit(items)  # Emit signal for item updates
 
-    def add_item(self, item):
-        self.items.append(item)
+    def add_item(self, item, Name):
+        self.items.append(item, Name)
         self.items_updated.emit(self.items)
 
     def remove_item(self, item):
@@ -118,6 +118,7 @@ class TabDialog(QWidget):
         Temp_index = tab_widget.addTab(QWidget(), "Random")
         tab_widget.addTab(Port(self, tab_widget), "Import/Export")
         tab_widget.addTab(Settings(self, tab_widget), "Settings")
+        
 
 
         random_tab = RandomTabDialog(self, tab_widget)
@@ -131,7 +132,7 @@ class TabDialog(QWidget):
         tab_widget.setTabEnabled(1, False)
         tab_widget.setTabEnabled(2, False)
         tab_widget.setTabEnabled(3, False)
-        #tab_widget.setTabEnabled(4, False)
+        tab_widget.setTabEnabled(4, False)
 
         tab_widget.setFixedHeight(250)
         
@@ -150,7 +151,7 @@ class ObjectTab(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
 
-        self.Object_pos_title = QLabel(f"Object 1 Co-ords", self)
+        self.Object_pos_title = QLabel(f"Object Co-ords", self)
 
         self.XObj_pos = QLabel("X:", self)
         self.XObj_pos_input_field = QLineEdit(parent=self)
@@ -172,7 +173,7 @@ class ObjectTab(QWidget):
         self.Z_button_minus = QPushButton('-', self)
         self.Z_button_plus = QPushButton('+', self)
         ####################################################################
-        self.Object_scale_title = QLabel(f"Object 1 Scale", self)
+        self.Object_scale_title = QLabel(f"Object Scale", self)
 
         self.Width_Obj_pos = QLabel("Width:", self)
         self.Width_Obj_pos_input_field = QLineEdit(parent=self)
@@ -202,7 +203,7 @@ class ObjectTab(QWidget):
         self.L_slider.setPageStep(0)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
 
-        self.Object_rotation_title = QLabel(f"Object 1 Rotation", self)
+        self.Object_rotation_title = QLabel(f"Object Rotation", self)
 
         self.X_Rotation_Label = QLabel("Roll:", self)
         self.X_Rotation_input_field = QLineEdit(parent=self)
@@ -1505,7 +1506,7 @@ class Port(QWidget):
             import_box = QMessageBox()
             import_box.setText("How would you like to import objects?")
             import_box.addButton("Multiple Files", QMessageBox.ActionRole)
-            import_box.addButton("Entire Folder", QMessageBox.ActionRole)
+            import_box.addButton("Folder", QMessageBox.ActionRole)
             import_box.addButton("Cancel", QMessageBox.RejectRole)
             
             import_box.exec()
@@ -1563,9 +1564,10 @@ class Port(QWidget):
             Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
 
             Tutorial_Box.exec()
+            Name = self.GetName()
             try:
                 obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-                shared_state.add_item(obj)
+                shared_state.add_item(obj, Name)
 
                 success_box = ilyaMessageBox("Object imported successfully.", "Success")
                 
@@ -1597,8 +1599,6 @@ class Port(QWidget):
                     backend.export(export_path)
                     success_box = ilyaMessageBox("Setting exported successfully.", "Success")
                    
-
-
             except:
                 error_box = ilyaMessageBox("There was an error selecting folder, please try again.", "Error")
 
@@ -1612,7 +1612,7 @@ class Port(QWidget):
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0]
                 if (path == ""): return
                 backend = Backend(json_filepath = path)
-                for i in range(4):
+                for i in range(5):
                     #self.path.tabwizard.widget(i).update_ui_by_config()
                     tab_widget(i).update_ui_by_config()
 
@@ -1664,14 +1664,10 @@ class Port(QWidget):
     
         #Sixth section
         self.Delete_Object_Button = QPushButton('Delete Object', self)
-
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget))
         
         
-        def select_render_folder():
-            
-
-                    
+        def select_render_folder():        
             try:
                 new_path = QFileDialog.getExistingDirectory(self, "Select Folder")
 
@@ -1686,8 +1682,6 @@ class Port(QWidget):
 
         self.SelectRenderFolder_Button = QPushButton('Change Render Folder', self)
         self.SelectRenderFolder_Button.clicked.connect(select_render_folder)
-
-
 
 
         def Object_detect(tab_widget):
@@ -1706,6 +1700,13 @@ class Port(QWidget):
         main_layout.addWidget(self.SelectRenderFolder_Button, 0, 6)
 
         self.setLayout(main_layout)
+        
+    def GetName(self):
+        ObjName, State = QtWidgets.QInputDialog.getText(self, 'Input Dialog', "Enter Object Name: ")
+        if State:
+            return ObjName
+        else:
+            return "Object"
 
 
 
