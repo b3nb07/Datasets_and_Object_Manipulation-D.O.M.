@@ -44,6 +44,7 @@ class ComboBoxState(QObject):
     def __init__(self):
         super().__init__()
         self.items = [] # this will store what is in the combobox
+        self.itemNames = []
         self.selected = None
 
     def update_items(self, items):
@@ -51,7 +52,8 @@ class ComboBoxState(QObject):
         self.items_updated.emit(items)  # Emit signal for item updates
 
     def add_item(self, item, Name):
-        self.items.append(item, Name)
+        self.items.append(item)
+        self.itemNames.append(Name)
         self.items_updated.emit(self.items)
 
     def remove_item(self, item):
@@ -59,7 +61,9 @@ class ComboBoxState(QObject):
         self.items_updated.emit(self.items)
 
     def remove_item(self, item):
+        pos = self.items.index(item)
         self.items.remove(item)
+        self.itemNames.remove(self.itemNames[pos])
         self.items_updated.emit(self.items)
 
     def update_selected(self, index):
@@ -151,7 +155,7 @@ class ObjectTab(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
 
-        self.Object_pos_title = QLabel(f"Object Co-ords", self)
+        self.Object_pos_title = QLabel(f"Co-ords", self)
 
         self.XObj_pos = QLabel("X:", self)
         self.XObj_pos_input_field = QLineEdit(parent=self)
@@ -175,7 +179,7 @@ class ObjectTab(QWidget):
         self.Z_button_minus = QPushButton('-', self)
         self.Z_button_plus = QPushButton('+', self)
         ####################################################################
-        self.Object_scale_title = QLabel(f"Object Scale", self)
+        self.Object_scale_title = QLabel(f"Scale", self)
         
         self.Object_scale_title.setToolTip('Changes the objects scale')
 
@@ -209,7 +213,7 @@ class ObjectTab(QWidget):
         
         #########################################
 
-        self.Object_rotation_title = QLabel(f"Object Rotation", self)
+        self.Object_rotation_title = QLabel(f"Rotation", self)
         
         self.Object_rotation_title.setToolTip('Changes the objects rotation')
 
@@ -311,12 +315,11 @@ class ObjectTab(QWidget):
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
-        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
-        self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
         
@@ -499,7 +502,7 @@ class ObjectTab(QWidget):
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
             #call backend function   
-            obj = shared_state.items[selected_object_index]
+            obj = shared_state.itemNames[selected_object_index]
             #print(obj)
             obj.set_loc(location)
         except:
@@ -515,7 +518,7 @@ class ObjectTab(QWidget):
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
-            obj = shared_state.items[selected_object_index]
+            obj = shared_state.itemNames[selected_object_index]
             #print(obj)
             obj.set_scale(scale)
         except:
@@ -532,7 +535,7 @@ class ObjectTab(QWidget):
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
-            obj = shared_state.items[selected_object_index]
+            obj = shared_state.itemNames[selected_object_index]
             #print(obj)
             obj.set_rotation(rotation)
         except:
@@ -659,12 +662,12 @@ class PivotTab(QWidget):
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
-        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         self.combo_box.activated.connect(lambda: self.Object_pivot_selected(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
         
         # initialise items
-        self.update_combo_box_items(shared_state.items)
+        self.update_combo_box_items(shared_state.itemNames)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
         
@@ -897,12 +900,12 @@ class RandomObject(QWidget):
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
-        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
-        self.update_combo_box_items(shared_state.items)
+        self.update_combo_box_items(shared_state.itemNames)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
         
@@ -1011,12 +1014,12 @@ class RandomPivot(QWidget):
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
-        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
-        self.update_combo_box_items(shared_state.items)
+        self.update_combo_box_items(shared_state.itemNames)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
 
@@ -1112,12 +1115,12 @@ class RandomRender(QWidget):
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
-        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
-        self.update_combo_box_items(shared_state.items)
+        self.update_combo_box_items(shared_state.itemNames)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
 
@@ -1214,12 +1217,12 @@ class RandomLight(QWidget):
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
-        shared_state.items_updated.connect(self.update_combo_box_items)
+        shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
-        self.update_combo_box_items(shared_state.items)
+        self.update_combo_box_items(shared_state.itemNames)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
 
@@ -1233,7 +1236,6 @@ class RandomLight(QWidget):
         self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 5, 1))
         self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 5, 2))
         self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 5, 3))
-        print("Trig")
 
         main_layout.addWidget(QLabel("Angle", self), 0, 3)
         self.gen_field("Pitch", main_layout, 3, 1, self.connFields(ParentTab, 9, 1))
