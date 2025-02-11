@@ -158,6 +158,8 @@ class ObjectTab(QWidget):
         self.XObj_pos_input_field.setText("0.0")
         self.X_button_minus = QPushButton('-', self)
         self.X_button_plus = QPushButton('+', self)
+        
+        self.Object_pos_title.setToolTip('Changes the objects Position') 
 
         self.YObj_pos = QLabel("Y:", self)
         self.YObj_pos_input_field = QLineEdit(parent=self)
@@ -174,11 +176,13 @@ class ObjectTab(QWidget):
         self.Z_button_plus = QPushButton('+', self)
         ####################################################################
         self.Object_scale_title = QLabel(f"Object Scale", self)
+        
+        self.Object_scale_title.setToolTip('Changes the objects scale')
 
         self.Width_Obj_pos = QLabel("Width:", self)
         self.Width_Obj_pos_input_field = QLineEdit(parent=self)
         
-        self.Width_Obj_pos_input_field.setText("0.0")
+        self.Width_Obj_pos_input_field.setText("1.0")
         
         self.W_slider = QtWidgets.QSlider(self)
         self.W_slider.setRange(-100, 100)
@@ -187,7 +191,7 @@ class ObjectTab(QWidget):
 
         self.Height_Obj_pos = QLabel("Height:", self)
         self.Height_Obj_pos_input_field = QLineEdit(parent=self)
-        self.Height_Obj_pos_input_field.setText("0.0")
+        self.Height_Obj_pos_input_field.setText("1.0")
 
         self.H_slider = QtWidgets.QSlider(self)
         self.H_slider.setRange(-100, 100)
@@ -196,14 +200,18 @@ class ObjectTab(QWidget):
         
         self.Length_Obj_pos = QLabel("Length:", self)
         self.Length_Obj_pos_input_field = QLineEdit(parent=self)
-        self.Length_Obj_pos_input_field.setText("0.0")
+        self.Length_Obj_pos_input_field.setText("1.0")
 
         self.L_slider = QtWidgets.QSlider(self)
         self.L_slider.setRange(-100, 100)
         self.L_slider.setPageStep(0)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
+        
+        #########################################
 
         self.Object_rotation_title = QLabel(f"Object Rotation", self)
+        
+        self.Object_rotation_title.setToolTip('Changes the objects rotation')
 
         self.X_Rotation_Label = QLabel("Roll:", self)
         self.X_Rotation_input_field = QLineEdit(parent=self)
@@ -311,6 +319,8 @@ class ObjectTab(QWidget):
         self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
+        
+        self.combo_box.setToolTip('Changes the object selected')
 
         ####################################################
 
@@ -580,6 +590,7 @@ class PivotTab(QWidget):
         self.Pivot_Point_Check.setChecked(True)
         self.Pivot_Point_Check.stateChanged.connect(lambda: self.state_changed(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
 
+        self.Pivot_Point_Check.setToolTip('Custom pivot point values')
         # X Pivot Point Controls
         self.XPivot_pos = QLabel("X:", self)
         self.XPivot_point_input_field = QLineEdit(parent=self)
@@ -621,6 +632,8 @@ class PivotTab(QWidget):
         self.Distance_Pivot_input_field = QLineEdit(parent=self)
         self.Distance_Pivot_input_field.setText("0")
         
+        self.Distance_Pivot.setToolTip('Changes Distance from camrea to object')
+        
         self.Distance_Slider = QtWidgets.QSlider(self)
         self.Distance_Slider.setPageStep(0)
         self.Distance_Slider.setOrientation(QtCore.Qt.Horizontal)
@@ -654,6 +667,8 @@ class PivotTab(QWidget):
         self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
+        
+        self.combo_box.setToolTip('Changes the object selected')
 
         #################
         main_layout = QGridLayout()
@@ -809,11 +824,13 @@ class RandomDefault(QWidget):
         super().__init__(parent)
 
         main_layout = QGridLayout()
-        Field = QCheckBox("Set ALL", self)
+        Field = QCheckBox("Set ALL RANDOM", self)
+        Field.setToolTip('Sets all elements on all pages to random') 
 
         SetSetCheck = QCheckBox("Set per SET")
+        SetSetCheck.setToolTip('Each selected field is randomly generated and its value is maintained throughout the entire set generation.') 
         SetFrameCheck = QCheckBox("Set per FRAME")
-        
+        SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
         RandomSeed = QLineEdit("", self)
         RandomSeed.setText(str(backend.get_config()["seed"]))
         RandomSeed.setMaximumWidth(200)
@@ -865,6 +882,7 @@ class RandomDefault(QWidget):
             field.setText(str(val))
         except ValueError:
             field.setText(str(backend.get_config()["seed"]))
+            field.setToolTip('Random seed') 
                             
 class RandomObject(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
@@ -916,6 +934,9 @@ class RandomObject(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        
+        Field_LowerBound.setToolTip('LowerBound') 
+        Field_UpperBound.setToolTip('UpperBound') 
 
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
@@ -1019,6 +1040,9 @@ class RandomPivot(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        
+        Field_LowerBound.setToolTip('LowerBound') 
+        Field_UpperBound.setToolTip('UpperBound') 
 
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
@@ -1117,6 +1141,9 @@ class RandomRender(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        
+        Field_LowerBound.setToolTip('LowerBound') 
+        Field_UpperBound.setToolTip('UpperBound') 
 
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
@@ -1217,7 +1244,7 @@ class RandomLight(QWidget):
         self.gen_field("Radius", main_layout, 6, 2)
         self.gen_field("Colour", main_layout, 6, 3)
 
-        self.gen_field("BackGround", main_layout, 9, 1)
+        #self.gen_field("BackGround", main_layout, 9, 1)
 
         #print(main_layout.itemAtPosition(0, 0).widget().setText("Electric boogalo"))
         #how to change values
@@ -1228,6 +1255,9 @@ class RandomLight(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        
+        Field_LowerBound.setToolTip('LowerBound') 
+        Field_UpperBound.setToolTip('UpperBound') 
 
         self.addCheck(Field, Fieldname, Layout, X, Y)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
@@ -1299,6 +1329,7 @@ class Render(QWidget):
         self.Number_of_renders_plus.clicked.connect(self.increase_count)
 
         self.Degree_Change_title = QLabel("Degrees of Change", self)
+        self.Degree_Change_title.setToolTip('Changes the degrees changed per Frame')
 
         # X Degree
         self.X_Degree_Label = QLabel("X:", self)
@@ -1348,6 +1379,8 @@ class Render(QWidget):
         self.unlimited_render_button = QPushButton("Unlimited Renders", self)
         self.unlimited_render_button.setCheckable(True)
         self.unlimited_render_button.clicked.connect(self.unlimitedrender)
+        
+        self.unlimited_render_button.setToolTip('Generates Frames until interupted')
 
         self.rendering = False
 
@@ -1721,6 +1754,7 @@ class Lighting(QWidget):
         self.colour_label = QLabel("Colour:", self)
         self.colour_select_button = QPushButton("Select colour", self)
         self.colour_select_button.clicked.connect(self.getColour)
+        self.colour_label.setToolTip('Object lighting Colour')
 
         self.lighting_colour = QLineEdit(self) #f789886 & bullshit
         self.lighting_colour.textEdited.connect(lambda: self.update_colour_example_text(self.lighting_colour.text()))
@@ -1731,6 +1765,7 @@ class Lighting(QWidget):
 
         ###
         self.lighting_strength_label = QLabel("Strength: ", self)
+        self.lighting_strength_label.setToolTip('Strength of lighting element')
         self.lighting_strength_input_field = QLineEdit(self)
         self.lighting_strength_input_field.setText("1")
         self.lighting_strength_input_field.textEdited.connect(lambda: self.Update_slider(self.strength_slider, self.lighting_strength_input_field.text()))
@@ -1743,6 +1778,7 @@ class Lighting(QWidget):
         
         ###
         self.radius_label = QLabel("Radius", self)
+        self.radius_label.setToolTip('Radius of lighting element')
         self.radius_input_field = QLineEdit(self)
         self.radius_input_field.setText("0")
         self.radius_input_field.textChanged.connect(lambda: self.set_radius_from_field(self.radius_input_field))
@@ -1761,6 +1797,7 @@ class Lighting(QWidget):
 
 
         self.light_coords_label = QLabel("Lighting Co-ords:", self)
+        self.light_coords_label.setToolTip('Co-ords of lighting element')
         ###
         self.Xlight_coords_label = QLabel("X:", self)
         self.Xlight_coords_input_field = QLineEdit(self)
@@ -1802,6 +1839,7 @@ class Lighting(QWidget):
         ###
 
         self.light_angle_label = QLabel("Lighting Angle:", self)
+        self.light_angle_label.setToolTip('Angle of lighting element')
         ###
         self.Xlight_angle_label = QLabel("X:", self)
         self.Xlight_angle_input_field = QLineEdit(self)
@@ -1840,6 +1878,7 @@ class Lighting(QWidget):
         self.light_type_combobox = QComboBox(self)
         self.light_type_combobox.addItems(["POINT", "SUN", "SPOT", "AREA"])
         self.light_type_combobox.currentIndexChanged.connect(self.change_type)
+        self.light_type_label.setToolTip('Type of lighting element')
 
 
         main_layout = QGridLayout()
