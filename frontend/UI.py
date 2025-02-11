@@ -1202,7 +1202,7 @@ class RandomRender(QWidget):
 
 
 class RandomLight(QWidget):
-    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
+    def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
 
         self.CheckBoxes = {}
@@ -1230,19 +1230,20 @@ class RandomLight(QWidget):
              self.set_all_random(main_layout, main_layout.itemAtPosition(1, 12).widget().isChecked()))
 
         main_layout.addWidget(QLabel("Co-ords:", self), 0, 0)
-        self.gen_field("X", main_layout, 0, 1)
-        self.gen_field("Y", main_layout, 0, 2)
-        self.gen_field("Z", main_layout, 0, 3)
+        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 5, 1))
+        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 5, 2))
+        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 5, 3))
+        print("Trig")
 
         main_layout.addWidget(QLabel("Angle", self), 0, 3)
-        self.gen_field("Pitch", main_layout, 3, 1)
-        self.gen_field("Roll", main_layout, 3, 2)
-        self.gen_field("Yaw", main_layout, 3, 3)
+        self.gen_field("Pitch", main_layout, 3, 1, self.connFields(ParentTab, 9, 1))
+        self.gen_field("Roll", main_layout, 3, 2, self.connFields(ParentTab, 9, 2))
+        self.gen_field("Yaw", main_layout, 3, 3, self.connFields(ParentTab, 9, 3))
         
         main_layout.addWidget(QLabel("Angle", self), 0, 7)
-        self.gen_field("Strength", main_layout, 6, 1)
-        self.gen_field("Radius", main_layout, 6, 2)
-        self.gen_field("Colour", main_layout, 6, 3)
+        self.gen_field("Strength", main_layout, 6, 1, self.connFields(ParentTab, 1, 0))
+        self.gen_field("Radius", main_layout, 6, 2, self.connFields(ParentTab, 1, 2))
+        self.gen_field("Colour", main_layout, 6, 3, self.connFields(ParentTab, 2, 1))
 
         #self.gen_field("BackGround", main_layout, 9, 1)
 
@@ -1250,8 +1251,8 @@ class RandomLight(QWidget):
         #how to change values
 
         self.setLayout(main_layout)
-
-    def gen_field(self, Fieldname, Layout, X, Y):
+        
+    def gen_field(self, Fieldname, Layout, X, Y, ConField):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
@@ -1259,7 +1260,7 @@ class RandomLight(QWidget):
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
 
-        self.addCheck(Field, Fieldname, Layout, X, Y)
+        self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
@@ -1268,6 +1269,11 @@ class RandomLight(QWidget):
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
 
+    def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
+        Layout.addWidget(Field, Y, X)
+        self.CheckBoxes[f"{Layout.itemAtPosition(0, 12).widget().currentText()}{Fieldname}"] = (X, Y)
+        Layout.itemAtPosition(Y, X).widget().toggled.connect(lambda: self.setAbled(ConField, Layout.itemAtPosition(Y, X).widget().isChecked()))
+    
     def validation(self, Field):
         if Field.isEnabled():
             """Updates field value"""
@@ -1277,9 +1283,12 @@ class RandomLight(QWidget):
             except:
                 Field.setText("")
 
-    def addCheck(self, Field, Fieldname, Layout, X, Y):
-        Layout.addWidget(Field, Y, X)
-        self.CheckBoxes[f"{Layout.itemAtPosition(0, 12).widget().currentText()}{Fieldname}"] = (X, Y)
+    def setAbled(self, Field, State):
+        """Connect Checkbox to correlating page field"""
+        Field.setEnabled(not State)
+        
+    def connFields(self, ParentTab, X, Y):
+        return ParentTab.widget(3).layout().itemAtPosition(Y, X).widget()
 
     def addLower(self, Field, Fieldname, Layout, X, Y):
         Layout.addWidget(Field, Y, X)
