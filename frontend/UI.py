@@ -1747,7 +1747,7 @@ class Port(QWidget):
         
     def GetName(self):
         ObjName, State = QtWidgets.QInputDialog.getText(self, 'Input Dialog', "Enter Object Name: ")
-        if State:
+        if State and ObjName != "":
             return ObjName
         else:
             return "Object"
