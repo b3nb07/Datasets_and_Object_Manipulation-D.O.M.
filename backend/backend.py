@@ -498,9 +498,11 @@ class Backend():
     def update_log(self, interaction):
         with open('interaction_log.txt','r+') as file:
             contents = file.read().split('\n')
-            print(contents)
             if len(contents) == 0:
                 pass
+            elif len(contents) == 1:
+                if contents[-1] != interaction.rstrip('\n'):
+                    file.write(interaction)
             elif contents[-2] != interaction.rstrip('\n'):
                 file.write(interaction)
 
