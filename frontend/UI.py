@@ -5,6 +5,7 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 
 import os
+import PyQt5
 from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox
 from PyQt5.QtCore import * 
 from PyQt5.QtGui import * 
@@ -106,11 +107,7 @@ class TabDialog(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.setWindowTitle("Datasets and Object Modeling")
-        """
-        stream = QtCore.QFile("Style\DarkMode.qss")
-        stream.open(QtCore.QIODevice.ReadOnly)
-        self.setStyleSheet(QtCore.QTextStream(stream).readAll())
-        """
+        
         tab_widget = QTabWidget()
 
         # Add all other tabs first
@@ -138,16 +135,36 @@ class TabDialog(QWidget):
         tab_widget.setTabEnabled(3, False)
         tab_widget.setTabEnabled(4, False)
 
-        tab_widget.setFixedHeight(250)
+        tab_widget.setFixedHeight(200)
         
         # enviroment
         environment = QWidget()
         environment.setStyleSheet("background-color: black;")
-        self.setMinimumSize(1350, 700) # minimum size of program
+        
+        ObjectsStatusBar = QScrollArea()
+        ObjectsStatusBar.setStyleSheet("background-color: white;")
+        ObjectsStatusBar.setMaximumWidth(175)
+        
+        ObjectsStatusBar.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        ObjectsStatusBar.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
-        main_layout = QVBoxLayout()
-        main_layout.addWidget(tab_widget)
-        main_layout.addWidget(environment)
+        
+        content_widget = QWidget()
+        ObjectsStatusBar.setWidget(content_widget)
+        ObjectsStatusBar.setWidgetResizable(True)
+        
+        ObjLayout = QVBoxLayout(content_widget)
+        
+        for i in range(1, 51):
+            Button = QPushButton(f"Object {i}")
+            ObjLayout.addWidget(Button)
+
+        self.setMinimumSize(1350, 700) # minimum size of program
+        main_layout = QGridLayout()
+        main_layout.addWidget(tab_widget, 0, 0, 1, 8)
+        
+        main_layout.addWidget(ObjectsStatusBar, 1, 0, 1, 2)
+        main_layout.addWidget(environment, 1, 1, 1, 7)  
         self.setLayout(main_layout)
 
 
@@ -502,7 +519,8 @@ class ObjectTab(QWidget):
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
             #call backend function   
-            obj = shared_state.itemNames[selected_object_index]
+            shared_state.itemNames[selected_object_index]
+            obj = shared_state.items[selected_object_index]
             #print(obj)
             obj.set_loc(location)
         except:
@@ -518,7 +536,8 @@ class ObjectTab(QWidget):
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
-            obj = shared_state.itemNames[selected_object_index]
+            shared_state.itemNames[selected_object_index]
+            obj = shared_state.items[selected_object_index]
             #print(obj)
             obj.set_scale(scale)
         except:
@@ -535,7 +554,8 @@ class ObjectTab(QWidget):
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
-            obj = shared_state.itemNames[selected_object_index]
+            shared_state.itemNames[selected_object_index]
+            obj = shared_state.items[selected_object_index]
             #print(obj)
             obj.set_rotation(rotation)
         except:
