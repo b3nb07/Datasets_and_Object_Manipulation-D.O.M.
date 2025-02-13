@@ -1716,6 +1716,13 @@ class Lighting(QWidget):
 
         self.light = backend.RenderLight()
 
+        self.light.set_energy(1)
+        self.light.set_color("#ffffff")
+        self.light.set_rotation([0,0,0])
+        self.light.set_radius(0)
+        self.light.set_type("POINT")
+        self.light.set_loc([0,0,0])
+
         ###
         self.colour_label = QLabel("Colour:", self)
         self.colour_select_button = QPushButton("Select colour", self)
