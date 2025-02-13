@@ -70,6 +70,8 @@ class ComboBoxState(QObject):
         self.selected_index = index
         # maybe delete
         self.selection_changed.emit(index)
+
+
 class RenderThreadPreview(QThread):
     finished = pyqtSignal()
     progress = pyqtSignal(str)
@@ -86,7 +88,7 @@ class RenderThread(QThread):
 
     def run(self):
         self.progress.emit("Rendering...")
-        backend.render(headless = False)
+        backend.render(headless = True)
         self.finished.emit()
 
 class LoadingScreen(QDialog):
@@ -107,14 +109,12 @@ class LoadingScreen(QDialog):
     def update_text(self, text):
         self.label.setText(text)
 
+class ilyaStorageBox:
+    def __init__(self, thread, config):
+        self.thread = thread
+        self.config = config
 
-class ilyaLinkedListNode:
-            def __init__(self, thread):
-                self.thread = thread
-                self.next = None
 
-            def setNext(self, next):
-                self.next = next
 
 # creates this shared state
 shared_state = ComboBoxState()
@@ -1304,11 +1304,10 @@ class Render(QWidget):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
 
-        
+        self.i = 1
 
 
-        self.currentNode = None
-        self.lastNode = None #Takes up memory but saves comp power later
+        self.queue = []
 
 
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
@@ -1503,15 +1502,48 @@ class Render(QWidget):
             renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
             renderingBox.exec()
 
+    def renderQueueControl(self):
+        if self.rendering:
+            newThread = RenderThread()
+            config = backend.getConfig()
+            box = ilyaStorageBox(newThread, config)
 
-        
+            self.queue.append(box)
+
+        else:
+            newThread = RenderThread()
+            config = backend.getConfig()
+            box = ilyaStorageBox(newThread, config)
+            self.queue.append(box)
+
+            self.generate_render()
+    
     def generate_render(self):
+        newBox = self.queue.pop(0)
+
+        newThread = newBox[0]
+        config = newBox[1]
+
+        newThread.start()
+        self.windowUp()
+        newThread.end()
+
+
+        #OK
+        #IVE BEEN AN IDIOT
+        #ALL YOU NEED TO STORE IN CONFIG
+        #THEN JUST MAKE THREAD
+        #BRUHHH
+
+    """ def gggenerate_render(self):
         if not self.rendering:
             self.rendering = True
             newThread = RenderThread()
-            #self.thread = RenderThread()
-            
-            threadNode = ilyaLinkedListNode(newThread)
+
+
+            self.queue.append(newThread)
+
+
             self.currentNode = threadNode
             self.lastNode = threadNode
 
@@ -1521,19 +1553,23 @@ class Render(QWidget):
 
             newThread.start()
             self.GenerateRenders_Button.setText("Add render job to queue")
+            print("Not rendering: ", threadNode)
             self.windowUp()
 
             newThread.quit()
             
         else:
             newThread = RenderThread()
-            threadNode = ilyaLinkedListNode(newThread)
+
+
             self.lastNode.next = threadNode
             self.lastNode = threadNode
 
+            print("Added to queue: ", threadNode)
+
             renderingBox = QMessageBox()
             renderingBox.setText("Added to queue.")
-            renderingBox.exec()
+            renderingBox.exec()"""
         
     
     def windowUp(self):
@@ -1546,7 +1582,8 @@ class Render(QWidget):
     
     def complete_loading(self):
         
-        self.currentNode = self.currentNode.next
+        
+        
         if (self.currentNode == None):
             self.lastNode = None
             self.rendering = False
@@ -1554,6 +1591,7 @@ class Render(QWidget):
             self.GenerateRenders_Button.setText("Generate Renders")
 
         else:
+            print("Item in queueL ", self.currentNode)
             self.currentNode.thread.start()
             self.currentNode.thread.quit()
         
