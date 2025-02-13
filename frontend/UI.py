@@ -69,7 +69,15 @@ class ComboBoxState(QObject):
         self.selected_index = index
         # maybe delete
         self.selection_changed.emit(index)
+class RenderThreadPreview(QThread):
+    finished = pyqtSignal()
+    progress = pyqtSignal(str)
 
+    def run(self):
+        self.progress.emit("Rendering...")
+        backend.render(headless = False, preview = True)
+        self.finished.emit()
+    
 
 class RenderThread(QThread):
     finished = pyqtSignal()
@@ -1354,6 +1362,9 @@ class Render(QWidget):
         self.unlimited_render_button.setCheckable(True)
         self.unlimited_render_button.clicked.connect(self.unlimitedrender)
 
+        self.render_preview_button = QPushButton("Render Preview", self)
+        self.render_preview_button.clicked.connect(self.renderPreview)
+
         self.rendering = False
 
         main_layout = QGridLayout()
@@ -1382,8 +1393,15 @@ class Render(QWidget):
 
         main_layout.addWidget(self.GenerateRenders_Button, 0, 7)
 
+        main_layout.addWidget(self.render_preview_button, 2, 7)
+
         self.setLayout(main_layout)
     
+   
+
+
+
+
     def unlimitedrender(self):
         test = True
         while True:
@@ -1450,6 +1468,24 @@ class Render(QWidget):
                 number_of_renders_value = 0
                 self.Number_of_renders_input_field.setText(str(number_of_renders_value))
             self.Number_of_renders_input_field.editingFinished.emit()
+
+    def renderPreview(self):
+        if not self.rendering:
+            self.rendering = True
+            self.thread = RenderThreadPreview()
+
+            self.thread.progress.connect(self.update_loading)
+            self.thread.finished.connect(self.complete_loading)
+
+            self.thread.start()
+            self.windowUp()
+
+            self.thread.quit()
+        else:
+            renderingBox = QMessageBox()
+            renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
+            renderingBox.exec()
+
 
         
     def generate_render(self):

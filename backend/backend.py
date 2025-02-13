@@ -288,7 +288,7 @@ class Backend():
         return position
 
     
-    def add_camera_poses(self):
+    def add_camera_poses(self, preview = False):
         """Add camera poses to generate render from"""
 
         randoms = config["random"] #Read values from config
@@ -336,6 +336,9 @@ class Backend():
                 position[2] += pivot_point[2] 
 
             self.add_cam_pose([position, camera_rotation])
+
+            if preview == True:
+                break
 
             if "angle" in randoms["environment"]:
                 current_x_angle += np.deg2rad( random.randint(0,359) )
@@ -401,9 +404,10 @@ class Backend():
         obj = config["objects"][selected_index]
 
 
-    def render(self, headless = False):
+    def render(self, headless = False, preview = False):
         """Renders the scene and saves to file in the output folder."""
-        self.add_camera_poses()
+
+        self.add_camera_poses(preview = preview)
         
 
         with open("backend\\temp_export.json", "w") as export_file:
@@ -421,7 +425,9 @@ class Backend():
             to_run.write("import blenderproc as bproc\n" + file_contents + f"""Backend("{path}\\\\temp_export.json")._render()""")
 
         os.system("blenderproc run backend/_temp.py")
-        if (not headless):
+        if (not headless and preview):
+            os.system("blenderproc vis hdf5 output/0.hdf5")
+        elif (not headless):
             for i in range(config["render"]["renders"]):
                 os.system("blenderproc vis hdf5 output/"+str(i)+".hdf5")
         os.remove("backend/_temp.py")
