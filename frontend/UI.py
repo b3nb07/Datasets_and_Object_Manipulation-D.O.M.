@@ -108,6 +108,19 @@ class TabDialog(QWidget):
         super().__init__(parent)
         self.setWindowTitle("Datasets and Object Modeling")
         
+        ObjectsStatusBar = QScrollArea()
+        ObjectsStatusBar.setStyleSheet("background-color: white;")
+        ObjectsStatusBar.setMaximumWidth(175)
+        
+        ObjectsStatusBar.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        ObjectsStatusBar.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        
+        content_widget = QWidget()
+        ObjLayout = QVBoxLayout(content_widget)
+        ObjLayout.setAlignment(Qt.AlignTop)
+        ObjectsStatusBar.setWidget(content_widget)
+        ObjectsStatusBar.setWidgetResizable(True)
+        
         tab_widget = QTabWidget()
 
         # Add all other tabs first
@@ -117,11 +130,9 @@ class TabDialog(QWidget):
         tab_widget.addTab(Lighting(self), "Lighting")
  
         Temp_index = tab_widget.addTab(QWidget(), "Random")
-        tab_widget.addTab(Port(self, tab_widget), "Import/Export")
+        tab_widget.addTab(Port(self, tab_widget, ObjLayout), "Import/Export")
         tab_widget.addTab(Settings(self, tab_widget), "Settings")
         
-
-
         random_tab = RandomTabDialog(self, tab_widget)
         tab_widget.removeTab(Temp_index)
         tab_widget.insertTab(Temp_index, random_tab, "Random")
@@ -140,24 +151,6 @@ class TabDialog(QWidget):
         # enviroment
         environment = QWidget()
         environment.setStyleSheet("background-color: black;")
-        
-        ObjectsStatusBar = QScrollArea()
-        ObjectsStatusBar.setStyleSheet("background-color: white;")
-        ObjectsStatusBar.setMaximumWidth(175)
-        
-        ObjectsStatusBar.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        ObjectsStatusBar.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-        
-        content_widget = QWidget()
-        ObjectsStatusBar.setWidget(content_widget)
-        ObjectsStatusBar.setWidgetResizable(True)
-        
-        ObjLayout = QVBoxLayout(content_widget)
-        
-        for i in range(1, 51):
-            Button = QPushButton(f"Object {i}")
-            ObjLayout.addWidget(Button)
 
         self.setMinimumSize(1350, 700) # minimum size of program
         main_layout = QGridLayout()
@@ -1554,9 +1547,8 @@ class Render(QWidget):
             print("Error")
 
 class Port(QWidget):
-    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
+    def __init__(self, parent: QWidget, tab_widget: QTabWidget, Scroll: QVBoxLayout):
         super().__init__(parent)
-
         
         class ilyaMessageBox(QMessageBox):
                 def __init__(self, text, title):
@@ -1617,7 +1609,7 @@ class Port(QWidget):
         self.Import_Object_Button.clicked.connect(Get_Object_Filepath)
 
         #Second Section
-        def Tutorial_Object():
+        def Tutorial_Object(Scroll):
             Tutorial_Box = QMessageBox()
             Tutorial_Box.setText("Please select a tutorial object from below")
             Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
@@ -1632,7 +1624,13 @@ class Port(QWidget):
             try:
                 obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
                 shared_state.add_item(obj, Name)
-
+                Label = QLabel(Name)
+                Label.setStyleSheet("border: 1px solid black;")
+                Label.setAlignment(QtCore.Qt.AlignCenter)
+                Label.setMaximumHeight(40)
+                Label.setMinimumHeight(40)
+                Scroll.addWidget(Label)
+                
                 success_box = ilyaMessageBox("Object imported successfully.", "Success")
                 
                 
@@ -1648,7 +1646,7 @@ class Port(QWidget):
             Object_detect(tab_widget)
 
         self.TutorialObjects_Button = QPushButton('Tutorial Objects', self)
-        self.TutorialObjects_Button.clicked.connect(Tutorial_Object)
+        self.TutorialObjects_Button.clicked.connect(lambda: Tutorial_Object(Scroll))
 
         #Third Section --> LEFT FOR NOW
         self.BrowseFiles_Button = QPushButton('Generate Data Set', self)
@@ -1688,15 +1686,15 @@ class Port(QWidget):
         self.ImportSettings_Button = QPushButton('Import Settings', self)
         self.ImportSettings_Button.clicked.connect(lambda: Get_Settings_Filepath(tab_widget))
 
-        def delete_object(tab_widget):
+        def delete_object(tab_widget, scroll):
             to_delete = QMessageBox()
             to_delete.setText("Please select an object to remove from below")
 
             if (not shared_state.items):
                 return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
 
-            for obj in shared_state.items:
-                to_delete.addButton(str(obj), QMessageBox.ActionRole)
+            for i in range(len(shared_state.itemNames)):
+                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
             
             to_delete.addButton("Cancel", QMessageBox.ActionRole)
 
@@ -1705,9 +1703,9 @@ class Port(QWidget):
             choice = str(to_delete.clickedButton().text())
 
             if choice != "Cancel":
-                
-                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
+                obj_index = shared_state.itemNames.index(choice)
                 obj = shared_state.items[obj_index]
+                scroll.itemAt(obj_index).widget().setParent(None)
                 try:
                     shared_state.remove_item(obj)
                     success_box = ilyaMessageBox("Object successfully deleted", "Success")
@@ -1728,7 +1726,7 @@ class Port(QWidget):
     
         #Sixth section
         self.Delete_Object_Button = QPushButton('Delete Object', self)
-        self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget))
+        self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
         
         
         def select_render_folder():        
