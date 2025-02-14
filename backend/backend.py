@@ -406,8 +406,6 @@ class Backend():
     def set_runtime_config(self, conf):
         self.runtime_config = conf
 
-
-
     def render(self, headless = False, preview = False):
         """Renders the scene and saves to file in the output folder."""
 
