@@ -1623,6 +1623,8 @@ class Port(QWidget):
             Name = self.GetName()
             try:
                 obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+                if Name == "Object":
+                    Name = f"{Name} {len(shared_state.itemNames)+1,}"
                 shared_state.add_item(obj, Name)
                 Label = QLabel(Name)
                 Label.setStyleSheet("border: 1px solid black;")
@@ -1764,7 +1766,7 @@ class Port(QWidget):
         self.setLayout(main_layout)
         
     def GetName(self):
-        ObjName, State = QtWidgets.QInputDialog.getText(self, 'Input Dialog', "Enter Object Name: ")
+        ObjName, State = QtWidgets.QInputDialog.getText(self, 'Object Name', "Enter Object Name: ")
         if State and ObjName != "":
             return ObjName
         else:
