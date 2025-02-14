@@ -70,6 +70,8 @@ class ComboBoxState(QObject):
         self.selected_index = index
         # maybe delete
         self.selection_changed.emit(index)
+
+
 class RenderThreadPreview(QThread):
     finished = pyqtSignal()
     progress = pyqtSignal(str)
@@ -86,7 +88,7 @@ class RenderThread(QThread):
 
     def run(self):
         self.progress.emit("Rendering...")
-        backend.render(headless = False)
+        backend.render(headless = True)
         self.finished.emit()
 
 class LoadingScreen(QDialog):
@@ -106,6 +108,13 @@ class LoadingScreen(QDialog):
 
     def update_text(self, text):
         self.label.setText(text)
+
+class ilyaStorageBox:
+    def __init__(self, thread, config):
+        self.thread = thread
+        self.config = config
+
+
 
 # creates this shared state
 shared_state = ComboBoxState()
@@ -1295,8 +1304,14 @@ class Render(QWidget):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
 
+        self.i = 1
+
+
+        self.queue = []
+
+
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
-        self.GenerateRenders_Button.clicked.connect(self.generate_render)
+        self.GenerateRenders_Button.clicked.connect(self.renderQueueControl)
         
 
 
@@ -1365,6 +1380,7 @@ class Render(QWidget):
 
         self.render_preview_button = QPushButton("Render Preview", self)
         self.render_preview_button.clicked.connect(self.renderPreview)
+        
 
         self.rendering = False
 
@@ -1470,8 +1486,10 @@ class Render(QWidget):
                 self.Number_of_renders_input_field.setText(str(number_of_renders_value))
             self.Number_of_renders_input_field.editingFinished.emit()
 
-    def renderPreview(self):
+    def renderPreview(self): 
         if not self.rendering:
+            config = backend.get_config()
+            backend.set_runtime_config(config)
             self.rendering = True
             self.thread = RenderThreadPreview()
 
@@ -1479,6 +1497,7 @@ class Render(QWidget):
             self.thread.finished.connect(self.complete_loading)
 
             self.thread.start()
+            
             self.windowUp()
 
             self.thread.quit()
@@ -1487,25 +1506,38 @@ class Render(QWidget):
             renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
             renderingBox.exec()
 
+    def renderQueueControl(self):
+        if self.rendering:
+            config = backend.get_config()
+            self.queue.append(config)
 
-        
+            renderingBox = QMessageBox()
+            renderingBox.setText("Added to queue.")
+            renderingBox.exec()
+
+
+        else:
+            config = backend.get_config()
+            self.queue.append(config)
+
+            self.generate_render()
+            self.render_preview_button.setEnabled(False)
+    
     def generate_render(self):
-        if not self.rendering:
-            self.rendering = True
-            self.thread = RenderThread()
-
-            self.thread.progress.connect(self.update_loading)
-            self.thread.finished.connect(self.complete_loading)
-
-            self.thread.start()
-            self.windowUp()
-
-            self.thread.quit()
-        else:
-            renderingBox = QMessageBox()
-            renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
-            renderingBox.exec()
+        self.rendering = True
+        newConfig = self.queue.pop(0)
+        backend.set_runtime_config(newConfig)
         
+        newThread = RenderThread()
+        newThread.progress.connect(self.update_loading)
+        newThread.finished.connect(self.complete_loading)
+        self.GenerateRenders_Button.setText("Add render job to queue")
+
+
+        newThread.start()
+        self.windowUp()
+        newThread.quit()
+    
     
     def windowUp(self):
         self.LoadingBox = LoadingScreen("")
@@ -1516,8 +1548,13 @@ class Render(QWidget):
         self.LoadingBox.update_text(text)
     
     def complete_loading(self):
-        self.rendering = False
-        self.LoadingBox.update_text("Rendering complete")
+        if not self.queue:
+            self.rendering = False
+            self.LoadingBox.update_text("Rendering complete")
+            self.GenerateRenders_Button.setText("Generate Renders")
+            self.render_preview_button.setEnabled(True)
+        else:
+            self.generate_render()
 
     def set_renders(self):
         try: 
