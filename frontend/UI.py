@@ -1311,7 +1311,7 @@ class Render(QWidget):
 
 
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
-        self.GenerateRenders_Button.clicked.connect(self.generate_render)
+        self.GenerateRenders_Button.clicked.connect(self.renderQueueControl)
         
 
 
@@ -1502,31 +1502,36 @@ class Render(QWidget):
             renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
             renderingBox.exec()
 
-    def renderQueueControl(self):
+    def renderQueueControl(self): #LINK BUTTONS TO THIS
         if self.rendering:
-            newThread = RenderThread()
-            config = backend.getConfig()
-            box = ilyaStorageBox(newThread, config)
+            config = backend.get_config()
+            self.queue.append(config)
 
-            self.queue.append(box)
+            renderingBox = QMessageBox()
+            renderingBox.setText("Added to queue.")
+            renderingBox.exec()
+
 
         else:
-            newThread = RenderThread()
-            config = backend.getConfig()
-            box = ilyaStorageBox(newThread, config)
-            self.queue.append(box)
+            config = backend.get_config()
+            self.queue.append(config)
 
             self.generate_render()
     
     def generate_render(self):
-        newBox = self.queue.pop(0)
+        self.rendering = True
+        newConfig = self.queue.pop(0)
+        backend.set_runtime_config(newConfig)
+        
+        newThread = RenderThread()
+        newThread.progress.connect(self.update_loading)
+        newThread.finished.connect(self.complete_loading)
+        self.GenerateRenders_Button.setText("Add render job to queue")
 
-        newThread = newBox[0]
-        config = newBox[1]
 
         newThread.start()
         self.windowUp()
-        newThread.end()
+        newThread.quit()
 
 
         #OK
@@ -1581,10 +1586,15 @@ class Render(QWidget):
         self.LoadingBox.update_text(text)
     
     def complete_loading(self):
+        if not self.queue:
+            self.rendering = False
+            self.LoadingBox.update_text("Rendering complete")
+            self.GenerateRenders_Button.setText("Generate Renders")
+        else:
+            self.generate_render()
         
         
-        
-        if (self.currentNode == None):
+        """if (self.currentNode == None):
             self.lastNode = None
             self.rendering = False
             self.LoadingBox.update_text("Rendering complete")
@@ -1593,7 +1603,7 @@ class Render(QWidget):
         else:
             print("Item in queueL ", self.currentNode)
             self.currentNode.thread.start()
-            self.currentNode.thread.quit()
+            self.currentNode.thread.quit()"""
         
 
     def set_renders(self):

@@ -403,6 +403,10 @@ class Backend():
         obj["sca"] = scale
         obj = config["objects"][selected_index]
 
+    def set_runtime_config(self, conf):
+        self.runtime_config = conf
+
+
 
     def render(self, headless = False, preview = False):
         """Renders the scene and saves to file in the output folder."""
@@ -411,7 +415,7 @@ class Backend():
         
 
         with open("backend\\temp_export.json", "w") as export_file:
-            json.dump(config, export_file)
+            json.dump(self.runtime_config, export_file)
 
         # Create a temporary file for the blender environment and call it
         path = os.path.abspath(os.getcwd()) + "\\backend"
