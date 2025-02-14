@@ -1789,11 +1789,15 @@ class Lighting(QWidget):
         self.lighting_strength_input_field = QLineEdit(self)
         self.lighting_strength_input_field.setText("1")
         self.lighting_strength_input_field.textEdited.connect(lambda: self.Update_slider(self.strength_slider, self.lighting_strength_input_field.text()))
+        self.lighting_strength_input_field.editingFinished.connect(lambda: self.set_strength(self.lighting_strength_input_field.text()))
 
         self.strength_slider = QSlider(self)
         self.strength_slider.setRange(0,100)
+        self.strength_slider.setPageStep(0)
         self.strength_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.strength_slider.sliderMoved.connect(lambda val: self.set_strength(val, self.lighting_strength_input_field))
+        self.strength_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.lighting_strength_input_field))
+        self.strength_slider.sliderReleased.connect(lambda: self.set_strength(self.strength_slider.value()))
+
         ###
         
         ###
@@ -1959,11 +1963,11 @@ class Lighting(QWidget):
         self.light.set_type(self.light_type_combobox.currentText())
 
 
-    def set_strength(self, val, field):
-        self.Slider_Update(val, field)
+    def set_strength(self, val):
         try:
-            self.light.set_energy(float(field.text()))
+            self.light.set_energy(float(val))
         except:
+            print('Light strength could not be set')
             pass
 
 
@@ -2056,6 +2060,16 @@ class Lighting(QWidget):
         if float(field.text()) > val or float(field.text()) + 0.5 < val:
             field.setText(str(val))
     
+
+    def Update_slider(self, slider, val):
+        try:
+            slider.setValue(int(round(float(val), 0)))
+        except Exception as e:
+            try:
+                slider.setValue(0)
+            except:
+                print("Error", e)
+    
     def set_rotation_from_field(self, slider, val):
         try:
             self.Update_slider(slider, val)
@@ -2067,16 +2081,6 @@ class Lighting(QWidget):
             self.light.set_rotation([float(x),float(z),float(y)])
         except:
             pass
-
-
-    def Update_slider(self, slider, val):
-        try:
-            slider.setValue(int(round(float(val), 0)))
-        except Exception as e:
-            try:
-                slider.setValue(0)
-            except:
-                print("Error", e)
 
 
     def update_colour_example_text(self, colour):

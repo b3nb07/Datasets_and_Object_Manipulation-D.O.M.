@@ -39,8 +39,9 @@ class Backend():
         new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
         self.set_seed(new_seed)
 
-        with open('interaction_log.txt','w') as file:
-            file.write('Program initialised\n')
+        if not is_blender_environment:
+            with open('interaction_log.txt','w') as file:
+                file.write('Program initialised\n')
 
         if (json_filepath is not None):
             # load json objects into self
@@ -447,6 +448,8 @@ class Backend():
     def render(self, headless = False, preview = False):
         """Renders the scene and saves to file in the output folder."""
 
+        self.update_log(f'Rendering Started\n')
+
         self.add_camera_poses(preview = preview)
         
 
@@ -496,15 +499,16 @@ class Backend():
         self.update_log(f'Settings exported\n')
 
     def update_log(self, interaction):
-        with open('interaction_log.txt','r+') as file:
-            contents = file.read().split('\n')
-            if len(contents) == 0:
-                pass
-            elif len(contents) == 1:
-                if contents[-1] != interaction.rstrip('\n'):
+        if not is_blender_environment:
+            with open('interaction_log.txt','r+') as file:
+                contents = file.read().split('\n')
+                if len(contents) == 0:
+                    pass
+                elif len(contents) == 1:
+                    if contents[-1] != interaction.rstrip('\n'):
+                        file.write(interaction)
+                elif contents[-2] != interaction.rstrip('\n'):
                     file.write(interaction)
-            elif contents[-2] != interaction.rstrip('\n'):
-                file.write(interaction)
 
     class RenderObject():
         """An object to be rendered."""
