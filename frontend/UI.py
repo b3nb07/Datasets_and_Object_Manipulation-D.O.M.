@@ -1380,6 +1380,7 @@ class Render(QWidget):
 
         self.render_preview_button = QPushButton("Render Preview", self)
         self.render_preview_button.clicked.connect(self.renderPreview)
+        
 
         self.rendering = False
 
@@ -1485,8 +1486,10 @@ class Render(QWidget):
                 self.Number_of_renders_input_field.setText(str(number_of_renders_value))
             self.Number_of_renders_input_field.editingFinished.emit()
 
-    def renderPreview(self):
+    def renderPreview(self): 
         if not self.rendering:
+            config = backend.get_config()
+            backend.set_runtime_config(config)
             self.rendering = True
             self.thread = RenderThreadPreview()
 
@@ -1494,6 +1497,7 @@ class Render(QWidget):
             self.thread.finished.connect(self.complete_loading)
 
             self.thread.start()
+            
             self.windowUp()
 
             self.thread.quit()
@@ -1517,6 +1521,7 @@ class Render(QWidget):
             self.queue.append(config)
 
             self.generate_render()
+            self.render_preview_button.setEnabled(False)
     
     def generate_render(self):
         self.rendering = True
@@ -1547,6 +1552,7 @@ class Render(QWidget):
             self.rendering = False
             self.LoadingBox.update_text("Rendering complete")
             self.GenerateRenders_Button.setText("Generate Renders")
+            self.render_preview_button.setEnabled(True)
         else:
             self.generate_render()
 
