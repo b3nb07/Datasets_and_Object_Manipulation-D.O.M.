@@ -668,8 +668,8 @@ class PivotTab(QWidget):
 
         self.Distance_Pivot_input_field.textEdited.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
         self.Distance_Pivot_input_field.editingFinished.connect(self.update_distance)
-        self.Distance_Pivot_input_field.setText("10")
-        self.Distance_Slider.setValue(10)
+        self.Distance_Pivot_input_field.setText("0")
+        self.Distance_Slider.setValue(0)
         #################
         self.Distance_Slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
         self.Distance_Slider.sliderReleased.connect(self.update_distance)
