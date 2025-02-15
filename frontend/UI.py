@@ -1646,10 +1646,15 @@ class Port(QWidget):
             Tutorial_Box.exec()
 
             try:
-                obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-                shared_state.add_item(obj)
+                buttonPressed = Tutorial_Box.clickedButton().text().upper()
+                if buttonPressed == "CANCEL":
+                    pass
+                else:
+                    #print(Tutorial_Box.clickedButton().text().upper())
+                    obj = backend.RenderObject(primative = buttonPressed)
+                    shared_state.add_item(obj)
 
-                success_box = benMessageBox("Object imported successfully.", "Success")
+                    success_box = benMessageBox("Object imported successfully.", "Success")
                 
                 
             except:
