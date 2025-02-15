@@ -130,7 +130,6 @@ class TabDialog(QWidget):
         self.setWindowTitle("Datasets and Object Modeling")
         
         ObjectsStatusBar = QScrollArea()
-        ObjectsStatusBar.setStyleSheet("background-color: white;")
         ObjectsStatusBar.setMaximumWidth(175)
         
         ObjectsStatusBar.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
