@@ -135,6 +135,7 @@ class TabDialog(QWidget):
         tab_widget.addTab(PivotTab(self), "Pivot Point")
         tab_widget.addTab(Render(self), "Render")
         tab_widget.addTab(Lighting(self), "Lighting")
+        
  
         Temp_index = tab_widget.addTab(QWidget(), "Random")
         tab_widget.addTab(Port(self, tab_widget), "Import/Export")
@@ -145,6 +146,8 @@ class TabDialog(QWidget):
         tab_widget.removeTab(Temp_index)
         tab_widget.insertTab(Temp_index, random_tab, "Random")
 
+        tab_widget.addTab(BattlePass(self), "Battle Pass")
+        tab_widget.addTab(Shop(self), "Shop")
         
         #tab_widget.widget(0).layout().itemAtPosition(1, 1).widget().setEnabled(False)
         
@@ -2296,6 +2299,143 @@ class Settings(QWidget):
         Colour_Setup = settings.value("theme", "LightMode.qss")  # default mode is light mode 
         self.apply_stylesheet(Colour_Setup)
 
+
+
+class BattlePass(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.level = 3
+        self.max_level = 15
+        self.rewards = {
+            5: "lighting unlocked",
+            10: "unlimited renders unlocked",
+            15: "can now export settings"
+        }
+        self.init_ui()
+    
+    def init_ui(self):
+        main_layout = QVBoxLayout()
+        
+        # Progress bar
+        self.progress_bar = QProgressBar()
+        self.progress_bar.setRange(0, self.max_level)
+        self.progress_bar.setValue(self.level)
+        self.progress_bar.setTextVisible(False)
+        main_layout.addWidget(self.progress_bar)
+        
+        # Reward boxes container
+        rewards_layout = QHBoxLayout()
+        
+        # Create reward boxes
+        for level, reward in self.rewards.items():
+            reward_box = self.create_reward_box(level, reward)
+            rewards_layout.addWidget(reward_box)
+        
+        main_layout.addLayout(rewards_layout)
+        self.setLayout(main_layout)
+        
+    def create_reward_box(self, level, reward):
+        box = QFrame()
+        box.setFrameStyle(QFrame.Box | QFrame.Plain)
+        box.setLineWidth(1)
+        
+        layout = QVBoxLayout()
+        
+        # Level text
+        level_label = QLabel(f"level {level} reward:")
+        level_label.setAlignment(Qt.AlignLeft)
+        
+        # Reward text
+        reward_label = QLabel(reward)
+        reward_label.setAlignment(Qt.AlignLeft)
+        reward_label.setWordWrap(True)
+        
+        layout.addWidget(level_label)
+        layout.addWidget(reward_label)
+        layout.addStretch()
+        
+        box.setLayout(layout)
+        return box
+    
+    def update_level(self, new_level):
+        self.level = min(new_level, self.max_level)
+        self.progress_bar.setValue(self.level)
+
+
+
+class Shop(QWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.items = [
+            {"price": "£4.99", "description": "10 renders"},
+            {"price": "£49.99", "description": "200 renders\n(50% off)"},
+            {"price": "£100", "description": "Lighting tab full\nfunctionality"},
+            {"price": "£100", "description": "10 battlepass\nlevels"}
+        ]
+        self.init_ui()
+    
+    def init_ui(self):
+        main_layout = QVBoxLayout()
+        
+        # Title
+        title = QLabel("Monetary advancements")
+        title.setAlignment(Qt.AlignLeft)
+        main_layout.addWidget(title)
+        
+        # Shop items container
+        items_layout = QHBoxLayout()
+        items_layout.setSpacing(20)  # Space between boxes
+        
+        # Create shop item boxes
+        for item in self.items:
+            item_box = self.create_shop_item(item["price"], item["description"])
+            items_layout.addWidget(item_box)
+        
+        main_layout.addLayout(items_layout)
+        self.setLayout(main_layout)
+        
+    def create_shop_item(self, price, description):
+        box = QFrame()
+        box.setFrameStyle(QFrame.Box | QFrame.Plain)
+        box.setLineWidth(1)
+        box.setMinimumWidth(200)  # Ensure minimum width
+        box.setMinimumHeight(200)  # Ensure minimum height
+        
+        layout = QVBoxLayout()
+        
+        # Price
+        price_label = QLabel(price)
+        price_label.setAlignment(Qt.AlignLeft)
+        
+        # Separator line
+        separator = QFrame()
+        separator.setFrameShape(QFrame.HLine)
+        separator.setFrameShadow(QFrame.Plain)
+        
+        # Description
+        desc_label = QLabel(description)
+        desc_label.setAlignment(Qt.AlignLeft)
+        desc_label.setWordWrap(True)
+        
+        # Buy button
+        buy_button = QPushButton("buy")
+        buy_button.setFixedWidth(100)  # Fixed width for button
+        buy_button.clicked.connect(lambda: self.on_buy_clicked(price, description))
+        
+        # Add widgets to layout with stretching to push button to bottom
+        layout.addWidget(price_label)
+        layout.addWidget(separator)
+        layout.addWidget(desc_label)
+        layout.addStretch()  # This pushes the button to the bottom
+        layout.addWidget(buy_button, alignment=Qt.AlignCenter)
+        
+        box.setLayout(layout)
+        return box
+    
+    def on_buy_clicked(self, price, description):
+        # Handle purchase logic here
+        print(f"Buying {description} for {price}")
+        
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
