@@ -1783,7 +1783,7 @@ class Port(QWidget):
                 Label.setMaximumHeight(40)
                 Label.setMinimumHeight(40)
                 Scroll.addWidget(Label)
-                          
+                
             except:
                 error_box = QMessageBox()
                 error_box.setWindowTitle("Error")
