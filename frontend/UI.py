@@ -88,7 +88,7 @@ class RenderThread(QThread):
 
     def run(self):
         self.progress.emit("Rendering...")
-        backend.render(headless = True)
+        backend.render(headless = False)
         self.finished.emit()
 
 class LoadingScreen(QDialog):
@@ -1545,15 +1545,15 @@ class Render(QWidget):
         newConfig = self.queue.pop(0)
         backend.set_runtime_config(newConfig)
         
-        newThread = RenderThread()
-        newThread.progress.connect(self.update_loading)
-        newThread.finished.connect(self.complete_loading)
+        self.newThread = RenderThread()
+        self.newThread.progress.connect(self.update_loading)
+        self.newThread.finished.connect(self.complete_loading)
         self.GenerateRenders_Button.setText("Add render job to queue")
 
 
-        newThread.start()
+        self.newThread.start()
         self.windowUp()
-        newThread.quit()
+        
     
     
     def windowUp(self):
@@ -1565,6 +1565,7 @@ class Render(QWidget):
         self.LoadingBox.update_text(text)
     
     def complete_loading(self):
+        self.newThread.quit()
         if not self.queue:
             self.rendering = False
             self.LoadingBox.update_text("Rendering complete")
