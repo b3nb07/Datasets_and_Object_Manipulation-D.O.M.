@@ -88,7 +88,7 @@ class RenderThread(QThread):
 
     def run(self):
         self.progress.emit("Rendering...")
-        backend.render(headless = True)
+        backend.render(headless = False)
         self.finished.emit()
 
 class LoadingScreen(QDialog):
@@ -202,7 +202,7 @@ class ObjectTab(QWidget):
         self.Width_Obj_pos_input_field.setText("0.0")
         
         self.W_slider = QtWidgets.QSlider(self)
-        self.W_slider.setRange(-100, 100)
+        self.W_slider.setRange(0, 950)
         self.W_slider.setPageStep(0)
         self.W_slider.setOrientation(QtCore.Qt.Horizontal)
 
@@ -211,7 +211,7 @@ class ObjectTab(QWidget):
         self.Height_Obj_pos_input_field.setText("0.0")
 
         self.H_slider = QtWidgets.QSlider(self)
-        self.H_slider.setRange(-100, 100)
+        self.H_slider.setRange(0, 950)
         self.H_slider.setPageStep(0)
         self.H_slider.setOrientation(QtCore.Qt.Horizontal)
         
@@ -220,7 +220,7 @@ class ObjectTab(QWidget):
         self.Length_Obj_pos_input_field.setText("0.0")
 
         self.L_slider = QtWidgets.QSlider(self)
-        self.L_slider.setRange(-100, 100)
+        self.L_slider.setRange(0, 950)
         self.L_slider.setPageStep(0)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
 
@@ -413,9 +413,9 @@ class ObjectTab(QWidget):
         self.Z_button_plus.clicked.connect(lambda: self.Plus_click(self.ZObj_pos_input_field))
         self.Z_button_minus.clicked.connect(lambda: self.Minus_click(self.ZObj_pos_input_field))
 
-        self.Width_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.W_slider, self.Width_Obj_pos_input_field.text()))
-        self.Height_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.H_slider, self.Height_Obj_pos_input_field.text()))
-        self.Length_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.L_slider, self.Length_Obj_pos_input_field.text()))
+        self.Width_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider_Scale(self.W_slider, self.Width_Obj_pos_input_field.text()))
+        self.Height_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider_Scale(self.H_slider, self.Height_Obj_pos_input_field.text()))
+        self.Length_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider_Scale(self.L_slider, self.Length_Obj_pos_input_field.text()))
 
         # editingFinished callbacks that updates backend
         self.Width_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
@@ -424,9 +424,9 @@ class ObjectTab(QWidget):
 
         ########################################
         
-        self.W_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Width_Obj_pos_input_field))
-        self.H_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Height_Obj_pos_input_field))
-        self.L_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Length_Obj_pos_input_field))
+        self.W_slider.sliderMoved.connect(lambda val: self.Slider_Update_Scale(val, self.Width_Obj_pos_input_field))
+        self.H_slider.sliderMoved.connect(lambda val: self.Slider_Update_Scale(val, self.Height_Obj_pos_input_field))
+        self.L_slider.sliderMoved.connect(lambda val: self.Slider_Update_Scale(val, self.Length_Obj_pos_input_field))
 
         self.W_slider.sliderReleased.connect(self.update_object_scale)
         self.H_slider.sliderReleased.connect(self.update_object_scale)
@@ -482,9 +482,9 @@ class ObjectTab(QWidget):
         self.Y_Rotation_input_field.setText(str(selected_object["rot"][1]))
         self.Z_Rotation_input_field.setText(str(selected_object["rot"][2]))
         
-        self.Update_slider(self.W_slider,self.Width_Obj_pos_input_field.text())
-        self.Update_slider(self.H_slider,self.Height_Obj_pos_input_field.text())
-        self.Update_slider(self.L_slider,self.Length_Obj_pos_input_field.text())
+        self.Update_slider_Scale(self.W_slider,self.Width_Obj_pos_input_field.text())
+        self.Update_slider_Scale(self.H_slider,self.Height_Obj_pos_input_field.text())
+        self.Update_slider_Scale(self.L_slider,self.Length_Obj_pos_input_field.text())
         self.Update_slider(self.X_Rotation,self.X_Rotation_input_field.text())
         self.Update_slider(self.Y_Rotation,self.Y_Rotation_input_field.text())
         self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
@@ -498,6 +498,46 @@ class ObjectTab(QWidget):
                 slider.setValue(0)
             except:
                 print("Error", e)
+    
+    def Update_slider_Scale(self, slider, val):
+        try:
+            val = float(val)
+            if val < 500:
+                slider.setValue(int(round(float(val * 500), 0)))
+            else:
+                slider.setValue(int(round(float( (val * 50) + 450), 0)))
+        except Exception as e:
+            try:
+                slider.setValue(0)
+            except:
+                print("Error", e)
+    
+    def Slider_Update_Scale(self, val, field):
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                if val < 500: # <1 true
+                    trueValStr = str(val / 500)
+                    if len(trueValStr) > 4:
+                        field.setText(trueValStr[0:4])
+                    else:
+                        field.setText(trueValStr)
+
+                else: # >1 true
+                    trueValStr = str((val - 450) / 50)
+                    if len(trueValStr) > 3:
+                        field.setText(trueValStr[0:3])
+                    else:
+                        field.setText(trueValStr)
+
+    def Slider_Update(self, val, field):
+        """Set Field value to slider value"""
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                field.setText(str(val))
 
             
     def update_object_pos(self):
@@ -575,13 +615,9 @@ class ObjectTab(QWidget):
                 field.setText(str(0.0))
                 field.editingFinished.emit()
             
-    def Slider_Update(self, val, field):
-        """Set Field value to slider value"""
-        if field.isEnabled():
-            if field.text() == '':
-                field.setText('0')
-            if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                field.setText(str(val))
+    
+
+    
         
         
     def update_label(self):
@@ -651,8 +687,8 @@ class PivotTab(QWidget):
 
         self.Distance_Pivot_input_field.textEdited.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
         self.Distance_Pivot_input_field.editingFinished.connect(self.update_distance)
-        self.Distance_Pivot_input_field.setText("10")
-        self.Distance_Slider.setValue(10)
+        self.Distance_Pivot_input_field.setText("0")
+        self.Distance_Slider.setValue(0)
         #################
         self.Distance_Slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
         self.Distance_Slider.sliderReleased.connect(self.update_distance)
@@ -1528,15 +1564,15 @@ class Render(QWidget):
         newConfig = self.queue.pop(0)
         backend.set_runtime_config(newConfig)
         
-        newThread = RenderThread()
-        newThread.progress.connect(self.update_loading)
-        newThread.finished.connect(self.complete_loading)
+        self.newThread = RenderThread()
+        self.newThread.progress.connect(self.update_loading)
+        self.newThread.finished.connect(self.complete_loading)
         self.GenerateRenders_Button.setText("Add render job to queue")
 
 
-        newThread.start()
+        self.newThread.start()
         self.windowUp()
-        newThread.quit()
+        
     
     
     def windowUp(self):
@@ -1548,6 +1584,7 @@ class Render(QWidget):
         self.LoadingBox.update_text(text)
     
     def complete_loading(self):
+        self.newThread.quit()
         if not self.queue:
             self.rendering = False
             self.LoadingBox.update_text("Rendering complete")
@@ -1646,10 +1683,15 @@ class Port(QWidget):
             Tutorial_Box.exec()
 
             try:
-                obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-                shared_state.add_item(obj)
+                buttonPressed = Tutorial_Box.clickedButton().text().upper()
+                if buttonPressed == "CANCEL":
+                    pass
+                else:
+                    #print(Tutorial_Box.clickedButton().text().upper())
+                    obj = backend.RenderObject(primative = buttonPressed)
+                    shared_state.add_item(obj)
 
-                success_box = benMessageBox("Object imported successfully.", "Success")
+                    success_box = benMessageBox("Object imported successfully.", "Success")
                 
                 
             except:
@@ -1667,7 +1709,7 @@ class Port(QWidget):
         self.TutorialObjects_Button.clicked.connect(Tutorial_Object)
 
         #Third Section --> LEFT FOR NOW
-        self.BrowseFiles_Button = QPushButton('Generate Data Set', self)
+        
 
         def Export_Settings():
             try:
@@ -1784,8 +1826,7 @@ class Port(QWidget):
         main_layout.addWidget(self.Delete_Object_Button, 0, 2)
         main_layout.addWidget(self.ExportSettings_Button, 0, 3)
         main_layout.addWidget(self.ImportSettings_Button, 0, 4)
-        main_layout.addWidget(self.BrowseFiles_Button, 0, 5)
-        main_layout.addWidget(self.SelectRenderFolder_Button, 0, 6)
+        main_layout.addWidget(self.SelectRenderFolder_Button, 0, 5)
 
         self.setLayout(main_layout)
 
