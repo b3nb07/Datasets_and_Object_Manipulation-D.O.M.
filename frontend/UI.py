@@ -202,7 +202,7 @@ class ObjectTab(QWidget):
         self.Width_Obj_pos_input_field.setText("0.0")
         
         self.W_slider = QtWidgets.QSlider(self)
-        self.W_slider.setRange(-100, 100)
+        self.W_slider.setRange(0, 1000)
         self.W_slider.setPageStep(0)
         self.W_slider.setOrientation(QtCore.Qt.Horizontal)
 
@@ -211,7 +211,7 @@ class ObjectTab(QWidget):
         self.Height_Obj_pos_input_field.setText("0.0")
 
         self.H_slider = QtWidgets.QSlider(self)
-        self.H_slider.setRange(-100, 100)
+        self.H_slider.setRange(0, 1000)
         self.H_slider.setPageStep(0)
         self.H_slider.setOrientation(QtCore.Qt.Horizontal)
         
@@ -220,7 +220,7 @@ class ObjectTab(QWidget):
         self.Length_Obj_pos_input_field.setText("0.0")
 
         self.L_slider = QtWidgets.QSlider(self)
-        self.L_slider.setRange(-100, 100)
+        self.L_slider.setRange(0, 1000)
         self.L_slider.setPageStep(0)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
 
@@ -424,9 +424,9 @@ class ObjectTab(QWidget):
 
         ########################################
         
-        self.W_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Width_Obj_pos_input_field))
-        self.H_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Height_Obj_pos_input_field))
-        self.L_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Length_Obj_pos_input_field))
+        self.W_slider.sliderMoved.connect(lambda val: self.Slider_Update_Scale(val, self.Width_Obj_pos_input_field))
+        self.H_slider.sliderMoved.connect(lambda val: self.Slider_Update_Scale(val, self.Height_Obj_pos_input_field))
+        self.L_slider.sliderMoved.connect(lambda val: self.Slider_Update_Scale(val, self.Length_Obj_pos_input_field))
 
         self.W_slider.sliderReleased.connect(self.update_object_scale)
         self.H_slider.sliderReleased.connect(self.update_object_scale)
@@ -482,9 +482,9 @@ class ObjectTab(QWidget):
         self.Y_Rotation_input_field.setText(str(selected_object["rot"][1]))
         self.Z_Rotation_input_field.setText(str(selected_object["rot"][2]))
         
-        self.Update_slider(self.W_slider,self.Width_Obj_pos_input_field.text())
-        self.Update_slider(self.H_slider,self.Height_Obj_pos_input_field.text())
-        self.Update_slider(self.L_slider,self.Length_Obj_pos_input_field.text())
+        self.Update_slider_Scale(self.W_slider,self.Width_Obj_pos_input_field.text())
+        self.Update_slider_Scale(self.H_slider,self.Height_Obj_pos_input_field.text())
+        self.Update_slider_Scale(self.L_slider,self.Length_Obj_pos_input_field.text())
         self.Update_slider(self.X_Rotation,self.X_Rotation_input_field.text())
         self.Update_slider(self.Y_Rotation,self.Y_Rotation_input_field.text())
         self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
@@ -493,6 +493,15 @@ class ObjectTab(QWidget):
     def Update_slider(self, slider, val):
         try:
             slider.setValue(int(round(float(val), 0)))
+        except Exception as e:
+            try:
+                slider.setValue(0)
+            except:
+                print("Error", e)
+    
+    def Update_slider_Scale(self, slider, val):
+        try:
+            slider.setValue(int(round(float(val) * 100 , 0)))
         except Exception as e:
             try:
                 slider.setValue(0)
@@ -582,6 +591,14 @@ class ObjectTab(QWidget):
                 field.setText('0')
             if float(field.text()) > val or float(field.text()) + 0.5 < val:
                 field.setText(str(val))
+    
+    def Slider_Update_Scale(self, val, field):
+        """Set Field value to slider value"""
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                field.setText(str(val/100))
         
         
     def update_label(self):
