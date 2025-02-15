@@ -202,7 +202,7 @@ class ObjectTab(QWidget):
         self.Width_Obj_pos_input_field.setText("0.0")
         
         self.W_slider = QtWidgets.QSlider(self)
-        self.W_slider.setRange(0, 1000)
+        self.W_slider.setRange(0, 950)
         self.W_slider.setPageStep(0)
         self.W_slider.setOrientation(QtCore.Qt.Horizontal)
 
@@ -211,7 +211,7 @@ class ObjectTab(QWidget):
         self.Height_Obj_pos_input_field.setText("0.0")
 
         self.H_slider = QtWidgets.QSlider(self)
-        self.H_slider.setRange(0, 1000)
+        self.H_slider.setRange(0, 950)
         self.H_slider.setPageStep(0)
         self.H_slider.setOrientation(QtCore.Qt.Horizontal)
         
@@ -220,7 +220,7 @@ class ObjectTab(QWidget):
         self.Length_Obj_pos_input_field.setText("0.0")
 
         self.L_slider = QtWidgets.QSlider(self)
-        self.L_slider.setRange(0, 1000)
+        self.L_slider.setRange(0, 950)
         self.L_slider.setPageStep(0)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
 
@@ -413,9 +413,9 @@ class ObjectTab(QWidget):
         self.Z_button_plus.clicked.connect(lambda: self.Plus_click(self.ZObj_pos_input_field))
         self.Z_button_minus.clicked.connect(lambda: self.Minus_click(self.ZObj_pos_input_field))
 
-        self.Width_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.W_slider, self.Width_Obj_pos_input_field.text()))
-        self.Height_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.H_slider, self.Height_Obj_pos_input_field.text()))
-        self.Length_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.L_slider, self.Length_Obj_pos_input_field.text()))
+        self.Width_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider_Scale(self.W_slider, self.Width_Obj_pos_input_field.text()))
+        self.Height_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider_Scale(self.H_slider, self.Height_Obj_pos_input_field.text()))
+        self.Length_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider_Scale(self.L_slider, self.Length_Obj_pos_input_field.text()))
 
         # editingFinished callbacks that updates backend
         self.Width_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
@@ -501,12 +501,43 @@ class ObjectTab(QWidget):
     
     def Update_slider_Scale(self, slider, val):
         try:
-            slider.setValue(int(round(float(val) * 100 , 0)))
+            val = float(val)
+            if val < 500:
+                slider.setValue(int(round(float(val * 500), 0)))
+            else:
+                slider.setValue(int(round(float( (val * 50) + 450), 0)))
         except Exception as e:
             try:
                 slider.setValue(0)
             except:
                 print("Error", e)
+    
+    def Slider_Update_Scale(self, val, field):
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                if val < 500: # <1 true
+                    trueValStr = str(val / 500)
+                    if len(trueValStr) > 4:
+                        field.setText(trueValStr[0:4])
+                    else:
+                        field.setText(trueValStr)
+
+                else: # >1 true
+                    trueValStr = str((val - 450) / 50)
+                    if len(trueValStr) > 3:
+                        field.setText(trueValStr[0:3])
+                    else:
+                        field.setText(trueValStr)
+
+    def Slider_Update(self, val, field):
+        """Set Field value to slider value"""
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                field.setText(str(val))
 
             
     def update_object_pos(self):
@@ -584,21 +615,9 @@ class ObjectTab(QWidget):
                 field.setText(str(0.0))
                 field.editingFinished.emit()
             
-    def Slider_Update(self, val, field):
-        """Set Field value to slider value"""
-        if field.isEnabled():
-            if field.text() == '':
-                field.setText('0')
-            if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                field.setText(str(val))
     
-    def Slider_Update_Scale(self, val, field):
-        """Set Field value to slider value"""
-        if field.isEnabled():
-            if field.text() == '':
-                field.setText('0')
-            if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                field.setText(str(val/100))
+
+    
         
         
     def update_label(self):
