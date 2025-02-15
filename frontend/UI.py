@@ -1689,7 +1689,7 @@ class Port(QWidget):
         self.TutorialObjects_Button.clicked.connect(Tutorial_Object)
 
         #Third Section --> LEFT FOR NOW
-        self.BrowseFiles_Button = QPushButton('Generate Data Set', self)
+        
 
         def Export_Settings():
             try:
@@ -1806,8 +1806,7 @@ class Port(QWidget):
         main_layout.addWidget(self.Delete_Object_Button, 0, 2)
         main_layout.addWidget(self.ExportSettings_Button, 0, 3)
         main_layout.addWidget(self.ImportSettings_Button, 0, 4)
-        main_layout.addWidget(self.BrowseFiles_Button, 0, 5)
-        main_layout.addWidget(self.SelectRenderFolder_Button, 0, 6)
+        main_layout.addWidget(self.SelectRenderFolder_Button, 0, 5)
 
         self.setLayout(main_layout)
 
