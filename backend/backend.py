@@ -39,6 +39,9 @@ class Backend():
         new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
         self.set_seed(new_seed)
 
+        with open('interaction_log.txt','w') as file:
+            file.write('Program initialised\n')
+
         if (json_filepath is not None):
             # load json objects into self
             temp = None
@@ -93,6 +96,8 @@ class Backend():
     def set_render_output_folder(self, path):
         config["render_folder"] = path
 
+        self.update_log(f'Render output folder changed to: {path}\n')
+
 
     def add_cam_pose(self, pose):
         """Adds a position of a camera to the scene for rendering.
@@ -130,6 +135,8 @@ class Backend():
         
         :param point: a list containing [X,Y,Z]"""
         config["pivot"]["point"] = point
+
+        self.update_log(f'Pivot point changed to: {point}\n')
         
     def set_pivot_distance(self, dis):
         """ Sets a custom distance for the pivotpoint in the scene for rendering.
@@ -137,11 +144,15 @@ class Backend():
         :param dis: a float value determining the distance"""
         config["pivot"]["dis"] = dis
 
+        self.update_log(f'Pivot distance changed to: {dis}\n')
+
     def set_seed(self,seed):
         """ Sets a custom seed for generating random when adding camera poses.
         
         :param seed: int value indicating random seed"""
         config["seed"] = seed
+
+        self.update_log(f'Seed changed to: {seed}\n')
 
     def set_renders(self, n):
         """ Sets amount renders generated.
@@ -149,90 +160,114 @@ class Backend():
         :param n: int amount of renders"""
         config["render"]["renders"] = n
 
+        self.update_log(f'Number of renders changed to: {n}\n')
+
     def set_angles(self, angles):
         """ Sets camera angle change per render in the config.
         
         :param angles: a list containing x z and y angle change"""
         config["render"]["degree"] = angles
 
+        self.update_log(f'Camera angle change per render changed to: {angles}\n')
+
     def toggle_random_pivot_x(self):
         """Toggles value for if pivot x coordinate is randomised"""
         if "x" in config["random"]["pivot"]:
             config["random"]["pivot"].remove("x")
+            self.update_log(f'Pivot point X co-ord set to not random\n')
         else:
             config["random"]["pivot"].append("x")
+            self.update_log(f'Pivot point X co-ord set to random\n')
+
 
     def toggle_random_pivot_z(self):
         """Toggles value for if pivot z coordinate is randomised"""
         if "z" in config["random"]["pivot"]:
             config["random"]["pivot"].remove("z")
+            self.update_log(f'Pivot point Z co-ord set to not random\n')
         else:
             config["random"]["pivot"].append("z")
+            self.update_log(f'Pivot point Z co-ord set to random\n')
 
     def toggle_random_pivot_y(self):
         """Toggles value for if pivot y coordinate is randomised"""
         if "y" in config["random"]["pivot"]:
             config["random"]["pivot"].remove("y")
+            self.update_log(f'Pivot point Y co-ord set to not random\n')
         else:
             config["random"]["pivot"].append("y")
+            self.update_log(f'Pivot point Y co-ord set to random\n')
 
     def toggle_random_environment_angle(self):
         """Toggles value for if the angle is randomised during render"""
         if "angle" in config["random"]["environment"]:
             config["random"]["environment"].remove("angle")
+            self.update_log(f'Angle during render set to not random\n')
         else:
             config["random"]["environment"].append("angle")
+            self.update_log(f'Angle during render set to random\n')
 
     def toggle_random_environment_background(self):
         """Toggles value for if background colour is randomised during render"""
         if "background" in config["random"]["environment"]:
             config["random"]["environment"].remove("background")
+            self.update_log(f'Background colour set to not random\n')
         else:
-            config["random"]["environment"].append("background")
+            self.update_log(f'Background colour set to random\n')
 
     def toggle_random_coord_x(self,selected_index):
         if "x" in config["random"]["pos"]:
             config["random"]["pos"].remove("x")
+            self.update_log(f'X co-ord of object {selected_index} set to not random\n')
         else:
             config["random"]["pos"].append("x")
+            self.update_log(f'X co-ord of object {selected_index} set to random\n')
         self.add_object_properties(selected_index)
 
     def toggle_random_coord_y(self,selected_index):
         if "y" in config["random"]["pos"]:
             config["random"]["pos"].remove("y")
+            self.update_log(f'Y co-ord of object {selected_index} set to not random\n')
         else:
             config["random"]["pos"].append("y")
+            self.update_log(f'Y co-ord of object {selected_index} set to random\n')
         self.add_object_properties(selected_index)
 
     def toggle_random_coord_z(self,selected_index):
         if "z" in config["random"]["pos"]:
             config["random"]["pos"].remove("z")
+            self.update_log(f'Z co-ord of object {selected_index} set to not random\n')
         else:
             config["random"]["pos"].append("z")
+            self.update_log(f'Z co-ord of object {selected_index} set to random\n')
         self.add_object_properties(selected_index)
 
 
     def toggle_random_width(self,selected_index):
         if "width" in config["random"]["sca"]:
             config["random"]["sca"].remove("width")
+            self.update_log(f'Width of object {selected_index} set to not random\n')
         else:
             config["random"]["sca"].append("width")
+            self.update_log(f'Width of object {selected_index} set to random\n')
         self.add_object_properties(selected_index)
-        
-
 
     def toggle_random_height(self,selected_index):
         if "height" in config["random"]["sca"]:
             config["random"]["sca"].remove("height")
+            self.update_log(f'Height of object {selected_index} set to not random\n')
         else:
             config["random"]["sca"].append("height")
+            self.update_log(f'Height of object {selected_index} set to random\n')
         self.add_object_properties(selected_index)
 
     def toggle_random_length(self,selected_index):
         if "length" in config["random"]["sca"]:
             config["random"]["sca"].remove("length")
+            self.update_log(f'Length of object {selected_index} set to not random\n')
         else:
             config["random"]["sca"].append("length")
+            self.update_log(f'Length of object {selected_index} set to random\n')
         self.add_object_properties(selected_index)
   
     def is_config_objects_empty(self):
@@ -258,6 +293,9 @@ class Backend():
 
         config["render_res"] = resolution
 
+        self.update_log(f'Render resolution changed to {resolution}\n')
+
+
     def set_bg_color(self, color, strength=1):
         """Sets the world background color for rendering. Note: RBG values are between 0-1, diving by 255 gives the appropriate values. 
         
@@ -267,6 +305,8 @@ class Backend():
             bproc.renderer.set_world_background([color[0]/255, color[1]/255, color[2]/255], strength)
 
         config["background_color"] = color
+
+        self.update_log(f'Background colour changed to {color}, with strength {strength}')
 
 
     def calculate_position(self, angle, distance):
@@ -288,7 +328,7 @@ class Backend():
         return position
 
     
-    def add_camera_poses(self):
+    def add_camera_poses(self, preview = False):
         """Add camera poses to generate render from"""
 
         randoms = config["random"] #Read values from config
@@ -336,6 +376,9 @@ class Backend():
                 position[2] += pivot_point[2] 
 
             self.add_cam_pose([position, camera_rotation])
+
+            if preview == True:
+                break
 
             if "angle" in randoms["environment"]:
                 current_x_angle += np.deg2rad( random.randint(0,359) )
@@ -400,14 +443,17 @@ class Backend():
         obj["sca"] = scale
         obj = config["objects"][selected_index]
 
+    def set_runtime_config(self, conf):
+        self.runtime_config = conf
 
-    def render(self, headless = False):
+    def render(self, headless = False, preview = False):
         """Renders the scene and saves to file in the output folder."""
-        self.add_camera_poses()
+
+        self.add_camera_poses(preview = preview)
         
 
         with open("backend\\temp_export.json", "w") as export_file:
-            json.dump(config, export_file)
+            json.dump(self.runtime_config, export_file)
 
         # Create a temporary file for the blender environment and call it
         path = os.path.abspath(os.getcwd()) + "\\backend"
@@ -421,7 +467,9 @@ class Backend():
             to_run.write("import blenderproc as bproc\n" + file_contents + f"""Backend("{path}\\\\temp_export.json")._render()""")
 
         os.system("blenderproc run backend/_temp.py")
-        if (not headless):
+        if (not headless and preview):
+            os.system("blenderproc vis hdf5 output/0.hdf5")
+        elif (not headless):
             for i in range(config["render"]["renders"]):
                 os.system("blenderproc vis hdf5 output/"+str(i)+".hdf5")
         os.remove("backend/_temp.py")
@@ -446,6 +494,19 @@ class Backend():
         file_path = path + "/" + filename
         with open(file_path, "w") as export_file:
             json.dump(config, export_file, indent = 2)
+        
+        self.update_log(f'Settings exported\n')
+
+    def update_log(self, interaction):
+        with open('interaction_log.txt','r+') as file:
+            contents = file.read().split('\n')
+            if len(contents) == 0:
+                pass
+            elif len(contents) == 1:
+                if contents[-1] != interaction.rstrip('\n'):
+                    file.write(interaction)
+            elif contents[-2] != interaction.rstrip('\n'):
+                file.write(interaction)
 
     class RenderObject():
         """An object to be rendered."""
@@ -457,6 +518,8 @@ class Backend():
             """
             self.object_pos = len(config.setdefault("objects", []))
             config["objects"].append({})
+
+            Backend.update_log(self,f'{self.__str__()} object added\n')
                         
             if (filepath is not None):
                 if (is_blender_environment):
@@ -497,6 +560,8 @@ class Backend():
             
             config["objects"][self.object_pos]["pos"] = location
 
+            Backend.update_log(self,f'Location of {self.__str__()} changed to {location}\n')
+
         def set_scale(self, scale):
             """Set the scale of an object in the scene.
             
@@ -505,6 +570,8 @@ class Backend():
             if (is_blender_environment):
                 self.object.set_scale(scale)
             config["objects"][self.object_pos]["sca"] = scale
+
+            Backend.update_log(self,f'Scale of {self.__str__()} changed to {scale}\n')
 
         def set_rotation(self, euler_rotation):
             """Set the rotation of an object in the scene.
@@ -516,10 +583,14 @@ class Backend():
 
             config["objects"][self.object_pos]["rot"] = euler_rotation
 
+            Backend.update_log(self,f'Rotation of {self.__str__()} changed to {euler_rotation}\n')
+
         def remove_object(self):
             """Remove the object from the scene"""
 
             config["objects"][self.object_pos] = None
+
+            Backend.update_log(self,f'{self.__str__()} object removed\n')
 
 
         #! TODO: Think of and implement more object manipulation methods
@@ -537,6 +608,9 @@ class Backend():
                 self.light = bproc.types.Light(light_type, name)
 
             self.light_pos = len(config.setdefault("light_sources", []))
+
+            Backend.update_log(self,f'{self.__str__()} light source added\n')
+
             config["light_sources"].append({
                 "type": light_type,
                 "name": name,
@@ -547,12 +621,17 @@ class Backend():
                 "radius": 0
             })
 
+        def __str__(self):
+            return f"Light Source {self.light_pos + 1}"
+
         def set_type(self, type):
             #print(config)
             if (is_blender_environment):
                 self.light.set_type(type)
 
             config["light_sources"][self.light_pos]["type"] = type
+
+            Backend.update_log(self,f'Type of {self.__str__()} changed to {type}\n')
 
         def set_radius(self, radius):
             #print(radius)
@@ -561,6 +640,7 @@ class Backend():
 
             config["light_sources"][self.light_pos]["radius"] = radius
 
+            Backend.update_log(self,f'Radius of {self.__str__()} changed to {radius}\n')
 
         def set_loc(self, location):
             """Set the location of a light source in the scene.
@@ -572,6 +652,8 @@ class Backend():
                 self.light.set_location(location)
 
             config["light_sources"][self.light_pos]["pos"] = location
+
+            Backend.update_log(self,f'Location of {self.__str__()} changed to {location}\n')
 
         def set_rotation(self, rotation):
             """Set the rotation of the light in the scene.
@@ -589,6 +671,8 @@ class Backend():
 
             config["light_sources"][self.light_pos]["rot"] = rotation
 
+            Backend.update_log(self,f'Rotation of {self.__str__()} changed to {rotation}\n')
+
         def set_energy(self, energy):
             """Sets the energy of the light.
             
@@ -599,6 +683,8 @@ class Backend():
                 self.light.set_energy(energy)
 
             config["light_sources"][self.light_pos]["energy"] = energy
+
+            Backend.update_log(self,f'Energy of {self.__str__()} changed to {energy}\n')
 
 
         def hex_to_rgba(self, hex_value: str):
@@ -627,4 +713,6 @@ class Backend():
                 self.light.set_color(colour)
 
             config["light_sources"][self.light_pos]["color"] = color
+
+            Backend.update_log(self,f'Colour of {self.__str__()} changed to {color}\n')
 # Empty line required
