@@ -124,7 +124,7 @@ class TabDialog(QWidget):
         tab_widget = QTabWidget()
 
         # Add all other tabs first
-        tab_widget.addTab(ObjectTab(self, tab_widget), "Object")
+        tab_widget.addTab(ObjectTab(self, tab_widget, ObjLayout), "Object")
         tab_widget.addTab(PivotTab(self), "Pivot Point")
         tab_widget.addTab(Render(self), "Render")
         tab_widget.addTab(Lighting(self), "Lighting")
@@ -162,7 +162,7 @@ class TabDialog(QWidget):
 
 
 class ObjectTab(QWidget):
-    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
+    def __init__(self, parent: QWidget, tab_widget: QTabWidget, Scroll: QVBoxLayout):
         super().__init__(parent)
 
         self.Object_pos_title = QLabel(f"Co-ords", self)
@@ -254,39 +254,68 @@ class ObjectTab(QWidget):
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
         self.Z_Rotation.setRange(0, 360)
 
-        def Get_Object_Filepath():
+        #First Section
+        def Get_Object_Filepath(Scroll):
+            import_box = QMessageBox()
+            import_box.setText("How would you like to import objects?")
+            import_box.addButton("Import Files", QMessageBox.ActionRole)
+            import_box.addButton("Folder", QMessageBox.ActionRole)
+            import_box.addButton("Cancel", QMessageBox.RejectRole)
+            
+            import_box.exec()
+            clicked_button = import_box.clickedButton().text()
+            
             try:
-                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
-                if (path == ""): return
-                # add the object to the shared state
-                shared_state.add_item(backend.RenderObject(filepath = path))
-                
+                if clicked_button == "Import Files":
+                    paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
+                    if not paths:
+                        return
+                    
+                    for path in paths:
+                        obj = backend.RenderObject(filepath=path)
+                        Name = os.path.basename(os.path.normpath(path))
+                        shared_state.add_item(obj, Name)
+                        Label = QLabel(Name)
+                        Label.setStyleSheet("border: 1px solid black;")
+                        Label.setAlignment(QtCore.Qt.AlignCenter)
+                        Label.setMaximumHeight(40)
+                        Label.setMinimumHeight(40)
+                        Scroll.addWidget(Label)
+
+                elif clicked_button == "Folder":
+                    folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
+                    if not folder_path:
+                        return
+                    
+                    # maybe have a global constant of supported extensions?
+                    supported_extensions = ['.blend', '.stl', '.obj']
+                    # go through each file in directory
+                    for root, _, files in os.walk(folder_path):
+                        for file in files:
+                            if any(file.lower().endswith(ext) for ext in supported_extensions):
+                                full_path = os.path.join(root, file)
+                                obj = backend.RenderObject(filepath=full_path)
+                                Name = os.path.basename(os.path.normpath(full_path))
+                                shared_state.add_item(obj, Name)
+                                Label = QLabel(Name)
+                                Label.setStyleSheet("border: 1px solid black;")
+                                Label.setAlignment(QtCore.Qt.AlignCenter)
+                                Label.setMaximumHeight(40)
+                                Label.setMinimumHeight(40)
+                                Scroll.addWidget(Label)
+
+
                 Object_detect(tab_widget)
 
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
 
-        self.Import_Object_Button = QPushButton("Import Object", self)
-        self.Import_Object_Button.clicked.connect(Get_Object_Filepath)
 
-        def Tutorial_Object():
-            Tutorial_Box = QMessageBox()
-            Tutorial_Box.setText("Please select a tutorial object from below")
-            Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Cylinder", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Cone", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
-
-            Tutorial_Box.exec()
-            obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-            shared_state.add_item(obj)
-
-            Object_detect(tab_widget)
-
-        self.TutorialObjects_Button = QPushButton('Tutorial Objects', self)
-        self.TutorialObjects_Button.clicked.connect(Tutorial_Object)
+            except Exception as e:
+                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
+                
+        self.Import_Object_Button = QPushButton("Import Objects", self)
+        self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
     
         def delete_object(tab_widget):
             to_delete = QMessageBox()
@@ -388,9 +417,8 @@ class ObjectTab(QWidget):
 
         main_layout.addWidget(self.combo_box, 0, 9)
 
-        main_layout.addWidget(self.Import_Object_Button, 4, 9)
-        main_layout.addWidget(self.TutorialObjects_Button, 4, 8)
-        main_layout.addWidget(self.Delete_Object_Button, 5, 9)
+        main_layout.addWidget(self.Import_Object_Button, 4, 8)
+        main_layout.addWidget(self.Delete_Object_Button, 4, 9)
 
         self.setLayout(main_layout)
 
@@ -457,7 +485,6 @@ class ObjectTab(QWidget):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
         self.combo_box.addItems(map(lambda o: str(o), items))
-        self.combo_box.activated.connect(self.update_label)
 
     def update_ui_by_config(self):
         """ Method that updates attributes in text field when the object index is change from combo box. """
@@ -586,15 +613,6 @@ class ObjectTab(QWidget):
             if float(field.text()) > val or float(field.text()) + 0.5 < val:
                 field.setText(str(val))
         
-        
-    def update_label(self):
-        """Updates labels on object change"""
-        AllItems = [self.combo_box.itemText(i) for i in range(self.combo_box.count())]
-        n = self.combo_box.currentIndex()
-        Title = AllItems[n]
-        self.Object_pos_title.setText(f"{Title} Co-ords")
-        self.Object_scale_title.setText(f"{Title} Scale")
-        self.Object_rotation_title.setText(f"{Title} Rotation")
 
 class PivotTab(QWidget):
     def __init__(self, parent: QWidget):
@@ -1558,10 +1576,10 @@ class Port(QWidget):
                     self.exec()
 
         #First Section
-        def Get_Object_Filepath():
+        def Get_Object_Filepath(Scroll):
             import_box = QMessageBox()
             import_box.setText("How would you like to import objects?")
-            import_box.addButton("Multiple Files", QMessageBox.ActionRole)
+            import_box.addButton("Import Files", QMessageBox.ActionRole)
             import_box.addButton("Folder", QMessageBox.ActionRole)
             import_box.addButton("Cancel", QMessageBox.RejectRole)
             
@@ -1569,16 +1587,23 @@ class Port(QWidget):
             clicked_button = import_box.clickedButton().text()
             
             try:
-                if clicked_button == "Multiple Files":
+                if clicked_button == "Import Files":
                     paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
                     if not paths:
                         return
                     
                     for path in paths:
                         obj = backend.RenderObject(filepath=path)
-                        shared_state.add_item(obj)
+                        Name = os.path.basename(os.path.normpath(path))
+                        shared_state.add_item(obj, Name)
+                        Label = QLabel(Name)
+                        Label.setStyleSheet("border: 1px solid black;")
+                        Label.setAlignment(QtCore.Qt.AlignCenter)
+                        Label.setMaximumHeight(40)
+                        Label.setMinimumHeight(40)
+                        Scroll.addWidget(Label)
 
-                elif clicked_button == "Entire Folder":
+                elif clicked_button == "Folder":
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
                     if not folder_path:
                         return
@@ -1591,12 +1616,17 @@ class Port(QWidget):
                             if any(file.lower().endswith(ext) for ext in supported_extensions):
                                 full_path = os.path.join(root, file)
                                 obj = backend.RenderObject(filepath=full_path)
-                                shared_state.add_item(obj)
+                                Name = os.path.basename(os.path.normpath(full_path))
+                                shared_state.add_item(obj, Name)
+                                Label = QLabel(Name)
+                                Label.setStyleSheet("border: 1px solid black;")
+                                Label.setAlignment(QtCore.Qt.AlignCenter)
+                                Label.setMaximumHeight(40)
+                                Label.setMinimumHeight(40)
+                                Scroll.addWidget(Label)
 
 
                 Object_detect(tab_widget)
-
-                success_box = ilyaMessageBox("Object imported successfully.", "Success")
 
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
@@ -1606,7 +1636,7 @@ class Port(QWidget):
                 QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
                 
         self.Import_Object_Button = QPushButton("Import Objects", self)
-        self.Import_Object_Button.clicked.connect(Get_Object_Filepath)
+        self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
 
         #Second Section
         def Tutorial_Object(Scroll):
@@ -1624,7 +1654,7 @@ class Port(QWidget):
             try:
                 obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
                 if Name == "Object":
-                    Name = f"{Name} {len(shared_state.itemNames)+1,}"
+                    Name = f"{Name} {len(shared_state.itemNames)+1}"
                 shared_state.add_item(obj, Name)
                 Label = QLabel(Name)
                 Label.setStyleSheet("border: 1px solid black;")
@@ -1677,7 +1707,6 @@ class Port(QWidget):
                 if (path == ""): return
                 backend = Backend(json_filepath = path)
                 for i in range(5):
-                    #self.path.tabwizard.widget(i).update_ui_by_config()
                     tab_widget(i).update_ui_by_config()
 
                 success_box = ilyaMessageBox("Setting imported successfully.", "Success")
