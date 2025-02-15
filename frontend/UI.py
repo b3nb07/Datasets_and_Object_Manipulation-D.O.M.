@@ -1610,7 +1610,7 @@ class Port(QWidget):
         super().__init__(parent)
 
         
-        class benMessageBox(QMessageBox):
+        class ilyaMessageBox(QMessageBox):
                 def __init__(self, text, title):
                     super().__init__()
                     self.setText(text)
@@ -1637,6 +1637,8 @@ class Port(QWidget):
                     for path in paths:
                         obj = backend.RenderObject(filepath=path)
                         shared_state.add_item(obj)
+                    
+                    success_box = ilyaMessageBox("Object imported successfully.", "Success")
 
                 elif clicked_button == "Entire Folder":
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
@@ -1652,11 +1654,12 @@ class Port(QWidget):
                                 full_path = os.path.join(root, file)
                                 obj = backend.RenderObject(filepath=full_path)
                                 shared_state.add_item(obj)
+                    success_box = ilyaMessageBox("Object imported successfully.", "Success")
 
 
                 Object_detect(tab_widget)
 
-                success_box = benMessageBox("Object imported successfully.", "Success")
+                
 
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
@@ -1691,7 +1694,7 @@ class Port(QWidget):
                     obj = backend.RenderObject(primative = buttonPressed)
                     shared_state.add_item(obj)
 
-                    success_box = benMessageBox("Object imported successfully.", "Success")
+                    success_box = ilyaMessageBox("Object imported successfully.", "Success")
                 
                 
             except:
@@ -1700,7 +1703,7 @@ class Port(QWidget):
                 error_box.setText("Error loading tutorial object.")
                 error_box.exec()
 
-                error_box = benMessageBox("Error loading tutorial object.", "Error")
+                error_box = ilyaMessageBox("Error loading tutorial object.", "Error")
                 
     
             Object_detect(tab_widget)
@@ -1719,12 +1722,12 @@ class Port(QWidget):
                     pass
                 else:
                     backend.export(export_path)
-                    success_box = benMessageBox("Setting exported successfully.", "Success")
+                    success_box = ilyaMessageBox("Setting exported successfully.", "Success")
                    
 
 
             except:
-                error_box = benMessageBox("There was an error selecting folder, please try again.", "Error")
+                error_box = ilyaMessageBox("There was an error selecting folder, please try again.", "Error")
 
         #Fourth Section
         self.ExportSettings_Button = QPushButton('Export Settings', self)
@@ -1740,7 +1743,7 @@ class Port(QWidget):
                     #self.path.tabwizard.widget(i).update_ui_by_config()
                     tab_widget(i).update_ui_by_config()
 
-                success_box = benMessageBox("Setting imported successfully.", "Success")
+                success_box = ilyaMessageBox("Setting imported successfully.", "Success")
             except Exception:
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
@@ -1770,7 +1773,7 @@ class Port(QWidget):
                 obj = shared_state.items[obj_index]
                 try:
                     shared_state.remove_item(obj)
-                    success_box = benMessageBox("Object successfully deleted", "Success")
+                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
                     
                     del backend.get_config()["objects"][obj.object_pos]
                     # shift objects after this one down by one
@@ -1778,7 +1781,7 @@ class Port(QWidget):
                         obj = shared_state.items[i]
                         obj.object_pos = i
                 except:
-                    error_box = benMessageBox("Error deleting object", "Error")
+                    error_box = ilyaMessageBox("Error deleting object", "Error")
 
                 shared_state.items_updated.emit(shared_state.items)
                 # The last object was deleted
@@ -1803,10 +1806,10 @@ class Port(QWidget):
                     pass
                 else:
                     backend.set_render_output_folder(new_path)
-                    success_box = benMessageBox("Render folder changed", "Success")
+                    success_box = ilyaMessageBox("Render folder changed", "Success")
 
             except:
-                error_box = benMessageBox("Error deleting object", "Error")
+                error_box = ilyaMessageBox("Error deleting object", "Error")
 
         self.SelectRenderFolder_Button = QPushButton('Change Render Folder', self)
         self.SelectRenderFolder_Button.clicked.connect(select_render_folder)
