@@ -75,8 +75,6 @@ class ComboBoxState(QObject):
         self.selected_index = index
         # maybe delete
         self.selection_changed.emit(index)
-
-
 class RenderThreadPreview(QThread):
     finished = pyqtSignal()
     progress = pyqtSignal(str)
@@ -113,13 +111,6 @@ class LoadingScreen(QDialog):
 
     def update_text(self, text):
         self.label.setText(text)
-
-class ilyaStorageBox:
-    def __init__(self, thread, config):
-        self.thread = thread
-        self.config = config
-
-
 
 # creates this shared state
 shared_state = ComboBoxState()
@@ -220,7 +211,7 @@ class ObjectTab(QWidget):
         self.Width_Obj_pos_input_field.setText("1.0")
         
         self.W_slider = QtWidgets.QSlider(self)
-        self.W_slider.setRange(0, 950)
+        self.W_slider.setRange(-100, 100)
         self.W_slider.setPageStep(0)
         self.W_slider.setOrientation(QtCore.Qt.Horizontal)
 
@@ -229,7 +220,7 @@ class ObjectTab(QWidget):
         self.Height_Obj_pos_input_field.setText("1.0")
 
         self.H_slider = QtWidgets.QSlider(self)
-        self.H_slider.setRange(0, 950)
+        self.H_slider.setRange(-100, 100)
         self.H_slider.setPageStep(0)
         self.H_slider.setOrientation(QtCore.Qt.Horizontal)
         
@@ -238,7 +229,7 @@ class ObjectTab(QWidget):
         self.Length_Obj_pos_input_field.setText("1.0")
 
         self.L_slider = QtWidgets.QSlider(self)
-        self.L_slider.setRange(0, 950)
+        self.L_slider.setRange(-100, 100)
         self.L_slider.setPageStep(0)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
         
@@ -462,9 +453,9 @@ class ObjectTab(QWidget):
         self.Z_button_plus.clicked.connect(lambda: self.Plus_click(self.ZObj_pos_input_field))
         self.Z_button_minus.clicked.connect(lambda: self.Minus_click(self.ZObj_pos_input_field))
 
-        self.Width_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider_Scale(self.W_slider, self.Width_Obj_pos_input_field.text()))
-        self.Height_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider_Scale(self.H_slider, self.Height_Obj_pos_input_field.text()))
-        self.Length_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider_Scale(self.L_slider, self.Length_Obj_pos_input_field.text()))
+        self.Width_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.W_slider, self.Width_Obj_pos_input_field.text()))
+        self.Height_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.H_slider, self.Height_Obj_pos_input_field.text()))
+        self.Length_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.L_slider, self.Length_Obj_pos_input_field.text()))
 
         # editingFinished callbacks that updates backend
         self.Width_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
@@ -473,9 +464,9 @@ class ObjectTab(QWidget):
 
         ########################################
         
-        self.W_slider.sliderMoved.connect(lambda val: self.Slider_Update_Scale(val, self.Width_Obj_pos_input_field))
-        self.H_slider.sliderMoved.connect(lambda val: self.Slider_Update_Scale(val, self.Height_Obj_pos_input_field))
-        self.L_slider.sliderMoved.connect(lambda val: self.Slider_Update_Scale(val, self.Length_Obj_pos_input_field))
+        self.W_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Width_Obj_pos_input_field))
+        self.H_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Height_Obj_pos_input_field))
+        self.L_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Length_Obj_pos_input_field))
 
         self.W_slider.sliderReleased.connect(self.update_object_scale)
         self.H_slider.sliderReleased.connect(self.update_object_scale)
@@ -530,9 +521,9 @@ class ObjectTab(QWidget):
         self.Y_Rotation_input_field.setText(str(selected_object["rot"][1]))
         self.Z_Rotation_input_field.setText(str(selected_object["rot"][2]))
         
-        self.Update_slider_Scale(self.W_slider,self.Width_Obj_pos_input_field.text())
-        self.Update_slider_Scale(self.H_slider,self.Height_Obj_pos_input_field.text())
-        self.Update_slider_Scale(self.L_slider,self.Length_Obj_pos_input_field.text())
+        self.Update_slider(self.W_slider,self.Width_Obj_pos_input_field.text())
+        self.Update_slider(self.H_slider,self.Height_Obj_pos_input_field.text())
+        self.Update_slider(self.L_slider,self.Length_Obj_pos_input_field.text())
         self.Update_slider(self.X_Rotation,self.X_Rotation_input_field.text())
         self.Update_slider(self.Y_Rotation,self.Y_Rotation_input_field.text())
         self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
@@ -546,46 +537,6 @@ class ObjectTab(QWidget):
                 slider.setValue(0)
             except:
                 print("Error", e)
-    
-    def Update_slider_Scale(self, slider, val):
-        try:
-            val = float(val)
-            if val < 500:
-                slider.setValue(int(round(float(val * 500), 0)))
-            else:
-                slider.setValue(int(round(float( (val * 50) + 450), 0)))
-        except Exception as e:
-            try:
-                slider.setValue(0)
-            except:
-                print("Error", e)
-    
-    def Slider_Update_Scale(self, val, field):
-        if field.isEnabled():
-            if field.text() == '':
-                field.setText('0')
-            if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                if val < 500: # <1 true
-                    trueValStr = str(val / 500)
-                    if len(trueValStr) > 4:
-                        field.setText(trueValStr[0:4])
-                    else:
-                        field.setText(trueValStr)
-
-                else: # >1 true
-                    trueValStr = str((val - 450) / 50)
-                    if len(trueValStr) > 3:
-                        field.setText(trueValStr[0:3])
-                    else:
-                        field.setText(trueValStr)
-
-    def Slider_Update(self, val, field):
-        """Set Field value to slider value"""
-        if field.isEnabled():
-            if field.text() == '':
-                field.setText('0')
-            if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                field.setText(str(val))
 
             
     def update_object_pos(self):
@@ -666,9 +617,13 @@ class ObjectTab(QWidget):
                 field.setText(str(0.0))
                 field.editingFinished.emit()
             
-    
-
-    
+    def Slider_Update(self, val, field):
+        """Set Field value to slider value"""
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                field.setText(str(val))
         
 
 class PivotTab(QWidget):
@@ -732,8 +687,8 @@ class PivotTab(QWidget):
 
         self.Distance_Pivot_input_field.textEdited.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
         self.Distance_Pivot_input_field.editingFinished.connect(self.update_distance)
-        self.Distance_Pivot_input_field.setText("0")
-        self.Distance_Slider.setValue(0)
+        self.Distance_Pivot_input_field.setText("10")
+        self.Distance_Slider.setValue(10)
         #################
         self.Distance_Slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
         self.Distance_Slider.sliderReleased.connect(self.update_distance)
@@ -1410,14 +1365,8 @@ class Render(QWidget):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
 
-        self.i = 1
-
-
-        self.queue = []
-
-
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
-        self.GenerateRenders_Button.clicked.connect(self.renderQueueControl)
+        self.GenerateRenders_Button.clicked.connect(self.generate_render)
         
 
 
@@ -1489,7 +1438,6 @@ class Render(QWidget):
 
         self.render_preview_button = QPushButton("Render Preview", self)
         self.render_preview_button.clicked.connect(self.renderPreview)
-        
 
         self.rendering = False
 
@@ -1595,10 +1543,8 @@ class Render(QWidget):
                 self.Number_of_renders_input_field.setText(str(number_of_renders_value))
             self.Number_of_renders_input_field.editingFinished.emit()
 
-    def renderPreview(self): 
+    def renderPreview(self):
         if not self.rendering:
-            config = backend.get_config()
-            backend.set_runtime_config(config)
             self.rendering = True
             self.thread = RenderThreadPreview()
 
@@ -1606,7 +1552,6 @@ class Render(QWidget):
             self.thread.finished.connect(self.complete_loading)
 
             self.thread.start()
-            
             self.windowUp()
 
             self.thread.quit()
@@ -1615,38 +1560,25 @@ class Render(QWidget):
             renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
             renderingBox.exec()
 
-    def renderQueueControl(self):
-        if self.rendering:
-            config = backend.get_config()
-            self.queue.append(config)
 
-            renderingBox = QMessageBox()
-            renderingBox.setText("Added to queue.")
-            renderingBox.exec()
-
-
-        else:
-            config = backend.get_config()
-            self.queue.append(config)
-
-            self.generate_render()
-            self.render_preview_button.setEnabled(False)
-    
+        
     def generate_render(self):
-        self.rendering = True
-        newConfig = self.queue.pop(0)
-        backend.set_runtime_config(newConfig)
-        
-        self.newThread = RenderThread()
-        self.newThread.progress.connect(self.update_loading)
-        self.newThread.finished.connect(self.complete_loading)
-        self.GenerateRenders_Button.setText("Add render job to queue")
+        if not self.rendering:
+            self.rendering = True
+            self.thread = RenderThread()
 
+            self.thread.progress.connect(self.update_loading)
+            self.thread.finished.connect(self.complete_loading)
 
-        self.newThread.start()
-        self.windowUp()
+            self.thread.start()
+            self.windowUp()
+
+            self.thread.quit()
+        else:
+            renderingBox = QMessageBox()
+            renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
+            renderingBox.exec()
         
-    
     
     def windowUp(self):
         self.LoadingBox = LoadingScreen("")
@@ -1657,14 +1589,8 @@ class Render(QWidget):
         self.LoadingBox.update_text(text)
     
     def complete_loading(self):
-        self.newThread.quit()
-        if not self.queue:
-            self.rendering = False
-            self.LoadingBox.update_text("Rendering complete")
-            self.GenerateRenders_Button.setText("Generate Renders")
-            self.render_preview_button.setEnabled(True)
-        else:
-            self.generate_render()
+        self.rendering = False
+        self.LoadingBox.update_text("Rendering complete")
 
     def set_renders(self):
         try: 
@@ -1682,7 +1608,7 @@ class Port(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget, Scroll: QVBoxLayout):
         super().__init__(parent)
         
-        class ilyaMessageBox(QMessageBox):
+        class benMessageBox(QMessageBox):
                 def __init__(self, text, title):
                     super().__init__()
                     self.setText(text)
@@ -1709,6 +1635,9 @@ class Port(QWidget):
                     for path in paths:
                         obj = backend.RenderObject(filepath=path)
 
+                        shared_state.add_item(obj)
+
+
                         Name = os.path.basename(os.path.normpath(path))
                         shared_state.add_item(obj, Name)
                         Label = QLabel(Name)
@@ -1733,6 +1662,9 @@ class Port(QWidget):
                                 full_path = os.path.join(root, file)
                                 obj = backend.RenderObject(filepath=full_path)
 
+                                shared_state.add_item(obj)
+
+
                                 Name = os.path.basename(os.path.normpath(full_path))
                                 shared_state.add_item(obj, Name)
                                 Label = QLabel(Name)
@@ -1744,7 +1676,10 @@ class Port(QWidget):
 
 
 
+                success_box = benMessageBox("Object imported successfully.", "Success")
+
                 Object_detect(tab_widget)
+
 
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
@@ -1773,6 +1708,12 @@ class Port(QWidget):
             Name = self.GetName()
             try:
                 obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+
+                shared_state.add_item(obj)
+
+                success_box = benMessageBox("Object imported successfully.", "Success")
+                
+
                 if Name == "Object":
                     Name = f"{Name} {len(shared_state.itemNames)+1}"
                 shared_state.add_item(obj, Name)
@@ -1782,6 +1723,7 @@ class Port(QWidget):
                 Label.setMaximumHeight(40)
                 Label.setMinimumHeight(40)
                 Scroll.addWidget(Label)
+
                 
             except:
                 error_box = QMessageBox()
@@ -1789,7 +1731,7 @@ class Port(QWidget):
                 error_box.setText("Error loading tutorial object.")
                 error_box.exec()
 
-                error_box = ilyaMessageBox("Error loading tutorial object.", "Error")
+                error_box = benMessageBox("Error loading tutorial object.", "Error")
                 
     
             Object_detect(tab_widget)
@@ -1798,7 +1740,7 @@ class Port(QWidget):
         self.TutorialObjects_Button.clicked.connect(lambda: Tutorial_Object(Scroll))
 
         #Third Section --> LEFT FOR NOW
-        
+        self.BrowseFiles_Button = QPushButton('Generate Data Set', self)
 
         def Export_Settings():
             try:
@@ -1808,10 +1750,10 @@ class Port(QWidget):
                     pass
                 else:
                     backend.export(export_path)
-                    success_box = ilyaMessageBox("Setting exported successfully.", "Success")
+                    success_box = benMessageBox("Setting exported successfully.", "Success")
                    
             except:
-                error_box = ilyaMessageBox("There was an error selecting folder, please try again.", "Error")
+                error_box = benMessageBox("There was an error selecting folder, please try again.", "Error")
 
         #Fourth Section
         self.ExportSettings_Button = QPushButton('Export Settings', self)
@@ -1826,7 +1768,7 @@ class Port(QWidget):
                 for i in range(5):
                     tab_widget(i).update_ui_by_config()
 
-                success_box = ilyaMessageBox("Setting imported successfully.", "Success")
+                success_box = benMessageBox("Setting imported successfully.", "Success")
             except Exception:
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
@@ -1856,7 +1798,7 @@ class Port(QWidget):
                 scroll.itemAt(obj_index).widget().setParent(None)
                 try:
                     shared_state.remove_item(obj)
-                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
+                    success_box = benMessageBox("Object successfully deleted", "Success")
                     
                     del backend.get_config()["objects"][obj.object_pos]
                     # shift objects after this one down by one
@@ -1864,7 +1806,7 @@ class Port(QWidget):
                         obj = shared_state.items[i]
                         obj.object_pos = i
                 except:
-                    error_box = ilyaMessageBox("Error deleting object", "Error")
+                    error_box = benMessageBox("Error deleting object", "Error")
 
                 shared_state.items_updated.emit(shared_state.items)
                 # The last object was deleted
@@ -1885,10 +1827,10 @@ class Port(QWidget):
                     pass
                 else:
                     backend.set_render_output_folder(new_path)
-                    success_box = ilyaMessageBox("Render folder changed", "Success")
+                    success_box = benMessageBox("Render folder changed", "Success")
 
             except:
-                error_box = ilyaMessageBox("Error deleting object", "Error")
+                error_box = benMessageBox("Error deleting object", "Error")
 
         self.SelectRenderFolder_Button = QPushButton('Change Render Folder', self)
         self.SelectRenderFolder_Button.clicked.connect(select_render_folder)
@@ -1906,7 +1848,8 @@ class Port(QWidget):
         main_layout.addWidget(self.Delete_Object_Button, 0, 2)
         main_layout.addWidget(self.ExportSettings_Button, 0, 3)
         main_layout.addWidget(self.ImportSettings_Button, 0, 4)
-        main_layout.addWidget(self.SelectRenderFolder_Button, 0, 5)
+        main_layout.addWidget(self.BrowseFiles_Button, 0, 5)
+        main_layout.addWidget(self.SelectRenderFolder_Button, 0, 6)
 
         self.setLayout(main_layout)
         
@@ -1956,11 +1899,15 @@ class Lighting(QWidget):
         self.lighting_strength_input_field = QLineEdit(self)
         self.lighting_strength_input_field.setText("1")
         self.lighting_strength_input_field.textEdited.connect(lambda: self.Update_slider(self.strength_slider, self.lighting_strength_input_field.text()))
+        self.lighting_strength_input_field.editingFinished.connect(lambda: self.set_strength(self.lighting_strength_input_field.text()))
 
         self.strength_slider = QSlider(self)
         self.strength_slider.setRange(0,100)
+        self.strength_slider.setPageStep(0)
         self.strength_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.strength_slider.sliderMoved.connect(lambda val: self.set_strength(val, self.lighting_strength_input_field))
+        self.strength_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.lighting_strength_input_field))
+        self.strength_slider.sliderReleased.connect(lambda: self.set_strength(self.strength_slider.value()))
+
         ###
         
         ###
@@ -2031,35 +1978,43 @@ class Lighting(QWidget):
         self.Xlight_angle_label = QLabel("X:", self)
         self.Xlight_angle_input_field = QLineEdit(self)
         self.Xlight_angle_input_field.setText("0")
-        self.Xlight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Xlight_angle_slider, self.Xlight_angle_input_field.text()))
-
+        self.Xlight_angle_input_field.textEdited.connect((lambda: self.Update_slider(self.Xlight_angle_slider, self.Xlight_angle_input_field.text())))
+        self.Xlight_angle_input_field.editingFinished.connect(self.update_rotation)
 
         self.Xlight_angle_slider = QSlider(self)
         self.Xlight_angle_slider.setRange(0,359)
+        self.Xlight_angle_slider.setPageStep(0)
         self.Xlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Xlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Xlight_angle_input_field))
+        self.Xlight_angle_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Xlight_angle_input_field))
+        self.Xlight_angle_slider.sliderReleased.connect(self.update_rotation)
 
 
         ###
         self.Ylight_angle_label = QLabel("Y:", self)
         self.Ylight_angle_input_field = QLineEdit(self)
         self.Ylight_angle_input_field.setText("0")
-        self.Ylight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Ylight_angle_slider, self.Ylight_angle_input_field.text()))
+        self.Ylight_angle_input_field.textEdited.connect((lambda: self.Update_slider(self.Ylight_angle_slider, self.Ylight_angle_input_field.text())))
+        self.Ylight_angle_input_field.editingFinished.connect(self.update_rotation)
 
         self.Ylight_angle_slider = QSlider(self)
         self.Ylight_angle_slider.setRange(0,359)
+        self.Ylight_angle_slider.setPageStep(0)
         self.Ylight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Ylight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Ylight_angle_input_field))
+        self.Ylight_angle_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Ylight_angle_input_field))
+        self.Ylight_angle_slider.sliderReleased.connect(self.update_rotation)
         ###
         self.Zlight_angle_label = QLabel("Z:", self)
         self.Zlight_angle_input_field = QLineEdit(self)
         self.Zlight_angle_input_field.setText("0")
-        self.Zlight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Zlight_angle_slider, self.Zlight_angle_input_field.text()))
+        self.Zlight_angle_input_field.textEdited.connect((lambda: self.Update_slider(self.Zlight_angle_slider, self.Zlight_angle_input_field.text())))
+        self.Zlight_angle_input_field.editingFinished.connect(self.update_rotation)
 
         self.Zlight_angle_slider = QSlider(self)
         self.Zlight_angle_slider.setRange(0,359)
+        self.Zlight_angle_slider.setPageStep(0)
         self.Zlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Zlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Zlight_angle_input_field))
+        self.Zlight_angle_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Zlight_angle_input_field))
+        self.Zlight_angle_slider.sliderReleased.connect(self.update_rotation)
        
         self.light_type_label = QLabel("Type: ", self)
         self.light_type_combobox = QComboBox(self)
@@ -2130,11 +2085,11 @@ class Lighting(QWidget):
         self.light.set_type(self.light_type_combobox.currentText())
 
 
-    def set_strength(self, val, field):
-        self.Slider_Update(val, field)
+    def set_strength(self, val):
         try:
-            self.light.set_energy(float(field.text()))
+            self.light.set_energy(float(val))
         except:
+            print('Light strength could not be set')
             pass
 
 
@@ -2178,12 +2133,11 @@ class Lighting(QWidget):
         except:
             pass
 
-    def set_rotation(self, val, field):
-        self.Slider_Update(val, field)
+    def update_rotation(self):
 
-        x = self.Xlight_angle_input_field.text()
-        y = self.Ylight_angle_input_field.text()
-        z = self.Zlight_angle_input_field.text()
+        x = (self.Xlight_angle_input_field.text() or 0)
+        y = (self.Ylight_angle_input_field.text() or 0)
+        z = (self.Zlight_angle_input_field.text() or 0)
 
         self.light.set_rotation([float(x),float(z),float(y)])
         
@@ -2227,18 +2181,6 @@ class Lighting(QWidget):
         if float(field.text()) > val or float(field.text()) + 0.5 < val:
             field.setText(str(val))
     
-    def set_rotation_from_field(self, slider, val):
-        try:
-            self.Update_slider(slider, val)
-
-            x = self.Xlight_angle_input_field.text()
-            y = self.Ylight_angle_input_field.text()
-            z = self.Zlight_angle_input_field.text()
-            
-            self.light.set_rotation([float(x),float(z),float(y)])
-        except:
-            pass
-
 
     def Update_slider(self, slider, val):
         try:
