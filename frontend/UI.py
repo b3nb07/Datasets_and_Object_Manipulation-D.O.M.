@@ -1707,12 +1707,11 @@ class Port(QWidget):
 
             Name = self.GetName()
             try:
+
                 obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
 
-                shared_state.add_item(obj)
-
                 success_box = benMessageBox("Object imported successfully.", "Success")
-                
+                    
 
                 if Name == "Object":
                     Name = f"{Name} {len(shared_state.itemNames)+1}"
@@ -1726,11 +1725,6 @@ class Port(QWidget):
 
                 
             except:
-                error_box = QMessageBox()
-                error_box.setWindowTitle("Error")
-                error_box.setText("Error loading tutorial object.")
-                error_box.exec()
-
                 error_box = benMessageBox("Error loading tutorial object.", "Error")
                 
     
