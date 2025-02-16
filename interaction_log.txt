@@ -7,5 +7,4 @@ Radius of Light Source 1 changed to 0
 Type of Light Source 1 changed to POINT
 Location of Light Source 1 changed to [0, 0, 0]
 Object 1 object added
-Object 2 object added
-Object 3 object added
+Energy of Light Source 1 changed to 38.0
