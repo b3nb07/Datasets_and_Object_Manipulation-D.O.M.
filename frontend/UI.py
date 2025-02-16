@@ -8,7 +8,6 @@ from PyQt5.QtCore import QSettings
 
 
 import os
-import PyQt5
 from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox
 from PyQt5.QtCore import * 
 from PyQt5.QtGui import * 
@@ -49,16 +48,14 @@ class ComboBoxState(QObject):
     def __init__(self):
         super().__init__()
         self.items = [] # this will store what is in the combobox
-        self.itemNames = []
         self.selected = None
 
     def update_items(self, items):
         self.items = items
         self.items_updated.emit(items)  # Emit signal for item updates
 
-    def add_item(self, item, Name):
+    def add_item(self, item):
         self.items.append(item)
-        self.itemNames.append(Name)
         self.items_updated.emit(self.items)
 
     def remove_item(self, item):
@@ -66,17 +63,13 @@ class ComboBoxState(QObject):
         self.items_updated.emit(self.items)
 
     def remove_item(self, item):
-        pos = self.items.index(item)
         self.items.remove(item)
-        self.itemNames.remove(self.itemNames[pos])
         self.items_updated.emit(self.items)
 
     def update_selected(self, index):
         self.selected_index = index
         # maybe delete
         self.selection_changed.emit(index)
-
-
 class RenderThreadPreview(QThread):
     finished = pyqtSignal()
     progress = pyqtSignal(str)
@@ -114,13 +107,6 @@ class LoadingScreen(QDialog):
     def update_text(self, text):
         self.label.setText(text)
 
-class ilyaStorageBox:
-    def __init__(self, thread, config):
-        self.thread = thread
-        self.config = config
-
-
-
 # creates this shared state
 shared_state = ComboBoxState()
 
@@ -128,31 +114,24 @@ class TabDialog(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.setWindowTitle("Datasets and Object Modeling")
-        
-        ObjectsStatusBar = QScrollArea()
-        ObjectsStatusBar.setMaximumWidth(175)
-        
-        ObjectsStatusBar.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        ObjectsStatusBar.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        
-        content_widget = QWidget()
-        ObjLayout = QVBoxLayout(content_widget)
-        ObjLayout.setAlignment(Qt.AlignTop)
-        ObjectsStatusBar.setWidget(content_widget)
-        ObjectsStatusBar.setWidgetResizable(True)
-        
+        """
+        stream = QtCore.QFile("Style\DarkMode.qss")
+        stream.open(QtCore.QIODevice.ReadOnly)
+        self.setStyleSheet(QtCore.QTextStream(stream).readAll())
+        """
         tab_widget = QTabWidget()
 
         # Add all other tabs first
-        tab_widget.addTab(ObjectTab(self, tab_widget, ObjLayout), "Object")
+        tab_widget.addTab(ObjectTab(self, tab_widget), "Object")
         tab_widget.addTab(PivotTab(self), "Pivot Point")
         tab_widget.addTab(Render(self), "Render")
         tab_widget.addTab(Lighting(self), "Lighting")
  
         Temp_index = tab_widget.addTab(QWidget(), "Random")
-        tab_widget.addTab(Port(self, tab_widget, ObjLayout), "Import/Export")
+        tab_widget.addTab(Port(self, tab_widget), "Import/Export")
         tab_widget.addTab(Settings(self, tab_widget), "Settings")
-        
+
+
         random_tab = RandomTabDialog(self, tab_widget)
         tab_widget.removeTab(Temp_index)
         tab_widget.insertTab(Temp_index, random_tab, "Random")
@@ -167,34 +146,30 @@ class TabDialog(QWidget):
         tab_widget.setTabEnabled(3, False)
         tab_widget.setTabEnabled(4, False)
 
-        tab_widget.setMaximumHeight(225)
+        tab_widget.setFixedHeight(250)
         
         # enviroment
         environment = QWidget()
         environment.setStyleSheet("background-color: black;")
-
         self.setMinimumSize(1350, 700) # minimum size of program
-        main_layout = QGridLayout()
-        main_layout.addWidget(tab_widget, 0, 0, 1, 8)
-        
-        main_layout.addWidget(ObjectsStatusBar, 1, 0, 1, 2)
-        main_layout.addWidget(environment, 1, 1, 1, 7)  
+
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(tab_widget)
+        main_layout.addWidget(environment)
         self.setLayout(main_layout)
 
 
 class ObjectTab(QWidget):
-    def __init__(self, parent: QWidget, tab_widget: QTabWidget, Scroll: QVBoxLayout):
+    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
 
-        self.Object_pos_title = QLabel(f"Co-ords", self)
+        self.Object_pos_title = QLabel(f"Object 1 Co-ords", self)
 
         self.XObj_pos = QLabel("X:", self)
         self.XObj_pos_input_field = QLineEdit(parent=self)
         self.XObj_pos_input_field.setText("0.0")
         self.X_button_minus = QPushButton('-', self)
         self.X_button_plus = QPushButton('+', self)
-        
-        self.Object_pos_title.setToolTip('Changes the objects Position') 
 
         self.YObj_pos = QLabel("Y:", self)
         self.YObj_pos_input_field = QLineEdit(parent=self)
@@ -210,43 +185,37 @@ class ObjectTab(QWidget):
         self.Z_button_minus = QPushButton('-', self)
         self.Z_button_plus = QPushButton('+', self)
         ####################################################################
-        self.Object_scale_title = QLabel(f"Scale", self)
-        
-        self.Object_scale_title.setToolTip('Changes the objects scale')
+        self.Object_scale_title = QLabel(f"Object 1 Scale", self)
 
         self.Width_Obj_pos = QLabel("Width:", self)
         self.Width_Obj_pos_input_field = QLineEdit(parent=self)
         
-        self.Width_Obj_pos_input_field.setText("1.0")
+        self.Width_Obj_pos_input_field.setText("0.0")
         
         self.W_slider = QtWidgets.QSlider(self)
-        self.W_slider.setRange(0, 950)
+        self.W_slider.setRange(-100, 100)
         self.W_slider.setPageStep(0)
         self.W_slider.setOrientation(QtCore.Qt.Horizontal)
 
         self.Height_Obj_pos = QLabel("Height:", self)
         self.Height_Obj_pos_input_field = QLineEdit(parent=self)
-        self.Height_Obj_pos_input_field.setText("1.0")
+        self.Height_Obj_pos_input_field.setText("0.0")
 
         self.H_slider = QtWidgets.QSlider(self)
-        self.H_slider.setRange(0, 950)
+        self.H_slider.setRange(-100, 100)
         self.H_slider.setPageStep(0)
         self.H_slider.setOrientation(QtCore.Qt.Horizontal)
         
         self.Length_Obj_pos = QLabel("Length:", self)
         self.Length_Obj_pos_input_field = QLineEdit(parent=self)
-        self.Length_Obj_pos_input_field.setText("1.0")
+        self.Length_Obj_pos_input_field.setText("0.0")
 
         self.L_slider = QtWidgets.QSlider(self)
-        self.L_slider.setRange(0, 950)
+        self.L_slider.setRange(-100, 100)
         self.L_slider.setPageStep(0)
         self.L_slider.setOrientation(QtCore.Qt.Horizontal)
-        
-        #########################################
 
-        self.Object_rotation_title = QLabel(f"Rotation", self)
-        
-        self.Object_rotation_title.setToolTip('Changes the objects rotation')
+        self.Object_rotation_title = QLabel(f"Object 1 Rotation", self)
 
         self.X_Rotation_Label = QLabel("Roll:", self)
         self.X_Rotation_input_field = QLineEdit(parent=self)
@@ -275,67 +244,40 @@ class ObjectTab(QWidget):
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
         self.Z_Rotation.setRange(0, 360)
 
-        #First Section
-        def Get_Object_Filepath(Scroll):
-            import_box = QMessageBox()
-            import_box.setText("How would you like to import objects?")
-            import_box.addButton("Import Files", QMessageBox.ActionRole)
-            import_box.addButton("Folder", QMessageBox.ActionRole)
-            import_box.addButton("Cancel", QMessageBox.RejectRole)
-            
-            import_box.exec()
-            clicked_button = import_box.clickedButton().text()
-            
+        def Get_Object_Filepath():
             try:
-                if clicked_button == "Import Files":
-                    paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
-                    if not paths:
-                        return
-                    
-                    for path in paths:
-                        obj = backend.RenderObject(filepath=path)
-                        Name = os.path.basename(os.path.normpath(path))
-                        shared_state.add_item(obj, Name)
-                        Label = QLabel(Name)
-                        Label.setStyleSheet("border: 1px solid black;")
-                        Label.setAlignment(QtCore.Qt.AlignCenter)
-                        Label.setMaximumHeight(40)
-                        Label.setMinimumHeight(40)
-                        Scroll.addWidget(Label)
-
-                elif clicked_button == "Folder":
-                    folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
-                    if not folder_path:
-                        return
-                    
-                    # maybe have a global constant of supported extensions?
-                    supported_extensions = ['.blend', '.stl', '.obj']
-                    # go through each file in directory
-                    for root, _, files in os.walk(folder_path):
-                        for file in files:
-                            if any(file.lower().endswith(ext) for ext in supported_extensions):
-                                full_path = os.path.join(root, file)
-                                obj = backend.RenderObject(filepath=full_path)
-                                Name = os.path.basename(os.path.normpath(full_path))
-                                shared_state.add_item(obj, Name)
-                                Label = QLabel(Name)
-                                Label.setStyleSheet("border: 1px solid black;")
-                                Label.setAlignment(QtCore.Qt.AlignCenter)
-                                Label.setMaximumHeight(40)
-                                Label.setMinimumHeight(40)
-                                Scroll.addWidget(Label)
-
-
+                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
+                if (path == ""): return
+                # add the object to the shared state
+                shared_state.add_item(backend.RenderObject(filepath = path))
+                
                 Object_detect(tab_widget)
 
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
-                
-            except Exception as e:
-                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
 
-        self.Import_Object_Button = QPushButton("Import Objects", self)
-        self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
+        self.Import_Object_Button = QPushButton("Import Object", self)
+        self.Import_Object_Button.clicked.connect(Get_Object_Filepath)
+
+        def Tutorial_Object():
+            Tutorial_Box = QMessageBox()
+            Tutorial_Box.setText("Please select a tutorial object from below")
+            Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Cylinder", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Cone", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
+            Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
+            Tutorial_Box.addButton(QMessageBox.Cancel)
+
+            Tutorial_Box.exec()
+            obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+            shared_state.add_item(obj)
+
+            Object_detect(tab_widget)
+
+        self.TutorialObjects_Button = QPushButton('Tutorial Objects', self)
+        self.TutorialObjects_Button.clicked.connect(Tutorial_Object)
     
         def delete_object(tab_widget):
             to_delete = QMessageBox()
@@ -375,15 +317,14 @@ class ObjectTab(QWidget):
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
-        shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
+        shared_state.items_updated.connect(self.update_combo_box_items)
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
+        self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
-        
-        self.combo_box.setToolTip('Changes the object selected')
 
         ####################################################
 
@@ -438,8 +379,9 @@ class ObjectTab(QWidget):
 
         main_layout.addWidget(self.combo_box, 0, 9)
 
-        main_layout.addWidget(self.Import_Object_Button, 4, 8)
-        main_layout.addWidget(self.Delete_Object_Button, 4, 9)
+        main_layout.addWidget(self.Import_Object_Button, 4, 9)
+        main_layout.addWidget(self.TutorialObjects_Button, 4, 8)
+        main_layout.addWidget(self.Delete_Object_Button, 5, 9)
 
         self.setLayout(main_layout)
 
@@ -462,9 +404,9 @@ class ObjectTab(QWidget):
         self.Z_button_plus.clicked.connect(lambda: self.Plus_click(self.ZObj_pos_input_field))
         self.Z_button_minus.clicked.connect(lambda: self.Minus_click(self.ZObj_pos_input_field))
 
-        self.Width_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider_Scale(self.W_slider, self.Width_Obj_pos_input_field.text()))
-        self.Height_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider_Scale(self.H_slider, self.Height_Obj_pos_input_field.text()))
-        self.Length_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider_Scale(self.L_slider, self.Length_Obj_pos_input_field.text()))
+        self.Width_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.W_slider, self.Width_Obj_pos_input_field.text()))
+        self.Height_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.H_slider, self.Height_Obj_pos_input_field.text()))
+        self.Length_Obj_pos_input_field.textEdited.connect(lambda: self.Update_slider(self.L_slider, self.Length_Obj_pos_input_field.text()))
 
         # editingFinished callbacks that updates backend
         self.Width_Obj_pos_input_field.editingFinished.connect(self.update_object_scale)
@@ -473,9 +415,9 @@ class ObjectTab(QWidget):
 
         ########################################
         
-        self.W_slider.sliderMoved.connect(lambda val: self.Slider_Update_Scale(val, self.Width_Obj_pos_input_field))
-        self.H_slider.sliderMoved.connect(lambda val: self.Slider_Update_Scale(val, self.Height_Obj_pos_input_field))
-        self.L_slider.sliderMoved.connect(lambda val: self.Slider_Update_Scale(val, self.Length_Obj_pos_input_field))
+        self.W_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Width_Obj_pos_input_field))
+        self.H_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Height_Obj_pos_input_field))
+        self.L_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Length_Obj_pos_input_field))
 
         self.W_slider.sliderReleased.connect(self.update_object_scale)
         self.H_slider.sliderReleased.connect(self.update_object_scale)
@@ -506,6 +448,7 @@ class ObjectTab(QWidget):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
         self.combo_box.addItems(map(lambda o: str(o), items))
+        self.combo_box.activated.connect(self.update_label)
 
     def update_ui_by_config(self):
         """ Method that updates attributes in text field when the object index is change from combo box. """
@@ -530,9 +473,9 @@ class ObjectTab(QWidget):
         self.Y_Rotation_input_field.setText(str(selected_object["rot"][1]))
         self.Z_Rotation_input_field.setText(str(selected_object["rot"][2]))
         
-        self.Update_slider_Scale(self.W_slider,self.Width_Obj_pos_input_field.text())
-        self.Update_slider_Scale(self.H_slider,self.Height_Obj_pos_input_field.text())
-        self.Update_slider_Scale(self.L_slider,self.Length_Obj_pos_input_field.text())
+        self.Update_slider(self.W_slider,self.Width_Obj_pos_input_field.text())
+        self.Update_slider(self.H_slider,self.Height_Obj_pos_input_field.text())
+        self.Update_slider(self.L_slider,self.Length_Obj_pos_input_field.text())
         self.Update_slider(self.X_Rotation,self.X_Rotation_input_field.text())
         self.Update_slider(self.Y_Rotation,self.Y_Rotation_input_field.text())
         self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
@@ -546,46 +489,6 @@ class ObjectTab(QWidget):
                 slider.setValue(0)
             except:
                 print("Error", e)
-    
-    def Update_slider_Scale(self, slider, val):
-        try:
-            val = float(val)
-            if val < 500:
-                slider.setValue(int(round(float(val * 500), 0)))
-            else:
-                slider.setValue(int(round(float( (val * 50) + 450), 0)))
-        except Exception as e:
-            try:
-                slider.setValue(0)
-            except:
-                print("Error", e)
-    
-    def Slider_Update_Scale(self, val, field):
-        if field.isEnabled():
-            if field.text() == '':
-                field.setText('0')
-            if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                if val < 500: # <1 true
-                    trueValStr = str(val / 500)
-                    if len(trueValStr) > 4:
-                        field.setText(trueValStr[0:4])
-                    else:
-                        field.setText(trueValStr)
-
-                else: # >1 true
-                    trueValStr = str((val - 450) / 50)
-                    if len(trueValStr) > 3:
-                        field.setText(trueValStr[0:3])
-                    else:
-                        field.setText(trueValStr)
-
-    def Slider_Update(self, val, field):
-        """Set Field value to slider value"""
-        if field.isEnabled():
-            if field.text() == '':
-                field.setText('0')
-            if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                field.setText(str(val))
 
             
     def update_object_pos(self):
@@ -600,7 +503,6 @@ class ObjectTab(QWidget):
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
             #call backend function   
-            shared_state.itemNames[selected_object_index]
             obj = shared_state.items[selected_object_index]
             #print(obj)
             obj.set_loc(location)
@@ -617,7 +519,6 @@ class ObjectTab(QWidget):
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
-            shared_state.itemNames[selected_object_index]
             obj = shared_state.items[selected_object_index]
             #print(obj)
             obj.set_scale(scale)
@@ -635,7 +536,6 @@ class ObjectTab(QWidget):
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
-            shared_state.itemNames[selected_object_index]
             obj = shared_state.items[selected_object_index]
             #print(obj)
             obj.set_rotation(rotation)
@@ -666,10 +566,23 @@ class ObjectTab(QWidget):
                 field.setText(str(0.0))
                 field.editingFinished.emit()
             
-    
-
-    
+    def Slider_Update(self, val, field):
+        """Set Field value to slider value"""
+        if field.isEnabled():
+            if field.text() == '':
+                field.setText('0')
+            if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                field.setText(str(val))
         
+        
+    def update_label(self):
+        """Updates labels on object change"""
+        AllItems = [self.combo_box.itemText(i) for i in range(self.combo_box.count())]
+        n = self.combo_box.currentIndex()
+        Title = AllItems[n]
+        self.Object_pos_title.setText(f"{Title} Co-ords")
+        self.Object_scale_title.setText(f"{Title} Scale")
+        self.Object_rotation_title.setText(f"{Title} Rotation")
 
 class PivotTab(QWidget):
     def __init__(self, parent: QWidget):
@@ -681,7 +594,6 @@ class PivotTab(QWidget):
         self.Pivot_Point_Check.setChecked(True)
         self.Pivot_Point_Check.stateChanged.connect(lambda: self.state_changed(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
 
-        self.Pivot_Point_Check.setToolTip('Custom pivot point values')
         # X Pivot Point Controls
         self.XPivot_pos = QLabel("X:", self)
         self.XPivot_point_input_field = QLineEdit(parent=self)
@@ -723,8 +635,6 @@ class PivotTab(QWidget):
         self.Distance_Pivot_input_field = QLineEdit(parent=self)
         self.Distance_Pivot_input_field.setText("0")
         
-        self.Distance_Pivot.setToolTip('Changes Distance from camrea to object')
-        
         self.Distance_Slider = QtWidgets.QSlider(self)
         self.Distance_Slider.setPageStep(0)
         self.Distance_Slider.setOrientation(QtCore.Qt.Horizontal)
@@ -732,8 +642,8 @@ class PivotTab(QWidget):
 
         self.Distance_Pivot_input_field.textEdited.connect(lambda: self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text()))
         self.Distance_Pivot_input_field.editingFinished.connect(self.update_distance)
-        self.Distance_Pivot_input_field.setText("0")
-        self.Distance_Slider.setValue(0)
+        self.Distance_Pivot_input_field.setText("10")
+        self.Distance_Slider.setValue(10)
         #################
         self.Distance_Slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Distance_Pivot_input_field))
         self.Distance_Slider.sliderReleased.connect(self.update_distance)
@@ -750,16 +660,14 @@ class PivotTab(QWidget):
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
-        shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
+        shared_state.items_updated.connect(self.update_combo_box_items)
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         self.combo_box.activated.connect(lambda: self.Object_pivot_selected(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
         
         # initialise items
-        self.update_combo_box_items(shared_state.itemNames)
+        self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
-        
-        self.combo_box.setToolTip('Changes the object selected')
 
         #################
         main_layout = QGridLayout()
@@ -915,13 +823,11 @@ class RandomDefault(QWidget):
         super().__init__(parent)
 
         main_layout = QGridLayout()
-        Field = QCheckBox("Set ALL RANDOM", self)
-        Field.setToolTip('Sets all elements on all pages to random') 
+        Field = QCheckBox("Set ALL", self)
 
         SetSetCheck = QCheckBox("Set per SET")
-        SetSetCheck.setToolTip('Each selected field is randomly generated and its value is maintained throughout the entire set generation.') 
         SetFrameCheck = QCheckBox("Set per FRAME")
-        SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
+        
         RandomSeed = QLineEdit("", self)
         RandomSeed.setText(str(backend.get_config()["seed"]))
         RandomSeed.setMaximumWidth(200)
@@ -973,7 +879,6 @@ class RandomDefault(QWidget):
             field.setText(str(val))
         except ValueError:
             field.setText(str(backend.get_config()["seed"]))
-            field.setToolTip('Random seed') 
                             
 class RandomObject(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
@@ -988,12 +893,12 @@ class RandomObject(QWidget):
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
-        shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
+        shared_state.items_updated.connect(self.update_combo_box_items)
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
-        self.update_combo_box_items(shared_state.itemNames)
+        self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
         
@@ -1025,9 +930,6 @@ class RandomObject(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
-        
-        Field_LowerBound.setToolTip('LowerBound') 
-        Field_UpperBound.setToolTip('UpperBound') 
 
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
@@ -1102,12 +1004,12 @@ class RandomPivot(QWidget):
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
-        shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
+        shared_state.items_updated.connect(self.update_combo_box_items)
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
-        self.update_combo_box_items(shared_state.itemNames)
+        self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
 
@@ -1131,9 +1033,6 @@ class RandomPivot(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
-        
-        Field_LowerBound.setToolTip('LowerBound') 
-        Field_UpperBound.setToolTip('UpperBound') 
 
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
@@ -1203,12 +1102,12 @@ class RandomRender(QWidget):
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
-        shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
+        shared_state.items_updated.connect(self.update_combo_box_items)
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
-        self.update_combo_box_items(shared_state.itemNames)
+        self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
 
@@ -1232,9 +1131,6 @@ class RandomRender(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
-        
-        Field_LowerBound.setToolTip('LowerBound') 
-        Field_UpperBound.setToolTip('UpperBound') 
 
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
@@ -1293,7 +1189,7 @@ class RandomRender(QWidget):
 
 
 class RandomLight(QWidget):
-    def __init__(self, parent: QWidget, ParentTab: QTabWidget):
+    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
 
         self.CheckBoxes = {}
@@ -1305,12 +1201,12 @@ class RandomLight(QWidget):
         # create initial combo_box
         self.combo_box = QComboBox(self)
         # connecting shared state updates to combo box
-        shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
+        shared_state.items_updated.connect(self.update_combo_box_items)
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
-        self.update_combo_box_items(shared_state.itemNames)
+        self.update_combo_box_items(shared_state.items)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
 
@@ -1321,36 +1217,33 @@ class RandomLight(QWidget):
              self.set_all_random(main_layout, main_layout.itemAtPosition(1, 12).widget().isChecked()))
 
         main_layout.addWidget(QLabel("Co-ords:", self), 0, 0)
-        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 5, 1))
-        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 5, 2))
-        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 5, 3))
+        self.gen_field("X", main_layout, 0, 1)
+        self.gen_field("Y", main_layout, 0, 2)
+        self.gen_field("Z", main_layout, 0, 3)
 
         main_layout.addWidget(QLabel("Angle", self), 0, 3)
-        self.gen_field("Pitch", main_layout, 3, 1, self.connFields(ParentTab, 9, 1))
-        self.gen_field("Roll", main_layout, 3, 2, self.connFields(ParentTab, 9, 2))
-        self.gen_field("Yaw", main_layout, 3, 3, self.connFields(ParentTab, 9, 3))
+        self.gen_field("Pitch", main_layout, 3, 1)
+        self.gen_field("Roll", main_layout, 3, 2)
+        self.gen_field("Yaw", main_layout, 3, 3)
         
         main_layout.addWidget(QLabel("Angle", self), 0, 7)
-        self.gen_field("Strength", main_layout, 6, 1, self.connFields(ParentTab, 1, 0))
-        self.gen_field("Radius", main_layout, 6, 2, self.connFields(ParentTab, 1, 2))
-        self.gen_field("Colour", main_layout, 6, 3, self.connFields(ParentTab, 2, 1))
+        self.gen_field("Strength", main_layout, 6, 1)
+        self.gen_field("Radius", main_layout, 6, 2)
+        self.gen_field("Colour", main_layout, 6, 3)
 
-        #self.gen_field("BackGround", main_layout, 9, 1)
+        self.gen_field("BackGround", main_layout, 9, 1)
 
         #print(main_layout.itemAtPosition(0, 0).widget().setText("Electric boogalo"))
         #how to change values
 
         self.setLayout(main_layout)
-        
-    def gen_field(self, Fieldname, Layout, X, Y, ConField):
+
+    def gen_field(self, Fieldname, Layout, X, Y):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
-        
-        Field_LowerBound.setToolTip('LowerBound') 
-        Field_UpperBound.setToolTip('UpperBound') 
 
-        self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
+        self.addCheck(Field, Fieldname, Layout, X, Y)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
@@ -1359,11 +1252,6 @@ class RandomLight(QWidget):
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
 
-    def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
-        Layout.addWidget(Field, Y, X)
-        self.CheckBoxes[f"{Layout.itemAtPosition(0, 12).widget().currentText()}{Fieldname}"] = (X, Y)
-        Layout.itemAtPosition(Y, X).widget().toggled.connect(lambda: self.setAbled(ConField, Layout.itemAtPosition(Y, X).widget().isChecked()))
-    
     def validation(self, Field):
         if Field.isEnabled():
             """Updates field value"""
@@ -1373,12 +1261,9 @@ class RandomLight(QWidget):
             except:
                 Field.setText("")
 
-    def setAbled(self, Field, State):
-        """Connect Checkbox to correlating page field"""
-        Field.setEnabled(not State)
-        
-    def connFields(self, ParentTab, X, Y):
-        return ParentTab.widget(3).layout().itemAtPosition(Y, X).widget()
+    def addCheck(self, Field, Fieldname, Layout, X, Y):
+        Layout.addWidget(Field, Y, X)
+        self.CheckBoxes[f"{Layout.itemAtPosition(0, 12).widget().currentText()}{Fieldname}"] = (X, Y)
 
     def addLower(self, Field, Fieldname, Layout, X, Y):
         Layout.addWidget(Field, Y, X)
@@ -1410,14 +1295,8 @@ class Render(QWidget):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
 
-        self.i = 1
-
-
-        self.queue = []
-
-
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
-        self.GenerateRenders_Button.clicked.connect(self.renderQueueControl)
+        self.GenerateRenders_Button.clicked.connect(self.generate_render)
         
 
 
@@ -1434,7 +1313,6 @@ class Render(QWidget):
         self.Number_of_renders_plus.clicked.connect(self.increase_count)
 
         self.Degree_Change_title = QLabel("Degrees of Change", self)
-        self.Degree_Change_title.setToolTip('Changes the degrees changed per Frame')
 
         # X Degree
         self.X_Degree_Label = QLabel("X:", self)
@@ -1484,12 +1362,9 @@ class Render(QWidget):
         self.unlimited_render_button = QPushButton("Unlimited Renders", self)
         self.unlimited_render_button.setCheckable(True)
         self.unlimited_render_button.clicked.connect(self.unlimitedrender)
-        
-        self.unlimited_render_button.setToolTip('Generates Frames until interupted')
 
         self.render_preview_button = QPushButton("Render Preview", self)
         self.render_preview_button.clicked.connect(self.renderPreview)
-        
 
         self.rendering = False
 
@@ -1595,10 +1470,8 @@ class Render(QWidget):
                 self.Number_of_renders_input_field.setText(str(number_of_renders_value))
             self.Number_of_renders_input_field.editingFinished.emit()
 
-    def renderPreview(self): 
+    def renderPreview(self):
         if not self.rendering:
-            config = backend.get_config()
-            backend.set_runtime_config(config)
             self.rendering = True
             self.thread = RenderThreadPreview()
 
@@ -1606,7 +1479,6 @@ class Render(QWidget):
             self.thread.finished.connect(self.complete_loading)
 
             self.thread.start()
-            
             self.windowUp()
 
             self.thread.quit()
@@ -1615,38 +1487,25 @@ class Render(QWidget):
             renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
             renderingBox.exec()
 
-    def renderQueueControl(self):
-        if self.rendering:
-            config = backend.get_config()
-            self.queue.append(config)
 
-            renderingBox = QMessageBox()
-            renderingBox.setText("Added to queue.")
-            renderingBox.exec()
-
-
-        else:
-            config = backend.get_config()
-            self.queue.append(config)
-
-            self.generate_render()
-            self.render_preview_button.setEnabled(False)
-    
+        
     def generate_render(self):
-        self.rendering = True
-        newConfig = self.queue.pop(0)
-        backend.set_runtime_config(newConfig)
-        
-        self.newThread = RenderThread()
-        self.newThread.progress.connect(self.update_loading)
-        self.newThread.finished.connect(self.complete_loading)
-        self.GenerateRenders_Button.setText("Add render job to queue")
+        if not self.rendering:
+            self.rendering = True
+            self.thread = RenderThread()
 
+            self.thread.progress.connect(self.update_loading)
+            self.thread.finished.connect(self.complete_loading)
 
-        self.newThread.start()
-        self.windowUp()
+            self.thread.start()
+            self.windowUp()
+
+            self.thread.quit()
+        else:
+            renderingBox = QMessageBox()
+            renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
+            renderingBox.exec()
         
-    
     
     def windowUp(self):
         self.LoadingBox = LoadingScreen("")
@@ -1657,14 +1516,8 @@ class Render(QWidget):
         self.LoadingBox.update_text(text)
     
     def complete_loading(self):
-        self.newThread.quit()
-        if not self.queue:
-            self.rendering = False
-            self.LoadingBox.update_text("Rendering complete")
-            self.GenerateRenders_Button.setText("Generate Renders")
-            self.render_preview_button.setEnabled(True)
-        else:
-            self.generate_render()
+        self.rendering = False
+        self.LoadingBox.update_text("Rendering complete")
 
     def set_renders(self):
         try: 
@@ -1679,10 +1532,11 @@ class Render(QWidget):
             print("Error")
 
 class Port(QWidget):
-    def __init__(self, parent: QWidget, tab_widget: QTabWidget, Scroll: QVBoxLayout):
+    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
+
         
-        class ilyaMessageBox(QMessageBox):
+        class benMessageBox(QMessageBox):
                 def __init__(self, text, title):
                     super().__init__()
                     self.setText(text)
@@ -1690,36 +1544,27 @@ class Port(QWidget):
                     self.exec()
 
         #First Section
-        def Get_Object_Filepath(Scroll):
+        def Get_Object_Filepath():
             import_box = QMessageBox()
             import_box.setText("How would you like to import objects?")
-            import_box.addButton("Import Files", QMessageBox.ActionRole)
-            import_box.addButton("Folder", QMessageBox.ActionRole)
+            import_box.addButton("Multiple Files", QMessageBox.ActionRole)
+            import_box.addButton("Entire Folder", QMessageBox.ActionRole)
             import_box.addButton("Cancel", QMessageBox.RejectRole)
             
             import_box.exec()
             clicked_button = import_box.clickedButton().text()
             
             try:
-                if clicked_button == "Import Files":
+                if clicked_button == "Multiple Files":
                     paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
                     if not paths:
                         return
                     
                     for path in paths:
                         obj = backend.RenderObject(filepath=path)
+                        shared_state.add_item(obj)
 
-                        Name = os.path.basename(os.path.normpath(path))
-                        shared_state.add_item(obj, Name)
-                        Label = QLabel(Name)
-                        Label.setStyleSheet("border: 1px solid black;")
-                        Label.setAlignment(QtCore.Qt.AlignCenter)
-                        Label.setMaximumHeight(40)
-                        Label.setMinimumHeight(40)
-                        Scroll.addWidget(Label)
-
-                elif clicked_button == "Folder":
-
+                elif clicked_button == "Entire Folder":
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
                     if not folder_path:
                         return
@@ -1732,19 +1577,12 @@ class Port(QWidget):
                             if any(file.lower().endswith(ext) for ext in supported_extensions):
                                 full_path = os.path.join(root, file)
                                 obj = backend.RenderObject(filepath=full_path)
-
-                                Name = os.path.basename(os.path.normpath(full_path))
-                                shared_state.add_item(obj, Name)
-                                Label = QLabel(Name)
-                                Label.setStyleSheet("border: 1px solid black;")
-                                Label.setAlignment(QtCore.Qt.AlignCenter)
-                                Label.setMaximumHeight(40)
-                                Label.setMinimumHeight(40)
-                                Scroll.addWidget(Label)
-
+                                shared_state.add_item(obj)
 
 
                 Object_detect(tab_widget)
+
+                success_box = benMessageBox("Object imported successfully.", "Success")
 
             except Exception:
                 QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
@@ -1754,10 +1592,10 @@ class Port(QWidget):
                 QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
                 
         self.Import_Object_Button = QPushButton("Import Objects", self)
-        self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
+        self.Import_Object_Button.clicked.connect(Get_Object_Filepath)
 
         #Second Section
-        def Tutorial_Object(Scroll):
+        def Tutorial_Object():
             Tutorial_Box = QMessageBox()
             Tutorial_Box.setText("Please select a tutorial object from below")
             Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
@@ -1770,18 +1608,12 @@ class Port(QWidget):
 
             Tutorial_Box.exec()
 
-            Name = self.GetName()
             try:
                 obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-                if Name == "Object":
-                    Name = f"{Name} {len(shared_state.itemNames)+1}"
-                shared_state.add_item(obj, Name)
-                Label = QLabel(Name)
-                Label.setStyleSheet("border: 1px solid black;")
-                Label.setAlignment(QtCore.Qt.AlignCenter)
-                Label.setMaximumHeight(40)
-                Label.setMinimumHeight(40)
-                Scroll.addWidget(Label)
+                shared_state.add_item(obj)
+
+                success_box = benMessageBox("Object imported successfully.", "Success")
+                
                 
             except:
                 error_box = QMessageBox()
@@ -1789,16 +1621,16 @@ class Port(QWidget):
                 error_box.setText("Error loading tutorial object.")
                 error_box.exec()
 
-                error_box = ilyaMessageBox("Error loading tutorial object.", "Error")
+                error_box = benMessageBox("Error loading tutorial object.", "Error")
                 
     
             Object_detect(tab_widget)
 
         self.TutorialObjects_Button = QPushButton('Tutorial Objects', self)
-        self.TutorialObjects_Button.clicked.connect(lambda: Tutorial_Object(Scroll))
+        self.TutorialObjects_Button.clicked.connect(Tutorial_Object)
 
         #Third Section --> LEFT FOR NOW
-        
+        self.BrowseFiles_Button = QPushButton('Generate Data Set', self)
 
         def Export_Settings():
             try:
@@ -1808,10 +1640,12 @@ class Port(QWidget):
                     pass
                 else:
                     backend.export(export_path)
-                    success_box = ilyaMessageBox("Setting exported successfully.", "Success")
+                    success_box = benMessageBox("Setting exported successfully.", "Success")
                    
+
+
             except:
-                error_box = ilyaMessageBox("There was an error selecting folder, please try again.", "Error")
+                error_box = benMessageBox("There was an error selecting folder, please try again.", "Error")
 
         #Fourth Section
         self.ExportSettings_Button = QPushButton('Export Settings', self)
@@ -1823,10 +1657,11 @@ class Port(QWidget):
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0]
                 if (path == ""): return
                 backend = Backend(json_filepath = path)
-                for i in range(5):
+                for i in range(4):
+                    #self.path.tabwizard.widget(i).update_ui_by_config()
                     tab_widget(i).update_ui_by_config()
 
-                success_box = ilyaMessageBox("Setting imported successfully.", "Success")
+                success_box = benMessageBox("Setting imported successfully.", "Success")
             except Exception:
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
@@ -1834,15 +1669,15 @@ class Port(QWidget):
         self.ImportSettings_Button = QPushButton('Import Settings', self)
         self.ImportSettings_Button.clicked.connect(lambda: Get_Settings_Filepath(tab_widget))
 
-        def delete_object(tab_widget, scroll):
+        def delete_object(tab_widget):
             to_delete = QMessageBox()
             to_delete.setText("Please select an object to remove from below")
 
             if (not shared_state.items):
                 return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
 
-            for i in range(len(shared_state.itemNames)):
-                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
+            for obj in shared_state.items:
+                to_delete.addButton(str(obj), QMessageBox.ActionRole)
             
             to_delete.addButton("Cancel", QMessageBox.ActionRole)
 
@@ -1851,12 +1686,12 @@ class Port(QWidget):
             choice = str(to_delete.clickedButton().text())
 
             if choice != "Cancel":
-                obj_index = shared_state.itemNames.index(choice)
+                
+                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
                 obj = shared_state.items[obj_index]
-                scroll.itemAt(obj_index).widget().setParent(None)
                 try:
                     shared_state.remove_item(obj)
-                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
+                    success_box = benMessageBox("Object successfully deleted", "Success")
                     
                     del backend.get_config()["objects"][obj.object_pos]
                     # shift objects after this one down by one
@@ -1864,7 +1699,7 @@ class Port(QWidget):
                         obj = shared_state.items[i]
                         obj.object_pos = i
                 except:
-                    error_box = ilyaMessageBox("Error deleting object", "Error")
+                    error_box = benMessageBox("Error deleting object", "Error")
 
                 shared_state.items_updated.emit(shared_state.items)
                 # The last object was deleted
@@ -1874,10 +1709,14 @@ class Port(QWidget):
     
         #Sixth section
         self.Delete_Object_Button = QPushButton('Delete Object', self)
-        self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
+
+        self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget))
         
         
-        def select_render_folder():        
+        def select_render_folder():
+            
+
+                    
             try:
                 new_path = QFileDialog.getExistingDirectory(self, "Select Folder")
 
@@ -1885,13 +1724,15 @@ class Port(QWidget):
                     pass
                 else:
                     backend.set_render_output_folder(new_path)
-                    success_box = ilyaMessageBox("Render folder changed", "Success")
+                    success_box = benMessageBox("Render folder changed", "Success")
 
             except:
-                error_box = ilyaMessageBox("Error deleting object", "Error")
+                error_box = benMessageBox("Error deleting object", "Error")
 
         self.SelectRenderFolder_Button = QPushButton('Change Render Folder', self)
         self.SelectRenderFolder_Button.clicked.connect(select_render_folder)
+
+
 
 
         def Object_detect(tab_widget):
@@ -1906,16 +1747,10 @@ class Port(QWidget):
         main_layout.addWidget(self.Delete_Object_Button, 0, 2)
         main_layout.addWidget(self.ExportSettings_Button, 0, 3)
         main_layout.addWidget(self.ImportSettings_Button, 0, 4)
-        main_layout.addWidget(self.SelectRenderFolder_Button, 0, 5)
+        main_layout.addWidget(self.BrowseFiles_Button, 0, 5)
+        main_layout.addWidget(self.SelectRenderFolder_Button, 0, 6)
 
         self.setLayout(main_layout)
-        
-    def GetName(self):
-        ObjName, State = QtWidgets.QInputDialog.getText(self, 'Object Name', "Enter Object Name: ")
-        if State and ObjName != "":
-            return ObjName
-        else:
-            return "Object"
 
 
 
@@ -1937,7 +1772,6 @@ class Lighting(QWidget):
         self.colour_label = QLabel("Colour:", self)
         self.colour_select_button = QPushButton("Select colour", self)
         self.colour_select_button.clicked.connect(self.getColour)
-        self.colour_label.setToolTip('Object lighting Colour')
 
         self.lighting_colour = QLineEdit(self) #f789886 & bullshit
         self.lighting_colour.textEdited.connect(lambda: self.update_colour_example_text(self.lighting_colour.text()))
@@ -1952,20 +1786,22 @@ class Lighting(QWidget):
 
         ###
         self.lighting_strength_label = QLabel("Strength: ", self)
-        self.lighting_strength_label.setToolTip('Strength of lighting element')
         self.lighting_strength_input_field = QLineEdit(self)
         self.lighting_strength_input_field.setText("1")
         self.lighting_strength_input_field.textEdited.connect(lambda: self.Update_slider(self.strength_slider, self.lighting_strength_input_field.text()))
+        self.lighting_strength_input_field.editingFinished.connect(lambda: self.set_strength(self.lighting_strength_input_field.text()))
 
         self.strength_slider = QSlider(self)
         self.strength_slider.setRange(0,100)
+        self.strength_slider.setPageStep(0)
         self.strength_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.strength_slider.sliderMoved.connect(lambda val: self.set_strength(val, self.lighting_strength_input_field))
+        self.strength_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.lighting_strength_input_field))
+        self.strength_slider.sliderReleased.connect(lambda: self.set_strength(self.strength_slider.value()))
+
         ###
         
         ###
         self.radius_label = QLabel("Radius", self)
-        self.radius_label.setToolTip('Radius of lighting element')
         self.radius_input_field = QLineEdit(self)
         self.radius_input_field.setText("0")
         self.radius_input_field.textChanged.connect(lambda: self.set_radius_from_field(self.radius_input_field))
@@ -1984,7 +1820,6 @@ class Lighting(QWidget):
 
 
         self.light_coords_label = QLabel("Lighting Co-ords:", self)
-        self.light_coords_label.setToolTip('Co-ords of lighting element')
         ###
         self.Xlight_coords_label = QLabel("X:", self)
         self.Xlight_coords_input_field = QLineEdit(self)
@@ -2026,46 +1861,52 @@ class Lighting(QWidget):
         ###
 
         self.light_angle_label = QLabel("Lighting Angle:", self)
-        self.light_angle_label.setToolTip('Angle of lighting element')
         ###
         self.Xlight_angle_label = QLabel("X:", self)
         self.Xlight_angle_input_field = QLineEdit(self)
         self.Xlight_angle_input_field.setText("0")
-        self.Xlight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Xlight_angle_slider, self.Xlight_angle_input_field.text()))
-
+        self.Xlight_angle_input_field.textEdited.connect((lambda: self.Update_slider(self.Xlight_angle_slider, self.Xlight_angle_input_field.text())))
+        self.Xlight_angle_input_field.editingFinished.connect(self.update_rotation)
 
         self.Xlight_angle_slider = QSlider(self)
         self.Xlight_angle_slider.setRange(0,359)
+        self.Xlight_angle_slider.setPageStep(0)
         self.Xlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Xlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Xlight_angle_input_field))
+        self.Xlight_angle_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Xlight_angle_input_field))
+        self.Xlight_angle_slider.sliderReleased.connect(self.update_rotation)
 
 
         ###
         self.Ylight_angle_label = QLabel("Y:", self)
         self.Ylight_angle_input_field = QLineEdit(self)
         self.Ylight_angle_input_field.setText("0")
-        self.Ylight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Ylight_angle_slider, self.Ylight_angle_input_field.text()))
+        self.Ylight_angle_input_field.textEdited.connect((lambda: self.Update_slider(self.Ylight_angle_slider, self.Ylight_angle_input_field.text())))
+        self.Ylight_angle_input_field.editingFinished.connect(self.update_rotation)
 
         self.Ylight_angle_slider = QSlider(self)
         self.Ylight_angle_slider.setRange(0,359)
+        self.Ylight_angle_slider.setPageStep(0)
         self.Ylight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Ylight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Ylight_angle_input_field))
+        self.Ylight_angle_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Ylight_angle_input_field))
+        self.Ylight_angle_slider.sliderReleased.connect(self.update_rotation)
         ###
         self.Zlight_angle_label = QLabel("Z:", self)
         self.Zlight_angle_input_field = QLineEdit(self)
         self.Zlight_angle_input_field.setText("0")
-        self.Zlight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Zlight_angle_slider, self.Zlight_angle_input_field.text()))
+        self.Zlight_angle_input_field.textEdited.connect((lambda: self.Update_slider(self.Zlight_angle_slider, self.Zlight_angle_input_field.text())))
+        self.Zlight_angle_input_field.editingFinished.connect(self.update_rotation)
 
         self.Zlight_angle_slider = QSlider(self)
         self.Zlight_angle_slider.setRange(0,359)
+        self.Zlight_angle_slider.setPageStep(0)
         self.Zlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Zlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Zlight_angle_input_field))
+        self.Zlight_angle_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Zlight_angle_input_field))
+        self.Zlight_angle_slider.sliderReleased.connect(self.update_rotation)
        
         self.light_type_label = QLabel("Type: ", self)
         self.light_type_combobox = QComboBox(self)
         self.light_type_combobox.addItems(["POINT", "SUN", "SPOT", "AREA"])
         self.light_type_combobox.currentIndexChanged.connect(self.change_type)
-        self.light_type_label.setToolTip('Type of lighting element')
 
 
         main_layout = QGridLayout()
@@ -2130,11 +1971,11 @@ class Lighting(QWidget):
         self.light.set_type(self.light_type_combobox.currentText())
 
 
-    def set_strength(self, val, field):
-        self.Slider_Update(val, field)
+    def set_strength(self, val):
         try:
-            self.light.set_energy(float(field.text()))
+            self.light.set_energy(float(val))
         except:
+            print('Light strength could not be set')
             pass
 
 
@@ -2178,12 +2019,11 @@ class Lighting(QWidget):
         except:
             pass
 
-    def set_rotation(self, val, field):
-        self.Slider_Update(val, field)
+    def update_rotation(self):
 
-        x = self.Xlight_angle_input_field.text()
-        y = self.Ylight_angle_input_field.text()
-        z = self.Zlight_angle_input_field.text()
+        x = (self.Xlight_angle_input_field.text() or 0)
+        y = (self.Ylight_angle_input_field.text() or 0)
+        z = (self.Zlight_angle_input_field.text() or 0)
 
         self.light.set_rotation([float(x),float(z),float(y)])
         
@@ -2227,18 +2067,6 @@ class Lighting(QWidget):
         if float(field.text()) > val or float(field.text()) + 0.5 < val:
             field.setText(str(val))
     
-    def set_rotation_from_field(self, slider, val):
-        try:
-            self.Update_slider(slider, val)
-
-            x = self.Xlight_angle_input_field.text()
-            y = self.Ylight_angle_input_field.text()
-            z = self.Zlight_angle_input_field.text()
-            
-            self.light.set_rotation([float(x),float(z),float(y)])
-        except:
-            pass
-
 
     def Update_slider(self, slider, val):
         try:
