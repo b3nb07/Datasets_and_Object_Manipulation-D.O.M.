@@ -518,8 +518,8 @@ class Backend():
                     elif len(contents) == 1:
                         if contents[-1] != interaction.rstrip('\n'):
                             file.write(interaction)
-                   elif contents[-2] != interaction.rstrip('\n'):
-                       file.write(interaction)
+                    elif contents[-2] != interaction.rstrip('\n'):
+                        file.write(interaction)
         except:
             print("Error")
 
