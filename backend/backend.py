@@ -29,8 +29,11 @@ class Backend():
 
         :param json_filepath: Filepath to a JSON configuration file.
         """
-        
 
+        if not is_blender_environment:
+            with open('interaction_log.txt','w') as file:
+                file.write('Program initialised\n')
+        
         if (is_blender_environment):
             bproc.init()
         
@@ -38,10 +41,6 @@ class Backend():
 
         new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
         self.set_seed(new_seed)
-
-        if not is_blender_environment:
-            with open('interaction_log.txt','w') as file:
-                file.write('Program initialised\n')
 
         if (json_filepath is not None):
             # load json objects into self
