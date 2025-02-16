@@ -1,0 +1,28 @@
+Program initialised
+Light Source 1 light source added
+Energy of Light Source 1 changed to 1
+Colour of Light Source 1 changed to #ffffff
+Rotation of Light Source 1 changed to [0, 0, 0]
+Radius of Light Source 1 changed to 0
+Type of Light Source 1 changed to POINT
+Location of Light Source 1 changed to [0, 0, 0]
+Object 1 object added
+Energy of Light Source 1 changed to 27.0
+Energy of Light Source 1 changed to 48.0
+Energy of Light Source 1 changed to 4.0
+Rotation of Light Source 1 changed to [147.0, 0.0, 0.0]
+Rotation of Light Source 1 changed to [147.0, 0.0, 47.0]
+Rotation of Light Source 1 changed to [147.0, 0.0, 279.0]
+Rotation of Light Source 1 changed to [147.0, 76.0, 279.0]
+Rotation of Light Source 1 changed to [14.0, 76.0, 279.0]
+Rotation of Light Source 1 changed to [14.0, 768.0, 279.0]
+Rotation of Light Source 1 changed to [14.0, 768.0, 2.0]
+Rotation of Light Source 1 changed to [148.0, 768.0, 2.0]
+Rotation of Light Source 1 changed to [148.0, 768.0, 67.0]
+Energy of Light Source 1 changed to 30.0
+Energy of Light Source 1 changed to 3.0
+Location of Object 1 changed to [0.0, 0.0, 0.0]
+Number of renders changed to: 2
+Camera angle change per render changed to: [1.0, 1.0, 1.0]
+Number of renders changed to: 4
+Rendering Started
