@@ -29,11 +29,8 @@ class Backend():
 
         :param json_filepath: Filepath to a JSON configuration file.
         """
-
-        if not is_blender_environment:
-            with open('interaction_log.txt','w') as file:
-                file.write('Program initialised\n')
         
+
         if (is_blender_environment):
             bproc.init()
         
@@ -42,11 +39,8 @@ class Backend():
         new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
         self.set_seed(new_seed)
 
-        try: 
-            with open('interaction_log.txt','w') as file:
-                file.write('Program initialised\n')
-        except:
-            print("Error")
+        with open('interaction_log.txt','w') as file:
+            file.write('Program initialised\n')
 
         if (json_filepath is not None):
             # load json objects into self
@@ -455,8 +449,6 @@ class Backend():
     def render(self, headless = False, preview = False):
         """Renders the scene and saves to file in the output folder."""
 
-        self.update_log(f'Rendering Started\n')
-
         self.add_camera_poses(preview = preview)
         
 
@@ -507,6 +499,7 @@ class Backend():
 
     def update_log(self, interaction):
 
+
         try:
 
             if not is_blender_environment:
@@ -522,7 +515,6 @@ class Backend():
                         file.write(interaction)
         except:
             print("Error")
-
 
     class RenderObject():
         """An object to be rendered."""
