@@ -1,0 +1,34 @@
+{
+    "English": {
+        "Colour Theme": "Colour Theme",
+        "Help": "Help",
+        "Languages": "Languages",
+        "Button": "Button",
+        "Colour" : "Skibidi"
+    },
+    "Spanish": {
+        "Colour Theme": "Tema de color",
+        "Help": "Ayuda",
+        "Languages": "Idiomas",
+        "Button": "Botón",
+        "Lighting Angle" : "Ángulo de iluminación",
+        "Lighting Co-ords": "Coordenadas de iluminación",
+        "Strength": "Fuerza",
+        "Radius": "Radio",
+        "Colour": "Color",
+        "Type" : "Tipo",
+        "Select Colour": "Seleccionar color"
+    },
+    "Portuguese": {
+        "Colour Theme": "Tema de cor",
+        "Help": "Ajuda",
+        "Languages": "Idiomas",
+        "Button": "Botão"
+    },
+    "Mandarin": {
+        "Colour Theme": "颜色主题",
+        "Help": "帮助",
+        "Languages": "语言",
+        "Button": "按钮"
+    }
+}

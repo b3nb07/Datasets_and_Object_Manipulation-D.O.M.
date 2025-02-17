@@ -382,7 +382,7 @@ class Backend():
             #Scale properties
         if "width" in random_object_scale:
             self.random_object_width = random.uniform(1,5)
-            scale[0] = self.random_object_width # random range of width - 1-100
+            scale[0] = self.random_object_width # random range of width - 1-5
             print(f"Randomized Width: {scale[0]}")
 
             
