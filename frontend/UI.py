@@ -1699,13 +1699,18 @@ class Port(QWidget):
                 # some successful, some failed
                 error_msg = f"Successfully imported {suc} files.\nFailed to import:\n"
                 for name, error in fail:
-                    error_msg += f"\n- {name}: {error}"
+                    error_msg += f"\n- {name}"
+                    # error_msg += f"\n- {name}: {error}"
                     
                 ilyaMessageBox(error_msg, "Issues found")
             else:
-                error_msg = "Failed to import all files:\n"
-                for name, error in fail:
-                    error_msg += f"\n- {name}: {error}"
+                # error_msg = "Failed to import all files:\n"
+                # for name, error in fail:
+                #     error_msg += f"\n- {name}"
+                    # error_msg += f"\n- {name}: {error}"
+                    
+                error_msg = f"Failed to import all files\n"
+                error_msg += f"{fail[0][1]}"
                 raise Exception(error_msg)
 
         def process_file(path):
@@ -1772,7 +1777,6 @@ class Port(QWidget):
                         return
                     
                     # go through each file in directory
-                    # supported_files = False
                     for root, _, files in os.walk(folder_path):
                         for file in files:
                             try:
