@@ -17,7 +17,18 @@
         "Radius": "Radio",
         "Colour": "Color",
         "Type" : "Tipo",
-        "Select Colour": "Seleccionar color"
+        "Select Colour": "Seleccionar color",
+        "Delete Object": "Eliminar objeto",
+        "Import Object": "Importar objeto",
+        "Tutorial Object": "Objeto tutorial",
+        "Export Settings": "Exportar configuraciones",
+        "Import Settings": "Importar configuraciones",
+        "Generate Data Set": "Generar conjunto de datos",
+        "Change Render Folder": "Carpeta de renderizado",
+        "Generate Renders": "Generar Renders",
+        "Unlimited Renders": "Renders Ilimitados",
+        "Degrees of Change": "Grados de Cambio",
+        "Number of Renders": "Número de Renders"
     },
     "Portuguese": {
         "Colour Theme": "Tema de cor",

@@ -1417,6 +1417,21 @@ class Render(QWidget):
         main_layout.addWidget(self.GenerateRenders_Button, 0, 7)
 
         self.setLayout(main_layout)
+
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
+
+
+    def translateUi(self):
+        """Apply translations to UI elements."""
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.GenerateRenders_Button.setText(translation.get("Generate Renders", "Generate Renders"))
+        self.unlimited_render_button.setText(translation.get("Unlimited Renders", "Unlimited Renders"))
+        self.Degree_Change_title.setText(translation.get("Degrees of Change", "Degrees of Change"))
+        self.Number_of_renders_title.setText(translation.get("Number of Renders", "Number of Renders"))
+
+
     
     def unlimitedrender(self):
         test = True
@@ -1532,10 +1547,8 @@ class Port(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
 
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
+
+        
         
         class ilyaMessageBox(QMessageBox):
                 def __init__(self, text, title):
@@ -1750,9 +1763,24 @@ class Port(QWidget):
         main_layout.addWidget(self.ImportSettings_Button, 0, 4)
         main_layout.addWidget(self.BrowseFiles_Button, 0, 5)
         main_layout.addWidget(self.SelectRenderFolder_Button, 0, 6)
-
         self.setLayout(main_layout)
 
+                
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
+
+
+    def translateUi(self):
+        """Apply translations to UI elements."""
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.Delete_Object_Button.setText(translation.get("Delete Object", "Delete Object"))
+        self.Import_Object_Button.setText(translation.get("Import Object", "Import Object"))
+        self.TutorialObjects_Button.setText(translation.get("Tutorial Object", "Tutorial Object"))
+        self.ExportSettings_Button.setText(translation.get("Export Settings", "Export Settings"))
+        self.ImportSettings_Button.setText(translation.get("Import Settings", "Import Settings"))
+        self.BrowseFiles_Button.setText(translation.get("Generate Data Set", "Generate Data Set"))
+        self.SelectRenderFolder_Button.setText(translation.get("Change Render Folder", "Change Render Folder"))
 
 
 
