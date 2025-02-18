@@ -1690,7 +1690,47 @@ class Port(QWidget):
                     self.exec()
 
         #First Section
+        def display_import_message(suc: int, fail: int):
+            """ Helper function to display the correct import message """
+            if suc > 0 and not fail:
+                # best case message
+                msg = ilyaMessageBox("All objects imported successfully", "Success")
+            elif suc > 0 and fail:
+                # some successful, some failed
+                error_msg = f"Successfully imported {suc} files.\nFailed to import:\n"
+                for name, error in fail:
+                    error_msg += f"\n- {name}: {error}"
+                    
+                ilyaMessageBox(error_msg, "Issues found")
+            else:
+                error_msg = "Failed to import all files:\n"
+                for name, error in fail:
+                    error_msg += f"\n- {name}: {error}"
+                raise Exception(error_msg)
+
+        def process_file(path):
+            """ Helper function to reduce clutter in the main function """
+            # maybe move this as a constant?
+            supported_extensions = ('.blend', '.stl', '.obj')    
+            name = os.path.basename(os.path.normpath(path))
+            
+            if not path.lower().endswith(supported_extensions):
+                raise Exception(f"Unsupported file type. Only {', '.join(supported_extensions)} files are supported.")
+            
+            obj = backend.RenderObject(filepath=path)
+            shared_state.add_item(obj, name)
+    
+            Label = QLabel(name)
+            Label.setStyleSheet("border: 1px solid black;")
+            Label.setAlignment(QtCore.Qt.AlignCenter)
+            Label.setMaximumHeight(40)
+            Label.setMinimumHeight(40)
+            Scroll.addWidget(Label)
+            
+            return name
+
         def Get_Object_Filepath(Scroll):
+            """ Import objects function """
             import_box = QMessageBox()
             import_box.setText("How would you like to import objects?")
             import_box.addButton("Import Files", QMessageBox.ActionRole)
@@ -1700,55 +1740,54 @@ class Port(QWidget):
             import_box.exec()
             clicked_button = import_box.clickedButton().text()
             
+            if clicked_button == "Cancel":
+                    return
+            # might not need this try now as cleaned up code a bit
             try:
+                # keep track of imports and their status
+                successful_imps = 0
+                failed_imps = []
+                
+                """ Importing single or multiple files """
                 if clicked_button == "Import Files":
                     paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
                     if not paths:
+                        msg = ilyaMessageBox("No objects imported", "Cancelled")
                         return
                     
                     for path in paths:
-                        obj = backend.RenderObject(filepath=path)
-
-                        Name = os.path.basename(os.path.normpath(path))
-                        shared_state.add_item(obj, Name)
-                        Label = QLabel(Name)
-                        Label.setStyleSheet("border: 1px solid black;")
-                        Label.setAlignment(QtCore.Qt.AlignCenter)
-                        Label.setMaximumHeight(40)
-                        Label.setMinimumHeight(40)
-                        Scroll.addWidget(Label)
-
+                        try:
+                            process_file(path)
+                            successful_imps += 1
+                        # any exceptions append to failed import list
+                        except Exception as e:
+                            name = os.path.basename(os.path.normpath(path))
+                            failed_imps.append((name, str(e)))
+                            
                 elif clicked_button == "Folder":
-
+                    """ Importing a folder or folders """
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
                     if not folder_path:
+                        msg = ilyaMessageBox("No objects imported", "Cancelled")
                         return
                     
-                    # maybe have a global constant of supported extensions?
-                    supported_extensions = ['.blend', '.stl', '.obj']
                     # go through each file in directory
+                    # supported_files = False
                     for root, _, files in os.walk(folder_path):
                         for file in files:
-                            if any(file.lower().endswith(ext) for ext in supported_extensions):
-                                full_path = os.path.join(root, file)
-                                obj = backend.RenderObject(filepath=full_path)
-
-                                Name = os.path.basename(os.path.normpath(full_path))
-                                shared_state.add_item(obj, Name)
-                                Label = QLabel(Name)
-                                Label.setStyleSheet("border: 1px solid black;")
-                                Label.setAlignment(QtCore.Qt.AlignCenter)
-                                Label.setMaximumHeight(40)
-                                Label.setMinimumHeight(40)
-                                Scroll.addWidget(Label)
-
-
-
+                            try:
+                                path = os.path.join(root, file)
+                                process_file(path)
+                                successful_imps += 1
+                            # any exceptions append to failed import list
+                            except Exception as e:
+                                name = os.path.basename(file)
+                                failed_imps.append((name, str(e)))
+                
+            
+                # display the appropriate import message
+                display_import_message(successful_imps, failed_imps)
                 Object_detect(tab_widget)
-
-            except Exception:
-                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
-
 
             except Exception as e:
                 QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
