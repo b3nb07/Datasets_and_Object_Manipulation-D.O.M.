@@ -1600,16 +1600,16 @@ class Render(QWidget):
             config = backend.get_config()
             backend.set_runtime_config(config)
             self.rendering = True
-            self.thread = RenderThreadPreview()
+            self.newThread = RenderThreadPreview()
 
-            self.thread.progress.connect(self.update_loading)
-            self.thread.finished.connect(self.complete_loading)
+            self.newThread.progress.connect(self.update_loading)
+            self.newThread.finished.connect(self.complete_loading)
 
-            self.thread.start()
+            self.newThread.start()
             
             self.windowUp()
 
-            self.thread.quit()
+            #self.thread.quit()
         else:
             renderingBox = QMessageBox()
             renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
