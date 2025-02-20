@@ -20,6 +20,7 @@ path.append("backend")
 from backend import Backend
 import numpy as np
 from re import search as regex
+from time import time
 
 """"
     Comment info - 
@@ -29,6 +30,7 @@ from re import search as regex
 
 """
 # Initialise backend
+last_viewport_update = time()
 backend = Backend()
 
 class ComboBoxState(QObject):
@@ -76,6 +78,17 @@ class ComboBoxState(QObject):
         # maybe delete
         self.selection_changed.emit(index)
 
+class EthanViewportThread(QThread):
+    def __init__(self, size):
+        super().__init__()
+        self.size = (size.width() * 0.85, size.height() * 0.7)
+
+    finished = pyqtSignal()
+
+    def run(self):
+        backend.set_res((int(self.size[0] / 4), int(self.size[1] / 4)))
+        backend.render(viewport_temp = True)
+        self.finished.emit()
 
 class RenderThreadPreview(QThread):
     finished = pyqtSignal()
@@ -171,6 +184,35 @@ class TabDialog(QWidget):
         
         # enviroment
         environment = QWidget()
+
+        def visual_change(thread):
+            global last_viewport_update
+
+            thread.quit()
+            environment.setStyleSheet("border-image: url(viewport_temp/0_colors.png) 0 0 0 0 stretch stretch")
+            # environment.setStyleSheet("background-position: center;background-repeat: no-repeat;background-image: url(viewport_temp/0_colors.png);")
+            last_viewport_update = time()
+
+        old_log = Backend.update_log
+        def update_viewport(interaction):
+            global last_viewport_update
+
+            # At least 10 seconds between viewport updates
+            if (time() - last_viewport_update > 5):
+                last_viewport_update = time()
+                print('test')
+                config = backend.get_config()
+                backend.set_runtime_config(config)
+
+                thread = EthanViewportThread(self.size())
+
+                thread.finished.connect(lambda: visual_change(thread))
+
+                thread.start()
+
+            return old_log(interaction)
+        
+        Backend.update_log = update_viewport
         environment.setStyleSheet("background-color: black;")
 
         self.setMinimumSize(1350, 700) # minimum size of program
@@ -1783,7 +1825,8 @@ class Port(QWidget):
                 Label.setMinimumHeight(40)
                 Scroll.addWidget(Label)
                 
-            except:
+            except Exception as e:
+                print(e)
                 error_box = QMessageBox()
                 error_box.setWindowTitle("Error")
                 error_box.setText("Error loading tutorial object.")

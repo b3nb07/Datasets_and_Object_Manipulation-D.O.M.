@@ -1,7 +1,10 @@
 # Backend output
+viewport_temp/
 output/
 export.json
 interaction_log.txt
+interaction_log
+backend/_temp.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
