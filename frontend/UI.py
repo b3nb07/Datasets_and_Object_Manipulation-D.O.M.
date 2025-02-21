@@ -191,7 +191,8 @@ class TabDialog(QWidget):
         self.update_while_viewport = False
 
         Backend.update_log = self.update_viewport
-        self.environment.setStyleSheet("background-color: black;")
+        # self.environment.setStyleSheet("background-color: black;")
+        self.environment.setStyleSheet("background-position: center;background-repeat: no-repeat;background-image: url(viewport_temp/loading.png);")
 
         self.setMinimumSize(1350, 700) # minimum size of program
         main_layout = QGridLayout()
