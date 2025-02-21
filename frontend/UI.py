@@ -808,32 +808,40 @@ class RandomTabDialog(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
 
-        tab_widget = QTabWidget()
-        tab_widget.addTab(RandomDefault(self, tab_widget), "Base")
-        tab_widget.addTab(RandomObject(self, ParentTab), "Object")
-        tab_widget.addTab(RandomPivot(self, ParentTab), "Pivot Point")
-        tab_widget.addTab(RandomRender(self, ParentTab), "Render")
-        tab_widget.addTab(RandomLight(self, ParentTab), "Light")
+        self.tab_widget = QTabWidget()
+        self.tab_widget.addTab(RandomDefault(self, ParentTab), "Base")
+        self.tab_widget.addTab(RandomObject(self, ParentTab), "Object")
+        self.tab_widget.addTab(RandomPivot(self, ParentTab), "Pivot Point")
+        self.tab_widget.addTab(RandomRender(self, ParentTab), "Render")
+        self.tab_widget.addTab(RandomLight(self, ParentTab), "Light")
         
 
         main_layout = QVBoxLayout()
-        main_layout.addWidget(tab_widget)
+        main_layout.addWidget(self.tab_widget)
         self.setLayout(main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
+
+
+    def translateUi(self):
+        """Apply translations to UI elements."""
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.tab_widget.setTabText(0, translation.get("Base", "Base"))
+        self.tab_widget.setTabText(1, translation.get("Object", "Object"))
+        self.tab_widget.setTabText(2, translation.get("Pivot Point", "Pivot Point"))
+        self.tab_widget.setTabText(3, translation.get("Render", "Render"))
+        self.tab_widget.setTabText(4, translation.get("Light", "Light"))
 
 class RandomDefault(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
 
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
-
         main_layout = QGridLayout()
         Field = QCheckBox("Set ALL", self)
 
-        SetSetCheck = QCheckBox("Set per SET")
-        SetFrameCheck = QCheckBox("Set per FRAME")
+        SetSetCheck = QCheckBox("Set per SET",self)
+        SetFrameCheck = QCheckBox("Set per FRAME",self)
         
         RandomSeed = QLineEdit("", self)
         RandomSeed.setText(str(backend.get_config()["seed"]))
@@ -853,6 +861,8 @@ class RandomDefault(QWidget):
         
         self.setLayout(main_layout)
 
+        ###translator.languageChanged.connect(self.translateUi)
+        ###self.translateUi()
 
     def SetSETChecks(self, Layout):
         if Layout.itemAtPosition(1, 0).widget().isChecked():
@@ -886,7 +896,18 @@ class RandomDefault(QWidget):
             field.setText(str(val))
         except ValueError:
             field.setText(str(backend.get_config()["seed"]))
-                            
+
+
+
+
+    """def translateUi(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.Field.setText(translation.get("Set ALL", "Set ALL"))
+        self.SetSetCheck.setText(translation.get("Set per SET", "Set per SET"))
+        self.SetFrameCheck.setText(translation.get("Set per FRAME", "Set per FRAME"))
+"""
+                                    
 class RandomObject(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
@@ -1256,7 +1277,18 @@ class RandomLight(QWidget):
         #print(main_layout.itemAtPosition(0, 0).widget().setText("Electric boogalo"))
         #how to change values
 
+        
+
         self.setLayout(main_layout)
+        
+        ###translator.languageChanged.connect(self.translateUi)
+        ####self.translateUi()
+
+
+    ###def translateUi(self):
+       ### current_lang = translator.current_language
+        ###translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        ###self..setText(translation.get("", ""))
 
     def gen_field(self, Fieldname, Layout, X, Y):
         Field = QCheckBox(Fieldname, self)
@@ -1429,7 +1461,7 @@ class Render(QWidget):
         self.GenerateRenders_Button.setText(translation.get("Generate Renders", "Generate Renders"))
         self.unlimited_render_button.setText(translation.get("Unlimited Renders", "Unlimited Renders"))
         self.Degree_Change_title.setText(translation.get("Degrees of Change", "Degrees of Change"))
-        self.Number_of_renders_title.setText(translation.get("Number of Renders", "Number of Renders"))
+        self.Number_of_renders_title.setText(translation.get("Number of Renders"))
 
 
     

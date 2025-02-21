@@ -28,7 +28,15 @@
         "Generate Renders": "Generar Renders",
         "Unlimited Renders": "Renders Ilimitados",
         "Degrees of Change": "Grados de Cambio",
-        "Number of Renders": "Número de Renders"
+        "Number of Renders": "Número de Renders",
+        "Base": "Base",
+        "Object": "Objeto",
+        "Pivot Point": "Punto de pivote",
+        "Render": "Renderizar",
+        "Light": "Luz",
+        "Set ALL": "Establecer TODO",
+        "Set per SET": "Establecer por CONJUNTO",
+        "Set per FRAME": "Establecer por FOTOGRAMA"
     },
     "Portuguese": {
         "Colour Theme": "Tema de cor",
