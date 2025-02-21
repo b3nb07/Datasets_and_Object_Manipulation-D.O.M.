@@ -275,6 +275,16 @@ class Backend():
             config["random"]["sca"].append("length")
             Backend.update_log(f'Length of object {selected_index} set to random\n')
         self.add_object_properties(selected_index)
+
+    def toggle_object(self, object, state):
+        if state:
+            if object not in config['objects']: 
+                config['objects'].append(object)
+                Backend.update_log(f'Object {object} toggled on\n')
+        else:
+            if object in config['objects']:
+                config['objects'].remove(object)
+                Backend.update_log(f'Object {object} toggled off\n')
   
     def is_config_objects_empty(self):
         if config.get("objects") == None:

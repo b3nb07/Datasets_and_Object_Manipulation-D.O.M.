@@ -338,12 +338,9 @@ class ObjectTab(QWidget):
                         obj = backend.RenderObject(filepath=path)
                         Name = os.path.basename(os.path.normpath(path))
                         shared_state.add_item(obj, Name)
-                        Label = QLabel(Name)
-                        Label.setStyleSheet("border: 1px solid black;")
-                        Label.setAlignment(QtCore.Qt.AlignCenter)
-                        Label.setMaximumHeight(40)
-                        Label.setMinimumHeight(40)
-                        Scroll.addWidget(Label)
+                        check = QCheckBox(Name)
+                        check.setMaximumWidth(175)
+                        Scroll.addWidget(check)
 
                 elif clicked_button == "Folder":
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
@@ -360,12 +357,9 @@ class ObjectTab(QWidget):
                                 obj = backend.RenderObject(filepath=full_path)
                                 Name = os.path.basename(os.path.normpath(full_path))
                                 shared_state.add_item(obj, Name)
-                                Label = QLabel(Name)
-                                Label.setStyleSheet("border: 1px solid black;")
-                                Label.setAlignment(QtCore.Qt.AlignCenter)
-                                Label.setMaximumHeight(40)
-                                Label.setMinimumHeight(40)
-                                Scroll.addWidget(Label)
+                                check = QCheckBox(Name)
+                                check.setMaximumWidth(175)
+                                Scroll.addWidget(check)
 
 
                 Object_detect(tab_widget)
@@ -1753,12 +1747,9 @@ class Port(QWidget):
 
                         Name = os.path.basename(os.path.normpath(path))
                         shared_state.add_item(obj, Name)
-                        Label = QLabel(Name)
-                        Label.setStyleSheet("border: 1px solid black;")
-                        Label.setAlignment(QtCore.Qt.AlignCenter)
-                        Label.setMaximumHeight(40)
-                        Label.setMinimumHeight(40)
-                        Scroll.addWidget(Label)
+                        check = QCheckBox(Name)
+                        check.setMaximumWidth(175)
+                        Scroll.addWidget(check)
 
                 elif clicked_button == "Folder":
 
@@ -1777,12 +1768,10 @@ class Port(QWidget):
 
                                 Name = os.path.basename(os.path.normpath(full_path))
                                 shared_state.add_item(obj, Name)
-                                Label = QLabel(Name)
-                                Label.setStyleSheet("border: 1px solid black;")
-                                Label.setAlignment(QtCore.Qt.AlignCenter)
-                                Label.setMaximumHeight(40)
-                                Label.setMinimumHeight(40)
-                                Scroll.addWidget(Label)
+                                check = QCheckBox(Name)
+                                check.stateChanged.connect(lambda: show_hide_object(check.text(),check.isChecked()))
+                                check.setMaximumWidth(175)
+                                Scroll.addWidget(check)
 
 
 
@@ -1818,12 +1807,11 @@ class Port(QWidget):
                 if Name == "Object":
                     Name = f"{Name} {len(shared_state.itemNames)+1}"
                 shared_state.add_item(obj, Name)
-                Label = QLabel(Name)
-                Label.setStyleSheet("border: 1px solid black;")
-                Label.setAlignment(QtCore.Qt.AlignCenter)
-                Label.setMaximumHeight(40)
-                Label.setMinimumHeight(40)
-                Scroll.addWidget(Label)
+
+                check = QCheckBox(Name)
+                check.stateChanged.connect(lambda: show_hide_object(check.text(),check.isChecked()))
+                check.setMaximumWidth(175)
+                Scroll.addWidget(check)
                 
             except Exception as e:
                 print(e)
@@ -1952,6 +1940,10 @@ class Port(QWidget):
         main_layout.addWidget(self.SelectRenderFolder_Button, 0, 5)
 
         self.setLayout(main_layout)
+
+        def show_hide_object(object,state):
+            backend.toggle_object(object,state)
+            
         
     def GetName(self):
         ObjName, State = QtWidgets.QInputDialog.getText(self, 'Object Name', "Enter Object Name: ")
@@ -1959,6 +1951,8 @@ class Port(QWidget):
             return ObjName
         else:
             return "Object"
+
+
 
 
 
