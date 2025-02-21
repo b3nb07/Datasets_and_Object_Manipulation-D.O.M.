@@ -30,7 +30,6 @@ from time import time
 
 """
 # Initialise backend
-last_viewport_update = time()
 backend = Backend()
 
 class ComboBoxState(QObject):
@@ -78,7 +77,7 @@ class ComboBoxState(QObject):
         # maybe delete
         self.selection_changed.emit(index)
 
-class EthanViewportThread(QThread):
+class ViewportThread(QThread):
     def __init__(self, size):
         super().__init__()
         self.size = (size.width() * 0.85, size.height() * 0.7)
@@ -183,45 +182,52 @@ class TabDialog(QWidget):
         tab_widget.setMaximumHeight(225)
         
         # enviroment
-        environment = QWidget()
+        self.environment = QWidget()
 
-        def visual_change(thread):
-            global last_viewport_update
+        self.old_log = Backend.update_log
+        self.viewport_ongoing = False
+        self.update_while_viewport = False
 
-            thread.quit()
-            environment.setStyleSheet("border-image: url(viewport_temp/0_colors.png) 0 0 0 0 stretch stretch")
-            # environment.setStyleSheet("background-position: center;background-repeat: no-repeat;background-image: url(viewport_temp/0_colors.png);")
-            last_viewport_update = time()
-
-        old_log = Backend.update_log
-        def update_viewport(interaction):
-            global last_viewport_update
-
-            # At least 10 seconds between viewport updates
-            if (time() - last_viewport_update > 5):
-                last_viewport_update = time()
-                print('test')
-                config = backend.get_config()
-                backend.set_runtime_config(config)
-
-                thread = EthanViewportThread(self.size())
-
-                thread.finished.connect(lambda: visual_change(thread))
-
-                thread.start()
-
-            return old_log(interaction)
-        
-        Backend.update_log = update_viewport
-        environment.setStyleSheet("background-color: black;")
+        Backend.update_log = self.update_viewport
+        self.environment.setStyleSheet("background-color: black;")
 
         self.setMinimumSize(1350, 700) # minimum size of program
         main_layout = QGridLayout()
         main_layout.addWidget(tab_widget, 0, 0, 1, 8)
         
         main_layout.addWidget(ObjectsStatusBar, 1, 0, 1, 2)
-        main_layout.addWidget(environment, 1, 1, 1, 7)  
+        main_layout.addWidget(self.environment, 1, 1, 1, 7)  
         self.setLayout(main_layout)
+
+    def visual_change(self, thread):
+        thread.quit()
+        self.environment.setStyleSheet("border-image: url(viewport_temp/0_colors.png) 0 0 0 0 stretch stretch")
+        # environment.setStyleSheet("background-position: center;background-repeat: no-repeat;background-image: url(viewport_temp/0_colors.png);")
+
+        self.viewport_ongoing = False
+
+        if (self.update_while_viewport):
+            self.update_while_viewport = False
+            self.update_viewport(update_log = False)
+
+    
+    def update_viewport(self, interaction = "", update_log = True):
+        # At least 10 seconds between viewport updates
+        # if (time() - last_viewport_update > 5):
+        if (not self.viewport_ongoing):
+            config = backend.get_config()
+            backend.set_runtime_config(config)
+
+            thread = ViewportThread(self.size())
+
+            thread.finished.connect(lambda: self.visual_change(thread))
+
+            self.viewport_ongoing = True
+            thread.start()
+        elif (update_log):
+            if ("Program" not in interaction and "Render" not in interaction):
+                self.update_while_viewport = True
+            return self.old_log(interaction)
 
 
 class ObjectTab(QWidget):
