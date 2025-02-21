@@ -679,7 +679,7 @@ class ObjectTab(QWidget):
             y_rot = float(self.Y_Rotation_input_field.text() or 0)
             z_rot = float(self.Z_Rotation_input_field.text() or 0)
             
-            rotation = [x_rot,y_rot,z_rot]
+            rotation = [np.deg2rad(x_rot),np.deg2rad(y_rot),np.deg2rad(z_rot)]
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
