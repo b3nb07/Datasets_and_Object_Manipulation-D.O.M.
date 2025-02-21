@@ -85,8 +85,10 @@ class ViewportThread(QThread):
     finished = pyqtSignal()
 
     def run(self):
+        old_res = backend.get_config().get("render_res")
         backend.set_res((int(self.size[0] / 4), int(self.size[1] / 4)))
         backend.render(viewport_temp = True)
+        backend.set_res(old_res)
         self.finished.emit()
 
 class RenderThreadPreview(QThread):
@@ -214,7 +216,7 @@ class TabDialog(QWidget):
     def update_viewport(self, interaction = "", update_log = True):
         # At least 10 seconds between viewport updates
         # if (time() - last_viewport_update > 5):
-        if (not self.viewport_ongoing):
+        if (not self.viewport_ongoing and "Render" not in interaction):
             config = backend.get_config()
             backend.set_runtime_config(config)
 
@@ -1457,6 +1459,7 @@ class RandomLight(QWidget):
 class Render(QWidget):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
+        self.mainpage = parent
 
         self.i = 1
 
@@ -1644,7 +1647,7 @@ class Render(QWidget):
             self.Number_of_renders_input_field.editingFinished.emit()
 
     def renderPreview(self): 
-        if not self.rendering:
+        if not self.rendering and not self.mainpage.viewport_ongoing:
             config = backend.get_config()
             backend.set_runtime_config(config)
             self.rendering = True
@@ -1681,6 +1684,11 @@ class Render(QWidget):
             self.render_preview_button.setEnabled(False)
     
     def generate_render(self):
+        if (self.mainpage.viewport_ongoing):
+            renderingBox = QMessageBox()
+            renderingBox.setText("Please wait for the viewport to finish its approximation before starting the main render.")
+            renderingBox.exec()
+            return
         self.rendering = True
         newConfig = self.queue.pop(0)
         backend.set_runtime_config(newConfig)
