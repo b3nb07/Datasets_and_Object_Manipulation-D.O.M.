@@ -1192,7 +1192,11 @@ class RandomPivot(QWidget):
         self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
         self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
         self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
-
+        
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(1, 1).widget(), main_layout.itemAtPosition(1, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(2, 1).widget(), main_layout.itemAtPosition(2, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(3, 1).widget(), main_layout.itemAtPosition(3, 2).widget()))
+        
         main_layout.addWidget(QLabel("Distnace", self), 0, 3)
         self.gen_field("Measurement", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
         
