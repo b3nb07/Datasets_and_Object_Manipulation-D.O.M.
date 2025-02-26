@@ -20,6 +20,7 @@ path.append("backend")
 from backend import Backend
 import numpy as np
 from re import search as regex
+from time import time
 
 """"
     Comment info - 
@@ -76,6 +77,19 @@ class ComboBoxState(QObject):
         # maybe delete
         self.selection_changed.emit(index)
 
+class ViewportThread(QThread):
+    def __init__(self, size):
+        super().__init__()
+        self.size = (size.width() * 0.85, size.height() * 0.7)
+
+    finished = pyqtSignal()
+
+    def run(self):
+        old_res = backend.get_config().get("render_res")
+        backend.set_res((int(self.size[0] / 4), int(self.size[1] / 4)))
+        backend.render(viewport_temp = True)
+        backend.set_res(old_res)
+        self.finished.emit()
 
 class RenderThreadPreview(QThread):
     finished = pyqtSignal()
@@ -170,16 +184,53 @@ class TabDialog(QWidget):
         tab_widget.setMaximumHeight(225)
         
         # enviroment
-        environment = QWidget()
-        environment.setStyleSheet("background-color: black;")
+        self.environment = QWidget()
+
+        self.old_log = Backend.update_log
+        self.viewport_ongoing = False
+        self.update_while_viewport = False
+
+        Backend.update_log = self.update_viewport
+        # self.environment.setStyleSheet("background-color: black;")
+        self.environment.setStyleSheet("background-position: center;background-repeat: no-repeat;background-image: url(viewport_temp/loading.png);")
 
         self.setMinimumSize(1350, 700) # minimum size of program
         main_layout = QGridLayout()
         main_layout.addWidget(tab_widget, 0, 0, 1, 8)
         
         main_layout.addWidget(ObjectsStatusBar, 1, 0, 1, 2)
-        main_layout.addWidget(environment, 1, 1, 1, 7)  
+        main_layout.addWidget(self.environment, 1, 1, 1, 7)  
         self.setLayout(main_layout)
+
+    def visual_change(self, thread):
+        thread.quit()
+        self.environment.setStyleSheet("border-image: url(viewport_temp/0_colors.png) 0 0 0 0 stretch stretch")
+        # environment.setStyleSheet("background-position: center;background-repeat: no-repeat;background-image: url(viewport_temp/0_colors.png);")
+
+        self.viewport_ongoing = False
+
+        if (self.update_while_viewport):
+            self.update_while_viewport = False
+            self.update_viewport(update_log = False)
+
+    
+    def update_viewport(self, interaction = "", update_log = True):
+        # At least 10 seconds between viewport updates
+        # if (time() - last_viewport_update > 5):
+        if (not self.viewport_ongoing and "Render" not in interaction):
+            config = backend.get_config()
+            backend.set_runtime_config(config)
+
+            thread = ViewportThread(self.size())
+
+            thread.finished.connect(lambda: self.visual_change(thread))
+
+            self.viewport_ongoing = True
+            thread.start()
+        elif (update_log):
+            if ("Program" not in interaction and "Render" not in interaction):
+                self.update_while_viewport = True
+            return self.old_log(interaction)
 
 
 class ObjectTab(QWidget):
@@ -631,7 +682,7 @@ class ObjectTab(QWidget):
             y_rot = float(self.Y_Rotation_input_field.text() or 0)
             z_rot = float(self.Z_Rotation_input_field.text() or 0)
             
-            rotation = [x_rot,y_rot,z_rot]
+            rotation = [np.deg2rad(x_rot),np.deg2rad(y_rot),np.deg2rad(z_rot)]
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
@@ -1409,6 +1460,7 @@ class RandomLight(QWidget):
 class Render(QWidget):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
+        self.mainpage = parent
 
         self.i = 1
 
@@ -1596,20 +1648,20 @@ class Render(QWidget):
             self.Number_of_renders_input_field.editingFinished.emit()
 
     def renderPreview(self): 
-        if not self.rendering:
+        if not self.rendering and not self.mainpage.viewport_ongoing:
             config = backend.get_config()
             backend.set_runtime_config(config)
             self.rendering = True
-            self.thread = RenderThreadPreview()
+            self.newThread = RenderThreadPreview()
 
-            self.thread.progress.connect(self.update_loading)
-            self.thread.finished.connect(self.complete_loading)
+            self.newThread.progress.connect(self.update_loading)
+            self.newThread.finished.connect(self.complete_loading)
 
-            self.thread.start()
+            self.newThread.start()
             
             self.windowUp()
 
-            self.thread.quit()
+            #self.thread.quit()
         else:
             renderingBox = QMessageBox()
             renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
@@ -1633,6 +1685,11 @@ class Render(QWidget):
             self.render_preview_button.setEnabled(False)
     
     def generate_render(self):
+        if (self.mainpage.viewport_ongoing):
+            renderingBox = QMessageBox()
+            renderingBox.setText("Please wait for the viewport to finish its approximation before starting the main render.")
+            renderingBox.exec()
+            return
         self.rendering = True
         newConfig = self.queue.pop(0)
         backend.set_runtime_config(newConfig)
@@ -1826,7 +1883,8 @@ class Port(QWidget):
                 Label.setMinimumHeight(40)
                 Scroll.addWidget(Label)
                 
-            except:
+            except Exception as e:
+                print(e)
                 error_box = QMessageBox()
                 error_box.setWindowTitle("Error")
                 error_box.setText("Error loading tutorial object.")
