@@ -66,6 +66,7 @@ class Backend():
 
             if ("objects" in temp):
                 for obj in temp["objects"]:
+                    if obj == None: continue
                     o = None
                     if ("filename" in obj):
                         o = self.RenderObject(filepath = obj["filename"])
@@ -278,12 +279,14 @@ class Backend():
 
     def toggle_object(self, object, state):
         if state:
-            if object not in config['objects']: 
-                config['objects'].append(object)
+            if object.hidden: 
+                #config['objects'].append(object)
+                object.add_object()
                 Backend.update_log(f'Object {object} toggled on\n')
         else:
-            if object in config['objects']:
-                config['objects'].remove(object)
+            if not object.hidden:
+                #config['objects'].remove(object)
+                object.remove_object()
                 Backend.update_log(f'Object {object} toggled off\n')
   
     def is_config_objects_empty(self):
@@ -508,9 +511,12 @@ class Backend():
             # Turn off everything to make it fast
             bproc.renderer.set_denoiser(None)
 
+            bproc.python.types.MeshObjectUtility.create_with_empty_mesh('emptyObject')
+
             bproc.writer.write_hdf5("viewport_temp/", bproc.renderer.render())
             return
-
+        
+        bproc.python.types.MeshObjectUtility.create_with_empty_mesh('emptyObject')
         data = bproc.renderer.render()
         if (config["render_folder"] == ""):
             bproc.writer.write_hdf5("output/", data)
@@ -559,6 +565,8 @@ class Backend():
             :param primative: Create object primatively, choose from one of ["CUBE", "CYLINDER", "CONE", "PLANE", "SPHERE", "MONKEY"].
             """
             self.object_pos = len(config.setdefault("objects", []))
+            self.properties = None
+            self.hidden = False
             config["objects"].append({})
 
             Backend.update_log(f'{self.__str__()} object added\n')
@@ -568,23 +576,27 @@ class Backend():
                     # handle the objects list
                     loaded_objects = bproc.loader.load_blend(filepath) if filepath.endswith(".blend") else bproc.loader.load_obj(filepath)
                     self.object = loaded_objects[0] if isinstance(loaded_objects, list) else loaded_objects
-                config["objects"][self.object_pos] = {
+                
+                self.properties = {
                     "filename": filepath,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
                     "sca": [1, 1, 1]
                 }
+                config["objects"][self.object_pos] = self.properties
                 return
 
             if (primative is not None):
                 if (is_blender_environment):
                     self.object = bproc.object.create_primitive(primative)
-                config["objects"][self.object_pos] = {
+
+                self.properties = {
                     "primative": primative,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
                     "sca": [1, 1, 1]
                 }
+                config["objects"][self.object_pos] = self.properties
                 return
 
             raise TypeError('No filepath or primative argument given.')
@@ -631,8 +643,17 @@ class Backend():
             """Remove the object from the scene"""
 
             config["objects"][self.object_pos] = None
+            self.hidden = True
 
             Backend.update_log(f'{self.__str__()} object removed\n')
+        
+        def add_object(self):
+            """Remove the object from the scene"""
+
+            config["objects"][self.object_pos] = self.properties
+            self.hidden = False
+
+            Backend.update_log(f'{self.__str__()} object added\n')
 
 
         #! TODO: Think of and implement more object manipulation methods

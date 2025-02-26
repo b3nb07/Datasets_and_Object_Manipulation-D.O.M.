@@ -78,6 +78,12 @@ class ComboBoxState(QObject):
         # maybe delete
         self.selection_changed.emit(index)
 
+class BenCheckBox():
+    def __init__(self, name, pos, object):
+        self.checkbox = QCheckBox(name)
+        self.pos = pos
+        self.object = object
+
 class EthanViewportThread(QThread):
     def __init__(self, size):
         super().__init__()
@@ -1808,10 +1814,12 @@ class Port(QWidget):
                     Name = f"{Name} {len(shared_state.itemNames)+1}"
                 shared_state.add_item(obj, Name)
 
-                check = QCheckBox(Name)
-                check.stateChanged.connect(lambda: show_hide_object(check.text(),check.isChecked()))
-                check.setMaximumWidth(175)
-                Scroll.addWidget(check)
+                #check = QCheckBox(Name)
+                check = BenCheckBox(Name,len(shared_state.itemNames),obj)
+                check.checkbox.setChecked(True)
+                check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
+                check.checkbox.setMaximumWidth(175)
+                Scroll.addWidget(check.checkbox)
                 
             except Exception as e:
                 print(e)
