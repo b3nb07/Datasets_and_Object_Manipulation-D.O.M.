@@ -1918,18 +1918,24 @@ class Port(QWidget):
 
             Tutorial_Box.exec()
 
-            Name = self.GetName()
+            
             try:
-                obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-                if Name == "Object":
-                    Name = f"{Name} {len(shared_state.itemNames)+1}"
-                shared_state.add_item(obj, Name)
+                if Tutorial_Box.clickedButton().text().upper() != "CANCEL":
+                    print("zero")
+                    Name = self.GetName()
+                    print("six")
+                    if Name != False:
+                        obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+                        print("seven")
+                        if Name == "Object":
+                            Name = f"{Name} {len(shared_state.itemNames)+1}"
+                        shared_state.add_item(obj, Name)
 
-                check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                check.checkbox.setChecked(True)
-                check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
-                check.checkbox.setMaximumWidth(175)
-                Scroll.addWidget(check.checkbox)
+                        check = BenCheckBox(Name,len(shared_state.itemNames),obj)
+                        check.checkbox.setChecked(True)
+                        check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
+                        check.checkbox.setMaximumWidth(175)
+                        Scroll.addWidget(check.checkbox)
                 
             except Exception as e:
                 print(e)
@@ -2064,11 +2070,22 @@ class Port(QWidget):
             
         
     def GetName(self):
-        ObjName, State = QtWidgets.QInputDialog.getText(self, 'Object Name', "Enter Object Name: ")
-        if State and ObjName != "":
-            return ObjName
-        else:
-            return "Object"
+        try:
+            print("One")
+            ObjName, State = QtWidgets.QInputDialog.getText(self, 'Object Name', "Enter Object Name: ")
+            print("two")
+            
+            if State and ObjName != "":
+                print("three")
+                return ObjName
+            elif not State:
+                print("special")
+                return False
+            else:
+                print("four")
+                return "Object"
+        except:
+            print("five")
 
 
 
