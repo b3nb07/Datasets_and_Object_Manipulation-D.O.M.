@@ -1,2 +1,0 @@
-Program initialised
-Render resolution changed to [256, 256]

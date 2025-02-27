@@ -1674,6 +1674,7 @@ class Render(QWidget):
 
 
     def unlimitedrender(self):
+        unlimitedRenderConfig = backend.get_config()
         test = True
         while True:
             if (self.rendering):
@@ -1683,6 +1684,7 @@ class Render(QWidget):
                 continue
             if self.unlimited_render_button.isChecked():
                 self.Number_of_renders_input_field.setText("1")
+                self.queue.append(unlimitedRenderConfig)
                 self.generate_render()
             else:
                 test = False
