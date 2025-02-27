@@ -187,7 +187,7 @@ class TabDialog(QWidget):
         tab_widget.setTabEnabled(3, False)
         tab_widget.setTabEnabled(4, False)
 
-        tab_widget.setMaximumHeight(225)
+        tab_widget.setMaximumHeight(250)
         
         # enviroment
         self.environment = QWidget()
@@ -1077,6 +1077,9 @@ class RandomObject(QWidget):
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
         
+        Field_LowerBound.setText('-inf')
+        Field_UpperBound.setText('inf')
+        
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
 
@@ -1085,6 +1088,9 @@ class RandomObject(QWidget):
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
+        
+        Field_LowerBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
@@ -1111,6 +1117,20 @@ class RandomObject(QWidget):
         """Generate Upperbound Field"""
         Layout.addWidget(Field, Y, X)
         self.UpperBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+        
+    def boundChecker(self, Lower, Upper):
+        try:
+            
+            Lowerval = float(Lower.text())
+            Upperval = float(Upper.text())
+            
+            if Lowerval > Upperval:
+                Lower.setText('-inf')
+            elif Upperval < Lowerval:
+                Upper.setText('inf')
+        except:
+            Lower.setText('-inf')
+            Upper.setText('inf')
 
     def un_checked(self, State, Field_LowerBound, Field_UpperBound):
         "Sets field to checkbox status"
@@ -1172,7 +1192,11 @@ class RandomPivot(QWidget):
         self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
         self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
         self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
-
+        
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(1, 1).widget(), main_layout.itemAtPosition(1, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(2, 1).widget(), main_layout.itemAtPosition(2, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(3, 1).widget(), main_layout.itemAtPosition(3, 2).widget()))
+        
         main_layout.addWidget(QLabel("Distnace", self), 0, 3)
         self.gen_field("Measurement", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
         
@@ -1183,6 +1207,9 @@ class RandomPivot(QWidget):
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
         
+        Field_LowerBound.setText('-inf')
+        Field_UpperBound.setText('inf')
+        
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
 
@@ -1191,6 +1218,9 @@ class RandomPivot(QWidget):
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
+        
+        Field_LowerBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
@@ -1223,6 +1253,20 @@ class RandomPivot(QWidget):
     def addUpper(self, Field, Fieldname, Layout, X, Y):
         Layout.addWidget(Field, Y, X)
         self.UpperBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+        
+    def boundChecker(self, Lower, Upper):
+        try:
+            
+            Lowerval = float(Lower.text())
+            Upperval = float(Upper.text())
+            
+            if Lowerval > Upperval:
+                Lower.setText('-inf')
+            elif Upperval < Lowerval:
+                Upper.setText('inf')
+        except:
+            Lower.setText('-inf')
+            Upper.setText('inf')
 
     def un_checked(self, State, Field_LowerBound, Field_UpperBound):
         Field_LowerBound.setEnabled(State)
@@ -1284,6 +1328,9 @@ class RandomRender(QWidget):
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
         
+        Field_LowerBound.setText('-inf')
+        Field_UpperBound.setText('inf')
+        
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
 
@@ -1292,6 +1339,9 @@ class RandomRender(QWidget):
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
+        
+        Field_LowerBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
@@ -1324,6 +1374,20 @@ class RandomRender(QWidget):
     def addUpper(self, Field, Fieldname, Layout, X, Y):
         Layout.addWidget(Field, Y, X)
         self.UpperBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+        
+    def boundChecker(self, Lower, Upper):
+        try:
+            
+            Lowerval = float(Lower.text())
+            Upperval = float(Upper.text())
+            
+            if Lowerval > Upperval:
+                Lower.setText('-inf')
+            elif Upperval < Lowerval:
+                Upper.setText('inf')
+        except:
+            Lower.setText('-inf')
+            Upper.setText('inf')
 
     def un_checked(self, State, Field_LowerBound, Field_UpperBound):
         Field_LowerBound.setEnabled(State)
@@ -1398,6 +1462,9 @@ class RandomLight(QWidget):
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
         
+        Field_LowerBound.setText('-inf')
+        Field_UpperBound.setText('inf')
+        
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
 
@@ -1406,6 +1473,9 @@ class RandomLight(QWidget):
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
+        
+        Field_LowerBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
@@ -1438,6 +1508,20 @@ class RandomLight(QWidget):
     def addUpper(self, Field, Fieldname, Layout, X, Y):
         Layout.addWidget(Field, Y, X)
         self.UpperBounds[f"{Layout.itemAtPosition(0, 12).widget().currentText()}{Fieldname}"] = (X, Y)
+        
+    def boundChecker(self, Lower, Upper):
+        try:
+            
+            Lowerval = float(Lower.text())
+            Upperval = float(Upper.text())
+            
+            if Lowerval > Upperval:
+                Lower.setText('-inf')
+            elif Upperval < Lowerval:
+                Upper.setText('inf')
+        except:
+            Lower.setText('-inf')
+            Upper.setText('inf')
 
     def un_checked(self, State, Field_LowerBound, Field_UpperBound):
         Field_LowerBound.setEnabled(State)
