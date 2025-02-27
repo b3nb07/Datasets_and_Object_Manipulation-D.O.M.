@@ -181,7 +181,7 @@ class TabDialog(QWidget):
         tab_widget.setTabEnabled(3, False)
         tab_widget.setTabEnabled(4, False)
 
-        tab_widget.setMaximumHeight(225)
+        tab_widget.setMaximumHeight(250)
         
         # enviroment
         self.environment = QWidget()
