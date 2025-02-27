@@ -456,6 +456,8 @@ class Backend():
     def render(self, headless = False, preview = False, viewport_temp = False):
         """Renders the scene and saves to file in the output folder."""
 
+        # We need to take 
+
         Backend.update_log(f'Rendering Started\n')
 
         self.add_camera_poses(preview = preview)
@@ -476,13 +478,16 @@ class Backend():
             to_run.write("import blenderproc as bproc\n" + file_contents + f"""Backend("{path}\\\\temp_export.json")._render({viewport_temp})""")
 
         os.system("blenderproc run backend/_temp.py")
+
+        highest = self.getHighestInDir()
+
         if (viewport_temp):
             os.system("blenderproc vis hdf5 viewport_temp/0.hdf5 --save viewport_temp")
-        elif (not headless and preview):
+        elif (not headless and preview): # Doesnt work anymore / could just bin off preview though
             os.system("blenderproc vis hdf5 output/0.hdf5")
         elif (not headless):
             for i in range(config["render"]["renders"]):
-                os.system("blenderproc vis hdf5 output/"+str(i)+".hdf5")
+                os.system("blenderproc vis hdf5 output/"+str(i + highest) +".hdf5")
 
         self.remove_camera_poses()
 
@@ -503,9 +508,25 @@ class Backend():
 
         data = bproc.renderer.render()
         if (config["render_folder"] == ""):
-            bproc.writer.write_hdf5("output/", data)
+            bproc.writer.write_hdf5("output/", data, append_to_existing_output = True)
         else:
-            bproc.writer.write_hdf5(config["render_folder"], data)
+            bproc.writer.write_hdf5(config["render_folder"], data, append_to_existing_output = True)
+    def getHighestInDir(self):
+        highest = -1
+        for file in os.listdir("output"):
+            if file.endswith(".hdf5"):
+                num = ""
+                for x in file:
+                    if x == ".":
+                        break
+                    else:
+                        num = num + x
+                try:
+                    if int(num) > highest:
+                        highest = int(num)
+                except:
+                    pass
+        return highest
 
     def export(self, path, filename="export.json"):
         """Exports the current scene setup to a JSON file.
