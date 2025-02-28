@@ -493,14 +493,17 @@ class Backend():
         os.system("blenderproc run backend/_temp.py")
 
         highest = self.getHighestInDir()
+        num = highest - config["render"]["renders"] + 1
+        print(highest)
+        print(num)
 
         if (viewport_temp):
             os.system("blenderproc vis hdf5 viewport_temp/0.hdf5 --save viewport_temp")
         elif (not headless and preview): # Doesnt work anymore / could just bin off preview though
             os.system("blenderproc vis hdf5 output/0.hdf5")
         elif (not headless):
-            for i in range(config["render"]["renders"]):
-                os.system("blenderproc vis hdf5 output/"+str(i + highest) +".hdf5")
+            for i in range(config["render"]["renders"] ):
+                os.system("blenderproc vis hdf5 output/"+str(i + num) +".hdf5")
 
         self.remove_camera_poses()
 
@@ -527,6 +530,7 @@ class Backend():
             bproc.writer.write_hdf5("output/", data, append_to_existing_output = True)
         else:
             bproc.writer.write_hdf5(config["render_folder"], data, append_to_existing_output = True)
+
     def getHighestInDir(self):
         highest = -1
         for file in os.listdir("output"):
