@@ -238,6 +238,12 @@ class TabDialog(QWidget):
                 self.update_while_viewport = True
             return self.old_log(interaction)
 
+class ilyaMessageBox(QMessageBox):
+                def __init__(self, text, title):
+                    super().__init__()
+                    self.setText(text)
+                    self.setWindowTitle(title)
+                    self.exec()
 
 class ObjectTab(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget, Scroll: QVBoxLayout):
@@ -331,101 +337,12 @@ class ObjectTab(QWidget):
         self.Z_Rotation.setPageStep(0)
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
         self.Z_Rotation.setRange(0, 360)
-
-        #First Section
-        def Get_Object_Filepath(Scroll):
-            import_box = QMessageBox()
-            import_box.setText("How would you like to import objects?")
-            import_box.addButton("Import Files", QMessageBox.ActionRole)
-            import_box.addButton("Folder", QMessageBox.ActionRole)
-            import_box.addButton("Cancel", QMessageBox.RejectRole)
-            
-            import_box.exec()
-            clicked_button = import_box.clickedButton().text()
-            
-            try:
-                if clicked_button == "Import Files":
-                    paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
-                    if not paths:
-                        return
-                    
-                    for path in paths:
-                        obj = backend.RenderObject(filepath=path)
-                        Name = os.path.basename(os.path.normpath(path))
-                        shared_state.add_item(obj, Name)
-                        check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                        check.checkbox.setChecked(True)
-                        check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
-                        check.checkbox.setMaximumWidth(175)
-                        Scroll.addWidget(check.checkbox)
-
-                elif clicked_button == "Folder":
-                    folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
-                    if not folder_path:
-                        return
-                    
-                    # maybe have a global constant of supported extensions?
-                    supported_extensions = ['.blend', '.stl', '.obj']
-                    # go through each file in directory
-                    for root, _, files in os.walk(folder_path):
-                        for file in files:
-                            if any(file.lower().endswith(ext) for ext in supported_extensions):
-                                full_path = os.path.join(root, file)
-                                obj = backend.RenderObject(filepath=full_path)
-                                Name = os.path.basename(os.path.normpath(full_path))
-                                shared_state.add_item(obj, Name)
-                                check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                                check.checkbox.setChecked(True)
-                                check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
-                                check.checkbox.setMaximumWidth(175)
-                                Scroll.addWidget(check.checkbox)
-
-
-                Object_detect(tab_widget)
-
-            except Exception:
-                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
-                
-            except Exception as e:
-                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
-
+        
         self.Import_Object_Button = QPushButton("Import Objects", self)
-        self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
-    
-        def delete_object(tab_widget):
-            to_delete = QMessageBox()
-
-            to_delete.setText("Please select an object to remove from below")
-
-            if (not shared_state.items):
-                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
-
-            for obj in shared_state.items:
-                to_delete.addButton(str(obj), QMessageBox.ActionRole)
-            
-            to_delete.addButton("Cancel", QMessageBox.ActionRole)
-
-            to_delete.exec()
-            choice = str(to_delete.clickedButton().text())
-
-            if choice != "Cancel":
-                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
-                obj = shared_state.items[obj_index]
-                shared_state.remove_item(obj)
-                del backend.get_config()["objects"][obj.object_pos]
-                # shift objects after this one down by one
-                for i in range(obj_index, len(shared_state.items)):
-                    obj = shared_state.items[i]
-                    obj.object_pos = i
-
-                shared_state.items_updated.emit(shared_state.items)
-                # The last object was deleted
-                if (not shared_state.items):
-                    Object_detect(tab_widget)
-                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
+        self.Import_Object_Button.clicked.connect(lambda: self.Get_Object_Filepath(Scroll, tab_widget))
 
         self.Delete_Object_Button = QPushButton('Delete Object', self)
-        self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget))
+        self.Delete_Object_Button.clicked.connect(lambda: self.delete_object(tab_widget, Scroll))
 
         # create initial combo_box
         self.combo_box = QComboBox(self)
@@ -498,11 +415,6 @@ class ObjectTab(QWidget):
 
         self.setLayout(main_layout)
 
-        def Object_detect(tab_widget):
-            State = not Backend.is_config_objects_empty(tab_widget)
-            for i in range(4):
-                tab_widget.setTabEnabled(i, State)
-
         # editingFinished callbacks that updates backend
         self.XObj_pos_input_field.editingFinished.connect(self.update_object_pos)
         self.YObj_pos_input_field.editingFinished.connect(self.update_object_pos)
@@ -557,9 +469,109 @@ class ObjectTab(QWidget):
         
         #########################################
 
-        def show_hide_object(object,state):
-            backend.toggle_object(object,state)
+    def show_hide_object(self, object,state):
+        backend.toggle_object(object,state)
+            
+    #First Section
+    def Get_Object_Filepath(self, Scroll, tab_widget):
+            import_box = QMessageBox()
+            import_box.setText("How would you like to import objects?")
+            import_box.addButton("Import Files", QMessageBox.ActionRole)
+            import_box.addButton("Folder", QMessageBox.ActionRole)
+            import_box.addButton("Cancel", QMessageBox.RejectRole)
+            
+            import_box.exec()
+            clicked_button = import_box.clickedButton().text()
+            
+            try:
+                if clicked_button == "Import Files":
+                    paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
+                    if not paths:
+                        return
+                    
+                    for path in paths:
+                        obj = backend.RenderObject(filepath=path)
+                        Name = os.path.basename(os.path.normpath(path))
+                        shared_state.add_item(obj, Name)
+                        check = BenCheckBox(Name, len(shared_state.itemNames),obj)
+                        check.checkbox.setChecked(True)
+                        check.checkbox.stateChanged.connect(lambda: self.show_hide_object(check.object,check.checkbox.isChecked()))
+                        check.checkbox.setMaximumWidth(175)
+                        Scroll.addWidget(check.checkbox)
 
+                elif clicked_button == "Folder":
+                    folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
+                    if not folder_path:
+                        return
+                    
+                    # maybe have a global constant of supported extensions?
+                    supported_extensions = ['.blend', '.stl', '.obj']
+                    # go through each file in directory
+                    for root, _, files in os.walk(folder_path):
+                        for file in files:
+                            if any(file.lower().endswith(ext) for ext in supported_extensions):
+                                full_path = os.path.join(root, file)
+                                obj = backend.RenderObject(filepath=full_path)
+                                Name = os.path.basename(os.path.normpath(full_path))
+                                shared_state.add_item(obj, Name)
+                                check = BenCheckBox(Name,len(shared_state.itemNames),obj)
+                                check.checkbox.setChecked(True)
+                                check.checkbox.stateChanged.connect(lambda: self.show_hide_object(check.object,check.checkbox.isChecked()))
+                                check.checkbox.setMaximumWidth(175)
+                                Scroll.addWidget(check.checkbox)
+
+
+                self.Object_detect(tab_widget)
+
+            except Exception:
+                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
+                
+            except Exception as e:
+                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
+    
+    def delete_object(self, tab_widget, scroll):
+            to_delete = QMessageBox()
+            to_delete.setText("Please select an object to remove from below")
+
+            if (not shared_state.items):
+                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
+
+            for i in range(len(shared_state.itemNames)):
+                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
+            
+            to_delete.addButton("Cancel", QMessageBox.ActionRole)
+
+            to_delete.exec()
+
+            choice = str(to_delete.clickedButton().text())
+
+            if choice != "Cancel":
+                obj_index = shared_state.itemNames.index(choice)
+                obj = shared_state.items[obj_index]
+                scroll.itemAt(obj_index).widget().setParent(None)
+                try:
+                    shared_state.remove_item(obj)
+                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
+                    
+                    del backend.get_config()["objects"][obj.object_pos]
+                    # shift objects after this one down by one
+                    for i in range(obj_index, len(shared_state.items)):
+                        obj = shared_state.items[i]
+                        obj.object_pos = i
+                except:
+                    error_box = ilyaMessageBox("Error deleting object", "Error")
+
+                shared_state.items_updated.emit(shared_state.items)
+                # The last object was deleted
+                if (not shared_state.items):
+                    self.Object_detect(tab_widget)
+                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
+                    
+    def Object_detect(self, tab_widget):
+            State = not Backend.is_config_objects_empty(tab_widget)
+            for i in range(5):
+                tab_widget.setTabEnabled(i, State)
+                
     def update_combo_box_items(self, items):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
