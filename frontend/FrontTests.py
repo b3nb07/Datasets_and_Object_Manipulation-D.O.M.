@@ -198,26 +198,74 @@ def RenderTabTests(tab_widget, shared_state, RenderTab):
             Field = Page.itemAtPosition(Slider_Fields[i][0], Slider_Fields[i][1]).widget()
             Slider = Page.itemAtPosition(Slider_Fields[i][0], Slider_Fields[i][1]+1).widget()
             
-            print(Field)
-            print(Slider)
-            
             #Error Checking on Slider
             Field.setText("OYJ")
             RenderTab.Slider_Update(RenderTab, 10, Field)
             TestPrint(f"Expected 0.0:", Field.text() == "0.0")
             
-            #Updates slider position
-            RenderTab.Update_slider(RenderTab, Slider, 50)
             #Updates Field Value
             RenderTab.Slider_Update(RenderTab, 50, Field)
             TestPrint(f"Expected 50:", Field.text() == "50")
 
+def LightingTabTests(tab_widget, shared_state, LightingTab):
+        TestPrint("---Lighting Tab Check")
+        Page = tab_widget.widget(3).layout()
+
+        ButtonFields = [[2, 1], [1, 5], [2, 5], [3, 5]]
+        Slider_Fields = [[0, 1], [1, 9], [2, 9], [3, 9]]
+
+        s = 0
+        
+        DropDown_Field = [[3,1]]
+        Colour_select = [[1, 2]]
+
+        TestPrint(f"{s}---Lighting Tab Button Check")
+        for Position in ButtonFields:
+            Field = Page.itemAtPosition(Position[0], Position[1]).widget()
+            MinusButton = Page.itemAtPosition(Position[0], Position[1]+1).widget()
+            PlusButton = Page.itemAtPosition(Position[0], Position[1]+2).widget()
             
-def Tests(window, tab_widget, shared_state, ObjectTab, PivotTab, RenderTab, backend):
+            #Error Checking on MinusButton
+            Field.setText("OYJ")
+            MinusButton.click()
+            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            
+            #Error Checking on PlusButton
+            Field.setText("OYJ")
+            PlusButton.click()
+            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            
+            #Checking Buttons Alter values
+            MinusButton.click()
+            TestPrint(f"Expected -1.0:", Field.text() == "-1.0")
+            PlusButton.click()
+            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            
+        TestPrint(f"{s}---Lighting Tab Slider Check")
+        for Position in Slider_Fields:
+            Field = Page.itemAtPosition(Position[0], Position[1]).widget()
+            Slider = Page.itemAtPosition(Position[0], Position[1]+1).widget()
+            
+            #Error Checking on Slider
+            Field.setText("OYJ")
+            LightingTab.Slider_Update(LightingTab, 10, Field)
+            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            
+            #Updates Field Value
+            LightingTab.Slider_Update(LightingTab, 50, Field)
+            TestPrint(f"Expected 50:", Field.text() == "50")
+
+def RandomTabTests(tab_widget, shared_state, RandomsPages):
+    TestPrint("---Random Tab Check")
+    Page = tab_widget.widget(4).layout()
+    pass
+            
+def Tests(window, tab_widget, shared_state, ObjectTab, PivotTab, RenderTab, LightingTab, RandomPages, backend):
     Tab_Checker(window, shared_state, backend)
     ObjectLoad(window, shared_state, ObjectTab, backend)
     Render(window, tab_widget, ObjectTab)
     ObjectTabTests(tab_widget, shared_state, ObjectTab)
     PivotTabTests(tab_widget, shared_state, PivotTab)
     RenderTabTests(tab_widget, shared_state, RenderTab)
-    
+    LightingTabTests(tab_widget, shared_state, LightingTab)
+    RandomTabTests(tab_widget, shared_state, RandomPages)

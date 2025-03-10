@@ -213,7 +213,7 @@ class TabDialog(QWidget):
         self.setLayout(main_layout)
         
         from FrontTests import Tests
-        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, backend)
+        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, RandomTabDialog, backend)
 
     def visual_change(self, thread):
         thread.quit()
@@ -2111,11 +2111,6 @@ class Port(QWidget):
         except:
             print("five")
 
-
-
-
-
-
 class Lighting(QWidget):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
@@ -2174,10 +2169,7 @@ class Lighting(QWidget):
         #self.radius_button_plus.clicked.connect(lambda: self.Plus_click(self.radius_input_field))
         self.radius_button_plus.clicked.connect(lambda: self.set_radius("Plus", self.radius_input_field))
 
-
-
         ###
-
 
         self.light_coords_label = QLabel("Lighting Co-ords:", self)
         self.light_coords_label.setToolTip('Co-ords of lighting element')
@@ -2418,10 +2410,14 @@ class Lighting(QWidget):
 
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
-        if field.text() == '':
-            field.setText('0')
-        if float(field.text()) > val or float(field.text()) + 0.5 < val:
-            field.setText(str(val))
+        if field.isEnabled():
+            try:
+                if field.text() == '':
+                    field.setText('0')
+                if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                    field.setText(str(val))
+            except:
+                field.setText("0.0")
     
     def set_rotation_from_field(self, slider, val):
         try:
