@@ -213,7 +213,7 @@ class TabDialog(QWidget):
         self.setLayout(main_layout)
         
         from FrontTests import Tests
-        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, backend)
+        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, backend)
 
     def visual_change(self, thread):
         thread.quit()
@@ -1692,11 +1692,6 @@ class Render(QWidget):
 
         self.setLayout(main_layout)
     
-   
-
-
-
-
     def unlimitedrender(self):
         unlimitedRenderConfig = backend.get_config()
         test = True
@@ -1740,10 +1735,13 @@ class Render(QWidget):
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
         if field.isEnabled():
-            if field.text() == '':
-                field.setText('0')
-            if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                field.setText(str(val))
+            try:
+                if field.text() == '':
+                    field.setText('0')
+                if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                    field.setText(str(val))
+            except:
+                field.setText("0.0")
 
     def increase_count(self):
         if self.Number_of_renders_input_field.isEnabled():
