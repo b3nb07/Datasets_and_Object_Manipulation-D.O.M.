@@ -176,7 +176,7 @@ class TabDialog(QWidget):
         random_tab = RandomTabDialog(self, tab_widget)
         tab_widget.removeTab(Temp_index)
         tab_widget.insertTab(Temp_index, random_tab, "Random")
-
+        print(tab_widget)
         
         #tab_widget.widget(0).layout().itemAtPosition(1, 1).widget().setEnabled(False)
         
@@ -206,7 +206,11 @@ class TabDialog(QWidget):
         
         main_layout.addWidget(ObjectsStatusBar, 1, 0, 1, 2)
         main_layout.addWidget(self.environment, 1, 1, 1, 7)  
+    
         self.setLayout(main_layout)
+        
+        from FrontTests import Tests
+        Tests(self, tab_widget, shared_state, ObjectTab, backend)
 
     def visual_change(self, thread):
         thread.quit()
@@ -607,6 +611,8 @@ class ObjectTab(QWidget):
         self.Update_slider(self.Y_Rotation,self.Y_Rotation_input_field.text())
         self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
         
+    def ValidType(self, val):
+        return type(val) == str
     
     def Update_slider(self, slider, val):
         try:
@@ -631,31 +637,38 @@ class ObjectTab(QWidget):
                 print("Error", e)
     
     def Slider_Update_Scale(self, val, field):
-        if field.isEnabled():
-            if field.text() == '':
-                field.setText('0')
-            if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                if val < 500: # <1 true
-                    trueValStr = str(val / 500)
-                    if len(trueValStr) > 4:
-                        field.setText(trueValStr[0:4])
-                    else:
-                        field.setText(trueValStr)
+        try:
+            if field.isEnabled():
+                if field.text() == '':
+                    field.setText('0')
+                if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                    if val < 500: # <1 true
+                        trueValStr = str(val / 500)
+                        if len(trueValStr) > 4:
+                            field.setText(trueValStr[0:4])
+                        else:
+                            field.setText(trueValStr)
 
-                else: # >1 true
-                    trueValStr = str((val - 450) / 50)
-                    if len(trueValStr) > 3:
-                        field.setText(trueValStr[0:3])
-                    else:
-                        field.setText(trueValStr)
+                    else: # >1 true
+                        trueValStr = str((val - 450) / 50)
+                        if len(trueValStr) > 3:
+                            field.setText(trueValStr[0:3])
+                        else:
+                            print(trueValStr)
+                            field.setText(trueValStr)
+        except:
+            field.setText("0.0")
 
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
         if field.isEnabled():
-            if field.text() == '':
-                field.setText('0')
-            if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                field.setText(str(val))
+            try:
+                if field.text() == '':
+                    field.setText('0.0')
+                if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                    field.setText(str(val))
+            except:
+                field.setText('0.0')
 
             
     def update_object_pos(self):
@@ -735,13 +748,6 @@ class ObjectTab(QWidget):
             except:
                 field.setText(str(0.0))
                 field.editingFinished.emit()
-    
-    
-            
-    
-
-    
-        
 
 class PivotTab(QWidget):
     def __init__(self, parent: QWidget):
