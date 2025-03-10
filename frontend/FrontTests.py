@@ -88,8 +88,14 @@ def ObjectTabTests(tab_widget, shared_state, ObjectTab):
             ObjectTab.Slider_Update_Scale(ObjectTab, 0, Field)
             TestPrint(f"Expected 0.0:", Field.text() == "0.0")
             
+            #Updates Field Value
             ObjectTab.Slider_Update_Scale(ObjectTab, 5450, Field)
             TestPrint(f"Expected 100:", Field.text() == "100")
+            
+            """#Updates slider position
+            ObjectTab.Update_slider(ObjectTab, Slider, 5450)
+            TestPrint(f"Expected 100:", Slider.sliderPosition() == "100")"""
+            
         
         TestPrint(f"{s}---Object Scale Slider Check")
         for i in range(len(Scale_Fields)):
@@ -104,8 +110,57 @@ def ObjectTabTests(tab_widget, shared_state, ObjectTab):
             ObjectTab.Slider_Update_Scale(ObjectTab, 5450, Field)
             TestPrint(f"Expected 100:", Field.text() == "100")
             
+            """#Updates slider position
+            ObjectTab.Update_slider(ObjectTab, Slider, 5450)
+            TestPrint(f"Expected 100:", Slider.sliderPosition() == "100")
+            print(Slider.sliderPosition())"""
+            
 def PivotTabTests(tab_widget, shared_state, PivotTab):
-    pass
+    TestPrint("---Pivot Tab Check")
+    Page = tab_widget.widget(1).layout()
+    
+    ButtonFields = [[1, 1], [2, 1], [3, 1]]
+    Distance_Fields = [[1, 5]]
+    
+    for s in range(shared_state.count()):
+    
+        for i in range(len(ButtonFields)):
+            TestPrint(f"{s}---Pivot Tab Button Check")
+            Field = Page.itemAtPosition(ButtonFields[i][0], ButtonFields[i][1]).widget()
+            MinusButton = Page.itemAtPosition(ButtonFields[i][0], ButtonFields[i][1]+1).widget()
+            PlusButton = Page.itemAtPosition(ButtonFields[i][0], ButtonFields[i][1]+2).widget()
+            
+            #Error Checking on MinusButton
+            Field.setText("OYJ")
+            MinusButton.click()
+            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            
+            #Error Checking on PlusButton
+            Field.setText("OYJ")
+            PlusButton.click()
+            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            
+            #Checking Buttons Alter values
+            MinusButton.click()
+            TestPrint(f"Expected -1.0:", Field.text() == "-1.0")
+            PlusButton.click()
+            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            
+        TestPrint(f"{s}---PivotTab Slider Check")
+        for i in range(len(Distance_Fields)):
+            Field = Page.itemAtPosition(Distance_Fields[i][0], Distance_Fields[i][1]).widget()
+            Slider = Page.itemAtPosition(Distance_Fields[i][0], Distance_Fields[i][1]+1).widget()
+            
+            #Error Checking on Slider
+            Field.setText("OYJ")
+            PivotTab.Slider_Update(PivotTab, 10, Field)
+            TestPrint(f"Expected 0:", Field.text() == "0")
+            
+            #Updates slider position
+            PivotTab.Update_slider(PivotTab, Slider, 50)
+            #Updates Field Value
+            PivotTab.Slider_Update(PivotTab, 50, Field)
+            TestPrint(f"Expected 50:", Field.text() == "50")
 
             
 def Tests(window, tab_widget, shared_state, ObjectTab, PivotTab, backend):

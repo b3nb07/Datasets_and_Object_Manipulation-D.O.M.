@@ -901,10 +901,13 @@ class PivotTab(QWidget):
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
         if field.isEnabled():
-            if field.text() == '':
+            try: 
+                if field.text() == '':
+                    field.setText('0')
+                if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                    field.setText(str(val))
+            except:
                 field.setText('0')
-            if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                field.setText(str(val))
         
     def Object_pivot_selected(self, Check, Fields, Buttons):
         "Set checkbox and associsated Fields and buttons False"
