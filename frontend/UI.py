@@ -76,6 +76,9 @@ class ComboBoxState(QObject):
         self.selected_index = index
         # maybe delete
         self.selection_changed.emit(index)
+        
+    def count(self):
+        return len(self.items)
 
 class BenCheckBox():
     def __init__(self, name, pos, object):

@@ -18,6 +18,9 @@ def ObjectLoad(window, shared_state, ObjectTab, backend):
     obj = backend.RenderObject("bugatti.obj")
     shared_state.add_item(obj, "bugatti_1")
     
+    obj = backend.RenderObject("bugatti.obj")
+    shared_state.add_item(obj, "bugatti_2")
+    
     ObjectTab.Object_detect(ObjectTab, NavBar)
     for i in range(NavBar.count()):
         TestPrint(f"Expected True:", True == NavBar.isTabEnabled(i))
@@ -40,47 +43,50 @@ def ObjectTabTests(window, tab_widget, shared_state, ObjectTab, backend):
     Rotation_Fields = [[1, 5], [2, 5], [3, 5]]
     Scale_Fields = [[1, 8], [2, 8], [3, 8]]
     
-    for i in range(len(ButtonFields)):
-        TestPrint("---Object Tab Button Check")
-        Field = Page.itemAtPosition(ButtonFields[i][0], ButtonFields[i][1]).widget()
-        MinusButton = Page.itemAtPosition(ButtonFields[i][0], ButtonFields[i][1]+1).widget()
-        PlusButton = Page.itemAtPosition(ButtonFields[i][0], ButtonFields[i][1]+2).widget()
-        
-        #Error Checking on MinusButton
-        Field.setText("OYJ")
-        MinusButton.click()
-        TestPrint(f"Expected 0.0:", Field.text() == "0.0")
-        
-        #Error Checking on PlusButton
-        Field.setText("OYJ")
-        PlusButton.click()
-        TestPrint(f"Expected 0.0:", Field.text() == "0.0")
-        
-        #Checking Buttons Alter values
-        MinusButton.click()
-        TestPrint(f"Expected -1.0:", Field.text() == "-1.0")
-        PlusButton.click()
-        TestPrint(f"Expected 0.0:", Field.text() == "0.0")
-        
-    TestPrint("---Object Rotation Slider Check")
-    for i in range(len(Rotation_Fields)):
-        Field = Page.itemAtPosition(Rotation_Fields[i][0], Rotation_Fields[i][1]).widget()
-        Slider = Page.itemAtPosition(Rotation_Fields[i][0], Rotation_Fields[i][1]+1).widget()
-        
-        #Error Checking on Slider
-        Field.setText("OYJ")
-        ObjectTab.Slider_Update_Scale(ObjectTab, 10, Field)
-        TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+    for s in range(shared_state.count()):
     
-    TestPrint("---Object Scale Slider Check")
-    for i in range(len(Scale_Fields)):
-        Field = Page.itemAtPosition(Scale_Fields[i][0], Scale_Fields[i][1]).widget()
-        Slider = Page.itemAtPosition(Scale_Fields[i][0], Scale_Fields[i][1]+1).widget()
+        for i in range(len(ButtonFields)):
+            TestPrint(f"{s}---Object Tab Button Check")
+            Field = Page.itemAtPosition(ButtonFields[i][0], ButtonFields[i][1]).widget()
+            MinusButton = Page.itemAtPosition(ButtonFields[i][0], ButtonFields[i][1]+1).widget()
+            PlusButton = Page.itemAtPosition(ButtonFields[i][0], ButtonFields[i][1]+2).widget()
+            
+            #Error Checking on MinusButton
+            Field.setText("OYJ")
+            MinusButton.click()
+            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            
+            #Error Checking on PlusButton
+            Field.setText("OYJ")
+            PlusButton.click()
+            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            
+            #Checking Buttons Alter values
+            MinusButton.click()
+            TestPrint(f"Expected -1.0:", Field.text() == "-1.0")
+            PlusButton.click()
+            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            
+        TestPrint(f"{s}---Object Rotation Slider Check")
+        for i in range(len(Rotation_Fields)):
+            Field = Page.itemAtPosition(Rotation_Fields[i][0], Rotation_Fields[i][1]).widget()
+            Slider = Page.itemAtPosition(Rotation_Fields[i][0], Rotation_Fields[i][1]+1).widget()
+            
+            #Error Checking on Slider
+            Field.setText("OYJ")
+            ObjectTab.Slider_Update_Scale(ObjectTab, 10, Field)
+            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
         
-        #Error Checking on Slider
-        Field.setText("OYJ")
-        ObjectTab.Slider_Update_Scale(ObjectTab, 10, Field)
-        TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+        TestPrint(f"{s}---Object Scale Slider Check")
+        for i in range(len(Scale_Fields)):
+            Field = Page.itemAtPosition(Scale_Fields[i][0], Scale_Fields[i][1]).widget()
+            Slider = Page.itemAtPosition(Scale_Fields[i][0], Scale_Fields[i][1]+1).widget()
+            
+            #Error Checking on Slider
+            Field.setText("OYJ")
+            ObjectTab.Slider_Update_Scale(ObjectTab, 10, Field)
+            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+        
         
     
     
