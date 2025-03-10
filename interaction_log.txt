@@ -1,2 +1,2 @@
 Program initialised
-Render resolution changed to [256, 256]
+Rotation of Object 1 changed to [np.float64(1.7453292519943295), np.float64(1.7453292519943295), np.float64(1.7453292519943295)]

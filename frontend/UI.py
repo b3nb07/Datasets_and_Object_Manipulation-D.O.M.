@@ -213,7 +213,7 @@ class TabDialog(QWidget):
         self.setLayout(main_layout)
         
         from FrontTests import Tests
-        Tests(self, tab_widget, shared_state, ObjectTab, backend)
+        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, backend)
 
     def visual_change(self, thread):
         thread.quit()

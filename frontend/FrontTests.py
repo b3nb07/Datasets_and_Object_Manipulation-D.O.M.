@@ -1,5 +1,16 @@
 import random
-import time
+
+def TestPrint(String, Valid=None):
+    PASS =  '\033[32m'
+    OKBLUE = '\033[94m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    if Valid == None:
+        print(f"{OKBLUE}{String}{ENDC}")
+    elif Valid:
+        print(f"{PASS}{String} Valid{ENDC}")
+    else:
+        print(f"{FAIL}{String} Invalid{ENDC}")
 
 def Tab_Checker(window, shared_state, backend):
     TestPrint("---NavBar Check")
@@ -35,7 +46,7 @@ def Render(window, tab_widget, ObjectTab):
     
     
         
-def ObjectTabTests(window, tab_widget, shared_state, ObjectTab, backend):
+def ObjectTabTests(tab_widget, shared_state, ObjectTab):
     TestPrint("---Object Tab Check")
     Page = tab_widget.widget(0).layout()
     
@@ -74,8 +85,11 @@ def ObjectTabTests(window, tab_widget, shared_state, ObjectTab, backend):
             
             #Error Checking on Slider
             Field.setText("OYJ")
-            ObjectTab.Slider_Update_Scale(ObjectTab, 10, Field)
+            ObjectTab.Slider_Update_Scale(ObjectTab, 0, Field)
             TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            
+            ObjectTab.Slider_Update_Scale(ObjectTab, 5450, Field)
+            TestPrint(f"Expected 100:", Field.text() == "100")
         
         TestPrint(f"{s}---Object Scale Slider Check")
         for i in range(len(Scale_Fields)):
@@ -86,27 +100,18 @@ def ObjectTabTests(window, tab_widget, shared_state, ObjectTab, backend):
             Field.setText("OYJ")
             ObjectTab.Slider_Update_Scale(ObjectTab, 10, Field)
             TestPrint(f"Expected 0.0:", Field.text() == "0.0")
-        
-        
-    
-    
-    
-    
             
-def Tests(window, tab_widget, shared_state, ObjectTab, backend):
+            ObjectTab.Slider_Update_Scale(ObjectTab, 5450, Field)
+            TestPrint(f"Expected 100:", Field.text() == "100")
+            
+def PivotTabTests(tab_widget, shared_state, PivotTab):
+    pass
+
+            
+def Tests(window, tab_widget, shared_state, ObjectTab, PivotTab, backend):
     Tab_Checker(window, shared_state, backend)
     ObjectLoad(window, shared_state, ObjectTab, backend)
     Render(window, tab_widget, ObjectTab)
-    ObjectTabTests(window, tab_widget, shared_state, ObjectTab, backend)
+    ObjectTabTests(tab_widget, shared_state, ObjectTab)
+    PivotTabTests(tab_widget, shared_state, PivotTab)
     
-def TestPrint(String, Valid=None):
-    PASS =  '\033[32m'
-    OKBLUE = '\033[94m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    if Valid == None:
-        print(f"{OKBLUE}{String}{ENDC}")
-    elif Valid:
-        print(f"{PASS}{String} Valid{ENDC}")
-    else:
-        print(f"{FAIL}{String} Invalid{ENDC}")
