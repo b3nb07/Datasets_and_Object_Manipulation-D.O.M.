@@ -255,12 +255,85 @@ def LightingTabTests(tab_widget, shared_state, LightingTab):
             LightingTab.Slider_Update(LightingTab, 50, Field)
             TestPrint(f"Expected 50:", Field.text() == "50")
 
-def RandomTabTests(tab_widget, shared_state, RandomsPages):
+def RandomDefaultTabTests(tab_widget):
+    TestPrint("---Random Default Tab Check")
+    Page = tab_widget.widget(0)
+    PageLayout = Page.layout()
+
+    TestPrint("XOR CheckBox Testing")
+
+    PageLayout.itemAtPosition(1, 0).widget().setChecked(True)
+    TestPrint("Check 1 not Check 2:", not PageLayout.itemAtPosition(2, 0).widget().isChecked())
+
+    PageLayout.itemAtPosition(2, 0).widget().setChecked(True)
+    TestPrint("Check 2 not Check 1:", not PageLayout.itemAtPosition(1, 0).widget().isChecked())
+
+    PageLayout.itemAtPosition(0, 0).widget().setChecked(True)
+
+def RandomTabPageTests(tab_widget, PagePos):
+    Pages = ["Default", "Object", "Pivot", "Render", "Lighting"]
+    CheckBoxPos = 12 if PagePos == 4 else 10 
+    TestPrint(f"---Random {Pages[PagePos]} Tab Check")
+    Page = tab_widget.widget(PagePos)
+    PageLayout = Page.layout()
+
+    TestPrint("---All Enabled")
+    for keys in Page.CheckBoxes.keys():
+        x, y = Page.CheckBoxes[keys]
+        TestPrint("Expected True:", PageLayout.itemAtPosition(1, x).widget().isChecked())
+        PageLayout.itemAtPosition(1, CheckBoxPos).widget().setChecked(False)
+
+    for keys in Page.CheckBoxes.keys():
+        x, y = Page.CheckBoxes[keys]
+        TestPrint("---Checkbox False: Field Disabled")
+        if not PageLayout.itemAtPosition(y, x).widget().isChecked():
+            TestPrint("Expected False:", not PageLayout.itemAtPosition(y, x+1).widget().isEnabled())
+            TestPrint("Expected False:", not PageLayout.itemAtPosition(y, x+2).widget().isEnabled())
+
+        PageLayout.itemAtPosition(y, x).widget().setChecked(True)
+
+        TestPrint("---Checkbox True: Field Enabled")
+        if PageLayout.itemAtPosition(y, x).widget().isChecked():
+            TestPrint("Expected True:", PageLayout.itemAtPosition(y, x+1).widget().isEnabled())
+            TestPrint("Expected True:", PageLayout.itemAtPosition(y, x+2).widget().isEnabled())
+
+        TestPrint("---Illegal Value")
+        PageLayout.itemAtPosition(y, x+1).widget().setText("OYJ")
+        PageLayout.itemAtPosition(y, x+1).widget().editingFinished.emit()
+        TestPrint("Expected -inf:", PageLayout.itemAtPosition(y, x+1).widget().text() == "-inf")
+        TestPrint("Expected inf:", PageLayout.itemAtPosition(y, x+2).widget().text() == "inf")
+
+        TestPrint("---LowerBound Value > UpperBound Value")
+        PageLayout.itemAtPosition(y, x+1).widget().setText("1")
+        PageLayout.itemAtPosition(y, x+2).widget().setText("0")
+        PageLayout.itemAtPosition(y, x+1).widget().editingFinished.emit()
+        TestPrint("Expected -inf:", PageLayout.itemAtPosition(y, x+1).widget().text() == "-inf")
+
+        TestPrint("---UpperBound Value < LowerBound Value")
+        PageLayout.itemAtPosition(y, x+1).widget().setText("1")
+        PageLayout.itemAtPosition(y, x+2).widget().setText("0")
+        PageLayout.itemAtPosition(y, x+2).widget().editingFinished.emit()
+        TestPrint("Expected -inf:", PageLayout.itemAtPosition(y, x+1).widget().text() == "-inf")
+
+    PageLayout.itemAtPosition(1, CheckBoxPos).widget().setChecked(True)
+    PageLayout.itemAtPosition(1, CheckBoxPos).widget().setChecked(False)
+    TestPrint("---AllPage Checkbox False: Field Disabled")
+    for keys in Page.CheckBoxes.keys():
+        x, y = Page.CheckBoxes[keys]
+        TestPrint("Expected False:", not PageLayout.itemAtPosition(y, x+1).widget().isEnabled())
+        TestPrint("Expected False:", not PageLayout.itemAtPosition(y, x+2).widget().isEnabled())
+
+#Invoked on line 991
+def RandomTabTests(tab_widget):
     TestPrint("---Random Tab Check")
-    Page = tab_widget.widget(4).layout()
-    pass
-            
-def Tests(window, tab_widget, shared_state, ObjectTab, PivotTab, RenderTab, LightingTab, RandomPages, backend):
+    RandomDefaultTabTests(tab_widget)
+    RandomTabPageTests(tab_widget, 1)
+    RandomTabPageTests(tab_widget, 2)
+    RandomTabPageTests(tab_widget, 3)
+    RandomTabPageTests(tab_widget, 4)
+
+#Invoked on line 213
+def Tests(window, tab_widget, shared_state, ObjectTab, PivotTab, RenderTab, LightingTab, backend):
     Tab_Checker(window, shared_state, backend)
     ObjectLoad(window, shared_state, ObjectTab, backend)
     Render(window, tab_widget, ObjectTab)
@@ -268,4 +341,3 @@ def Tests(window, tab_widget, shared_state, ObjectTab, PivotTab, RenderTab, Ligh
     PivotTabTests(tab_widget, shared_state, PivotTab)
     RenderTabTests(tab_widget, shared_state, RenderTab)
     LightingTabTests(tab_widget, shared_state, LightingTab)
-    RandomTabTests(tab_widget, shared_state, RandomPages)

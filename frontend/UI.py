@@ -179,7 +179,6 @@ class TabDialog(QWidget):
         random_tab = RandomTabDialog(self, tab_widget)
         tab_widget.removeTab(Temp_index)
         tab_widget.insertTab(Temp_index, random_tab, "Random")
-        print(tab_widget)
         
         #tab_widget.widget(0).layout().itemAtPosition(1, 1).widget().setEnabled(False)
         
@@ -213,7 +212,7 @@ class TabDialog(QWidget):
         self.setLayout(main_layout)
         
         from FrontTests import Tests
-        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, RandomTabDialog, backend)
+        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)
 
     def visual_change(self, thread):
         thread.quit()
@@ -988,6 +987,9 @@ class RandomTabDialog(QWidget):
         tab_widget.addTab(RandomPivot(self, ParentTab), "Pivot Point")
         tab_widget.addTab(RandomRender(self, ParentTab), "Render")
         tab_widget.addTab(RandomLight(self, ParentTab), "Light")
+
+        from FrontTests import RandomTabTests
+        RandomTabTests(tab_widget)
         
 
         main_layout = QVBoxLayout()
