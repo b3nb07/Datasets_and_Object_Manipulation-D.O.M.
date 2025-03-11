@@ -77,6 +77,12 @@ class ComboBoxState(QObject):
         # maybe delete
         self.selection_changed.emit(index)
 
+class BenCheckBox():
+    def __init__(self, name, pos, object):
+        self.checkbox = QCheckBox(name)
+        self.pos = pos
+        self.object = object
+
 class ViewportThread(QThread):
     def __init__(self, size):
         super().__init__()
@@ -181,7 +187,7 @@ class TabDialog(QWidget):
         tab_widget.setTabEnabled(3, False)
         tab_widget.setTabEnabled(4, False)
 
-        tab_widget.setMaximumHeight(225)
+        tab_widget.setMaximumHeight(250)
         
         # enviroment
         self.environment = QWidget()
@@ -347,12 +353,11 @@ class ObjectTab(QWidget):
                         obj = backend.RenderObject(filepath=path)
                         Name = os.path.basename(os.path.normpath(path))
                         shared_state.add_item(obj, Name)
-                        Label = QLabel(Name)
-                        Label.setStyleSheet("border: 1px solid black;")
-                        Label.setAlignment(QtCore.Qt.AlignCenter)
-                        Label.setMaximumHeight(40)
-                        Label.setMinimumHeight(40)
-                        Scroll.addWidget(Label)
+                        check = BenCheckBox(Name,len(shared_state.itemNames),obj)
+                        check.checkbox.setChecked(True)
+                        check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
+                        check.checkbox.setMaximumWidth(175)
+                        Scroll.addWidget(check.checkbox)
 
                 elif clicked_button == "Folder":
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
@@ -369,12 +374,11 @@ class ObjectTab(QWidget):
                                 obj = backend.RenderObject(filepath=full_path)
                                 Name = os.path.basename(os.path.normpath(full_path))
                                 shared_state.add_item(obj, Name)
-                                Label = QLabel(Name)
-                                Label.setStyleSheet("border: 1px solid black;")
-                                Label.setAlignment(QtCore.Qt.AlignCenter)
-                                Label.setMaximumHeight(40)
-                                Label.setMinimumHeight(40)
-                                Scroll.addWidget(Label)
+                                check = BenCheckBox(Name,len(shared_state.itemNames),obj)
+                                check.checkbox.setChecked(True)
+                                check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
+                                check.checkbox.setMaximumWidth(175)
+                                Scroll.addWidget(check.checkbox)
 
 
                 Object_detect(tab_widget)
@@ -553,6 +557,9 @@ class ObjectTab(QWidget):
         
         #########################################
 
+        def show_hide_object(object,state):
+            backend.toggle_object(object,state)
+
     def update_combo_box_items(self, items):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
@@ -716,6 +723,8 @@ class ObjectTab(QWidget):
             except:
                 field.setText(str(0.0))
                 field.editingFinished.emit()
+    
+    
             
     
 
@@ -1082,6 +1091,9 @@ class RandomObject(QWidget):
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
         
+        Field_LowerBound.setText('-inf')
+        Field_UpperBound.setText('inf')
+        
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
 
@@ -1125,6 +1137,20 @@ class RandomObject(QWidget):
         """Generate Upperbound Field"""
         Layout.addWidget(Field, Y, X)
         self.UpperBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+        
+    def boundChecker(self, Lower, Upper):
+        try:
+            
+            Lowerval = float(Lower.text())
+            Upperval = float(Upper.text())
+            
+            if Lowerval > Upperval:
+                Lower.setText('-inf')
+            elif Upperval < Lowerval:
+                Upper.setText('inf')
+        except:
+            Lower.setText('-inf')
+            Upper.setText('inf')
 
     def un_checked(self, State, Field_LowerBound, Field_UpperBound):
         "Sets field to checkbox status"
@@ -1186,7 +1212,11 @@ class RandomPivot(QWidget):
         self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
         self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
         self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
-
+        
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(1, 1).widget(), main_layout.itemAtPosition(1, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(2, 1).widget(), main_layout.itemAtPosition(2, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(3, 1).widget(), main_layout.itemAtPosition(3, 2).widget()))
+        
         main_layout.addWidget(QLabel("Distnace", self), 0, 3)
         self.gen_field("Measurement", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
         
@@ -1196,6 +1226,9 @@ class RandomPivot(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        
+        Field_LowerBound.setText('-inf')
+        Field_UpperBound.setText('inf')
         
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
@@ -1246,6 +1279,20 @@ class RandomPivot(QWidget):
     def addUpper(self, Field, Fieldname, Layout, X, Y):
         Layout.addWidget(Field, Y, X)
         self.UpperBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+        
+    def boundChecker(self, Lower, Upper):
+        try:
+            
+            Lowerval = float(Lower.text())
+            Upperval = float(Upper.text())
+            
+            if Lowerval > Upperval:
+                Lower.setText('-inf')
+            elif Upperval < Lowerval:
+                Upper.setText('inf')
+        except:
+            Lower.setText('-inf')
+            Upper.setText('inf')
 
     def un_checked(self, State, Field_LowerBound, Field_UpperBound):
         Field_LowerBound.setEnabled(State)
@@ -1307,6 +1354,9 @@ class RandomRender(QWidget):
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
         
+        Field_LowerBound.setText('-inf')
+        Field_UpperBound.setText('inf')
+        
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
 
@@ -1315,6 +1365,9 @@ class RandomRender(QWidget):
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
+        
+        Field_LowerBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
 
         #
         lower = Field_LowerBound.text()
@@ -1357,6 +1410,20 @@ class RandomRender(QWidget):
     def addUpper(self, Field, Fieldname, Layout, X, Y):
         Layout.addWidget(Field, Y, X)
         self.UpperBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
+        
+    def boundChecker(self, Lower, Upper):
+        try:
+            
+            Lowerval = float(Lower.text())
+            Upperval = float(Upper.text())
+            
+            if Lowerval > Upperval:
+                Lower.setText('-inf')
+            elif Upperval < Lowerval:
+                Upper.setText('inf')
+        except:
+            Lower.setText('-inf')
+            Upper.setText('inf')
 
     def un_checked(self, State, Field_LowerBound, Field_UpperBound):
         Field_LowerBound.setEnabled(State)
@@ -1431,6 +1498,9 @@ class RandomLight(QWidget):
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
         
+        Field_LowerBound.setText('-inf')
+        Field_UpperBound.setText('inf')
+        
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
 
@@ -1439,6 +1509,9 @@ class RandomLight(QWidget):
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
+        
+        Field_LowerBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
+        Field_UpperBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
 
         #
         lower = Field_LowerBound.text()
@@ -1480,6 +1553,20 @@ class RandomLight(QWidget):
     def addUpper(self, Field, Fieldname, Layout, X, Y):
         Layout.addWidget(Field, Y, X)
         self.UpperBounds[f"{Layout.itemAtPosition(0, 12).widget().currentText()}{Fieldname}"] = (X, Y)
+        
+    def boundChecker(self, Lower, Upper):
+        try:
+            
+            Lowerval = float(Lower.text())
+            Upperval = float(Upper.text())
+            
+            if Lowerval > Upperval:
+                Lower.setText('-inf')
+            elif Upperval < Lowerval:
+                Upper.setText('inf')
+        except:
+            Lower.setText('-inf')
+            Upper.setText('inf')
 
     def un_checked(self, State, Field_LowerBound, Field_UpperBound):
         Field_LowerBound.setEnabled(State)
@@ -1623,6 +1710,7 @@ class Render(QWidget):
 
 
     def unlimitedrender(self):
+        unlimitedRenderConfig = backend.get_config()
         test = True
         while True:
             if (self.rendering):
@@ -1632,6 +1720,7 @@ class Render(QWidget):
                 continue
             if self.unlimited_render_button.isChecked():
                 self.Number_of_renders_input_field.setText("1")
+                self.queue.append(unlimitedRenderConfig)
                 self.generate_render()
             else:
                 test = False
@@ -1860,6 +1949,15 @@ class Port(QWidget):
                         return
                     
                     for path in paths:
+                        obj = backend.RenderObject(filepath=path)
+
+                        Name = os.path.basename(os.path.normpath(path))
+                        shared_state.add_item(obj, Name)
+                        check = BenCheckBox(Name,len(shared_state.itemNames),obj)
+                        check.checkbox.setChecked(True)
+                        check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
+                        check.checkbox.setMaximumWidth(175)
+                        Scroll.addWidget(check.checkbox)
                         try:
                             process_file(path)
                             successful_imps += 1
@@ -1867,7 +1965,6 @@ class Port(QWidget):
                         except Exception as e:
                             name = os.path.basename(os.path.normpath(path))
                             failed_imps.append((name, str(e)))
-                            
                 elif clicked_button == "Folder":
                     """ Importing a folder or folders """
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
@@ -1878,6 +1975,17 @@ class Port(QWidget):
                     # go through each file in directory
                     for root, _, files in os.walk(folder_path):
                         for file in files:
+                            if any(file.lower().endswith(ext) for ext in supported_extensions):
+                                full_path = os.path.join(root, file)
+                                obj = backend.RenderObject(filepath=full_path)
+
+                                Name = os.path.basename(os.path.normpath(full_path))
+                                shared_state.add_item(obj, Name)
+                                check = BenCheckBox(Name,len(shared_state.itemNames),obj)
+                                check.checkbox.setChecked(True)
+                                check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
+                                check.checkbox.setMaximumWidth(175)
+                                Scroll.addWidget(check.checkbox)
                             try:
                                 path = os.path.join(root, file)
                                 process_file(path)
@@ -1912,18 +2020,24 @@ class Port(QWidget):
 
             Tutorial_Box.exec()
 
-            Name = self.GetName()
+            
             try:
-                obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-                if Name == "Object":
-                    Name = f"{Name} {len(shared_state.itemNames)+1}"
-                shared_state.add_item(obj, Name)
-                Label = QLabel(Name)
-                Label.setStyleSheet("border: 1px solid black;")
-                Label.setAlignment(QtCore.Qt.AlignCenter)
-                Label.setMaximumHeight(40)
-                Label.setMinimumHeight(40)
-                Scroll.addWidget(Label)
+                if Tutorial_Box.clickedButton().text().upper() != "CANCEL":
+                    print("zero")
+                    Name = self.GetName()
+                    print("six")
+                    if Name != False:
+                        obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+                        print("seven")
+                        if Name == "Object":
+                            Name = f"{Name} {len(shared_state.itemNames)+1}"
+                        shared_state.add_item(obj, Name)
+
+                        check = BenCheckBox(Name,len(shared_state.itemNames),obj)
+                        check.checkbox.setChecked(True)
+                        check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
+                        check.checkbox.setMaximumWidth(175)
+                        Scroll.addWidget(check.checkbox)
                 
             except Exception as e:
                 print(e)
@@ -2052,13 +2166,30 @@ class Port(QWidget):
         main_layout.addWidget(self.SelectRenderFolder_Button, 0, 5)
 
         self.setLayout(main_layout)
+
+        def show_hide_object(object,state):
+            backend.toggle_object(object,state)
+            
         
     def GetName(self):
-        ObjName, State = QtWidgets.QInputDialog.getText(self, 'Object Name', "Enter Object Name: ")
-        if State and ObjName != "":
-            return ObjName
-        else:
-            return "Object"
+        try:
+            print("One")
+            ObjName, State = QtWidgets.QInputDialog.getText(self, 'Object Name', "Enter Object Name: ")
+            print("two")
+            
+            if State and ObjName != "":
+                print("three")
+                return ObjName
+            elif not State:
+                print("special")
+                return False
+            else:
+                print("four")
+                return "Object"
+        except:
+            print("five")
+
+
 
 
 
