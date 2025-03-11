@@ -378,9 +378,6 @@ class ObjectTab(QWidget):
 
 
                 Object_detect(tab_widget)
-
-            except Exception:
-                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
                 
             except Exception as e:
                 QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
