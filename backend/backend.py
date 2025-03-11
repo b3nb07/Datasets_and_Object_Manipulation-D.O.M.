@@ -124,6 +124,8 @@ class Backend():
             "dis": 0
         }
         config["random"] = {
+            "mode": "set",
+            "objects": {},
             "pivot": [],
             "environment": [],
             "pos": [],
@@ -168,6 +170,42 @@ class Backend():
         config["render"]["renders"] = n
 
         Backend.update_log(f'Number of renders changed to: {n}\n')
+
+    # REPOSITION THESE FUNCTIONS 
+    #
+    def toggle_random_mode(self, mode):
+        config["random"]["mode"] = str(mode)
+        Backend.update_log(f'Random mode set to {mode}\n')
+    #
+    #
+    def update_random_attribute(self, category, field, state, lower, upper):
+        print(state)
+        
+        # cfg validation:
+        config["random"].setdefault("objects", {})
+        config["random"]["objects"].setdefault(category, {})
+        
+        if state:            
+            # add field to config with bounds
+            config["random"]["objects"][category][field] = [str(lower), str(upper)]
+        else:
+            # remove field from config if it exists
+            if field in config["random"]["objects"]:
+                del config["random"]["objects"][field]
+        
+        # Backend.update_log(f'Random attribute {field} set to {state}\n')
+    #
+    
+    def apply_random_limits(self):
+        """Applies the limits at specificied mode"""
+        
+        # generate a float value between the upper and lower bounds of every attribute
+        
+        # travel in the config by category -> attributes .-> category -> attributes
+        
+        pass
+    #
+    #
 
     def set_angles(self, angles):
         """ Sets camera angle change per render in the config.
