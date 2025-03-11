@@ -66,7 +66,6 @@ class Backend():
 
             if ("objects" in temp):
                 for obj in temp["objects"]:
-                    if obj == None: continue
                     o = None
                     if ("filename" in obj):
                         o = self.RenderObject(filepath = obj["filename"])
@@ -311,18 +310,6 @@ class Backend():
             config["random"]["sca"].append("length")
             Backend.update_log(f'Length of object {selected_index} set to random\n')
         self.add_object_properties(selected_index)
-
-    def toggle_object(self, object, state):
-        if state:
-            if object.hidden: 
-                #config['objects'].append(object)
-                object.add_object()
-                Backend.update_log(f'Object {object} toggled on\n')
-        else:
-            if not object.hidden:
-                #config['objects'].remove(object)
-                object.remove_object()
-                Backend.update_log(f'Object {object} toggled off\n')
   
     def is_config_objects_empty(self):
         if config.get("objects") == None:
@@ -504,8 +491,6 @@ class Backend():
     def render(self, headless = False, preview = False, viewport_temp = False):
         """Renders the scene and saves to file in the output folder."""
 
-        # We need to take 
-
         Backend.update_log(f'Rendering Started\n')
 
         self.add_camera_poses(preview = preview)
@@ -526,19 +511,13 @@ class Backend():
             to_run.write("import blenderproc as bproc\n" + file_contents + f"""Backend("{path}\\\\temp_export.json")._render({viewport_temp})""")
 
         os.system("blenderproc run backend/_temp.py")
-
-        highest = self.getHighestInDir()
-        num = highest - config["render"]["renders"] + 1
-        print(highest)
-        print(num)
-
         if (viewport_temp):
             os.system("blenderproc vis hdf5 viewport_temp/0.hdf5 --save viewport_temp")
-        elif (not headless and preview): # Doesnt work anymore / could just bin off preview though
+        elif (not headless and preview):
             os.system("blenderproc vis hdf5 output/0.hdf5")
         elif (not headless):
-            for i in range(config["render"]["renders"] ):
-                os.system("blenderproc vis hdf5 output/"+str(i + num) +".hdf5")
+            for i in range(config["render"]["renders"]):
+                os.system("blenderproc vis hdf5 output/"+str(i)+".hdf5")
 
         self.remove_camera_poses()
 
@@ -554,34 +533,14 @@ class Backend():
             # Turn off everything to make it fast
             bproc.renderer.set_denoiser(None)
 
-            bproc.python.types.MeshObjectUtility.create_with_empty_mesh('emptyObject')
-
             bproc.writer.write_hdf5("viewport_temp/", bproc.renderer.render())
             return
-        
-        bproc.python.types.MeshObjectUtility.create_with_empty_mesh('emptyObject')
+
         data = bproc.renderer.render()
         if (config["render_folder"] == ""):
-            bproc.writer.write_hdf5("output/", data, append_to_existing_output = True)
+            bproc.writer.write_hdf5("output/", data)
         else:
-            bproc.writer.write_hdf5(config["render_folder"], data, append_to_existing_output = True)
-
-    def getHighestInDir(self):
-        highest = -1
-        for file in os.listdir("output"):
-            if file.endswith(".hdf5"):
-                num = ""
-                for x in file:
-                    if x == ".":
-                        break
-                    else:
-                        num = num + x
-                try:
-                    if int(num) > highest:
-                        highest = int(num)
-                except:
-                    pass
-        return highest
+            bproc.writer.write_hdf5(config["render_folder"], data)
 
     def export(self, path, filename="export.json"):
         """Exports the current scene setup to a JSON file.
@@ -625,8 +584,6 @@ class Backend():
             :param primative: Create object primatively, choose from one of ["CUBE", "CYLINDER", "CONE", "PLANE", "SPHERE", "MONKEY"].
             """
             self.object_pos = len(config.setdefault("objects", []))
-            self.properties = None
-            self.hidden = False
             config["objects"].append({})
 
             Backend.update_log(f'{self.__str__()} object added\n')
@@ -636,27 +593,23 @@ class Backend():
                     # handle the objects list
                     loaded_objects = bproc.loader.load_blend(filepath) if filepath.endswith(".blend") else bproc.loader.load_obj(filepath)
                     self.object = loaded_objects[0] if isinstance(loaded_objects, list) else loaded_objects
-                
-                self.properties = {
+                config["objects"][self.object_pos] = {
                     "filename": filepath,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
                     "sca": [1, 1, 1]
                 }
-                config["objects"][self.object_pos] = self.properties
                 return
 
             if (primative is not None):
                 if (is_blender_environment):
                     self.object = bproc.object.create_primitive(primative)
-
-                self.properties = {
+                config["objects"][self.object_pos] = {
                     "primative": primative,
                     "pos": [0, 0, 0],
                     "rot": [0, 0, 0],
                     "sca": [1, 1, 1]
                 }
-                config["objects"][self.object_pos] = self.properties
                 return
 
             raise TypeError('No filepath or primative argument given.')
@@ -703,17 +656,8 @@ class Backend():
             """Remove the object from the scene"""
 
             config["objects"][self.object_pos] = None
-            self.hidden = True
 
             Backend.update_log(f'{self.__str__()} object removed\n')
-        
-        def add_object(self):
-            """Remove the object from the scene"""
-
-            config["objects"][self.object_pos] = self.properties
-            self.hidden = False
-
-            Backend.update_log(f'{self.__str__()} object added\n')
 
 
         #! TODO: Think of and implement more object manipulation methods
