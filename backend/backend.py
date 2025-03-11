@@ -42,12 +42,6 @@ class Backend():
         new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
         self.set_seed(new_seed)
 
-        try: 
-            with open('interaction_log.txt','w') as file:
-                file.write('Program initialised\n')
-        except:
-            print("Error")
-
         if (json_filepath is not None):
             # load json objects into self
             temp = None
@@ -135,7 +129,7 @@ class Backend():
         }
         config["render_folder"] = ""
 
-        config["render_res"] = [256,256]
+        config["render_res"] = (256,256)
 
     def set_pivot_point(self, point):
         """ Sets a custom pivotpoint in the scene for rendering.
@@ -282,12 +276,10 @@ class Backend():
             if object.hidden: 
                 #config['objects'].append(object)
                 object.add_object()
-                Backend.update_log(f'Object {object} toggled on\n')
         else:
             if not object.hidden:
                 #config['objects'].remove(object)
                 object.remove_object()
-                Backend.update_log(f'Object {object} toggled off\n')
   
     def is_config_objects_empty(self):
         if config.get("objects") == None:
@@ -471,7 +463,8 @@ class Backend():
 
         # We need to take 
 
-        Backend.update_log(f'Rendering Started\n')
+        if not viewport_temp: Backend.update_log(f'Rendering Started\n')
+        else: Backend.update_log(f'Viewport Preview Render Started\n')
 
         self.add_camera_poses(preview = preview)
 
@@ -670,15 +663,15 @@ class Backend():
             config["objects"][self.object_pos] = None
             self.hidden = True
 
-            Backend.update_log(f'{self.__str__()} object removed\n')
+            Backend.update_log(f'{self.__str__()} object removed from the scene\n')
         
         def add_object(self):
-            """Remove the object from the scene"""
+            """Add the object to the scene"""
 
             config["objects"][self.object_pos] = self.properties
             self.hidden = False
 
-            Backend.update_log(f'{self.__str__()} object added\n')
+            Backend.update_log(f'{self.__str__()} object added to the scene\n')
 
 
         #! TODO: Think of and implement more object manipulation methods

@@ -224,6 +224,7 @@ class TabDialog(QWidget):
         # At least 10 seconds between viewport updates
         # if (time() - last_viewport_update > 5):
         if (not self.viewport_ongoing and "Render" not in interaction):
+            self.old_log(interaction)
             config = backend.get_config()
             backend.set_runtime_config(config)
 
@@ -392,7 +393,7 @@ class ObjectTab(QWidget):
         self.Import_Object_Button = QPushButton("Import Objects", self)
         self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
     
-        def delete_object(tab_widget):
+        def delete_object(tab_widget, scroll):
             to_delete = QMessageBox()
 
             to_delete.setText("Please select an object to remove from below")
@@ -412,6 +413,8 @@ class ObjectTab(QWidget):
                 obj_index = int(to_delete.clickedButton().text()[-1]) - 1
                 obj = shared_state.items[obj_index]
                 shared_state.remove_item(obj)
+                scroll.itemAt(obj_index).widget().setParent(None)
+                backend.update_log(f'{obj} object deleted\n')
                 del backend.get_config()["objects"][obj.object_pos]
                 # shift objects after this one down by one
                 for i in range(obj_index, len(shared_state.items)):
@@ -425,7 +428,7 @@ class ObjectTab(QWidget):
                     QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
 
         self.Delete_Object_Button = QPushButton('Delete Object', self)
-        self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget))
+        self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
 
         # create initial combo_box
         self.combo_box = QComboBox(self)
@@ -631,11 +634,12 @@ class ObjectTab(QWidget):
                         field.setText(trueValStr)
 
                 else: # >1 true
-                    trueValStr = str((val - 450) / 50)
-                    if len(trueValStr) > 3:
-                        field.setText(trueValStr[0:3])
+                    trueValStr = (val - 450) / 50
+                    field.setText(str(round(trueValStr,1)))
+                    '''if len(trueValStr) > 3:
+                        field.setTextstr((round(trueValStr,1)))
                     else:
-                        field.setText(trueValStr)
+                        field.setText(trueValStr)'''
 
     def Slider_Update(self, val, field):
         """Set Field value to slider value"""
@@ -2014,7 +2018,7 @@ class Port(QWidget):
                 try:
                     shared_state.remove_item(obj)
                     success_box = ilyaMessageBox("Object successfully deleted", "Success")
-                    
+                    backend.update_log(f'{obj} object deleted\n')
                     del backend.get_config()["objects"][obj.object_pos]
                     # shift objects after this one down by one
                     for i in range(obj_index, len(shared_state.items)):
