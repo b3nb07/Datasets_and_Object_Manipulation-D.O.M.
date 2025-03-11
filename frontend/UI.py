@@ -990,7 +990,6 @@ class RandomTabDialog(QWidget):
 
         from FrontTests import RandomTabTests
         RandomTabTests(tab_widget)
-        
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(tab_widget)
