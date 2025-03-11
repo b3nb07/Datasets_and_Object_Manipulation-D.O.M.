@@ -1003,11 +1003,16 @@ class RandomDefault(QWidget):
 
     def SetSETChecks(self, Layout):
         if Layout.itemAtPosition(1, 0).widget().isChecked():
+            print('toggled: per set')
+            # initial mode
+            backend.toggle_random_mode("set")
             Layout.itemAtPosition(2, 0).widget().setChecked(False)
         self.notXOR(Layout)
     
     def SetFRAMEChecks(self, Layout):
         if Layout.itemAtPosition(2, 0).widget().isChecked():
+            print('toggled: per frame')
+            backend.toggle_random_mode("frame")
             Layout.itemAtPosition(1, 0).widget().setChecked(False)
         self.notXOR(Layout)
 
@@ -1098,10 +1103,16 @@ class RandomObject(QWidget):
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
         
-        Field_LowerBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
-        Field_UpperBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
-
+        #
+        lower = Field_LowerBound.text()
+        upper = Field_UpperBound.text()
+        
+        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute('object', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute('object', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        
+        Field.toggled.connect(lambda state: backend.update_random_attribute('object', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
+        #
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
         
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
@@ -1156,7 +1167,7 @@ class RandomObject(QWidget):
             """Updates field value"""
             try:
                 val = float(Field.text())
-                Field.setText(str(val))
+                Field.setText(str(val))                
             except:
                 Field.setText("")
 
@@ -1228,10 +1239,16 @@ class RandomPivot(QWidget):
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
         
-        Field_LowerBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
-        Field_UpperBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
-
+        #
+        lower = Field_LowerBound.text()
+        upper = Field_UpperBound.text()
+        
+        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute('pivot', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute('pivot', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        
+        Field.toggled.connect(lambda state: backend.update_random_attribute('pivot', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
+        #
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
 
     def validation(self, Field):
@@ -1352,7 +1369,17 @@ class RandomRender(QWidget):
         Field_LowerBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
         Field_UpperBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
 
+        #
+        lower = Field_LowerBound.text()
+        upper = Field_UpperBound.text()
+        
+        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute('render', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute('render', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        
+        Field.toggled.connect(lambda state: backend.update_random_attribute('render', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
+        #
+        
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
         
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
@@ -1486,7 +1513,16 @@ class RandomLight(QWidget):
         Field_LowerBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
         Field_UpperBound.editingFinished.connect(lambda: self.boundChecker(Field_LowerBound, Field_UpperBound))
 
+        #
+        lower = Field_LowerBound.text()
+        upper = Field_UpperBound.text()
+        
+        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute('light', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute('light', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        
+        Field.toggled.connect(lambda state: backend.update_random_attribute('light', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
+        #
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
 
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
@@ -1842,7 +1878,52 @@ class Port(QWidget):
                     self.exec()
 
         #First Section
+        def display_import_message(suc: int, fail: int):
+            """ Helper function to display the correct import message """
+            if suc > 0 and not fail:
+                # best case message
+                msg = ilyaMessageBox("All objects imported successfully", "Success")
+            elif suc > 0 and fail:
+                # some successful, some failed
+                error_msg = f"Successfully imported {suc} files.\nFailed to import:\n"
+                for name, error in fail:
+                    error_msg += f"\n- {name}"
+                    # error_msg += f"\n- {name}: {error}"
+                    
+                ilyaMessageBox(error_msg, "Issues found")
+            else:
+                # error_msg = "Failed to import all files:\n"
+                # for name, error in fail:
+                #     error_msg += f"\n- {name}"
+                    # error_msg += f"\n- {name}: {error}"
+                    
+                error_msg = f"Failed to import all files\n"
+                error_msg += f"{fail[0][1]}"
+                raise Exception(error_msg)
+
+        def process_file(path):
+            """ Helper function to reduce clutter in the main function """
+            # maybe move this as a constant?
+            supported_extensions = ('.blend', '.stl', '.obj')    
+            name = os.path.basename(os.path.normpath(path))
+            
+            if not path.lower().endswith(supported_extensions):
+                raise Exception(f"Unsupported file type. Only {', '.join(supported_extensions)} files are supported.")
+            
+            obj = backend.RenderObject(filepath=path)
+            shared_state.add_item(obj, name)
+    
+            Label = QLabel(name)
+            Label.setStyleSheet("border: 1px solid black;")
+            Label.setAlignment(QtCore.Qt.AlignCenter)
+            Label.setMaximumHeight(40)
+            Label.setMinimumHeight(40)
+            Scroll.addWidget(Label)
+            
+            return name
+
         def Get_Object_Filepath(Scroll):
+            """ Import objects function """
             import_box = QMessageBox()
             import_box.setText("How would you like to import objects?")
             import_box.addButton("Import Files", QMessageBox.ActionRole)
@@ -1852,10 +1933,19 @@ class Port(QWidget):
             import_box.exec()
             clicked_button = import_box.clickedButton().text()
             
+            if clicked_button == "Cancel":
+                    return
+            # might not need this try now as cleaned up code a bit
             try:
+                # keep track of imports and their status
+                successful_imps = 0
+                failed_imps = []
+                
+                """ Importing single or multiple files """
                 if clicked_button == "Import Files":
                     paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
                     if not paths:
+                        msg = ilyaMessageBox("No objects imported", "Cancelled")
                         return
                     
                     for path in paths:
@@ -1868,15 +1958,20 @@ class Port(QWidget):
                         check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
                         check.checkbox.setMaximumWidth(175)
                         Scroll.addWidget(check.checkbox)
-
+                        try:
+                            process_file(path)
+                            successful_imps += 1
+                        # any exceptions append to failed import list
+                        except Exception as e:
+                            name = os.path.basename(os.path.normpath(path))
+                            failed_imps.append((name, str(e)))
                 elif clicked_button == "Folder":
-
+                    """ Importing a folder or folders """
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
                     if not folder_path:
+                        msg = ilyaMessageBox("No objects imported", "Cancelled")
                         return
                     
-                    # maybe have a global constant of supported extensions?
-                    supported_extensions = ['.blend', '.stl', '.obj']
                     # go through each file in directory
                     for root, _, files in os.walk(folder_path):
                         for file in files:
@@ -1891,14 +1986,19 @@ class Port(QWidget):
                                 check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
                                 check.checkbox.setMaximumWidth(175)
                                 Scroll.addWidget(check.checkbox)
-
-
-
+                            try:
+                                path = os.path.join(root, file)
+                                process_file(path)
+                                successful_imps += 1
+                            # any exceptions append to failed import list
+                            except Exception as e:
+                                name = os.path.basename(file)
+                                failed_imps.append((name, str(e)))
+                
+            
+                # display the appropriate import message
+                display_import_message(successful_imps, failed_imps)
                 Object_detect(tab_widget)
-
-            except Exception:
-                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
-
 
             except Exception as e:
                 QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
