@@ -249,6 +249,7 @@ class ObjectTab(QWidget):
         self.XObj_pos = QLabel("X:", self)
         self.XObj_pos_input_field = QLineEdit(parent=self)
         self.XObj_pos_input_field.setText("0.0")
+        #self.XObj_pos_input_field.setFocusPolicy(Qt.NoFocus)
         self.X_button_minus = QPushButton('-', self)
         self.X_button_plus = QPushButton('+', self)
         
@@ -699,7 +700,6 @@ class ObjectTab(QWidget):
             selected_object_index = self.combo_box.currentIndex()
             shared_state.itemNames[selected_object_index]
             obj = shared_state.items[selected_object_index]
-            #print(obj)
             obj.set_rotation(rotation)
         except:
             print("Error Updating Rotation, X, Y or Z value is invalid")
@@ -1873,6 +1873,8 @@ class Port(QWidget):
                         check.checkbox.setMaximumWidth(175)
                         Scroll.addWidget(check.checkbox)
 
+                        QApplication.instance().focusWidget().clearFocus()
+
                 elif clicked_button == "Folder":
 
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
@@ -1942,6 +1944,8 @@ class Port(QWidget):
                         check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
                         check.checkbox.setMaximumWidth(175)
                         Scroll.addWidget(check.checkbox)
+
+                        QApplication.instance().focusWidget().clearFocus()
                 
             except Exception as e:
                 print(e)
@@ -2134,13 +2138,15 @@ class Lighting(QWidget):
         self.lighting_strength_input_field = QLineEdit(self)
         self.lighting_strength_input_field.setText("1")
         self.lighting_strength_input_field.textEdited.connect(lambda: self.Update_slider(self.strength_slider, self.lighting_strength_input_field.text()))
+        self.lighting_strength_input_field.editingFinished.connect(self.update_strength)
 
         self.strength_slider = QSlider(self)
         self.strength_slider.setRange(0,100)
         self.strength_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.strength_slider.sliderMoved.connect(lambda val: self.set_strength(val, self.lighting_strength_input_field))
+        self.strength_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.lighting_strength_input_field))
+        self.strength_slider.sliderReleased.connect(self.update_strength)
         ###
-        
+
         ###
         self.radius_label = QLabel("Radius", self)
         self.radius_label.setToolTip('Radius of lighting element')
@@ -2209,35 +2215,39 @@ class Lighting(QWidget):
         self.Xlight_angle_label = QLabel("X:", self)
         self.Xlight_angle_input_field = QLineEdit(self)
         self.Xlight_angle_input_field.setText("0")
-        self.Xlight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Xlight_angle_slider, self.Xlight_angle_input_field.text()))
-
+        self.Xlight_angle_input_field.textEdited.connect(lambda: self.Update_slider(self.Xlight_angle_slider, self.Xlight_angle_input_field.text()))
+        self.Xlight_angle_input_field.editingFinished.connect(lambda: self.set_rotation_from_field(self.Xlight_angle_slider, self.Xlight_angle_input_field.text()))
 
         self.Xlight_angle_slider = QSlider(self)
         self.Xlight_angle_slider.setRange(0,359)
         self.Xlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Xlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Xlight_angle_input_field))
-
+        self.Xlight_angle_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Xlight_angle_input_field))
+        self.Xlight_angle_slider.sliderReleased.connect(self.update_rotation)
 
         ###
         self.Ylight_angle_label = QLabel("Y:", self)
         self.Ylight_angle_input_field = QLineEdit(self)
         self.Ylight_angle_input_field.setText("0")
-        self.Ylight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Ylight_angle_slider, self.Ylight_angle_input_field.text()))
+        self.Ylight_angle_input_field.textEdited.connect(lambda: self.Update_slider(self.Ylight_angle_slider, self.Ylight_angle_input_field.text()))
+        self.Ylight_angle_input_field.editingFinished.connect(lambda: self.set_rotation_from_field(self.Ylight_angle_slider, self.Ylight_angle_input_field.text()))
 
         self.Ylight_angle_slider = QSlider(self)
         self.Ylight_angle_slider.setRange(0,359)
         self.Ylight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Ylight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Ylight_angle_input_field))
+        self.Ylight_angle_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Ylight_angle_input_field))
+        self.Ylight_angle_slider.sliderReleased.connect(self.update_rotation)
         ###
         self.Zlight_angle_label = QLabel("Z:", self)
         self.Zlight_angle_input_field = QLineEdit(self)
         self.Zlight_angle_input_field.setText("0")
-        self.Zlight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Zlight_angle_slider, self.Zlight_angle_input_field.text()))
+        self.Zlight_angle_input_field.textEdited.connect(lambda: self.Update_slider(self.Zlight_angle_slider, self.Zlight_angle_input_field.text()))
+        self.Zlight_angle_input_field.editingFinished.connect(lambda: self.set_rotation_from_field(self.Zlight_angle_slider, self.Zlight_angle_input_field.text()))
 
         self.Zlight_angle_slider = QSlider(self)
         self.Zlight_angle_slider.setRange(0,359)
         self.Zlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Zlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Zlight_angle_input_field))
+        self.Zlight_angle_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Zlight_angle_input_field))
+        self.Zlight_angle_slider.sliderReleased.connect(self.update_rotation)
        
         self.light_type_label = QLabel("Type: ", self)
         self.light_type_combobox = QComboBox(self)
@@ -2308,8 +2318,8 @@ class Lighting(QWidget):
         self.light.set_type(self.light_type_combobox.currentText())
 
 
-    def set_strength(self, val, field):
-        self.Slider_Update(val, field)
+    def update_strength(self):
+        field = self.lighting_strength_input_field
         try:
             self.light.set_energy(float(field.text()))
         except:
@@ -2356,8 +2366,7 @@ class Lighting(QWidget):
         except:
             pass
 
-    def set_rotation(self, val, field):
-        self.Slider_Update(val, field)
+    def update_rotation(self):
 
         x = self.Xlight_angle_input_field.text()
         y = self.Ylight_angle_input_field.text()
