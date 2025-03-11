@@ -382,9 +382,6 @@ class ObjectTab(QWidget):
 
 
                 Object_detect(tab_widget)
-
-            except Exception:
-                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
                 
             except Exception as e:
                 QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
@@ -1949,15 +1946,6 @@ class Port(QWidget):
                         return
                     
                     for path in paths:
-                        obj = backend.RenderObject(filepath=path)
-
-                        Name = os.path.basename(os.path.normpath(path))
-                        shared_state.add_item(obj, Name)
-                        check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                        check.checkbox.setChecked(True)
-                        check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
-                        check.checkbox.setMaximumWidth(175)
-                        Scroll.addWidget(check.checkbox)
                         try:
                             process_file(path)
                             successful_imps += 1
@@ -1965,6 +1953,7 @@ class Port(QWidget):
                         except Exception as e:
                             name = os.path.basename(os.path.normpath(path))
                             failed_imps.append((name, str(e)))
+                            
                 elif clicked_button == "Folder":
                     """ Importing a folder or folders """
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
@@ -1975,17 +1964,6 @@ class Port(QWidget):
                     # go through each file in directory
                     for root, _, files in os.walk(folder_path):
                         for file in files:
-                            if any(file.lower().endswith(ext) for ext in supported_extensions):
-                                full_path = os.path.join(root, file)
-                                obj = backend.RenderObject(filepath=full_path)
-
-                                Name = os.path.basename(os.path.normpath(full_path))
-                                shared_state.add_item(obj, Name)
-                                check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                                check.checkbox.setChecked(True)
-                                check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
-                                check.checkbox.setMaximumWidth(175)
-                                Scroll.addWidget(check.checkbox)
                             try:
                                 path = os.path.join(root, file)
                                 process_file(path)
