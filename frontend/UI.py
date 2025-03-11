@@ -994,11 +994,16 @@ class RandomDefault(QWidget):
 
     def SetSETChecks(self, Layout):
         if Layout.itemAtPosition(1, 0).widget().isChecked():
+            print('toggled: per set')
+            # initial mode
+            backend.toggle_random_mode("set")
             Layout.itemAtPosition(2, 0).widget().setChecked(False)
         self.notXOR(Layout)
     
     def SetFRAMEChecks(self, Layout):
         if Layout.itemAtPosition(2, 0).widget().isChecked():
+            print('toggled: per frame')
+            backend.toggle_random_mode("frame")
             Layout.itemAtPosition(1, 0).widget().setChecked(False)
         self.notXOR(Layout)
 
@@ -1085,8 +1090,17 @@ class RandomObject(QWidget):
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
-
+        
+        #
+        lower = Field_LowerBound.text()
+        upper = Field_UpperBound.text()
+        
+        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute('object', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute('object', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        
+        Field.toggled.connect(lambda state: backend.update_random_attribute('object', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
+        #
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
         
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
@@ -1127,7 +1141,7 @@ class RandomObject(QWidget):
             """Updates field value"""
             try:
                 val = float(Field.text())
-                Field.setText(str(val))
+                Field.setText(str(val))                
             except:
                 Field.setText("")
 
@@ -1191,8 +1205,17 @@ class RandomPivot(QWidget):
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
-
+        
+        #
+        lower = Field_LowerBound.text()
+        upper = Field_UpperBound.text()
+        
+        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute('pivot', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute('pivot', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        
+        Field.toggled.connect(lambda state: backend.update_random_attribute('pivot', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
+        #
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
 
     def validation(self, Field):
@@ -1293,7 +1316,17 @@ class RandomRender(QWidget):
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
 
+        #
+        lower = Field_LowerBound.text()
+        upper = Field_UpperBound.text()
+        
+        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute('render', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute('render', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        
+        Field.toggled.connect(lambda state: backend.update_random_attribute('render', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
+        #
+        
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
         
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
@@ -1407,7 +1440,16 @@ class RandomLight(QWidget):
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
 
+        #
+        lower = Field_LowerBound.text()
+        upper = Field_UpperBound.text()
+        
+        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute('light', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute('light', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        
+        Field.toggled.connect(lambda state: backend.update_random_attribute('light', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
+        #
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
 
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
