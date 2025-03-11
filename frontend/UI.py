@@ -5,8 +5,8 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 from functools import cached_property
 from PyQt5.QtCore import QSettings
-
-
+from TranslationManager import translator
+import json
 import os
 import PyQt5
 from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox
@@ -735,6 +735,11 @@ class PivotTab(QWidget):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
 
+        ###
+        ###translator.languageChanged.connect(self.translateUi)
+        ###self.translateUi()
+        ###
+
         # Pivot Point Coords Section
         self.Pivot_Point_Check = QCheckBox("Cutom Pivot Point", self)
         self.Pivot_Point_Check.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
@@ -958,17 +963,30 @@ class RandomTabDialog(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
 
-        tab_widget = QTabWidget()
-        tab_widget.addTab(RandomDefault(self, tab_widget), "Base")
-        tab_widget.addTab(RandomObject(self, ParentTab), "Object")
-        tab_widget.addTab(RandomPivot(self, ParentTab), "Pivot Point")
-        tab_widget.addTab(RandomRender(self, ParentTab), "Render")
-        tab_widget.addTab(RandomLight(self, ParentTab), "Light")
+        self.tab_widget = QTabWidget()
+        self.tab_widget.addTab(RandomDefault(self, ParentTab), "Base")
+        self.tab_widget.addTab(RandomObject(self, ParentTab), "Object")
+        self.tab_widget.addTab(RandomPivot(self, ParentTab), "Pivot Point")
+        self.tab_widget.addTab(RandomRender(self, ParentTab), "Render")
+        self.tab_widget.addTab(RandomLight(self, ParentTab), "Light")
         
 
         main_layout = QVBoxLayout()
-        main_layout.addWidget(tab_widget)
+        main_layout.addWidget(self.tab_widget)
         self.setLayout(main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
+
+
+    def translateUi(self):
+        """Apply translations to UI elements."""
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.tab_widget.setTabText(0, translation.get("Base", "Base"))
+        self.tab_widget.setTabText(1, translation.get("Object", "Object"))
+        self.tab_widget.setTabText(2, translation.get("Pivot Point", "Pivot Point"))
+        self.tab_widget.setTabText(3, translation.get("Render", "Render"))
+        self.tab_widget.setTabText(4, translation.get("Light", "Light"))
 
 class RandomDefault(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
@@ -978,9 +996,9 @@ class RandomDefault(QWidget):
         Field = QCheckBox("Set ALL RANDOM", self)
         Field.setToolTip('Sets all elements on all pages to random') 
 
-        SetSetCheck = QCheckBox("Set per SET")
+        SetSetCheck = QCheckBox("Set per SET",self)
         SetSetCheck.setToolTip('Each selected field is randomly generated and its value is maintained throughout the entire set generation.') 
-        SetFrameCheck = QCheckBox("Set per FRAME")
+        SetFrameCheck = QCheckBox("Set per FRAME",self)
         SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
         RandomSeed = QLineEdit("", self)
         RandomSeed.setText(str(backend.get_config()["seed"]))
@@ -1000,6 +1018,8 @@ class RandomDefault(QWidget):
         
         self.setLayout(main_layout)
 
+        ###translator.languageChanged.connect(self.translateUi)
+        ###self.translateUi()
 
     def SetSETChecks(self, Layout):
         if Layout.itemAtPosition(1, 0).widget().isChecked():
@@ -1033,6 +1053,7 @@ class RandomDefault(QWidget):
             field.setText(str(val))
         except ValueError:
             field.setText(str(backend.get_config()["seed"]))
+
             field.setToolTip('Random seed') 
                             
 class RandomObject(QWidget):
@@ -1172,6 +1193,7 @@ class RandomObject(QWidget):
 class RandomPivot(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
+        
 
         self.CheckBoxes = {}
         self.LowerBounds = {}
@@ -1297,6 +1319,13 @@ class RandomPivot(QWidget):
 class RandomRender(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
+        
+
+        ###
+        ###translator.languageChanged.connect(self.translateUi)
+        ###self.translateUi()
+        ###
+
 
         self.CheckBoxes = {}
         self.LowerBounds = {}
@@ -1420,6 +1449,11 @@ class RandomLight(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
 
+        ###
+        ###translator.languageChanged.connect(self.translateUi)
+        ###self.translateUi()
+        ###
+
         self.CheckBoxes = {}
         self.LowerBounds = {}
         self.UpperBounds = {}
@@ -1464,8 +1498,11 @@ class RandomLight(QWidget):
         #print(main_layout.itemAtPosition(0, 0).widget().setText("Electric boogalo"))
         #how to change values
 
+        
+
         self.setLayout(main_layout)
         
+
     def gen_field(self, Fieldname, Layout, X, Y, ConField):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
@@ -1560,6 +1597,11 @@ class Render(QWidget):
 
         self.queue = []
 
+
+        ###
+        ###translator.languageChanged.connect(self.translateUi)
+        ###self.translateUi()
+        ###
 
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
         self.GenerateRenders_Button.clicked.connect(self.renderQueueControl)
@@ -1667,6 +1709,21 @@ class Render(QWidget):
         main_layout.addWidget(self.render_preview_button, 2, 7)
 
         self.setLayout(main_layout)
+
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
+
+
+    def translateUi(self):
+        """Apply translations to UI elements."""
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.GenerateRenders_Button.setText(translation.get("Generate Renders", "Generate Renders"))
+        self.unlimited_render_button.setText(translation.get("Unlimited Renders", "Unlimited Renders"))
+        self.Degree_Change_title.setText(translation.get("Degrees of Change", "Degrees of Change"))
+        self.Number_of_renders_title.setText(translation.get("Number of Renders"))
+
+
     
    
 
@@ -2058,14 +2115,30 @@ class Port(QWidget):
 
         main_layout = QGridLayout()
 
-        main_layout.addWidget(self.TutorialObjects_Button, 0, 0)
-        main_layout.addWidget(self.Import_Object_Button, 0, 1)
-        main_layout.addWidget(self.Delete_Object_Button, 0, 2)
-        main_layout.addWidget(self.ExportSettings_Button, 0, 3)
-        main_layout.addWidget(self.ImportSettings_Button, 0, 4)
+        main_layout.addWidget(self.Import_Object_Button, 0, 0)
+        main_layout.addWidget(self.Delete_Object_Button, 0, 1)
+        main_layout.addWidget(self.ExportSettings_Button, 0, 2)
+        main_layout.addWidget(self.ImportSettings_Button, 0, 3)
+        main_layout.addWidget(self.BrowseFiles_Button, 0, 4)
         main_layout.addWidget(self.SelectRenderFolder_Button, 0, 5)
-
         self.setLayout(main_layout)
+
+                
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
+
+
+    def translateUi(self):
+        """Apply translations to UI elements."""
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.Delete_Object_Button.setText(translation.get("Delete Object", "Delete Object"))
+        self.Import_Object_Button.setText(translation.get("Import Object", "Import Object"))
+        self.TutorialObjects_Button.setText(translation.get("Tutorial Object", "Tutorial Object"))
+        self.ExportSettings_Button.setText(translation.get("Export Settings", "Export Settings"))
+        self.ImportSettings_Button.setText(translation.get("Import Settings", "Import Settings"))
+        self.BrowseFiles_Button.setText(translation.get("Generate Data Set", "Generate Data Set"))
+        self.SelectRenderFolder_Button.setText(translation.get("Change Render Folder", "Change Render Folder"))
 
         def show_hide_object(object,state):
             backend.toggle_object(object,state)
@@ -2093,19 +2166,11 @@ class Port(QWidget):
 
 
 
-
 class Lighting(QWidget):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
 
         self.light = backend.RenderLight()
-
-        self.light.set_energy(1)
-        self.light.set_color("#ffffff")
-        self.light.set_rotation([0,0,0])
-        self.light.set_radius(0)
-        self.light.set_type("POINT")
-        self.light.set_loc([0,0,0])
 
         ###
         self.colour_label = QLabel("Colour:", self)
@@ -2298,6 +2363,8 @@ class Lighting(QWidget):
         main_layout.addWidget(self.radius_button_plus, 2, 3)
 
         self.setLayout(main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
 
     def change_type(self):
@@ -2445,6 +2512,23 @@ class Lighting(QWidget):
         except:
             pass
 
+
+
+    def translateUi(self):
+        """Apply translations to UI elements."""
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.light_angle_label.setText(translation.get("Lighting Angle", "Lighting Angle"))
+        self.light_coords_label.setText(translation.get("Lighting Co-ords", "Lighting Co-ords"))
+        self.lighting_strength_label.setText(translation.get("Strength", "Strength"))
+        self.lighting_colour.setText(translation.get("Colour", "Colour"))
+        self.radius_label.setText(translation.get("Radius", "Radius"))
+        self.light_type_label.setText(translation.get("Type", "Type"))
+        self.colour_label.setText(translation.get("Colour", "Colour"))
+        self.colour_select_button.setText(translation.get("Select Colour", "Select Colour"))
+
+        
+
 class Settings(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
@@ -2455,12 +2539,13 @@ class Settings(QWidget):
         self.Help_button = QPushButton('Help', self)
         self.Languages = QPushButton('Languages', self)
         self.Secret_button = QPushButton('Button', self)
-        
+        self.current_language = "English"
+        self.translations = translator.translations
 
         #button clicks
         self.colour_scheme_button.clicked.connect(self.Colour_Scheme_Press)
+        translator.languageChanged.connect(self.translateUi)
         self.Languages.clicked.connect(self.Language_button_press)
-
         
         #button Layout
         main_layout.addWidget(self.colour_scheme_button, 0, 1)
@@ -2473,7 +2558,6 @@ class Settings(QWidget):
 
 
     def Colour_Scheme_Press(self):
-        """Opens colour scheme options"""
         colour_box = QMessageBox(self)
         colour_box.setWindowTitle("Select Colour Scheme")
         colour_box.setText("Please select a colour scheme:")
@@ -2483,7 +2567,7 @@ class Settings(QWidget):
         light_mode = colour_box.addButton("Light Mode", QMessageBox.ActionRole)
         colourblind1 = colour_box.addButton("Factory New", QMessageBox.ActionRole)
         default = colour_box.addButton("Colourblind 2", QMessageBox.ActionRole)
-        dyslexic = colour_box.addButton("Dyslexic Friendly", QMessageBox.ActionRole)
+        dyslexic = colour_box.addButton("Light Mode 2", QMessageBox.ActionRole)
         colour_scheme1 = colour_box.addButton("Colour Mode 1", QMessageBox.ActionRole)
         Image_test = colour_box.addButton("Imagetest", QMessageBox.ActionRole)
         colour_box.addButton(QMessageBox.Cancel)
@@ -2507,6 +2591,18 @@ class Settings(QWidget):
             self.apply_stylesheet("ImageTest.qss")
 
 
+    def apply_stylesheet(self, filename):
+        """Loads and applies stylesheet, then saves the choice"""
+        qss_path = os.path.join(os.path.dirname(__file__), "..", "Style", filename)
+        try:
+            with open(qss_path, "r") as file:
+                qss = file.read()
+                QApplication.instance().setStyleSheet(qss)  
+                self.save_settings(filename)  # Save the colour theme choice
+        except FileNotFoundError:
+            print(f"Error: {filename} not found")
+
+
     def Language_button_press(self):
         language_box = QMessageBox(self)
         language_box.setWindowTitle("Select a Language")
@@ -2525,30 +2621,27 @@ class Settings(QWidget):
 
         # Apply styles based on button clicked
         if language_box.clickedButton() == English:
-            self.apply_Language
+            translator.setLanguage("English")
         elif language_box.clickedButton() == Spanish:
-            self.apply_Language()
+            translator.setLanguage("Spanish")
         elif language_box.clickedButton() == Portuguese:
-            self.apply_Language()
+            translator.setLanguage("Portugese")
         elif language_box.clickedButton() == Mandarin:
-            self.apply_Language()
+            translator.setLanguage("Mandarin")
         elif language_box.clickedButton() == Language5:
-            self.apply_Language()
+            translator.setLanguage()
         elif language_box.clickedButton() == Language6:
-            self.apply_Language()
+            translator.setLanguage()
         elif language_box.clickedButton() == Language7:
-            self.apply_Language()
+            translator.setLanguage()
 
-    def apply_stylesheet(self, filename):
-        """Loads and applies stylesheet, then saves the choice"""
-        qss_path = os.path.join(os.path.dirname(__file__), "..", "Style", filename)
-        try:
-            with open(qss_path, "r") as file:
-                qss = file.read()
-                QApplication.instance().setStyleSheet(qss)  
-                self.save_settings(filename)  # Save the colour theme choice
-        except FileNotFoundError:
-            print(f"Error: {filename} not found")
+    def translateUi(self):
+        current_lang = translator.current_language
+        translation = self.translations.get(current_lang, self.translations.get("English"))
+        self.colour_scheme_button.setText(translation.get("Colour Theme", "Colour Theme"))
+        self.Help_button.setText(translation.get("Help", "Help"))
+        self.Languages.setText(translation.get("Languages", "Languages"))
+        self.Secret_button.setText(translation.get("Button", "Button"))
 
     def save_settings(self, Colour_Setup):
         settings = QSettings("UserSettings")
