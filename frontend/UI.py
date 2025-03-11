@@ -5,8 +5,6 @@ import sys
 from PyQt5 import QtCore, QtWidgets
 from functools import cached_property
 from PyQt5.QtCore import QSettings
-
-
 import os
 import PyQt5
 from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox
@@ -58,29 +56,35 @@ class ComboBoxState(QObject):
         self.items_updated.emit(items)  # Emit signal for item updates
 
     def add_item(self, item, Name):
+        # Add items to list of objects in list and display name
         self.items.append(item)
         self.itemNames.append(Name)
         self.items_updated.emit(self.items)
 
     def remove_item(self, item):
+        # remove items to list of objects in list and display name
         self.items.remove(item)
         self.items_updated.emit(self.items)
 
     def remove_item(self, item):
+        # Add items to list of objects in list and display name
         pos = self.items.index(item)
         self.items.remove(item)
         self.itemNames.remove(self.itemNames[pos])
         self.items_updated.emit(self.items)
 
     def update_selected(self, index):
+        #Update current object selected
         self.selected_index = index
         # maybe delete
         self.selection_changed.emit(index)
         
     def count(self):
+        #Amount of items
         return len(self.items)
 
 class BenCheckBox():
+    #Creates a checkbox for objectStatusBar
     def __init__(self, name, pos, object):
         self.checkbox = QCheckBox(name)
         self.pos = pos
@@ -152,9 +156,9 @@ class TabDialog(QWidget):
         super().__init__(parent)
         self.setWindowTitle("Datasets and Object Modeling")
         
+        #Object side par to display current objects loaded in and allow for removal from current render without deletion
         ObjectsStatusBar = QScrollArea()
         ObjectsStatusBar.setMaximumWidth(175)
-        
         ObjectsStatusBar.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         ObjectsStatusBar.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
@@ -165,8 +169,7 @@ class TabDialog(QWidget):
         ObjectsStatusBar.setWidgetResizable(True)
         
         tab_widget = QTabWidget()
-
-        # Add all other tabs first
+        # NAVBAR: Add all other tabs first
         tab_widget.addTab(ObjectTab(self, tab_widget, ObjLayout), "Object")
         tab_widget.addTab(PivotTab(self), "Pivot Point")
         tab_widget.addTab(Render(self), "Render")
@@ -179,10 +182,8 @@ class TabDialog(QWidget):
         random_tab = RandomTabDialog(self, tab_widget)
         tab_widget.removeTab(Temp_index)
         tab_widget.insertTab(Temp_index, random_tab, "Random")
-        
-        #tab_widget.widget(0).layout().itemAtPosition(1, 1).widget().setEnabled(False)
-        
 
+        #Disable until Object is loaded
         tab_widget.setTabEnabled(0, False)
         tab_widget.setTabEnabled(1, False)
         tab_widget.setTabEnabled(2, False)
@@ -194,27 +195,31 @@ class TabDialog(QWidget):
         # enviroment
         self.environment = QWidget()
 
+        #Viewport Variables
         self.old_log = Backend.update_log
         self.viewport_ongoing = False
         self.update_while_viewport = False
 
+        #Viewport Instatiate
         Backend.update_log = self.update_viewport
-        # self.environment.setStyleSheet("background-color: black;")
         self.environment.setStyleSheet("background-position: center;background-repeat: no-repeat;background-image: url(viewport_temp/loading.png);")
 
         self.setMinimumSize(1350, 700) # minimum size of program
+
+        # Layout of Main Page
         main_layout = QGridLayout()
         main_layout.addWidget(tab_widget, 0, 0, 1, 8)
-        
         main_layout.addWidget(ObjectsStatusBar, 1, 0, 1, 2)
         main_layout.addWidget(self.environment, 1, 1, 1, 7)  
     
         self.setLayout(main_layout)
         
+        #Tests for all pages except Random (included in RandomTabDialog)
         from FrontTests import Tests
         Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)
 
     def visual_change(self, thread):
+        #Updates Viewport Image
         thread.quit()
         self.environment.setStyleSheet("border-image: url(viewport_temp/0_colors.png) 0 0 0 0 stretch stretch")
         # environment.setStyleSheet("background-position: center;background-repeat: no-repeat;background-image: url(viewport_temp/0_colors.png);")
@@ -222,6 +227,7 @@ class TabDialog(QWidget):
         self.viewport_ongoing = False
 
         if (self.update_while_viewport):
+            #Ensures most up to date image is displayed
             self.update_while_viewport = False
             self.update_viewport(update_log = False)
 
@@ -245,15 +251,20 @@ class TabDialog(QWidget):
             return self.old_log(interaction)
 
 class ilyaMessageBox(QMessageBox):
-                def __init__(self, text, title):
-                    super().__init__()
-                    self.setText(text)
-                    self.setWindowTitle(title)
-                    self.exec()
+    #IlyaCommentBox
+    # Displays a custom messagebox
+    def __init__(self, text, title):
+        super().__init__()
+        self.setText(text)
+        self.setWindowTitle(title)
+        self.exec()
 
 class ObjectTab(QWidget):
+    #Object Page
     def __init__(self, parent: QWidget, tab_widget: QTabWidget, Scroll: QVBoxLayout):
         super().__init__(parent)
+
+        #Declare UI elements
 
         self.Object_pos_title = QLabel(f"Co-ords", self)
 
@@ -365,6 +376,9 @@ class ObjectTab(QWidget):
 
         ####################################################
 
+        #Declare Location of elements in a grid layout 
+        #(Y, X)
+
         main_layout = QGridLayout()
         main_layout.addWidget(self.Object_pos_title, 0, 0)
 
@@ -421,6 +435,7 @@ class ObjectTab(QWidget):
 
         self.setLayout(main_layout)
 
+        #Connect Page to functions
         # editingFinished callbacks that updates backend
         self.XObj_pos_input_field.editingFinished.connect(self.update_object_pos)
         self.YObj_pos_input_field.editingFinished.connect(self.update_object_pos)
@@ -476,10 +491,12 @@ class ObjectTab(QWidget):
         #########################################
 
     def show_hide_object(self, object,state):
+        #State declares when rendered on not
         backend.toggle_object(object,state)
             
     #First Section
     def Get_Object_Filepath(self, Scroll, tab_widget):
+            # Import Object
             import_box = QMessageBox()
             import_box.setText("How would you like to import objects?")
             import_box.addButton("Import Files", QMessageBox.ActionRole)
@@ -497,12 +514,14 @@ class ObjectTab(QWidget):
                     
                     for path in paths:
                         obj = backend.RenderObject(filepath=path)
+                        #set name to filename
                         Name = os.path.basename(os.path.normpath(path))
                         shared_state.add_item(obj, Name)
                         check = BenCheckBox(Name, len(shared_state.itemNames),obj)
                         check.checkbox.setChecked(True)
                         check.checkbox.stateChanged.connect(lambda: self.show_hide_object(check.object,check.checkbox.isChecked()))
                         check.checkbox.setMaximumWidth(175)
+                        #adds to object Status bar
                         Scroll.addWidget(check.checkbox)
 
                 elif clicked_button == "Folder":
@@ -518,15 +537,17 @@ class ObjectTab(QWidget):
                             if any(file.lower().endswith(ext) for ext in supported_extensions):
                                 full_path = os.path.join(root, file)
                                 obj = backend.RenderObject(filepath=full_path)
+                                #Sets name to filename
                                 Name = os.path.basename(os.path.normpath(full_path))
                                 shared_state.add_item(obj, Name)
                                 check = BenCheckBox(Name,len(shared_state.itemNames),obj)
                                 check.checkbox.setChecked(True)
                                 check.checkbox.stateChanged.connect(lambda: self.show_hide_object(check.object,check.checkbox.isChecked()))
                                 check.checkbox.setMaximumWidth(175)
+                                #Adds to objectStatus Bar
                                 Scroll.addWidget(check.checkbox)
 
-
+                #adds to shared state
                 self.Object_detect(tab_widget)
 
             except Exception:
@@ -536,6 +557,7 @@ class ObjectTab(QWidget):
                 QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
     
     def delete_object(self, tab_widget, scroll):
+            # Delete Object
             to_delete = QMessageBox()
             to_delete.setText("Please select an object to remove from below")
 
@@ -546,21 +568,23 @@ class ObjectTab(QWidget):
                 to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
             
             to_delete.addButton("Cancel", QMessageBox.ActionRole)
-
             to_delete.exec()
-
+            #Object select
             choice = str(to_delete.clickedButton().text())
 
             if choice != "Cancel":
+                """Removes Object Via Index from all areas """
                 obj_index = shared_state.itemNames.index(choice)
                 obj = shared_state.items[obj_index]
                 scroll.itemAt(obj_index).widget().setParent(None)
                 try:
+                    #Removal
                     shared_state.remove_item(obj)
                     success_box = ilyaMessageBox("Object successfully deleted", "Success")
                     
+                    #Deletes backend
                     del backend.get_config()["objects"][obj.object_pos]
-                    # shift objects after this one down by one
+                    """shift objects after this one down by one"""
                     for i in range(obj_index, len(shared_state.items)):
                         obj = shared_state.items[i]
                         obj.object_pos = i
@@ -568,12 +592,13 @@ class ObjectTab(QWidget):
                     error_box = ilyaMessageBox("Error deleting object", "Error")
 
                 shared_state.items_updated.emit(shared_state.items)
-                # The last object was deleted
+                """The last object was deleted"""
                 if (not shared_state.items):
                     self.Object_detect(tab_widget)
                     QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
                     
     def Object_detect(self, tab_widget):
+            """On upload/delete to be called to check if any object is to be rendered and enables tabs accordingly"""
             State = not Backend.is_config_objects_empty(tab_widget)
             for i in range(5):
                 tab_widget.setTabEnabled(i, State)
@@ -614,9 +639,11 @@ class ObjectTab(QWidget):
         self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
         
     def ValidType(self, val):
+        """Validates if val type is string"""
         return type(val) == str
     
     def Update_slider(self, slider, val):
+        """Updates slider to reflect InputField"""
         try:
             slider.setValue(int(round(float(val), 0)))
         except Exception as e:
@@ -753,6 +780,7 @@ class ObjectTab(QWidget):
 
 class PivotTab(QWidget):
     def __init__(self, parent: QWidget):
+        """Pivot Tab"""
         super().__init__(parent)
 
         # Pivot Point Coords Section
@@ -979,6 +1007,7 @@ class PivotTab(QWidget):
 
 class RandomTabDialog(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
+        """Random Tab Nav Bar"""
         super().__init__(parent)
 
         tab_widget = QTabWidget()
@@ -988,6 +1017,8 @@ class RandomTabDialog(QWidget):
         tab_widget.addTab(RandomRender(self, ParentTab), "Render")
         tab_widget.addTab(RandomLight(self, ParentTab), "Light")
 
+
+        """Random Page Testsing"""
         from FrontTests import RandomTabTests
         RandomTabTests(tab_widget)
 
@@ -996,24 +1027,31 @@ class RandomTabDialog(QWidget):
         self.setLayout(main_layout)
 
 class RandomDefault(QWidget):
+    """Defualt page for Random"""
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
 
         main_layout = QGridLayout()
+        """Sets all fields in all random pages to enabled"""
         Field = QCheckBox("Set ALL RANDOM", self)
         Field.setToolTip('Sets all elements on all pages to random') 
 
+        """Set per is XOR"""
         SetSetCheck = QCheckBox("Set per SET")
         SetSetCheck.setToolTip('Each selected field is randomly generated and its value is maintained throughout the entire set generation.') 
         SetFrameCheck = QCheckBox("Set per FRAME")
         SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
         RandomSeed = QLineEdit("", self)
+
+        """The random seed value used to generate random values"""
         RandomSeed.setText(str(backend.get_config()["seed"]))
         RandomSeed.setMaximumWidth(200)
         
         main_layout.addWidget(Field, 0, 0)
         main_layout.addWidget(SetSetCheck, 1, 0)
         main_layout.addWidget(SetFrameCheck, 2, 0)
+        
+        """XOR FUNCTIONS"""
         SetSetCheck.toggled.connect(lambda: self.SetSETChecks(main_layout))
         SetFrameCheck.toggled.connect(lambda: self.SetFRAMEChecks(main_layout))
         SetSetCheck.setChecked(True)
@@ -1027,22 +1065,27 @@ class RandomDefault(QWidget):
 
 
     def SetSETChecks(self, Layout):
+        """XOR FUNCTIONS"""
         if Layout.itemAtPosition(1, 0).widget().isChecked():
             Layout.itemAtPosition(2, 0).widget().setChecked(False)
         self.notXOR(Layout)
     
     def SetFRAMEChecks(self, Layout):
+        """XOR FUNCTIONS"""
         if Layout.itemAtPosition(2, 0).widget().isChecked():
             Layout.itemAtPosition(1, 0).widget().setChecked(False)
         self.notXOR(Layout)
 
     def notXOR(self, Layout):
+        """XOR FUNCTIONS"""
         if (not Layout.itemAtPosition(1, 0).widget().isChecked()) == (not Layout.itemAtPosition(2, 0).widget().isChecked()):
             Layout.itemAtPosition(1, 0).widget().setChecked(True)
         
     def checkUpdate(self, tab_widget, State):
         """Method to update all Random checkboxes"""
         """
+        DO NOT DELETE 
+        Path to check is state is checked
         Tab navbar -> Page -> QgridLayout -> Widget(Y position, X position) -> QCheckBox -> State
         tab_widget -> tab_widget.widget(i) -> widget.layout() -> widget.layout().itemAtPosition(position[1], position[0]) -> widget.layout().itemAtPosition(position[1], position[0]).widget() -> widget.layout().itemAtPosition(position[1], position[0]).widget().setChecked(State)
         """
@@ -1061,9 +1104,14 @@ class RandomDefault(QWidget):
             field.setToolTip('Random seed') 
                             
 class RandomObject(QWidget):
+    """Random Object"""
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
 
+        """Fields in Page"""
+        """
+        Intended to be accessed via self.CheckBoxes.Keys()
+        """
         self.CheckBoxes = {}
         self.LowerBounds = {}
         self.UpperBounds = {}
@@ -1111,12 +1159,18 @@ class RandomObject(QWidget):
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
         
+        """sets text to ensure Bounds and better error handling"""
         Field_LowerBound.setText('-inf')
         Field_UpperBound.setText('inf')
         
+        """Hover over provides a  description"""
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
 
+        """
+        Creates and Adds field to layout
+        Connects them to validation and bounds checking
+        """
         self.addCheck(Field, Fieldname, Layout, X, Y, ConField)
         self.addLower(Field_LowerBound, Fieldname, Layout, X+1, Y)
         self.addUpper(Field_UpperBound, Fieldname, Layout, X+2, Y)
@@ -1140,6 +1194,7 @@ class RandomObject(QWidget):
         Field.setEnabled(not State)
         
     def connFields(self, ParentTab, X, Y):
+        """Connects field to related Field not in random"""
         return ParentTab.widget(0).layout().itemAtPosition(Y, X).widget()
 
     def addLower(self, Field, Fieldname, Layout, X, Y):
@@ -1153,6 +1208,7 @@ class RandomObject(QWidget):
         self.UpperBounds[f"{Layout.itemAtPosition(0, 10).widget().currentText()}{Fieldname}"] = (X, Y)
         
     def boundChecker(self, Lower, Upper):
+        """If not within bounds set adjust to mandatory legal values"""
         try:
             
             Lowerval = float(Lower.text())
@@ -1195,6 +1251,7 @@ class RandomObject(QWidget):
         pass
 
 class RandomPivot(QWidget):
+    """Random PivotPage"""
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
 
@@ -1226,6 +1283,10 @@ class RandomPivot(QWidget):
         self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
         self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
         self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
+
+        """
+        Special Connfields as this has a checkbox interaction that has to invert all related Fields
+        """
         
         ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(1, 1).widget(), main_layout.itemAtPosition(1, 2).widget()))
         ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(2, 1).widget(), main_layout.itemAtPosition(2, 2).widget()))
@@ -1235,6 +1296,11 @@ class RandomPivot(QWidget):
         self.gen_field("Measurement", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
         
         self.setLayout(main_layout)
+
+
+    """
+    SEE RANDOM OBJECT CLASS FUNCTIONS FOR COMMENTS
+    """
 
     def gen_field(self, Fieldname, Layout, X, Y, ConField):
         Field = QCheckBox(Fieldname, self)
@@ -1320,6 +1386,7 @@ class RandomPivot(QWidget):
         pass
 
 class RandomRender(QWidget):
+    """Random Render"""
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
 
@@ -1356,6 +1423,10 @@ class RandomRender(QWidget):
         self.gen_field("Quantity", main_layout, 3, 1, self.connFields(ParentTab, 0, 1))
 
         self.setLayout(main_layout)
+
+    """
+    SEE RANDOM OBJECT CLASS FUNCTIONS FOR COMMENTS
+    """
 
     def gen_field(self, Fieldname, Layout, X, Y, ConField):
         Field = QCheckBox(Fieldname, self)
@@ -1442,6 +1513,7 @@ class RandomRender(QWidget):
 
 
 class RandomLight(QWidget):
+    """Random Lighting"""
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
 
@@ -1490,6 +1562,10 @@ class RandomLight(QWidget):
         #how to change values
 
         self.setLayout(main_layout)
+    
+    """
+    SEE RANDOM OBJECT CLASS FUNCTIONS FOR COMMENTS
+    """
         
     def gen_field(self, Fieldname, Layout, X, Y, ConField):
         Field = QCheckBox(Fieldname, self)

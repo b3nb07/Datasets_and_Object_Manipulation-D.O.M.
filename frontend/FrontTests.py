@@ -215,9 +215,6 @@ def LightingTabTests(tab_widget, shared_state, LightingTab):
         Slider_Fields = [[0, 1], [1, 9], [2, 9], [3, 9]]
 
         s = 0
-        
-        DropDown_Field = [[3,1]]
-        Colour_select = [[1, 2]]
 
         TestPrint(f"{s}---Lighting Tab Button Check")
         for Position in ButtonFields:
@@ -260,8 +257,8 @@ def RandomDefaultTabTests(tab_widget):
     Page = tab_widget.widget(0)
     PageLayout = Page.layout()
 
+    #XOR CHECKING
     TestPrint("XOR CheckBox Testing")
-
     PageLayout.itemAtPosition(1, 0).widget().setChecked(True)
     TestPrint("Check 1 not Check 2:", not PageLayout.itemAtPosition(2, 0).widget().isChecked())
 
