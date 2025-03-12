@@ -280,6 +280,14 @@ class Backend():
             if not object.hidden:
                 #config['objects'].remove(object)
                 object.remove_object()
+    
+    def ground_object(self, object, state):
+        if state:
+            object.grounded = True
+        else:
+            object.grounded = False
+        print(object.grounded)
+            
   
     def is_config_objects_empty(self):
         if config.get("objects") == None:
@@ -585,6 +593,7 @@ class Backend():
             self.object_pos = len(config.setdefault("objects", []))
             self.properties = None
             self.hidden = False
+            self.grounded = False
             config["objects"].append({})
 
             Backend.update_log(f'{self.__str__()} object added\n')

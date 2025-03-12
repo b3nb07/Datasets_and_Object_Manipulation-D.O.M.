@@ -77,11 +77,6 @@ class ComboBoxState(QObject):
         # maybe delete
         self.selection_changed.emit(index)
 
-class BenCheckBox():
-    def __init__(self, name, pos, object):
-        self.checkbox = QCheckBox(name)
-        self.pos = pos
-        self.object = object
 
 class ViewportThread(QThread):
     def __init__(self, size):
@@ -355,11 +350,22 @@ class ObjectTab(QWidget):
                         obj = backend.RenderObject(filepath=path)
                         Name = os.path.basename(os.path.normpath(path))
                         shared_state.add_item(obj, Name)
-                        check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                        check.checkbox.setChecked(True)
-                        check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
-                        check.checkbox.setMaximumWidth(175)
-                        Scroll.addWidget(check.checkbox)
+                        
+                        button = QPushButton(Name)
+                        button.setMaximumWidth(175)
+                        menu = QMenu()
+                        incexc = menu.addAction('Included in Scene')
+                        ground = menu.addAction('Grounded')
+                        
+                        incexc.setCheckable(True)
+                        incexc.setChecked(True)
+                        incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
+
+                        ground.setCheckable(True)
+                        ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                        
+                        button.setMenu(menu)
+                        Scroll.addWidget(button)
 
                 elif clicked_button == "Folder":
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
@@ -376,11 +382,22 @@ class ObjectTab(QWidget):
                                 obj = backend.RenderObject(filepath=full_path)
                                 Name = os.path.basename(os.path.normpath(full_path))
                                 shared_state.add_item(obj, Name)
-                                check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                                check.checkbox.setChecked(True)
-                                check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
-                                check.checkbox.setMaximumWidth(175)
-                                Scroll.addWidget(check.checkbox)
+                                
+                                button = QPushButton(Name)
+                                button.setMaximumWidth(175)
+                                menu = QMenu()
+                                incexc = menu.addAction('Included in Scene')
+                                ground = menu.addAction('Grounded')
+                                
+                                incexc.setCheckable(True)
+                                incexc.setChecked(True)
+                                incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
+
+                                ground.setCheckable(True)
+                                ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                                
+                                button.setMenu(menu)
+                                Scroll.addWidget(button)
 
 
                 Object_detect(tab_widget)
@@ -563,6 +580,9 @@ class ObjectTab(QWidget):
 
         def show_hide_object(object,state):
             backend.toggle_object(object,state)
+        
+        def ground_object(object,state):
+            backend.grounf_object(object,state)
 
     def update_combo_box_items(self, items):
         """ Method could be called to update combo_box_items. Maybe Delete. """
@@ -1867,11 +1887,22 @@ class Port(QWidget):
 
                         Name = os.path.basename(os.path.normpath(path))
                         shared_state.add_item(obj, Name)
-                        check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                        check.checkbox.setChecked(True)
-                        check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
-                        check.checkbox.setMaximumWidth(175)
-                        Scroll.addWidget(check.checkbox)
+                        
+                        button = QPushButton(Name)
+                        button.setMaximumWidth(175)
+                        menu = QMenu()
+                        incexc = menu.addAction('Included in Scene')
+                        ground = menu.addAction('Grounded')
+                        
+                        incexc.setCheckable(True)
+                        incexc.setChecked(True)
+                        incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
+
+                        ground.setCheckable(True)
+                        ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                        
+                        button.setMenu(menu)
+                        Scroll.addWidget(button)
 
                         QApplication.instance().focusWidget().clearFocus()
 
@@ -1892,11 +1923,24 @@ class Port(QWidget):
 
                                 Name = os.path.basename(os.path.normpath(full_path))
                                 shared_state.add_item(obj, Name)
-                                check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                                check.checkbox.setChecked(True)
-                                check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
-                                check.checkbox.setMaximumWidth(175)
-                                Scroll.addWidget(check.checkbox)
+
+                                button = QPushButton(Name)
+                                button.setMaximumWidth(175)
+                                menu = QMenu()
+                                incexc = menu.addAction('Included in Scene')
+                                ground = menu.addAction('Grounded')
+                                
+                                incexc.setCheckable(True)
+                                incexc.setChecked(True)
+                                incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
+
+                                ground.setCheckable(True)
+                                ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                                
+                                button.setMenu(menu)
+                                Scroll.addWidget(button)
+
+                                QApplication.instance().focusWidget().clearFocus()
 
 
 
@@ -1939,11 +1983,21 @@ class Port(QWidget):
                             Name = f"{Name} {len(shared_state.itemNames)+1}"
                         shared_state.add_item(obj, Name)
 
-                        check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                        check.checkbox.setChecked(True)
-                        check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
-                        check.checkbox.setMaximumWidth(175)
-                        Scroll.addWidget(check.checkbox)
+                        button = QPushButton(Name)
+                        button.setMaximumWidth(175)
+                        menu = QMenu()
+                        incexc = menu.addAction('Included in Scene')
+                        ground = menu.addAction('Grounded')
+                        
+                        incexc.setCheckable(True)
+                        incexc.setChecked(True)
+                        incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
+
+                        ground.setCheckable(True)
+                        ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                        
+                        button.setMenu(menu)
+                        Scroll.addWidget(button)
 
                         QApplication.instance().focusWidget().clearFocus()
                 
@@ -2077,6 +2131,9 @@ class Port(QWidget):
 
         def show_hide_object(object,state):
             backend.toggle_object(object,state)
+        
+        def ground_object(object,state):
+            backend.ground_object(object,state)
             
         
     def GetName(self):
