@@ -608,6 +608,11 @@ class ObjectTab(QWidget):
         def ground_object(object,state):
             backend.grounf_object(object,state)
 
+        def Object_detect(tab_widget):
+            State = not Backend.is_config_objects_empty(tab_widget)
+            for i in range(5):
+                tab_widget.setTabEnabled(i, State)
+
     
     def delete_object(self, tab_widget, scroll):
             # Delete Object
@@ -721,19 +726,19 @@ class ObjectTab(QWidget):
     def Slider_Update_Scale(self, val, field):
         try:
             if field.isEnabled():
-            if field.text() == '':
-                field.setText('0')
-            if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                if val < 500: # <1 true
-                    trueValStr = str(val / 500)
-                    if len(trueValStr) > 4:
-                        field.setText(trueValStr[0:4])
-                    else:
-                        field.setText(trueValStr)
+                if field.text() == '':
+                    field.setText('0')
+                if float(field.text()) > val or float(field.text()) + 0.5 < val:
+                    if val < 500: # <1 true
+                        trueValStr = str(val / 500)
+                        if len(trueValStr) > 4:
+                            field.setText(trueValStr[0:4])
+                        else:
+                            field.setText(trueValStr)
 
-                else: # >1 true
-                    trueValStr = (val - 450) / 50
-                    field.setText(str(round(trueValStr,1)))
+                    else: # >1 true
+                        trueValStr = (val - 450) / 50
+                        field.setText(str(round(trueValStr,1)))
         except:
             field.setText("0.0")
 
