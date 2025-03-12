@@ -216,9 +216,9 @@ class TabDialog(QWidget):
     
         self.setLayout(main_layout)
         
-        #Tests for all pages except Random (included in RandomTabDialog)
+        """#Tests for all pages except Random (included in RandomTabDialog)
         from FrontTests import Tests
-        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)
+        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)"""
 
     def visual_change(self, thread):
         #Updates Viewport Image
@@ -1017,17 +1017,17 @@ class RandomTabDialog(QWidget):
         """Random Tab Nav Bar"""
         super().__init__(parent)
 
-        tab_widget = QTabWidget()
-        tab_widget.addTab(RandomDefault(self, tab_widget), "Base")
-        tab_widget.addTab(RandomObject(self, ParentTab), "Object")
-        tab_widget.addTab(RandomPivot(self, ParentTab), "Pivot Point")
-        tab_widget.addTab(RandomRender(self, ParentTab), "Render")
-        tab_widget.addTab(RandomLight(self, ParentTab), "Light")
+        self.tab_widget = QTabWidget()
+        self.tab_widget.addTab(RandomDefault(self, self.tab_widget), "Base")
+        self.tab_widget.addTab(RandomObject(self, ParentTab), "Object")
+        self.tab_widget.addTab(RandomPivot(self, ParentTab), "Pivot Point")
+        self.tab_widget.addTab(RandomRender(self, ParentTab), "Render")
+        self.tab_widget.addTab(RandomLight(self, ParentTab), "Light")
 
 
-        """Random Page Testsing"""
+        """
         from FrontTests import RandomTabTests
-        RandomTabTests(tab_widget)
+        RandomTabTests(self.tab_widget)"""
 
         main_layout = QVBoxLayout()
         main_layout.addWidget(self.tab_widget)
@@ -2023,7 +2023,7 @@ class Port(QWidget):
                         shared_state.add_item(obj, Name)
                         check = BenCheckBox(Name,len(shared_state.itemNames),obj)
                         check.checkbox.setChecked(True)
-                        check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
+                        check.checkbox.stateChanged.connect(lambda: self.show_hide_object(check.object,check.checkbox.isChecked()))
                         check.checkbox.setMaximumWidth(175)
                         Scroll.addWidget(check.checkbox)
 
@@ -2046,7 +2046,7 @@ class Port(QWidget):
                                 shared_state.add_item(obj, Name)
                                 check = BenCheckBox(Name,len(shared_state.itemNames),obj)
                                 check.checkbox.setChecked(True)
-                                check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
+                                check.checkbox.stateChanged.connect(lambda: self.show_hide_object(check.object,check.checkbox.isChecked()))
                                 check.checkbox.setMaximumWidth(175)
                                 Scroll.addWidget(check.checkbox)
 
@@ -2093,7 +2093,7 @@ class Port(QWidget):
 
                         check = BenCheckBox(Name,len(shared_state.itemNames),obj)
                         check.checkbox.setChecked(True)
-                        check.checkbox.stateChanged.connect(lambda: show_hide_object(check.object,check.checkbox.isChecked()))
+                        check.checkbox.stateChanged.connect(lambda: self.show_hide_object(check.object,check.checkbox.isChecked()))
                         check.checkbox.setMaximumWidth(175)
                         Scroll.addWidget(check.checkbox)
                 
@@ -2216,11 +2216,11 @@ class Port(QWidget):
 
         main_layout = QGridLayout()
 
-        main_layout.addWidget(self.Import_Object_Button, 0, 0)
-        main_layout.addWidget(self.Delete_Object_Button, 0, 1)
-        main_layout.addWidget(self.ExportSettings_Button, 0, 2)
-        main_layout.addWidget(self.ImportSettings_Button, 0, 3)
-        main_layout.addWidget(self.BrowseFiles_Button, 0, 4)
+        main_layout.addWidget(self.TutorialObjects_Button, 0, 0)
+        main_layout.addWidget(self.Import_Object_Button, 0, 1)
+        main_layout.addWidget(self.Delete_Object_Button, 0, 2)
+        main_layout.addWidget(self.ExportSettings_Button, 0, 3)
+        main_layout.addWidget(self.ImportSettings_Button, 0, 4)
         main_layout.addWidget(self.SelectRenderFolder_Button, 0, 5)
         self.setLayout(main_layout)
 
@@ -2238,7 +2238,6 @@ class Port(QWidget):
         self.TutorialObjects_Button.setText(translation.get("Tutorial Object", "Tutorial Object"))
         self.ExportSettings_Button.setText(translation.get("Export Settings", "Export Settings"))
         self.ImportSettings_Button.setText(translation.get("Import Settings", "Import Settings"))
-        self.BrowseFiles_Button.setText(translation.get("Generate Data Set", "Generate Data Set"))
         self.SelectRenderFolder_Button.setText(translation.get("Change Render Folder", "Change Render Folder"))
 
         def show_hide_object(object,state):
@@ -2276,7 +2275,7 @@ class Lighting(QWidget):
         self.colour_label.setToolTip('Object lighting Colour')
 
         self.lighting_colour = QLineEdit(self) #f789886 & bullshit
-        self.lighting_colour.textEdited.connect(lambda: self.update_colour_example_text(self.lighting_colour.text()))
+        self.lighting_colour.editingFinished.connect(lambda: self.update_colour_example_text(self.lighting_colour.text()))
         self.colour_example = QLabel(self)
         self.lighting_colour.setText("#ffffff")
         
@@ -2524,8 +2523,9 @@ class Lighting(QWidget):
         
 
     def getColour(self):
+        
         colour = QColorDialog.getColor()
-
+        
         self.lighting_colour.setText(colour.name())
         self.colour_example.setStyleSheet(("background-color: {c}").format(c = colour.name()))
 
@@ -2533,7 +2533,6 @@ class Lighting(QWidget):
             self.light.set_color(colour.name())
         except:
             pass
-
 
     def Minus_click(self, field):
         """Updates field value"""
@@ -2587,9 +2586,25 @@ class Lighting(QWidget):
                 slider.setValue(0)
             except:
                 print("Error", e)
+                
+    def isValidHexaCode(self, str):
+ 
+        if (str[0] != '#'):
+            return False
+    
+        if (not(len(str) == 4 or len(str) == 7)):
+            self.lighting_colour.setText("#ffffff")
+    
+        for i in range(1, len(str)):
+            if (not((str[i] >= '0' and str[i] <= '9') or (str[i] >= 'a' and str[i] <= 'f') or (str[i] >= 'A' or str[i] <= 'F'))):
+                self.lighting_colour.setText("#ffffff")
+    
+        return
 
 
     def update_colour_example_text(self, colour):
+        self.isValidHexaCode(self.lighting_colour.text())
+        
         try:
             if bool(regex("(([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f]))", colour)) or bool(regex("#(([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f])([0-9]|[a-f]))", colour)):
                 if colour[0] != "#":
@@ -2619,7 +2634,6 @@ class Lighting(QWidget):
         self.light_angle_label.setText(translation.get("Lighting Angle", "Lighting Angle"))
         self.light_coords_label.setText(translation.get("Lighting Co-ords", "Lighting Co-ords"))
         self.lighting_strength_label.setText(translation.get("Strength", "Strength"))
-        self.lighting_colour.setText(translation.get("Colour", "Colour"))
         self.radius_label.setText(translation.get("Radius", "Radius"))
         self.light_type_label.setText(translation.get("Type", "Type"))
         self.colour_label.setText(translation.get("Colour", "Colour"))

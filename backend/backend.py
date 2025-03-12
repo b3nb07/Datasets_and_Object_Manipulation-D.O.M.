@@ -787,7 +787,10 @@ class Backend():
             OR WE REFERENCE
             :SHRUG:
             """
-            return [x / 255 for x in bytes.fromhex(hex_value[-6:])]
+            try:
+                return [x / 255 for x in bytes.fromhex(hex_value[-6:])]
+            except:
+                return "#FFFFFF"
 
         def set_color(self, color):
             """Sets the color of the light using the RGB colour space.
