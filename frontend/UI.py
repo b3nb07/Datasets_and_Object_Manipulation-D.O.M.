@@ -2124,10 +2124,6 @@ class Port(QWidget):
                                 button.setMenu(menu)
                                 Scroll.addWidget(button)
 
-
-
-
-
                 Object_detect(tab_widget)
 
             except Exception:
@@ -2158,7 +2154,7 @@ class Port(QWidget):
             try:
                 if Tutorial_Box.clickedButton().text().upper() != "CANCEL":
                     Name = self.GetName()
-                    if Name != False:
+                    if Name != False and len(Name) < 25:
                         obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
                         if Name == "Object":
                             Name = f"{Name} {len(shared_state.itemNames)+1}"
@@ -2181,7 +2177,8 @@ class Port(QWidget):
                         Scroll.addWidget(button)
 
                         QApplication.instance().focusWidget().clearFocus()
-
+                    else:
+                        error_box = ilyaMessageBox("Name is too long!", "Error")
                 
             except Exception as e:
                 print(e)
@@ -2744,6 +2741,7 @@ class Settings(QWidget):
         self.translations = translator.translations
 
         #button clicks
+        self.Help_button.clicked.connect(self.openWebsite)
         self.colour_scheme_button.clicked.connect(self.Colour_Scheme_Press)
         translator.languageChanged.connect(self.translateUi)
         self.Languages.clicked.connect(self.Language_button_press)
@@ -2756,7 +2754,10 @@ class Settings(QWidget):
         self.setLayout(main_layout)
 
         self.load_settings()
-
+        
+    def openWebsite(self):
+        import webbrowser
+        webbrowser.open('https://github.com/b3nb07/CS3028_Group_Project')
 
     def Colour_Scheme_Press(self):
         colour_box = QMessageBox(self)
