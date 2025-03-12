@@ -1,2 +1,10 @@
 Program initialised
-Render resolution changed to [256, 256]
+Seed changed to: 129003438
+Light Source 1 light source added
+Object 1 object added
+Render resolution changed to (286, 122)
+Object 3 object added
+ Started
+Location of Object 1 changed to [0.0, 0.0, 0.0]
+Render resolution changed to (256, 256)
+Render resolution changed to (286, 122)

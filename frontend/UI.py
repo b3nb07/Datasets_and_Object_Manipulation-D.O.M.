@@ -437,18 +437,18 @@ class ObjectTab(QWidget):
     
         def delete_object(tab_widget, scroll):
             to_delete = QMessageBox()
-
             to_delete.setText("Please select an object to remove from below")
 
             if (not shared_state.items):
                 return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
 
-            for obj in shared_state.items:
-                to_delete.addButton(str(obj), QMessageBox.ActionRole)
+            for i in range(len(shared_state.itemNames)):
+                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
             
             to_delete.addButton("Cancel", QMessageBox.ActionRole)
 
             to_delete.exec()
+
             choice = str(to_delete.clickedButton().text())
 
             if choice != "Cancel":
