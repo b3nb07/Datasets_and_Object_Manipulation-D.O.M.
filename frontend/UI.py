@@ -2312,6 +2312,12 @@ class Port(QWidget):
         main_layout.addWidget(self.SelectRenderFolder_Button, 0, 5)
         self.setLayout(main_layout)
 
+        def show_hide_object(object,state):
+            backend.toggle_object(object,state)
+        
+        def ground_object(object,state):
+            backend.ground_object(object,state)
+
                 
         translator.languageChanged.connect(self.translateUi)
         self.translateUi()
@@ -2328,11 +2334,6 @@ class Port(QWidget):
         self.ImportSettings_Button.setText(translation.get("Import Settings", "Import Settings"))
         self.SelectRenderFolder_Button.setText(translation.get("Change Render Folder", "Change Render Folder"))
 
-        def show_hide_object(object,state):
-            backend.toggle_object(object,state)
-        
-        def ground_object(object,state):
-            backend.ground_object(object,state)
             
         
     def GetName(self):
