@@ -85,12 +85,6 @@ class ComboBoxState(QObject):
         #Amount of items
         return len(self.items)
 
-class BenCheckBox():
-    #Creates a checkbox for objectStatusBar
-    def __init__(self, name, pos, object):
-        self.checkbox = QCheckBox(name)
-        self.pos = pos
-        self.object = object
 
 class ViewportThread(QThread):
     def __init__(self, size):
@@ -161,7 +155,7 @@ class TabDialog(QWidget):
         #Object side par to display current objects loaded in and allow for removal from current render without deletion
         ObjectsStatusBar = QScrollArea()
         ObjectsStatusBar.setMaximumWidth(175)
-        ObjectsStatusBar.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
         ObjectsStatusBar.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
         content_widget = QWidget()
@@ -238,6 +232,7 @@ class TabDialog(QWidget):
         # At least 10 seconds between viewport updates
         # if (time() - last_viewport_update > 5):
         if (not self.viewport_ongoing and "Render" not in interaction):
+            self.old_log(interaction)
             config = backend.get_config()
             backend.set_runtime_config(config)
 
@@ -273,6 +268,7 @@ class ObjectTab(QWidget):
         self.XObj_pos = QLabel("X:", self)
         self.XObj_pos_input_field = QLineEdit(parent=self)
         self.XObj_pos_input_field.setText("0.0")
+        #self.XObj_pos_input_field.setFocusPolicy(Qt.NoFocus)
         self.X_button_minus = QPushButton('-', self)
         self.X_button_plus = QPushButton('+', self)
         
@@ -356,12 +352,126 @@ class ObjectTab(QWidget):
         self.Z_Rotation.setPageStep(0)
         self.Z_Rotation.setOrientation(QtCore.Qt.Horizontal)
         self.Z_Rotation.setRange(0, 360)
-        
+
+        #First Section
+        def Get_Object_Filepath(Scroll):
+            import_box = QMessageBox()
+            import_box.setText("How would you like to import objects?")
+            import_box.addButton("Import Files", QMessageBox.ActionRole)
+            import_box.addButton("Folder", QMessageBox.ActionRole)
+            import_box.addButton("Cancel", QMessageBox.RejectRole)
+            
+            import_box.exec()
+            clicked_button = import_box.clickedButton().text()
+            
+            try:
+                if clicked_button == "Import Files":
+                    paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
+                    if not paths:
+                        return
+                    
+                    for path in paths:
+                        obj = backend.RenderObject(filepath=path)
+                        Name = os.path.basename(os.path.normpath(path))
+                        shared_state.add_item(obj, Name)
+                        
+                        button = QPushButton(Name)
+                        button.setMaximumWidth(175)
+                        menu = QMenu()
+                        incexc = menu.addAction('Included in Scene')
+                        ground = menu.addAction('Grounded')
+                        
+                        incexc.setCheckable(True)
+                        incexc.setChecked(True)
+                        incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
+
+                        ground.setCheckable(True)
+                        ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                        
+                        button.setMenu(menu)
+                        Scroll.addWidget(button)
+
+                elif clicked_button == "Folder":
+                    folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
+                    if not folder_path:
+                        return
+                    
+                    # maybe have a global constant of supported extensions?
+                    supported_extensions = ['.blend', '.stl', '.obj']
+                    # go through each file in directory
+                    for root, _, files in os.walk(folder_path):
+                        for file in files:
+                            if any(file.lower().endswith(ext) for ext in supported_extensions):
+                                full_path = os.path.join(root, file)
+                                obj = backend.RenderObject(filepath=full_path)
+                                Name = os.path.basename(os.path.normpath(full_path))
+                                shared_state.add_item(obj, Name)
+                                
+                                button = QPushButton(Name)
+                                button.setMaximumWidth(175)
+                                menu = QMenu()
+                                incexc = menu.addAction('Included in Scene')
+                                ground = menu.addAction('Grounded')
+                                
+                                incexc.setCheckable(True)
+                                incexc.setChecked(True)
+                                incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
+
+                                ground.setCheckable(True)
+                                ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                                
+                                button.setMenu(menu)
+                                Scroll.addWidget(button)
+
+
+                Object_detect(tab_widget)
+
+            except Exception:
+                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
+                
+            except Exception as e:
+                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
+
         self.Import_Object_Button = QPushButton("Import Objects", self)
-        self.Import_Object_Button.clicked.connect(lambda: self.Get_Object_Filepath(Scroll, tab_widget))
+        self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
+    
+        def delete_object(tab_widget, scroll):
+            to_delete = QMessageBox()
+
+            to_delete.setText("Please select an object to remove from below")
+
+            if (not shared_state.items):
+                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
+
+            for obj in shared_state.items:
+                to_delete.addButton(str(obj), QMessageBox.ActionRole)
+            
+            to_delete.addButton("Cancel", QMessageBox.ActionRole)
+
+            to_delete.exec()
+            choice = str(to_delete.clickedButton().text())
+
+            if choice != "Cancel":
+                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
+                obj = shared_state.items[obj_index]
+                shared_state.remove_item(obj)
+                scroll.itemAt(obj_index).widget().setParent(None)
+                backend.update_log(f'{obj} object deleted\n')
+                del backend.get_config()["objects"][obj.object_pos]
+                # shift objects after this one down by one
+                for i in range(obj_index, len(shared_state.items)):
+                    obj = shared_state.items[i]
+                    obj.object_pos = i
+
+                shared_state.items_updated.emit(shared_state.items)
+                # The last object was deleted
+                if (not shared_state.items):
+                    Object_detect(tab_widget)
+                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
 
         self.Delete_Object_Button = QPushButton('Delete Object', self)
-        self.Delete_Object_Button.clicked.connect(lambda: self.delete_object(tab_widget, Scroll))
+        self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
+
 
         # create initial combo_box
         self.combo_box = QComboBox(self)
@@ -492,71 +602,17 @@ class ObjectTab(QWidget):
         
         #########################################
 
-    def show_hide_object(self, object,state):
-        #State declares when rendered on not
-        backend.toggle_object(object,state)
-            
-    #First Section
-    def Get_Object_Filepath(self, Scroll, tab_widget):
-            # Import Object
-            import_box = QMessageBox()
-            import_box.setText("How would you like to import objects?")
-            import_box.addButton("Import Files", QMessageBox.ActionRole)
-            import_box.addButton("Folder", QMessageBox.ActionRole)
-            import_box.addButton("Cancel", QMessageBox.RejectRole)
-            
-            import_box.exec()
-            clicked_button = import_box.clickedButton().text()
-            
-            try:
-                if clicked_button == "Import Files":
-                    paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
-                    if not paths:
-                        return
-                    
-                    for path in paths:
-                        obj = backend.RenderObject(filepath=path)
-                        #set name to filename
-                        Name = os.path.basename(os.path.normpath(path))
-                        shared_state.add_item(obj, Name)
-                        check = BenCheckBox(Name, len(shared_state.itemNames),obj)
-                        check.checkbox.setChecked(True)
-                        check.checkbox.stateChanged.connect(lambda: self.show_hide_object(check.object,check.checkbox.isChecked()))
-                        check.checkbox.setMaximumWidth(175)
-                        #adds to object Status bar
-                        Scroll.addWidget(check.checkbox)
+        def show_hide_object(object,state):
+            backend.toggle_object(object,state)
+        
+        def ground_object(object,state):
+            backend.grounf_object(object,state)
 
-                elif clicked_button == "Folder":
-                    folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
-                    if not folder_path:
-                        return
-                    
-                    # maybe have a global constant of supported extensions?
-                    supported_extensions = ['.blend', '.stl', '.obj']
-                    # go through each file in directory
-                    for root, _, files in os.walk(folder_path):
-                        for file in files:
-                            if any(file.lower().endswith(ext) for ext in supported_extensions):
-                                full_path = os.path.join(root, file)
-                                obj = backend.RenderObject(filepath=full_path)
-                                #Sets name to filename
-                                Name = os.path.basename(os.path.normpath(full_path))
-                                shared_state.add_item(obj, Name)
-                                check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                                check.checkbox.setChecked(True)
-                                check.checkbox.stateChanged.connect(lambda: self.show_hide_object(check.object,check.checkbox.isChecked()))
-                                check.checkbox.setMaximumWidth(175)
-                                #Adds to objectStatus Bar
-                                Scroll.addWidget(check.checkbox)
+        def Object_detect(tab_widget):
+            State = not Backend.is_config_objects_empty(tab_widget)
+            for i in range(5):
+                tab_widget.setTabEnabled(i, State)
 
-                #adds to shared state
-                self.Object_detect(tab_widget)
-
-            except Exception:
-                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
-                
-            except Exception as e:
-                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
     
     def delete_object(self, tab_widget, scroll):
             # Delete Object
@@ -681,12 +737,8 @@ class ObjectTab(QWidget):
                             field.setText(trueValStr)
 
                     else: # >1 true
-                        trueValStr = str((val - 450) / 50)
-                        if len(trueValStr) > 3:
-                            field.setText(trueValStr[0:3])
-                        else:
-                            print(trueValStr)
-                            field.setText(trueValStr)
+                        trueValStr = (val - 450) / 50
+                        field.setText(str(round(trueValStr,1)))
         except:
             field.setText("0.0")
 
@@ -751,7 +803,6 @@ class ObjectTab(QWidget):
             selected_object_index = self.combo_box.currentIndex()
             shared_state.itemNames[selected_object_index]
             obj = shared_state.items[selected_object_index]
-            #print(obj)
             obj.set_rotation(rotation)
         except:
             print("Error Updating Rotation, X, Y or Z value is invalid")
@@ -2021,11 +2072,23 @@ class Port(QWidget):
 
                         Name = os.path.basename(os.path.normpath(path))
                         shared_state.add_item(obj, Name)
-                        check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                        check.checkbox.setChecked(True)
-                        check.checkbox.stateChanged.connect(lambda: self.show_hide_object(check.object,check.checkbox.isChecked()))
-                        check.checkbox.setMaximumWidth(175)
-                        Scroll.addWidget(check.checkbox)
+
+                        button = QPushButton(Name)
+                        button.setMaximumWidth(175)
+                        menu = QMenu()
+                        incexc = menu.addAction('Included in Scene')
+                        ground = menu.addAction('Grounded')
+                        
+                        incexc.setCheckable(True)
+                        incexc.setChecked(True)
+                        incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
+
+                        ground.setCheckable(True)
+                        ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                        
+                        button.setMenu(menu)
+                        Scroll.addWidget(button)
+
 
                 elif clicked_button == "Folder":
 
@@ -2044,11 +2107,24 @@ class Port(QWidget):
 
                                 Name = os.path.basename(os.path.normpath(full_path))
                                 shared_state.add_item(obj, Name)
-                                check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                                check.checkbox.setChecked(True)
-                                check.checkbox.stateChanged.connect(lambda: self.show_hide_object(check.object,check.checkbox.isChecked()))
-                                check.checkbox.setMaximumWidth(175)
-                                Scroll.addWidget(check.checkbox)
+
+                                button = QPushButton(Name)
+                                button.setMaximumWidth(175)
+                                menu = QMenu()
+                                incexc = menu.addAction('Included in Scene')
+                                ground = menu.addAction('Grounded')
+                                
+                                incexc.setCheckable(True)
+                                incexc.setChecked(True)
+                                incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
+
+                                ground.setCheckable(True)
+                                ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                                
+                                button.setMenu(menu)
+                                Scroll.addWidget(button)
+
+
 
 
 
@@ -2088,11 +2164,24 @@ class Port(QWidget):
                             Name = f"{Name} {len(shared_state.itemNames)+1}"
                         shared_state.add_item(obj, Name)
 
-                        check = BenCheckBox(Name,len(shared_state.itemNames),obj)
-                        check.checkbox.setChecked(True)
-                        check.checkbox.stateChanged.connect(lambda: self.show_hide_object(check.object,check.checkbox.isChecked()))
-                        check.checkbox.setMaximumWidth(175)
-                        Scroll.addWidget(check.checkbox)
+                        button = QPushButton(Name)
+                        button.setMaximumWidth(175)
+                        menu = QMenu()
+                        incexc = menu.addAction('Included in Scene')
+                        ground = menu.addAction('Grounded')
+                        
+                        incexc.setCheckable(True)
+                        incexc.setChecked(True)
+                        incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
+
+                        ground.setCheckable(True)
+                        ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                        
+                        button.setMenu(menu)
+                        Scroll.addWidget(button)
+
+                        QApplication.instance().focusWidget().clearFocus()
+
                 
             except Exception as e:
                 print(e)
@@ -2169,7 +2258,7 @@ class Port(QWidget):
                 try:
                     shared_state.remove_item(obj)
                     success_box = ilyaMessageBox("Object successfully deleted", "Success")
-                    
+                    backend.update_log(f'{obj} object deleted\n')
                     del backend.get_config()["objects"][obj.object_pos]
                     # shift objects after this one down by one
                     for i in range(obj_index, len(shared_state.items)):
@@ -2221,6 +2310,12 @@ class Port(QWidget):
         main_layout.addWidget(self.SelectRenderFolder_Button, 0, 5)
         self.setLayout(main_layout)
 
+        def show_hide_object(object,state):
+            backend.toggle_object(object,state)
+        
+        def ground_object(object,state):
+            backend.ground_object(object,state)
+
                 
         translator.languageChanged.connect(self.translateUi)
         self.translateUi()
@@ -2237,8 +2332,6 @@ class Port(QWidget):
         self.ImportSettings_Button.setText(translation.get("Import Settings", "Import Settings"))
         self.SelectRenderFolder_Button.setText(translation.get("Change Render Folder", "Change Render Folder"))
 
-        def show_hide_object(object,state):
-            backend.toggle_object(object,state)
             
         
     def GetName(self):
@@ -2283,13 +2376,15 @@ class Lighting(QWidget):
         self.lighting_strength_input_field = QLineEdit(self)
         self.lighting_strength_input_field.setText("1")
         self.lighting_strength_input_field.textEdited.connect(lambda: self.Update_slider(self.strength_slider, self.lighting_strength_input_field.text()))
+        self.lighting_strength_input_field.editingFinished.connect(self.update_strength)
 
         self.strength_slider = QSlider(self)
         self.strength_slider.setRange(0,100)
         self.strength_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.strength_slider.sliderMoved.connect(lambda val: self.set_strength(val, self.lighting_strength_input_field))
+        self.strength_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.lighting_strength_input_field))
+        self.strength_slider.sliderReleased.connect(self.update_strength)
         ###
-        
+
         ###
         self.radius_label = QLabel("Radius", self)
         self.radius_label.setToolTip('Radius of lighting element')
@@ -2355,35 +2450,39 @@ class Lighting(QWidget):
         self.Xlight_angle_label = QLabel("X:", self)
         self.Xlight_angle_input_field = QLineEdit(self)
         self.Xlight_angle_input_field.setText("0")
-        self.Xlight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Xlight_angle_slider, self.Xlight_angle_input_field.text()))
-
+        self.Xlight_angle_input_field.textEdited.connect(lambda: self.Update_slider(self.Xlight_angle_slider, self.Xlight_angle_input_field.text()))
+        self.Xlight_angle_input_field.editingFinished.connect(lambda: self.set_rotation_from_field(self.Xlight_angle_slider, self.Xlight_angle_input_field.text()))
 
         self.Xlight_angle_slider = QSlider(self)
         self.Xlight_angle_slider.setRange(0,359)
         self.Xlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Xlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Xlight_angle_input_field))
-
+        self.Xlight_angle_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Xlight_angle_input_field))
+        self.Xlight_angle_slider.sliderReleased.connect(self.update_rotation)
 
         ###
         self.Ylight_angle_label = QLabel("Y:", self)
         self.Ylight_angle_input_field = QLineEdit(self)
         self.Ylight_angle_input_field.setText("0")
-        self.Ylight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Ylight_angle_slider, self.Ylight_angle_input_field.text()))
+        self.Ylight_angle_input_field.textEdited.connect(lambda: self.Update_slider(self.Ylight_angle_slider, self.Ylight_angle_input_field.text()))
+        self.Ylight_angle_input_field.editingFinished.connect(lambda: self.set_rotation_from_field(self.Ylight_angle_slider, self.Ylight_angle_input_field.text()))
 
         self.Ylight_angle_slider = QSlider(self)
         self.Ylight_angle_slider.setRange(0,359)
         self.Ylight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Ylight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Ylight_angle_input_field))
+        self.Ylight_angle_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Ylight_angle_input_field))
+        self.Ylight_angle_slider.sliderReleased.connect(self.update_rotation)
         ###
         self.Zlight_angle_label = QLabel("Z:", self)
         self.Zlight_angle_input_field = QLineEdit(self)
         self.Zlight_angle_input_field.setText("0")
-        self.Zlight_angle_input_field.textEdited.connect(lambda: self.set_rotation_from_field(self.Zlight_angle_slider, self.Zlight_angle_input_field.text()))
+        self.Zlight_angle_input_field.textEdited.connect(lambda: self.Update_slider(self.Zlight_angle_slider, self.Zlight_angle_input_field.text()))
+        self.Zlight_angle_input_field.editingFinished.connect(lambda: self.set_rotation_from_field(self.Zlight_angle_slider, self.Zlight_angle_input_field.text()))
 
         self.Zlight_angle_slider = QSlider(self)
         self.Zlight_angle_slider.setRange(0,359)
         self.Zlight_angle_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Zlight_angle_slider.sliderMoved.connect(lambda val: self.set_rotation(val, self.Zlight_angle_input_field))
+        self.Zlight_angle_slider.sliderMoved.connect(lambda val: self.Slider_Update(val, self.Zlight_angle_input_field))
+        self.Zlight_angle_slider.sliderReleased.connect(self.update_rotation)
        
         self.light_type_label = QLabel("Type: ", self)
         self.light_type_combobox = QComboBox(self)
@@ -2456,8 +2555,8 @@ class Lighting(QWidget):
         self.light.set_type(self.light_type_combobox.currentText())
 
 
-    def set_strength(self, val, field):
-        self.Slider_Update(val, field)
+    def update_strength(self):
+        field = self.lighting_strength_input_field
         try:
             self.light.set_energy(float(field.text()))
         except:
@@ -2504,8 +2603,7 @@ class Lighting(QWidget):
         except:
             pass
 
-    def set_rotation(self, val, field):
-        self.Slider_Update(val, field)
+    def update_rotation(self):
 
         x = self.Xlight_angle_input_field.text()
         y = self.Ylight_angle_input_field.text()
