@@ -152,7 +152,7 @@ class TabDialog(QWidget):
         ObjectsStatusBar = QScrollArea()
         ObjectsStatusBar.setMaximumWidth(175)
         
-        ObjectsStatusBar.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        #ObjectsStatusBar.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         ObjectsStatusBar.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
         content_widget = QWidget()
