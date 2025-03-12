@@ -444,7 +444,7 @@ class Backend():
             #Scale properties
         if "width" in random_object_scale:
             self.random_object_width = random.uniform(1,5)
-            scale[0] = self.random_object_width # random range of width - 1-100
+            scale[0] = self.random_object_width # random range of width - 1-5
             print(f"Randomized Width: {scale[0]}")
 
             
@@ -789,7 +789,10 @@ class Backend():
             OR WE REFERENCE
             :SHRUG:
             """
-            return [x / 255 for x in bytes.fromhex(hex_value[-6:])]
+            try:
+                return [x / 255 for x in bytes.fromhex(hex_value[-6:])]
+            except:
+                return [255, 255, 255]
 
         def set_color(self, color):
             """Sets the color of the light using the RGB colour space.
@@ -800,6 +803,7 @@ class Backend():
             colour = self.hex_to_rgba(color)
             #print(colour)
             if (is_blender_environment):
+                print(colour)
                 self.light.set_color(colour)
 
             config["light_sources"][self.light_pos]["color"] = color
