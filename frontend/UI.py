@@ -2089,7 +2089,6 @@ class Port(QWidget):
                         button.setMenu(menu)
                         Scroll.addWidget(button)
 
-                        QApplication.instance().focusWidget().clearFocus()
 
                 elif clicked_button == "Folder":
 
@@ -2125,7 +2124,6 @@ class Port(QWidget):
                                 button.setMenu(menu)
                                 Scroll.addWidget(button)
 
-                                QApplication.instance().focusWidget().clearFocus()
 
 
 
