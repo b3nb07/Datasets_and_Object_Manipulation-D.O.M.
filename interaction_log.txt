@@ -1,69 +1,19 @@
 Program initialised
-Seed changed to: 90691305
+Seed changed to: 276647762
 Light Source 1 light source added
 Object 1 object added
 Render resolution changed to (286, 122)
 Viewport Preview Render Started
-Scale of Object 1 changed to [1.0, 2.0, 1.0]
+Pivot distance changed to: 21.0
 Render resolution changed to (256, 256)
 Render resolution changed to (286, 122)
 Viewport Preview Render Started
 Render resolution changed to (256, 256)
-Scale of Object 1 changed to [1.0, 2.0, 1.0]
+Location of Object 1 changed to [0.0, 0.0, 0.0]
 Render resolution changed to (286, 122)
 Viewport Preview Render Started
-Render resolution changed to (256, 256)
-Pivot distance changed to: 30.0
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Render resolution changed to (256, 256)
-Scale of Object 1 changed to [1.0, 2.0, 1.0]
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Render resolution changed to (256, 256)
-Scale of Object 1 changed to [1.0, 20.0, 1.0]
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Render resolution changed to (256, 256)
-Scale of Object 1 changed to [1.0, 1.0, 1.0]
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Location of Light Source 1 changed to [0.0, 0.0, 1.0]
-Location of Light Source 1 changed to [0.0, 0.0, 2.0]
-Location of Light Source 1 changed to [0.0, 0.0, 3.0]
-Render resolution changed to (256, 256)
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Colour of Light Source 1 changed to #ffff00
-Energy of Light Source 1 changed to 77.0
+Rotation of Object 1 changed to [np.float64(0.0), np.float64(1.5533430342749532), np.float64(0.0)]
 Render resolution changed to (256, 256)
 Render resolution changed to (286, 122)
 Viewport Preview Render Started
 Render resolution changed to (256, 256)
-Colour of Light Source 1 changed to #ffff7f
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Render resolution changed to (256, 256)
-Scale of Object 1 changed to [1.0, 2.0, 1.0]
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Render resolution changed to (256, 256)
-Scale of Object 1 changed to [1.0, 3.0, 1.0]
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Render resolution changed to (256, 256)
-Scale of Object 1 changed to [1.0, 10.0, 1.0]
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Render resolution changed to (256, 256)
-Scale of Object 1 changed to [1.0, 1.0, 1.0]
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Render resolution changed to (256, 256)
-Scale of Object 1 changed to [1.0, 1.0, 10.0]
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Render resolution changed to (256, 256)
-Scale of Object 1 changed to [1.0, 1.0, 10.0]
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
