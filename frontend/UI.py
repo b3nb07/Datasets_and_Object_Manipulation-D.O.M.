@@ -2081,12 +2081,9 @@ class Port(QWidget):
             
             try:
                 if Tutorial_Box.clickedButton().text().upper() != "CANCEL":
-                    print("zero")
                     Name = self.GetName()
-                    print("six")
                     if Name != False:
                         obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
-                        print("seven")
                         if Name == "Object":
                             Name = f"{Name} {len(shared_state.itemNames)+1}"
                         shared_state.add_item(obj, Name)
@@ -2246,21 +2243,16 @@ class Port(QWidget):
         
     def GetName(self):
         try:
-            print("One")
             ObjName, State = QtWidgets.QInputDialog.getText(self, 'Object Name', "Enter Object Name: ")
-            print("two")
             
             if State and ObjName != "":
-                print("three")
                 return ObjName
             elif not State:
-                print("special")
                 return False
             else:
-                print("four")
                 return "Object"
         except:
-            print("five")
+            pass
 
 class Lighting(QWidget):
     def __init__(self, parent: QWidget):
@@ -2590,7 +2582,7 @@ class Lighting(QWidget):
     def isValidHexaCode(self, str):
  
         if (str[0] != '#'):
-            return False
+            return
     
         if (not(len(str) == 4 or len(str) == 7)):
             self.lighting_colour.setText("#ffffff")
@@ -2610,7 +2602,6 @@ class Lighting(QWidget):
                 if colour[0] != "#":
                     colour = "#" + colour
 
-                
                 self.light.set_color(colour)
                 #print("CHANGED BACKEND")
                 self.colour_example.setStyleSheet(("background-color: {c}").format(c = colour))
