@@ -1,1 +1,1 @@
-#t
+set_scale

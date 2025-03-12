@@ -779,7 +779,7 @@ class ObjectTab(QWidget):
             width = float(self.Width_Obj_pos_input_field.text() or 0)
             height = float(self.Height_Obj_pos_input_field.text() or 0)
             length = float(self.Length_Obj_pos_input_field.text() or 0)
-            scale = [width,height,length]
+            scale = [width,length,height]
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
