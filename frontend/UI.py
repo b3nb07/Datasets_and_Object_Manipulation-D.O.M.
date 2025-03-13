@@ -2027,7 +2027,13 @@ class Render(QWidget):
         else:
             self.generate_render()
 
-    def set_renders(self):
+    def set_renders(self):#
+        try:
+            val = int(self.Number_of_renders_input_field.text())
+            if val <= 0:
+                self.Number_of_renders_input_field.setText("1") 
+        except:
+            self.Number_of_renders_input_field.setText("1") 
         try: 
             backend.set_renders(int(self.Number_of_renders_input_field.text()))
         except:
