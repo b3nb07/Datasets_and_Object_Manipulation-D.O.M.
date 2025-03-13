@@ -232,13 +232,13 @@ class Backend():
             case 'object':
                 self.random_update_object_loc(index, field, random_value)
             case 'pivot':
-                self.random_update_pivot(index, field, random_value)
+                self.random_update_pivot(field, random_value)
             case 'render':
-                self.random_update_render(index, field, random_value)
+                self.random_update_render(field, random_value)
             case 'light':
                 self.random_update_light(index, field, random_value)
 
-    def random_update_render(self, index, field, random_value):
+    def random_update_render(self, field, random_value):
         match field:
             case "X":
                 pass
@@ -248,9 +248,11 @@ class Backend():
                 pass
             
             case "Quantity":
-                config["render"]["renders"] = int(np.floor(random_value));
+                config["render"]["renders"] = int(np.floor(random_value))
+                
+        return config
 
-    def random_update_pivot(self, index, field, random_value):
+    def random_update_pivot(self, field, random_value):
         match field:
             # assume XYZ is format for pivot
             case "X":
@@ -305,106 +307,6 @@ class Backend():
         config["render"]["degree"] = angles
 
         Backend.update_log(f'Camera angle change per render changed to: {angles}\n')
-
-    def toggle_random_pivot_x(self):
-        """Toggles value for if pivot x coordinate is randomised"""
-        if "x" in config["random"]["pivot"]:
-            config["random"]["pivot"].remove("x")
-            Backend.update_log(f'Pivot point X co-ord set to not random\n')
-        else:
-            config["random"]["pivot"].append("x")
-            Backend.update_log(f'Pivot point X co-ord set to random\n')
-
-
-    def toggle_random_pivot_z(self):
-        """Toggles value for if pivot z coordinate is randomised"""
-        if "z" in config["random"]["pivot"]:
-            config["random"]["pivot"].remove("z")
-            Backend.update_log(f'Pivot point Z co-ord set to not random\n')
-        else:
-            config["random"]["pivot"].append("z")
-            Backend.update_log(f'Pivot point Z co-ord set to random\n')
-
-    def toggle_random_pivot_y(self):
-        """Toggles value for if pivot y coordinate is randomised"""
-        if "y" in config["random"]["pivot"]:
-            config["random"]["pivot"].remove("y")
-            Backend.update_log(f'Pivot point Y co-ord set to not random\n')
-        else:
-            config["random"]["pivot"].append("y")
-            Backend.update_log(f'Pivot point Y co-ord set to random\n')
-
-    def toggle_random_environment_angle(self):
-        """Toggles value for if the angle is randomised during render"""
-        if "angle" in config["random"]["environment"]:
-            config["random"]["environment"].remove("angle")
-            Backend.update_log(f'Angle during render set to not random\n')
-        else:
-            config["random"]["environment"].append("angle")
-            Backend.update_log(f'Angle during render set to random\n')
-
-    def toggle_random_environment_background(self):
-        """Toggles value for if background colour is randomised during render"""
-        if "background" in config["random"]["environment"]:
-            config["random"]["environment"].remove("background")
-            Backend.update_log(f'Background colour set to not random\n')
-        else:
-            Backend.update_log(f'Background colour set to random\n')
-
-    def toggle_random_coord_x(self,selected_index):
-        if "x" in config["random"]["pos"]:
-            config["random"]["pos"].remove("x")
-            Backend.update_log(f'X co-ord of object {selected_index} set to not random\n')
-        else:
-            config["random"]["pos"].append("x")
-            Backend.update_log(f'X co-ord of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
-
-    def toggle_random_coord_y(self,selected_index):
-        if "y" in config["random"]["pos"]:
-            config["random"]["pos"].remove("y")
-            Backend.update_log(f'Y co-ord of object {selected_index} set to not random\n')
-        else:
-            config["random"]["pos"].append("y")
-            Backend.update_log(f'Y co-ord of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
-
-    def toggle_random_coord_z(self,selected_index):
-        if "z" in config["random"]["pos"]:
-            config["random"]["pos"].remove("z")
-            Backend.update_log(f'Z co-ord of object {selected_index} set to not random\n')
-        else:
-            config["random"]["pos"].append("z")
-            Backend.update_log(f'Z co-ord of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
-
-
-    def toggle_random_width(self,selected_index):
-        if "width" in config["random"]["sca"]:
-            config["random"]["sca"].remove("width")
-            Backend.update_log(f'Width of object {selected_index} set to not random\n')
-        else:
-            config["random"]["sca"].append("width")
-            Backend.update_log(f'Width of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
-
-    def toggle_random_height(self,selected_index):
-        if "height" in config["random"]["sca"]:
-            config["random"]["sca"].remove("height")
-            Backend.update_log(f'Height of object {selected_index} set to not random\n')
-        else:
-            config["random"]["sca"].append("height")
-            Backend.update_log(f'Height of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
-
-    def toggle_random_length(self,selected_index):
-        if "length" in config["random"]["sca"]:
-            config["random"]["sca"].remove("length")
-            Backend.update_log(f'Length of object {selected_index} set to not random\n')
-        else:
-            config["random"]["sca"].append("length")
-            Backend.update_log(f'Length of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
 
     def toggle_object(self, object, state):
         if state:
@@ -541,55 +443,6 @@ class Backend():
         """Remove camera poses that have been used to generate renders"""
 
         config["camera_poses"] = []
-   
-
-    def add_object_properties(self,selected_index):
-        #IF ANYONE WANTS ASSIGN VALUES TO RANDOM RANGE I JUST PUT PLACEHOLDER VALUES
-        obj = config["objects"][selected_index]
-
-        # Get randomization settings from the config
-        randoms = config["random"]
-        random_object_pos = randoms["pos"]
-        random_object_scale = randoms["sca"]
-
-        # Copy current position and scale values
-        position = obj["pos"].copy()
-        scale = obj["sca"].copy()
-            #Position propertis
-        if "x" in random_object_pos:
-            position[0] = random.uniform(1, 10) # random range of x coords - 1-10
-            print(f"Randomized Object X: {scale[0]}")
-            
-        if "y" in random_object_pos:
-            position[2] = random.uniform(1, 10)
-            print(f"Randomized Object y: {position[2]}")
-
-
-        if "z" in random_object_pos:
-            position[1] = random.uniform(1, 10)
-            print(f"Randomized Object Z: {position[1]}")
-
-
-            #Scale properties
-        if "width" in random_object_scale:
-            self.random_object_width = random.uniform(1,5)
-            scale[0] = self.random_object_width # random range of width - 1-100
-            print(f"Randomized Width: {scale[0]}")
-
-            
-        if "height" in random_object_scale:
-            scale[1] = random.uniform(1, 5)
-            print(f"Randomized Height: {scale[1]}")
-
-
-        if "length" in random_object_scale:
-            scale[2] = random.uniform(1, 5)
-            print(f"Randomized Length: {scale[2]}")
-
-                    
-        obj["pos"] = position
-        obj["sca"] = scale
-        obj = config["objects"][selected_index]
 
     def set_runtime_config(self, config):
         self.runtime_config = config
