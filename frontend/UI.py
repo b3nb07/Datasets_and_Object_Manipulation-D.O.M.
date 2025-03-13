@@ -1101,10 +1101,10 @@ class RandomObject(QWidget):
         lower = Field_LowerBound.text()
         upper = Field_UpperBound.text()
         
-        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute('object', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
-        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute('object', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute(self.combo_box.currentIndex(), 'object', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute(self.combo_box.currentIndex(), 'object', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
         
-        Field.toggled.connect(lambda state: backend.update_random_attribute('object', Fieldname, state, lower, upper))
+        Field.toggled.connect(lambda state: backend.update_random_attribute(self.combo_box.currentIndex(), 'object', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         #
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
@@ -1150,6 +1150,10 @@ class RandomObject(QWidget):
         "Sets field to checkbox status"
         Field_LowerBound.setEnabled(State)
         Field_UpperBound.setEnabled(State)
+        
+        # if not State:
+        Field_LowerBound.setText("0")
+        Field_UpperBound.setText("0")
 
     def set_all_random(self, main_layout, State):
         """Set all elements on page to active"""
@@ -1234,10 +1238,10 @@ class RandomPivot(QWidget):
         lower = Field_LowerBound.text()
         upper = Field_UpperBound.text()
         
-        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute('pivot', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
-        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute('pivot', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute(self.combo_box.currentIndex(), 'pivot', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute(self.combo_box.currentIndex(), 'pivot', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
         
-        Field.toggled.connect(lambda state: backend.update_random_attribute('pivot', Fieldname, state, lower, upper))
+        Field.toggled.connect(lambda state: backend.update_random_attribute(self.combo_box.currentIndex(), 'pivot', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         #
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
@@ -1288,6 +1292,10 @@ class RandomPivot(QWidget):
     def un_checked(self, State, Field_LowerBound, Field_UpperBound):
         Field_LowerBound.setEnabled(State)
         Field_UpperBound.setEnabled(State)
+        
+        # if not State:
+        Field_LowerBound.setText("0")
+        Field_UpperBound.setText("0")
 
     def set_all_random(self, main_layout, State):
         for keys in self.CheckBoxes.keys():
@@ -1358,10 +1366,10 @@ class RandomRender(QWidget):
         lower = Field_LowerBound.text()
         upper = Field_UpperBound.text()
         
-        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute('render', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
-        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute('render', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute(self.combo_box.currentIndex(), 'render', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute(self.combo_box.currentIndex(), 'render', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
         
-        Field.toggled.connect(lambda state: backend.update_random_attribute('render', Fieldname, state, lower, upper))
+        Field.toggled.connect(lambda state: backend.update_random_attribute(self.combo_box.currentIndex(), 'render', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         #
         
@@ -1413,6 +1421,10 @@ class RandomRender(QWidget):
     def un_checked(self, State, Field_LowerBound, Field_UpperBound):
         Field_LowerBound.setEnabled(State)
         Field_UpperBound.setEnabled(State)
+        
+        # if not State:
+        Field_LowerBound.setText("0")
+        Field_UpperBound.setText("0")
 
     def set_all_random(self, main_layout, State):
         for keys in self.CheckBoxes.keys():
@@ -1496,10 +1508,10 @@ class RandomLight(QWidget):
         lower = Field_LowerBound.text()
         upper = Field_UpperBound.text()
         
-        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute('light', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
-        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute('light', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_LowerBound.editingFinished.connect(lambda: backend.update_random_attribute(self.combo_box.currentIndex(), 'light', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
+        Field_UpperBound.editingFinished.connect(lambda: backend.update_random_attribute(self.combo_box.currentIndex(), 'light', Fieldname, Field.isChecked(), Field_LowerBound.text(), Field_UpperBound.text()))
         
-        Field.toggled.connect(lambda state: backend.update_random_attribute('light', Fieldname, state, lower, upper))
+        Field.toggled.connect(lambda state: backend.update_random_attribute(self.combo_box.currentIndex(), 'light', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         #
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
@@ -1550,6 +1562,10 @@ class RandomLight(QWidget):
     def un_checked(self, State, Field_LowerBound, Field_UpperBound):
         Field_LowerBound.setEnabled(State)
         Field_UpperBound.setEnabled(State)
+        
+        # if not State:
+        Field_LowerBound.setText("0")
+        Field_UpperBound.setText("0")
 
     def set_all_random(self, main_layout, State):
         for keys in self.CheckBoxes.keys():

@@ -178,34 +178,125 @@ class Backend():
         Backend.update_log(f'Random mode set to {mode}\n')
     #
     #
-    def update_random_attribute(self, category, field, state, lower, upper):
-        print(state)
-        
+    def update_random_attribute(self, index, category, field, state, lower, upper):        
         # cfg validation:
         config["random"].setdefault("objects", {})
-        config["random"]["objects"].setdefault(category, {})
+        config["random"]["objects"].setdefault(index, {})
+        config["random"]["objects"][index].setdefault(category, {})
+
         
         if state:            
             # add field to config with bounds
-            config["random"]["objects"][category][field] = [str(lower), str(upper)]
+            config["random"]["objects"][index][category][field] = [str(lower), str(upper)]
+            #### 
+            self.apply_specific_random_limit(index, category, field)
         else:
+            # check this logic again
             # remove field from config if it exists
-            if field in config["random"]["objects"]:
-                del config["random"]["objects"][field]
+            if field in config["random"]["objects"][index][category]:
+                del config["random"]["objects"][index][category][field]
         
         # Backend.update_log(f'Random attribute {field} set to {state}\n')
     #
     
-    def apply_random_limits(self):
-        """Applies the limits at specificied mode"""
-        
-        # generate a float value between the upper and lower bounds of every attribute
-        
-        # travel in the config by category -> attributes .-> category -> attributes
-        
+    def apply_specific_random_limit(self, index, category, field):
+        """Applies the specific limits"""
+        try:
+            lower_bound = float(config["random"]["objects"][index][category][field][0])
+            upper_bound = float(config["random"]["objects"][index][category][field][1])
+            
+            random_value = random.uniform(lower_bound, upper_bound)#
+            print(f"object {index} - {category} - {field}: {random_value}")
+            self.update_appropriate_cfg(index, category, field, random_value)
+        except:
+            pass
+    
+    # this should be called for when its generating PER render
+    def apply_all_random_limits(self):
+        """Applies the limits at the per render mode"""
+        # will be chcanged to obj, cat, attributes later
+        for obj, attributes in config["random"]["objects"].items():
+            for attr, bounds in attributes.items():
+                try:
+                    lower_bound = float(bounds[0])
+                    upper_bound = float(bounds[1])
+                    
+                    random_value = random.uniform(lower_bound, upper_bound)
+                    print(f"{obj} - {attr}: {random_value}")
+                except:
+                    break
+    #
+    #
+    def update_appropriate_cfg(self, index, category, field, random_value):
+        match category:
+            case 'object':
+                self.random_update_object_loc(index, field, random_value)
+            case 'pivot':
+                self.random_update_pivot(index, field, random_value)
+            case 'render':
+                self.random_update_render(index, field, random_value)
+            case 'light':
+                self.random_update_light(index, field, random_value)
+
+    def random_update_render(self, index, field, random_value):
+        match field:
+            case "X":
+                pass
+            case "Y":
+                pass
+            case "Z":
+                pass
+            
+            case "Quantity":
+                config["render"]["renders"] = int(np.floor(random_value));
+
+    def random_update_pivot(self, index, field, random_value):
+        match field:
+            # assume XYZ is format for pivot
+            case "X":
+                config["pivot"]["point"][0] = random_value
+            case "Y":
+                config["pivot"]["point"][1] = random_value
+            case "Z":
+                config["pivot"]["point"][2] = random_value
+            
+            # idk why its called this but its the pivot distance
+            case "Measurement":
+                config["pivot"]["dis"] = random_value
+            
+        return config
+    
+    def random_update_light(self, index, field, random_value):
         pass
-    #
-    #
+
+    def random_update_object_loc(self, index, field, random_value):
+        match field:
+            # assumes pos is xzy (think this is the case)
+            case "X":
+                config["objects"][index]["pos"][0] = random_value
+            case "Y":
+                config["objects"][index]["pos"][2] = random_value
+            case "Z":
+                config["objects"][index]["pos"][1] = random_value
+            
+            # assumes pitch is Y, roll is X and yaw is Z
+            case "Pitch":
+                config["objects"][index]["rot"][0] = random_value
+            case "Roll":
+                config["objects"][index]["rot"][0] = random_value
+            case "Yaw":
+                config["objects"][index]["rot"][0] = random_value
+            
+            # assumes width is x height is y and length is z and is in form xyz
+            case "Width":
+                config["objects"][index]["sca"][0] = random_value
+            case "Height":
+                config["objects"][index]["sca"][1] = random_value
+            case "Length":
+                config["objects"][index]["sca"][2] = random_value
+            
+        return config
+    
 
     def set_angles(self, angles):
         """ Sets camera angle change per render in the config.
