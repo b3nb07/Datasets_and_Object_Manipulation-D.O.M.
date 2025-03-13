@@ -2167,7 +2167,10 @@ class Port(QWidget):
                     if Name != False:
                         obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
                         if Name == "Object":
-                            Name = f"{Name} {len(shared_state.itemNames)+1}"
+                            count = 1
+                            while f"{Name} {len(shared_state.itemNames)+count}" in shared_state.itemNames:
+                                count+=1
+                            Name = f"{Name} {len(shared_state.itemNames)+count}"
                         shared_state.add_item(obj, Name)
 
                         button = QPushButton(Name)
