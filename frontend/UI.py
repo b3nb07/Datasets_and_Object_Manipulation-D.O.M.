@@ -2186,16 +2186,12 @@ class Port(QWidget):
                         Scroll.addWidget(button)
 
                         QApplication.instance().focusWidget().clearFocus()
-                    else:
+                    elif Name != False and len(Name) >= 25:
                         error_box = ilyaMessageBox("Name is too long!", "Error")
-                
+                    else:
+                        pass
+                        
             except Exception as e:
-                print(e)
-                error_box = QMessageBox()
-                error_box.setWindowTitle("Error")
-                error_box.setText("Error loading tutorial object.")
-                error_box.exec()
-
                 error_box = ilyaMessageBox("Error loading tutorial object.", "Error")
                 
     
