@@ -1,2 +1,3 @@
 Program initialised
-Render resolution changed to [256, 256]
+Seed changed to: 602251421
+Light Source 1 light source added
