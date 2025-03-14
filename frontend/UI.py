@@ -2027,7 +2027,13 @@ class Render(QWidget):
         else:
             self.generate_render()
 
-    def set_renders(self):
+    def set_renders(self):#
+        try:
+            val = int(self.Number_of_renders_input_field.text())
+            if val <= 0:
+                self.Number_of_renders_input_field.setText("1") 
+        except:
+            self.Number_of_renders_input_field.setText("1") 
         try: 
             backend.set_renders(int(self.Number_of_renders_input_field.text()))
         except:
@@ -2157,7 +2163,10 @@ class Port(QWidget):
                     if Name != False and len(Name) < 25:
                         obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
                         if Name == "Object":
-                            Name = f"{Name} {len(shared_state.itemNames)+1}"
+                            count = 1
+                            while f"{Name} {len(shared_state.itemNames)+count}" in shared_state.itemNames:
+                                count+=1
+                            Name = f"{Name} {len(shared_state.itemNames)+count}"
                         shared_state.add_item(obj, Name)
 
                         button = QPushButton(Name)
