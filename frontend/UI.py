@@ -261,13 +261,18 @@ class TabDialog(QWidget):
     def translateUi(self):
         current_lang = translator.current_language
         translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
-        self.tab_widget.setTabText(0, translator.getTranslation("Object"))
-        self.tab_widget.setTabText(1, translator.getTranslation("Pivot Point"))
-        self.tab_widget.setTabText(2, translator.getTranslation("Render"))
-        self.tab_widget.setTabText(3, translator.getTranslation("Lighting"))
-        self.tab_widget.setTabText(4, translator.getTranslation("Random"))
-        self.tab_widget.setTabText(5, translator.getTranslation("Import/Export"))
-        self.tab_widget.setTabText(6, translator.getTranslation("Settings"))
+        self.tab_widget.setTabText(0, translation.get("Object", "Object"))
+        self.tab_widget.setTabText(1, translation.get("Pivot Point", "Pivot Point"))
+        self.tab_widget.setTabText(2, translation.get("Render", "Render"))
+        self.tab_widget.setTabText(3, translation.get("Lighting", "Lighting"))
+        self.tab_widget.setTabText(4, translation.get("Random", "Random"))
+        self.tab_widget.setTabText(5, translation.get("Import/Export", "Import/Export"))
+        self.tab_widget.setTabText(6, translation.get("Settings", "Settings"))
+
+
+
+        
+
 
 class ilyaMessageBox(QMessageBox):
     #IlyaCommentBox
@@ -567,7 +572,7 @@ class ObjectTab(QWidget):
         main_layout.addWidget(self.Import_Object_Button, 4, 8)
         main_layout.addWidget(self.Delete_Object_Button, 4, 9)
 
-        self.setLayout(main_layout)
+
 
         #Connect Page to functions
         # editingFinished callbacks that updates backend
@@ -621,7 +626,11 @@ class ObjectTab(QWidget):
         self.X_Rotation.sliderReleased.connect(self.update_object_rotation)
         self.Y_Rotation.sliderReleased.connect(self.update_object_rotation)
         self.Z_Rotation.sliderReleased.connect(self.update_object_rotation)
+        self.setLayout(main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
         
+
         #########################################
 
         def show_hide_object(object,state):
@@ -717,6 +726,35 @@ class ObjectTab(QWidget):
         self.Update_slider(self.X_Rotation,self.X_Rotation_input_field.text())
         self.Update_slider(self.Y_Rotation,self.Y_Rotation_input_field.text())
         self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
+
+
+
+    def translateUi(self):
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        self.Object_pos_title.setText(translations.get("Co-ords", "Co-ords"))
+        self.XObj_pos.setText(translations.get("X:", "X:"))
+        self.YObj_pos.setText(translations.get("Y:", "Y:"))
+        self.ZObj_pos.setText(translations.get("Z:", "Z:"))
+        self.Object_scale_title.setText(translations.get("Scale", "Scale"))
+        self.Width_Obj_pos.setText(translations.get("Width:", "Width:"))
+        self.Height_Obj_pos.setText(translations.get("Height:", "Height:"))
+        self.Length_Obj_pos.setText(translations.get("Length:", "Length:"))        
+        self.Object_rotation_title.setText(translations.get("Rotation", "Rotation"))
+        self.X_Rotation_Label.setText(translations.get("Roll:", "Roll:"))
+        self.Y_Rotation_Label.setText(translations.get("Pitch:", "Pitch:"))
+        self.Z_Rotation_Label.setText(translations.get("Yaw:", "Yaw:"))
+        self.Object_pos_title.setToolTip(translations.get('Changes the objects Position', 'Changes the objects Position'))
+        self.Object_scale_title.setToolTip(translations.get('Changes the objects scale', 'Changes the objects scale'))
+        self.Object_rotation_title.setToolTip(translations.get('Changes the objects rotation', 'Changes the objects rotation'))
+        self.W_slider.setToolTip(translations.get("Adjust Width", "Adjust Width"))
+        self.H_slider.setToolTip(translations.get("Adjust Height", "Adjust Height"))
+        self.L_slider.setToolTip(translations.get("Adjust Length", "Adjust Length"))
+        print("All available keys:", list(translations.keys()))
+
+
+
         
     def ValidType(self, val):
         """Validates if val type is string"""
@@ -1110,7 +1148,6 @@ class RandomTabDialog(QWidget):
 
 
     def translateUi(self):
-        """Apply translations to UI elements."""
         current_lang = translator.current_language
         translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
         self.tab_widget.setTabText(0, translation.get("Base", "Base"))
@@ -1247,6 +1284,7 @@ class RandomObject(QWidget):
         self.gen_field("Height", main_layout, 6, 2, self.connFields(ParentTab, 8, 2))
         self.gen_field("Length", main_layout, 6, 3, self.connFields(ParentTab, 8, 3))
         
+        translator.languageChanged.connect(self.translateUi)
         self.setLayout(main_layout)
 
     def gen_field(self, Fieldname, Layout, X, Y, ConField):
@@ -1278,6 +1316,12 @@ class RandomObject(QWidget):
 
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
+
+
+            
+
         
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
         """Generate checkbox"""
@@ -1345,6 +1389,11 @@ class RandomObject(QWidget):
     def on_object_selected(self, selected_object_pos):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         pass
+    
+    
+    def translateUi(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
 
 class RandomPivot(QWidget):
     """Random PivotPage"""
@@ -1897,7 +1946,8 @@ class Render(QWidget):
         self.GenerateRenders_Button.setText(translation.get("Generate Renders", "Generate Renders"))
         self.unlimited_render_button.setText(translation.get("Unlimited Renders", "Unlimited Renders"))
         self.Degree_Change_title.setText(translation.get("Degrees of Change", "Degrees of Change"))
-        self.Number_of_renders_title.setText(translation.get("Number of Renders"))
+        self.Number_of_renders_title.setText(translation.get("Number of Renders", "Number of Renders"))
+        self.render_preview_button.setText(translation.get("Render Preview","Render Preview"))
 
 
     
@@ -2774,7 +2824,6 @@ class Settings(QWidget):
         main_layout.addWidget(self.colour_scheme_button, 0, 1)
         main_layout.addWidget(self.Help_button, 0, 2)
         main_layout.addWidget(self.Languages, 0, 3)
-        main_layout.addWidget(self.Secret_button, 0, 4)
         self.setLayout(main_layout)
 
         self.load_settings()
@@ -2788,11 +2837,10 @@ class Settings(QWidget):
         # Add buttons for different styles
         dark_mode = colour_box.addButton("Dark Mode", QMessageBox.ActionRole)
         light_mode = colour_box.addButton("Light Mode", QMessageBox.ActionRole)
-        colourblind1 = colour_box.addButton("Factory New", QMessageBox.ActionRole)
-        default = colour_box.addButton("Colourblind 2", QMessageBox.ActionRole)
+        colourblind1 = colour_box.addButton("Factory Default", QMessageBox.ActionRole)
+        default = colour_box.addButton("Colourblind 1", QMessageBox.ActionRole)
         dyslexic = colour_box.addButton("Light Mode 2", QMessageBox.ActionRole)
-        colour_scheme1 = colour_box.addButton("Colour Mode 1", QMessageBox.ActionRole)
-        Image_test = colour_box.addButton("Imagetest", QMessageBox.ActionRole)
+        colour_scheme1 = colour_box.addButton("Colour Blind 2", QMessageBox.ActionRole)
         colour_box.addButton(QMessageBox.Cancel)
 
         colour_box.exec()
@@ -2810,8 +2858,6 @@ class Settings(QWidget):
             self.apply_stylesheet("Dyslexic.qss")
         elif colour_box.clickedButton() == colour_scheme1:
             self.apply_stylesheet("ColourScheme1.qss")
-        elif colour_box.clickedButton() == Image_test:
-            self.apply_stylesheet("ImageTest.qss")
 
 
     def apply_stylesheet(self, filename):
@@ -2836,9 +2882,6 @@ class Settings(QWidget):
         Spanish = language_box.addButton("Spanish", QMessageBox.ActionRole)
         Portuguese = language_box.addButton("Portuguese", QMessageBox.ActionRole)
         Mandarin = language_box.addButton("Mandarin", QMessageBox.ActionRole)
-        Language5 = language_box.addButton("Language 5", QMessageBox.ActionRole)
-        Language6 = language_box.addButton("Language 6", QMessageBox.ActionRole)
-        Language7 = language_box.addButton("Imagetest", QMessageBox.ActionRole)
         language_box.addButton(QMessageBox.Cancel)
         language_box.exec()
 
@@ -2848,15 +2891,10 @@ class Settings(QWidget):
         elif language_box.clickedButton() == Spanish:
             translator.setLanguage("Spanish")
         elif language_box.clickedButton() == Portuguese:
-            translator.setLanguage("Portugese")
+            translator.setLanguage("Portuguese")
         elif language_box.clickedButton() == Mandarin:
             translator.setLanguage("Mandarin")
-        elif language_box.clickedButton() == Language5:
-            translator.setLanguage()
-        elif language_box.clickedButton() == Language6:
-            translator.setLanguage()
-        elif language_box.clickedButton() == Language7:
-            translator.setLanguage()
+
 
     def translateUi(self):
         current_lang = translator.current_language
