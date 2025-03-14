@@ -437,18 +437,18 @@ class ObjectTab(QWidget):
     
         def delete_object(tab_widget, scroll):
             to_delete = QMessageBox()
-
             to_delete.setText("Please select an object to remove from below")
 
             if (not shared_state.items):
                 return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
 
-            for obj in shared_state.items:
-                to_delete.addButton(str(obj), QMessageBox.ActionRole)
+            for i in range(len(shared_state.itemNames)):
+                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
             
             to_delete.addButton("Cancel", QMessageBox.ActionRole)
 
             to_delete.exec()
+
             choice = str(to_delete.clickedButton().text())
 
             if choice != "Cancel":
@@ -779,7 +779,7 @@ class ObjectTab(QWidget):
             width = float(self.Width_Obj_pos_input_field.text() or 0)
             height = float(self.Height_Obj_pos_input_field.text() or 0)
             length = float(self.Length_Obj_pos_input_field.text() or 0)
-            scale = [width,height,length]
+            scale = [width,length,height]
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
@@ -797,7 +797,7 @@ class ObjectTab(QWidget):
             y_rot = float(self.Y_Rotation_input_field.text() or 0)
             z_rot = float(self.Z_Rotation_input_field.text() or 0)
             
-            rotation = [np.deg2rad(x_rot),np.deg2rad(y_rot),np.deg2rad(z_rot)]
+            rotation = [np.deg2rad(y_rot),np.deg2rad(x_rot),np.deg2rad(z_rot)]
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
@@ -2124,10 +2124,6 @@ class Port(QWidget):
                                 button.setMenu(menu)
                                 Scroll.addWidget(button)
 
-
-
-
-
                 Object_detect(tab_widget)
 
             except Exception:
@@ -2158,7 +2154,7 @@ class Port(QWidget):
             try:
                 if Tutorial_Box.clickedButton().text().upper() != "CANCEL":
                     Name = self.GetName()
-                    if Name != False:
+                    if Name != False and len(Name) < 25:
                         obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
                         if Name == "Object":
                             Name = f"{Name} {len(shared_state.itemNames)+1}"
@@ -2181,7 +2177,8 @@ class Port(QWidget):
                         Scroll.addWidget(button)
 
                         QApplication.instance().focusWidget().clearFocus()
-
+                    else:
+                        error_box = ilyaMessageBox("Name is too long!", "Error")
                 
             except Exception as e:
                 print(e)
@@ -2744,6 +2741,7 @@ class Settings(QWidget):
         self.translations = translator.translations
 
         #button clicks
+        self.Help_button.clicked.connect(self.openWebsite)
         self.colour_scheme_button.clicked.connect(self.Colour_Scheme_Press)
         translator.languageChanged.connect(self.translateUi)
         self.Languages.clicked.connect(self.Language_button_press)
@@ -2756,7 +2754,10 @@ class Settings(QWidget):
         self.setLayout(main_layout)
 
         self.load_settings()
-
+        
+    def openWebsite(self):
+        import webbrowser
+        webbrowser.open('https://github.com/b3nb07/CS3028_Group_Project')
 
     def Colour_Scheme_Press(self):
         colour_box = QMessageBox(self)
