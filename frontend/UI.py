@@ -181,11 +181,11 @@ class TabDialog(QWidget):
         translator.languageChanged.connect(self.translateUi)
 
         #Disable until Object is loaded
-        self.tab_widget.setTabEnabled(0, True)
-        self.tab_widget.setTabEnabled(1, True)
-        self.tab_widget.setTabEnabled(2, True)
-        self.tab_widget.setTabEnabled(3, True)
-        self.tab_widget.setTabEnabled(4, True)
+        self.tab_widget.setTabEnabled(0, False)
+        self.tab_widget.setTabEnabled(1, False)
+        self.tab_widget.setTabEnabled(2, False)
+        self.tab_widget.setTabEnabled(3, False)
+        self.tab_widget.setTabEnabled(4, False)
         self.tab_widget.setTabEnabled(5, True)
 
 
@@ -268,11 +268,6 @@ class TabDialog(QWidget):
         self.tab_widget.setTabText(4, translation.get("Random", "Random"))
         self.tab_widget.setTabText(5, translation.get("Import/Export", "Import/Export"))
         self.tab_widget.setTabText(6, translation.get("Settings", "Settings"))
-
-
-
-        
-
 
 class ilyaMessageBox(QMessageBox):
     #IlyaCommentBox
@@ -464,18 +459,18 @@ class ObjectTab(QWidget):
     
         def delete_object(tab_widget, scroll):
             to_delete = QMessageBox()
+
             to_delete.setText("Please select an object to remove from below")
 
             if (not shared_state.items):
                 return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
 
-            for i in range(len(shared_state.itemNames)):
-                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
+            for obj in shared_state.items:
+                to_delete.addButton(str(obj), QMessageBox.ActionRole)
             
             to_delete.addButton("Cancel", QMessageBox.ActionRole)
 
             to_delete.exec()
-
             choice = str(to_delete.clickedButton().text())
 
             if choice != "Cancel":
@@ -840,7 +835,7 @@ class ObjectTab(QWidget):
             width = float(self.Width_Obj_pos_input_field.text() or 0)
             height = float(self.Height_Obj_pos_input_field.text() or 0)
             length = float(self.Length_Obj_pos_input_field.text() or 0)
-            scale = [width,length,height]
+            scale = [width,height,length]
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
@@ -858,7 +853,7 @@ class ObjectTab(QWidget):
             y_rot = float(self.Y_Rotation_input_field.text() or 0)
             z_rot = float(self.Z_Rotation_input_field.text() or 0)
             
-            rotation = [np.deg2rad(y_rot),np.deg2rad(x_rot),np.deg2rad(z_rot)]
+            rotation = [np.deg2rad(x_rot),np.deg2rad(y_rot),np.deg2rad(z_rot)]
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
@@ -1425,13 +1420,14 @@ class RandomObject(QWidget):
         
         current_lang = translator.current_language
         translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
-
+        
+        #Translate Qlabels/Checkboxes
         self.rotation_label.setText(translation.get("Rotation","Rotation"))
         self.coords_label.setText(translation.get("Co-ords:","Co-ords:"))
         self.scale_label.setText(translation.get("Scale","Scale"))
         self.set_all_checkbox.setText(translation.get("Set all random","Set all random"))
         
-        
+        #Translate genfields
         for field_name, checkbox in self.field_checkboxes.items():
             translated = translation.get(field_name, field_name)
             checkbox.setText(translated)
@@ -1587,12 +1583,13 @@ class RandomPivot(QWidget):
         
         current_lang = translator.current_language
         translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
-
+        
+        #Translate Qlabels/Checkboxes
         self.distance_label.setText(translation.get("Distance","Distance"))
         self.coords_label.setText(translation.get("Co-ords:","Co-ords:"))
         self.set_all_checkbox.setText(translation.get("Set all random","Set all random"))
         
-        
+        #Translate genFields
         for field_name, checkbox in self.field_checkboxes.items():
             translated = translation.get(field_name, field_name)
             checkbox.setText(translated)
@@ -1921,11 +1918,7 @@ class Render(QWidget):
 
 
         self.queue = []
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
-
+ 
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
         self.GenerateRenders_Button.clicked.connect(self.renderQueueControl)
         
@@ -2038,7 +2031,7 @@ class Render(QWidget):
 
 
     def translateUi(self):
-        """Apply translations to UI elements."""
+        """Apply translations"""
         current_lang = translator.current_language
         translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
         self.GenerateRenders_Button.setText(translation.get("Generate Renders", "Generate Renders"))
@@ -2197,13 +2190,7 @@ class Render(QWidget):
         else:
             self.generate_render()
 
-    def set_renders(self):#
-        try:
-            val = int(self.Number_of_renders_input_field.text())
-            if val <= 0:
-                self.Number_of_renders_input_field.setText("1") 
-        except:
-            self.Number_of_renders_input_field.setText("1") 
+    def set_renders(self):
         try: 
             backend.set_renders(int(self.Number_of_renders_input_field.text()))
         except:
@@ -2300,6 +2287,10 @@ class Port(QWidget):
                                 button.setMenu(menu)
                                 Scroll.addWidget(button)
 
+
+
+
+
                 Object_detect(tab_widget)
 
             except Exception:
@@ -2330,13 +2321,10 @@ class Port(QWidget):
             try:
                 if Tutorial_Box.clickedButton().text().upper() != "CANCEL":
                     Name = self.GetName()
-                    if Name != False and len(Name) < 25:
+                    if Name != False:
                         obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
                         if Name == "Object":
-                            count = 1
-                            while f"{Name} {len(shared_state.itemNames)+count}" in shared_state.itemNames:
-                                count+=1
-                            Name = f"{Name} {len(shared_state.itemNames)+count}"
+                            Name = f"{Name} {len(shared_state.itemNames)+1}"
                         shared_state.add_item(obj, Name)
 
                         button = QPushButton(Name)
@@ -2356,12 +2344,15 @@ class Port(QWidget):
                         Scroll.addWidget(button)
 
                         QApplication.instance().focusWidget().clearFocus()
-                    elif Name != False and len(Name) >= 25:
-                        error_box = ilyaMessageBox("Name is too long!", "Error")
-                    else:
-                        pass
-                        
+
+                
             except Exception as e:
+                print(e)
+                error_box = QMessageBox()
+                error_box.setWindowTitle("Error")
+                error_box.setText("Error loading tutorial object.")
+                error_box.exec()
+
                 error_box = ilyaMessageBox("Error loading tutorial object.", "Error")
                 
     
@@ -2494,7 +2485,7 @@ class Port(QWidget):
 
 
     def translateUi(self):
-        """Apply translations to UI elements."""
+        """Apply translations"""
         current_lang = translator.current_language
         translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
         self.Delete_Object_Button.setText(translation.get("Delete Object", "Delete Object"))
@@ -2885,9 +2876,6 @@ class Lighting(QWidget):
             self.colour_example.setStyleSheet(("background-color: {c}").format(c = colour.name()))
         except:
             pass
-
-
-
     def translateUi(self):
         """Apply translations to UI elements."""
         current_lang = translator.current_language
@@ -2911,12 +2899,10 @@ class Settings(QWidget):
         self.colour_scheme_button = QPushButton('Colour Theme', self)
         self.Help_button = QPushButton('Help', self)
         self.Languages = QPushButton('Languages', self)
-        self.Secret_button = QPushButton('Button', self)
         self.current_language = "English"
         self.translations = translator.translations
 
         #button clicks
-        self.Help_button.clicked.connect(self.openWebsite)
         self.colour_scheme_button.clicked.connect(self.Colour_Scheme_Press)
         translator.languageChanged.connect(self.translateUi)
         self.Languages.clicked.connect(self.Language_button_press)
@@ -2928,10 +2914,7 @@ class Settings(QWidget):
         self.setLayout(main_layout)
 
         self.load_settings()
-        
-    def openWebsite(self):
-        import webbrowser
-        webbrowser.open('https://github.com/b3nb07/CS3028_Group_Project')
+
 
     def Colour_Scheme_Press(self):
         colour_box = QMessageBox(self)
@@ -2998,25 +2981,38 @@ class Settings(QWidget):
             translator.setLanguage("Portuguese")
         elif language_box.clickedButton() == Mandarin:
             translator.setLanguage("Mandarin")
-
-
+        
+        self.save_language_setting()
+        
     def translateUi(self):
         current_lang = translator.current_language
         translation = self.translations.get(current_lang, self.translations.get("English"))
         self.colour_scheme_button.setText(translation.get("Colour Theme", "Colour Theme"))
         self.Help_button.setText(translation.get("Help", "Help"))
         self.Languages.setText(translation.get("Languages", "Languages"))
-        self.Secret_button.setText(translation.get("Button", "Button"))
 
     def save_settings(self, Colour_Setup):
         settings = QSettings("UserSettings")
         settings.setValue("theme", Colour_Setup)
         settings.sync()
 
+            
+    def save_language_setting(self):
+        settings = QSettings("UserSettings")
+        settings.setValue("language", translator.current_language)
+
     def load_settings(self):
         settings = QSettings("UserSettings")
         Colour_Setup = settings.value("theme", "LightMode.qss")  # default mode is light mode 
         self.apply_stylesheet(Colour_Setup)
+
+        saved_lang = settings.value("language", "English")
+        if saved_lang in translator.translations:
+            translator.setLanguage(saved_lang)
+        else:
+            translator.setLanguage("English")# default to english
+        
+        self.translateUi()
 
 
 if __name__ == "__main__":
