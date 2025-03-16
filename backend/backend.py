@@ -66,7 +66,6 @@ class Backend():
                         o = self.RenderObject(filepath = obj["filename"])
                     else:
                         o = self.RenderObject(primative = obj["primative"])
-                
 
                     o.set_loc(obj["pos"])
                     o.set_rotation(obj["rot"])
