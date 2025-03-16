@@ -1349,7 +1349,7 @@ class RandomPivot(QWidget):
         shared_state.update_selected(0)
 
         main_layout.addWidget(self.combo_box, 0, 10)
-
+        main_layout.itemAtPosition(0, 10).widget().setHidden(True)
         main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
         main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
              self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
@@ -1367,7 +1367,7 @@ class RandomPivot(QWidget):
         ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(2, 1).widget(), main_layout.itemAtPosition(2, 2).widget()))
         ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(3, 1).widget(), main_layout.itemAtPosition(3, 2).widget()))
         
-        main_layout.addWidget(QLabel("Distnace", self), 0, 3)
+        main_layout.addWidget(QLabel("Distance", self), 0, 3)
         self.gen_field("Measurement", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
         
         self.setLayout(main_layout)
@@ -1491,7 +1491,7 @@ class RandomRender(QWidget):
         shared_state.update_selected(0)
 
         main_layout.addWidget(self.combo_box, 0, 10)
-        
+        main_layout.itemAtPosition(0, 10).widget().setHidden(True)
         main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
         main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
              self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
@@ -1623,7 +1623,7 @@ class RandomLight(QWidget):
         shared_state.update_selected(0)
 
         main_layout.addWidget(self.combo_box, 0, 12)
-        
+        main_layout.itemAtPosition(0, 12).widget().setHidden(True)
         main_layout.addWidget(QCheckBox("Set all random", self), 1, 12)
         main_layout.itemAtPosition(1, 12).widget().toggled.connect(lambda:
              self.set_all_random(main_layout, main_layout.itemAtPosition(1, 12).widget().isChecked()))
@@ -1633,7 +1633,7 @@ class RandomLight(QWidget):
         self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 5, 2))
         self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 5, 3))
 
-        main_layout.addWidget(QLabel("Angle", self), 0, 3)
+        main_layout.addWidget(QLabel("Rotation", self), 0, 3)
         self.gen_field("Pitch", main_layout, 3, 1, self.connFields(ParentTab, 9, 1))
         self.gen_field("Roll", main_layout, 3, 2, self.connFields(ParentTab, 9, 2))
         self.gen_field("Yaw", main_layout, 3, 3, self.connFields(ParentTab, 9, 3))
@@ -2741,7 +2741,6 @@ class Settings(QWidget):
         self.colour_scheme_button = QPushButton('Colour Theme', self)
         self.Help_button = QPushButton('Help', self)
         self.Languages = QPushButton('Languages', self)
-        self.Secret_button = QPushButton('Button', self)
         self.current_language = "English"
         self.translations = translator.translations
 
@@ -2755,7 +2754,6 @@ class Settings(QWidget):
         main_layout.addWidget(self.colour_scheme_button, 0, 1)
         main_layout.addWidget(self.Help_button, 0, 2)
         main_layout.addWidget(self.Languages, 0, 3)
-        main_layout.addWidget(self.Secret_button, 0, 4)
         self.setLayout(main_layout)
 
         self.load_settings()
@@ -2817,12 +2815,9 @@ class Settings(QWidget):
 
         # Add buttons for different styles
         English = language_box.addButton("English", QMessageBox.ActionRole)
-        Spanish = language_box.addButton("Spanish", QMessageBox.ActionRole)
-        Portuguese = language_box.addButton("Portuguese", QMessageBox.ActionRole)
-        Mandarin = language_box.addButton("Mandarin", QMessageBox.ActionRole)
-        Language5 = language_box.addButton("Language 5", QMessageBox.ActionRole)
-        Language6 = language_box.addButton("Language 6", QMessageBox.ActionRole)
-        Language7 = language_box.addButton("Imagetest", QMessageBox.ActionRole)
+        Spanish = language_box.addButton("Español", QMessageBox.ActionRole)
+        Portuguese = language_box.addButton("Portugués", QMessageBox.ActionRole)
+        Mandarin = language_box.addButton("中文", QMessageBox.ActionRole)
         language_box.addButton(QMessageBox.Cancel)
         language_box.exec()
 
@@ -2832,23 +2827,16 @@ class Settings(QWidget):
         elif language_box.clickedButton() == Spanish:
             translator.setLanguage("Spanish")
         elif language_box.clickedButton() == Portuguese:
-            translator.setLanguage("Portugese")
+            translator.setLanguage("Portuguese")
         elif language_box.clickedButton() == Mandarin:
             translator.setLanguage("Mandarin")
-        elif language_box.clickedButton() == Language5:
-            translator.setLanguage()
-        elif language_box.clickedButton() == Language6:
-            translator.setLanguage()
-        elif language_box.clickedButton() == Language7:
-            translator.setLanguage()
-
+            
     def translateUi(self):
         current_lang = translator.current_language
         translation = self.translations.get(current_lang, self.translations.get("English"))
         self.colour_scheme_button.setText(translation.get("Colour Theme", "Colour Theme"))
         self.Help_button.setText(translation.get("Help", "Help"))
         self.Languages.setText(translation.get("Languages", "Languages"))
-        self.Secret_button.setText(translation.get("Button", "Button"))
 
     def save_settings(self, Colour_Setup):
         settings = QSettings("UserSettings")

@@ -1,7 +1,7 @@
 Program initialised
-Seed changed to: 15672280
+Seed changed to: 787859629
 Light Source 1 light source added
 Object 1 object added
 Render resolution changed to (286, 122)
 Viewport Preview Render Started
-Object 2 object added
+Render resolution changed to (256, 256)

@@ -1,0 +1,80 @@
+{
+    "English": {
+
+        "X": "X",
+        "Y": "Y",
+        "Z": "Z",
+        "Co-ords": "Co-ords",
+
+        "Object": "Object",
+        "Rotation": "Rotation",
+        "Roll": "Roll",
+        "Pitch": "Pitch",
+        "Yaw": "Yaw",
+        "Scale": "Scale",
+        "Width": "Width",
+        "Height": "Height",
+        "Length": "Length",
+        "Import Object": "Import Object",
+        "Delete Object": "Delete Object",
+
+        "Pivot Point": "Pivot Point",
+        "Custom Pivot Point": "Custom Pivot Point",
+        "Distance": "Distance",
+
+        "Render": "Render",
+        "Number of Renders": "Number of Renders",
+        "Degrees of Change": "Degrees of Change",
+        "Generate Renders": "Generate Renders",
+        "Unlimited Renders": "Unlimited Renders",
+        "Render preview": "Render preview",
+
+        "Lighting": "Lighting",
+        "Strength": "Strength",
+        "Colour": "Colour",
+        "Radius": "Radius",
+        "Type" : "Type",
+        "Lighting Co-ords": "Lighting Co-ords",
+        "Lighting Angle" : "Lighting Angle",
+
+        "Random": "Random",
+        "Base": "Base",
+        "Set ALL RANDOM": "Set ALL RANDOM", 
+        "Set all random": "Set all random", 
+        "Set per SET": "Set per SET",
+        "Set per FRAME": "Set per FRAME",
+        
+        "Measurement": "Measurement",
+
+        "Quantity": "Quantity",
+
+        "Import/Export": "Import/Export",
+
+        "Tutorial Objects": "Tutorial Objects",
+        "Export Settings": "Export Settings",
+        "Import Settings": "Import Settings",
+        "Change Render Folder": "Change Render Folder",
+
+        "Settings": "Settings",
+        "Colour Theme": "Colour Theme",
+        "Help": "Help",
+        "Languages": "Languages",
+
+        "Please select a tutorial object from below": "Please select a tutorial object from below",
+        "Cancel": "Cancel",
+        "How would you like to import objects?": "How would you like to import objects?",
+        "Please select an object to remove from below": "Please select an object to remove from below",
+        "please select a colour scheme": "please select a colour scheme",
+        "Dark Mode": "Dark Mode",
+        "Light Mode": "Light Mode",
+        "Factory New": "Factory New",
+        "Colourblind 2": "Colourblind 2",
+        "Light Mode 2": "Light Mode 2",
+        "Colour Mode 1": "Colour Mode 1",
+        "ImageTest": "ImageTest",
+        "please select a langauge:": "please select a langauge:",
+
+        "Included in Scnene": "Included in Scnene",
+        "Grounded": "Grounded"
+    }
+}
