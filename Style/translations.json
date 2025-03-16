@@ -96,7 +96,18 @@
         "Yaw": "Guiñada",
         "Height": "Altura",
         "Length": "Longitud",
-        "Render Preview": "Vista previa de renderizado"
+        "Render Preview": "Vista previa de renderizado",
+        "Custom Pivot Point": "Punto de pivote personalizado",
+        "Distance": "Distancia",
+        "Measurement": "Medición",
+        "Degrees of Change:": "Grados de Cambio:",
+        "Quantity": "Cantidad",
+        "Angle": "Ángulo",
+        "Set ALL RANDOM": "Establecer TODO ALEATORIO",
+        "All_random_TT": "Establece todos los elementos en todas las páginas a aleatorio",
+        "Set_Per_Set_TT": "Cada campo seleccionado se genera aleatoriamente y se mantiene durante la generación del conjunto.",
+        "Set_Per_Frame_TT": "Cada campo seleccionado se genera aleatoriamente por fotograma."
+
     },
     "Mandarin": {
             "Colour Theme": "颜色主题",
@@ -163,8 +174,7 @@
             "Length": "长度",
             "Render Preview": "渲染预览"
         },
-    
-            "Portuguese": {
+    "Portuguese": {
                 "Colour Theme": "Tema de cor",
                 "Help": "Ajuda",
                 "Languages": "Idiomas",
