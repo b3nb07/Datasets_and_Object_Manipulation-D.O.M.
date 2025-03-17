@@ -164,20 +164,20 @@ class TabDialog(QWidget):
         ObjectsStatusBar.setWidget(content_widget)
         ObjectsStatusBar.setWidgetResizable(True)
         
-        tab_widget = QTabWidget()
+        self.tab_widget = QTabWidget()
         # NAVBAR: Add all other tabs first
-        tab_widget.addTab(ObjectTab(self, tab_widget, ObjLayout), "Object")
-        tab_widget.addTab(PivotTab(self), "Pivot Point")
-        tab_widget.addTab(Render(self), "Render")
-        tab_widget.addTab(Lighting(self), "Lighting")
+        self.tab_widget.addTab(ObjectTab(self, self.tab_widget, ObjLayout), "Object")
+        self.tab_widget.addTab(PivotTab(self), "Pivot Point")
+        self.tab_widget.addTab(Render(self), "Render")
+        self.tab_widget.addTab(Lighting(self), "Lighting")
  
-        Temp_index = tab_widget.addTab(QWidget(), "Random")
-        tab_widget.addTab(Port(self, tab_widget, ObjLayout), "Import/Export")
-        tab_widget.addTab(Settings(self, tab_widget), "Settings")
+        Temp_index = self.tab_widget.addTab(QWidget(), "Random")
+        self.tab_widget.addTab(Port(self, self.tab_widget, ObjLayout), "Import/Export")
+        self.tab_widget.addTab(Settings(self, self.tab_widget), "Settings")
         
-        random_tab = RandomTabDialog(self, tab_widget)
-        tab_widget.removeTab(Temp_index)
-        tab_widget.insertTab(Temp_index, random_tab, "Random")
+        random_tab = RandomTabDialog(self, self.tab_widget)
+        self.tab_widget.removeTab(Temp_index)
+        self.tab_widget.insertTab(Temp_index, random_tab, "Random")
 
         #Disable until Object is loaded
         self.tab_widget.setTabEnabled(0, False)
@@ -206,11 +206,13 @@ class TabDialog(QWidget):
 
         # Layout of Main Page
         main_layout = QGridLayout()
-        main_layout.addWidget(tab_widget, 0, 0, 1, 8)
+        main_layout.addWidget(self.tab_widget, 0, 0, 1, 8)
         main_layout.addWidget(ObjectsStatusBar, 1, 0, 1, 2)
         main_layout.addWidget(self.environment, 1, 1, 1, 7)  
-    
         self.setLayout(main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
+
         
         """#Tests for all pages except Random (included in RandomTabDialog)
         from FrontTests import Tests
@@ -248,6 +250,17 @@ class TabDialog(QWidget):
             if ("Program" not in interaction and "Render" not in interaction):
                 self.update_while_viewport = True
             return self.old_log(interaction)
+        
+    def translateUi(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.tab_widget.setTabText(0, translation.get("Object", "Object"))
+        self.tab_widget.setTabText(1, translation.get("Pivot Point", "Pivot Point"))
+        self.tab_widget.setTabText(2, translation.get("Render", "Render"))
+        self.tab_widget.setTabText(3, translation.get("Lighting", "Lighting"))
+        self.tab_widget.setTabText(4, translation.get("Random", "Random"))
+        self.tab_widget.setTabText(5, translation.get("Import/Export", "Import/Export"))
+        self.tab_widget.setTabText(6, translation.get("Settings", "Settings"))
 
 class ilyaMessageBox(QMessageBox):
     #IlyaCommentBox
@@ -2756,7 +2769,6 @@ class Settings(QWidget):
         main_layout.addWidget(self.colour_scheme_button, 0, 1)
         main_layout.addWidget(self.Help_button, 0, 2)
         main_layout.addWidget(self.Languages, 0, 3)
-        main_layout.addWidget(self.Secret_button, 0, 4)
         self.setLayout(main_layout)
 
         self.load_settings()
