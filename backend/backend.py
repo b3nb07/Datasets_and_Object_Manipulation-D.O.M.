@@ -533,7 +533,7 @@ class Backend():
 
     def getHighestInDir(self):
         highest = -1
-        for file in os.listdir("output"):
+        for file in os.listdir(config["render_folder"]):
             if file.endswith(".hdf5"):
                 num = ""
                 for x in file:
