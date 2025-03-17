@@ -181,11 +181,11 @@ class TabDialog(QWidget):
         translator.languageChanged.connect(self.translateUi)
 
         #Disable until Object is loaded
-        self.tab_widget.setTabEnabled(0, True)
-        self.tab_widget.setTabEnabled(1, True)
-        self.tab_widget.setTabEnabled(2, True)
-        self.tab_widget.setTabEnabled(3, True)
-        self.tab_widget.setTabEnabled(4, True)
+        self.tab_widget.setTabEnabled(0, False)
+        self.tab_widget.setTabEnabled(1, False)
+        self.tab_widget.setTabEnabled(2, False)
+        self.tab_widget.setTabEnabled(3, False)
+        self.tab_widget.setTabEnabled(4, False)
         self.tab_widget.setTabEnabled(5, True)
 
 
@@ -2909,7 +2909,6 @@ class Settings(QWidget):
         self.colour_scheme_button = QPushButton('Colour Theme', self)
         self.Help_button = QPushButton('Help', self)
         self.Languages = QPushButton('Languages', self)
-        self.Secret_button = QPushButton('Button', self)
         self.current_language = "English"
         self.translations = translator.translations
 
@@ -2977,9 +2976,9 @@ class Settings(QWidget):
 
         # Add buttons for different styles
         English = language_box.addButton("English", QMessageBox.ActionRole)
-        Spanish = language_box.addButton("Spanish", QMessageBox.ActionRole)
-        Portuguese = language_box.addButton("Portuguese", QMessageBox.ActionRole)
-        Mandarin = language_box.addButton("Mandarin", QMessageBox.ActionRole)
+        Spanish = language_box.addButton("Español", QMessageBox.ActionRole)
+        Portuguese = language_box.addButton("Português", QMessageBox.ActionRole)
+        Mandarin = language_box.addButton("英语", QMessageBox.ActionRole)
         language_box.addButton(QMessageBox.Cancel)
         language_box.exec()
 
@@ -2992,6 +2991,8 @@ class Settings(QWidget):
             translator.setLanguage("Portuguese")
         elif language_box.clickedButton() == Mandarin:
             translator.setLanguage("Mandarin")
+        self.save_language_setting()
+
 
 
     def translateUi(self):
@@ -3000,7 +3001,6 @@ class Settings(QWidget):
         self.colour_scheme_button.setText(translation.get("Colour Theme", "Colour Theme"))
         self.Help_button.setText(translation.get("Help", "Help"))
         self.Languages.setText(translation.get("Languages", "Languages"))
-        self.Secret_button.setText(translation.get("Button", "Button"))
 
     def save_settings(self, Colour_Setup):
         settings = QSettings("UserSettings")
@@ -3011,6 +3011,18 @@ class Settings(QWidget):
         settings = QSettings("UserSettings")
         Colour_Setup = settings.value("theme", "LightMode.qss")  # default mode is light mode 
         self.apply_stylesheet(Colour_Setup)
+
+        saved_lang = settings.value("language", "English")
+        if saved_lang in translator.translations:
+            translator.setLanguage(saved_lang)
+        else:
+            translator.setLanguage("English") # default language english
+        
+        self.translateUi()
+
+    def save_language_setting(self):
+        settings = QSettings("UserSettings")
+        settings.setValue("language", translator.current_language)
 
 
 if __name__ == "__main__":
