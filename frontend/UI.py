@@ -2966,9 +2966,9 @@ class Settings(QWidget):
 
         # Add buttons for different styles
         English = language_box.addButton("English", QMessageBox.ActionRole)
-        Spanish = language_box.addButton("Spanish", QMessageBox.ActionRole)
-        Portuguese = language_box.addButton("Portuguese", QMessageBox.ActionRole)
-        Mandarin = language_box.addButton("Mandarin", QMessageBox.ActionRole)
+        Spanish = language_box.addButton("Español", QMessageBox.ActionRole)
+        Portuguese = language_box.addButton("Português", QMessageBox.ActionRole)
+        Mandarin = language_box.addButton("中文", QMessageBox.ActionRole)
         language_box.addButton(QMessageBox.Cancel)
         language_box.exec()
 
