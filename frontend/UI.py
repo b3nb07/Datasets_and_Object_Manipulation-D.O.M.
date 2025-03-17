@@ -1218,6 +1218,8 @@ class RandomPivot(QWidget):
         main_layout.addWidget(QLabel("Distnace", self), 0, 3)
         self.gen_field("Measurement", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
         
+        main_layout.itemAtPosition(0, 10).widget().setHidden(True)
+        
         self.setLayout(main_layout)
 
     def gen_field(self, Fieldname, Layout, X, Y, ConField):
@@ -1345,6 +1347,8 @@ class RandomRender(QWidget):
 
         main_layout.addWidget(QLabel("Render", self), 0, 3)
         self.gen_field("Quantity", main_layout, 3, 1, self.connFields(ParentTab, 0, 1))
+
+        main_layout.itemAtPosition(0, 10).widget().setHidden(True)
 
         self.setLayout(main_layout)
 
@@ -1487,6 +1491,8 @@ class RandomLight(QWidget):
 
         #print(main_layout.itemAtPosition(0, 0).widget().setText("Electric boogalo"))
         #how to change values
+
+        main_layout.itemAtPosition(0, 12).widget().setHidden(True)
 
         self.setLayout(main_layout)
         
