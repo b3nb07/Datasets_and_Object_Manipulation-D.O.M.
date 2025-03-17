@@ -486,9 +486,8 @@ class ObjectTab(QWidget):
                 backend.update_log(f'{obj} object deleted\n')
                 del backend.get_config()["objects"][obj.object_pos]
                 # shift objects after this one down by one
-                for i in range(obj_index, len(shared_state.items)):
-                    obj = shared_state.items[i]
-                    obj.object_pos = i
+                for i in range(len(shared_state.itemNames)):
+                    to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
 
                 shared_state.items_updated.emit(shared_state.items)
                 # The last object was deleted
@@ -840,7 +839,7 @@ class ObjectTab(QWidget):
             width = float(self.Width_Obj_pos_input_field.text() or 0)
             height = float(self.Height_Obj_pos_input_field.text() or 0)
             length = float(self.Length_Obj_pos_input_field.text() or 0)
-            scale = [width,height,length]
+            scale = [width,length,height]
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
@@ -858,8 +857,8 @@ class ObjectTab(QWidget):
             y_rot = float(self.Y_Rotation_input_field.text() or 0)
             z_rot = float(self.Z_Rotation_input_field.text() or 0)
             
-            rotation = [np.deg2rad(x_rot),np.deg2rad(y_rot),np.deg2rad(z_rot)]
-            
+            rotation = [np.deg2rad(y_rot),np.deg2rad(x_rot),np.deg2rad(z_rot)]     
+
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
             shared_state.itemNames[selected_object_index]
@@ -2916,6 +2915,7 @@ class Settings(QWidget):
         self.colour_scheme_button.clicked.connect(self.Colour_Scheme_Press)
         translator.languageChanged.connect(self.translateUi)
         self.Languages.clicked.connect(self.Language_button_press)
+        self.Help_button.clicked.connect(self.openWebsite)
         
         #button Layout
         main_layout.addWidget(self.colour_scheme_button, 0, 1)
@@ -2924,6 +2924,10 @@ class Settings(QWidget):
         self.setLayout(main_layout)
 
         self.load_settings()
+
+    def openWebsite(self):
+         import webbrowser
+         webbrowser.open('https://github.com/b3nb07/CS3028_Group_Project')
 
 
     def Colour_Scheme_Press(self):
