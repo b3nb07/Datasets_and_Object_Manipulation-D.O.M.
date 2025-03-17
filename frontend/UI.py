@@ -96,7 +96,7 @@ class ViewportThread(QThread):
     def run(self):
         old_res = backend.get_config().get("render_res")
         backend.set_res((int(self.size[0] / 4), int(self.size[1] / 4)))
-        backend.render(viewport_temp = True)
+        backend.render(shared_state, viewport_temp = True)
         backend.set_res(old_res)
         self.finished.emit()
 
@@ -106,7 +106,7 @@ class RenderThreadPreview(QThread):
 
     def run(self):
         self.progress.emit("Rendering...")
-        backend.render(headless = False, preview = True)
+        backend.render(shared_state, headless = False, preview = True)
         self.finished.emit()
     
 
@@ -116,7 +116,7 @@ class RenderThread(QThread):
 
     def run(self):
         self.progress.emit("Rendering...")
-        backend.render(headless = False)
+        backend.render(shared_state, headless = False)
         self.finished.emit()
 
 class LoadingScreen(QDialog):
@@ -1780,34 +1780,34 @@ class Render(QWidget):
         # X Degree
         self.X_Degree_Label = QLabel("X:", self)
         self.X_Degree_input_field = QLineEdit(parent=self)
-        self.X_Degree_input_field.setText("1")
+        self.X_Degree_input_field.setText("0")
         self.X_Degree_input_field.editingFinished.connect(self.set_angles)
         self.X_Degree_slider = QtWidgets.QSlider(self)
         self.X_Degree_slider.setPageStep(0)
         self.X_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.X_Degree_slider.setMinimum(1) 
+        self.X_Degree_slider.setMinimum(0) 
         self.X_Degree_slider.setMaximum(360)
 
         # Y Degree
         self.Y_Degree_Label = QLabel("Y:", self)
         self.Y_Degree_input_field = QLineEdit(parent=self)
         self.Y_Degree_slider = QtWidgets.QSlider(self)
-        self.Y_Degree_input_field.setText("1")
+        self.Y_Degree_input_field.setText("0")
         self.Y_Degree_input_field.editingFinished.connect(self.set_angles)
         self.Y_Degree_slider.setPageStep(0)
         self.Y_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Y_Degree_slider.setMinimum(1)
+        self.Y_Degree_slider.setMinimum(0)
         self.Y_Degree_slider.setMaximum(360)
 
         # Z Degree
         self.Z_Degree_Label = QLabel("Z:", self)
         self.Z_Degree_input_field = QLineEdit(parent=self)
-        self.Z_Degree_input_field.setText("1")
+        self.Z_Degree_input_field.setText("0")
         self.Z_Degree_input_field.editingFinished.connect(self.set_angles)
         self.Z_Degree_slider = QtWidgets.QSlider(self)
         self.Z_Degree_slider.setPageStep(0)
         self.Z_Degree_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.Z_Degree_slider.setMinimum(1)
+        self.Z_Degree_slider.setMinimum(0)
         self.Z_Degree_slider.setMaximum(360)
 
         self.X_Degree_input_field.textEdited.connect(lambda: self.Update_slider(self.X_Degree_slider, self.X_Degree_input_field.text()))

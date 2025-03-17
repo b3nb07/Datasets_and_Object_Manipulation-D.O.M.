@@ -222,7 +222,6 @@ class Backend():
         else:
             config["random"]["pos"].append("x")
             Backend.update_log(f'X co-ord of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
 
     def toggle_random_coord_y(self,selected_index):
         if "y" in config["random"]["pos"]:
@@ -231,7 +230,6 @@ class Backend():
         else:
             config["random"]["pos"].append("y")
             Backend.update_log(f'Y co-ord of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
 
     def toggle_random_coord_z(self,selected_index):
         if "z" in config["random"]["pos"]:
@@ -240,7 +238,6 @@ class Backend():
         else:
             config["random"]["pos"].append("z")
             Backend.update_log(f'Z co-ord of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
 
 
     def toggle_random_width(self,selected_index):
@@ -250,7 +247,6 @@ class Backend():
         else:
             config["random"]["sca"].append("width")
             Backend.update_log(f'Width of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
 
     def toggle_random_height(self,selected_index):
         if "height" in config["random"]["sca"]:
@@ -259,7 +255,6 @@ class Backend():
         else:
             config["random"]["sca"].append("height")
             Backend.update_log(f'Height of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
 
     def toggle_random_length(self,selected_index):
         if "length" in config["random"]["sca"]:
@@ -268,7 +263,6 @@ class Backend():
         else:
             config["random"]["sca"].append("length")
             Backend.update_log(f'Length of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
 
     def toggle_object(self, object, state):
         if state:
@@ -283,9 +277,10 @@ class Backend():
     def ground_object(self, object, state):
         if state:
             object.grounded = True
+            Backend.update_log(f'Object {object} grounded\n')
         else:
             object.grounded = False
-        print(object.grounded)
+            Backend.update_log(f'Object {object} ungrounded\n')
             
   
     def is_config_objects_empty(self):
@@ -413,65 +408,72 @@ class Backend():
         config["camera_poses"] = []
    
 
-    def add_object_properties(self,selected_index):
+    def add_object_properties(self,obj):
         #IF ANYONE WANTS ASSIGN VALUES TO RANDOM RANGE I JUST PUT PLACEHOLDER VALUES
-        obj = config["objects"][selected_index]
 
-        # Get randomization settings from the config
-        randoms = config["random"]
-        random_object_pos = randoms["pos"]
-        random_object_scale = randoms["sca"]
+        if not obj.grounded:
 
-        # Copy current position and scale values
-        position = obj["pos"].copy()
-        scale = obj["sca"].copy()
-            #Position propertis
-        if "x" in random_object_pos:
-            position[0] = random.uniform(1, 10) # random range of x coords - 1-10
-            print(f"Randomized Object X: {scale[0]}")
-            
-        if "y" in random_object_pos:
-            position[2] = random.uniform(1, 10)
-            print(f"Randomized Object y: {position[2]}")
+            # Get randomization settings from the config
+            randoms = config["random"]
+            random_object_pos = randoms["pos"]
+            random_object_scale = randoms["sca"]
 
-
-        if "z" in random_object_pos:
-            position[1] = random.uniform(1, 10)
-            print(f"Randomized Object Z: {position[1]}")
+            # Copy current position and scale values
+            position = obj.properties["pos"].copy()
+            scale = obj.properties["sca"].copy()
+                #Position propertis
+            if "x" in random_object_pos:
+                position[0] = random.uniform(1, 10) # random range of x coords - 1-10
+                print(f"Randomized Object X: {scale[0]}")
+                
+            if "y" in random_object_pos:
+                position[2] = random.uniform(1, 10)
+                print(f"Randomized Object y: {position[2]}")
 
 
-            #Scale properties
-        if "width" in random_object_scale:
-            self.random_object_width = random.uniform(1,5)
-            scale[0] = self.random_object_width # random range of width - 1-5
-            print(f"Randomized Width: {scale[0]}")
-
-            
-        if "height" in random_object_scale:
-            scale[1] = random.uniform(1, 5)
-            print(f"Randomized Height: {scale[1]}")
+            if "z" in random_object_pos:
+                position[1] = random.uniform(1, 10)
+                print(f"Randomized Object Z: {position[1]}")
 
 
-        if "length" in random_object_scale:
-            scale[2] = random.uniform(1, 5)
-            print(f"Randomized Length: {scale[2]}")
+                #Scale properties
+            if "width" in random_object_scale:
+                self.random_object_width = random.uniform(1,5)
+                scale[0] = self.random_object_width # random range of width - 1-5
+                print(f"Randomized Width: {scale[0]}")
 
-                    
-        obj["pos"] = position
-        obj["sca"] = scale
-        obj = config["objects"][selected_index]
+                
+            if "height" in random_object_scale:
+                scale[1] = random.uniform(1, 5)
+                print(f"Randomized Height: {scale[1]}")
+
+
+            if "length" in random_object_scale:
+                scale[2] = random.uniform(1, 5)
+                print(f"Randomized Length: {scale[2]}")
+
+                        
+            obj.properties["pos"] = position
+            obj.properties["sca"] = scale
 
     def set_runtime_config(self, config):
         self.runtime_config = config
 
 
-    def render(self, headless = False, preview = False, viewport_temp = False):
+    def render(self, objects, headless = False, preview = False, viewport_temp = False, config = config):
         """Renders the scene and saves to file in the output folder."""
 
         # We need to take 
 
         if not viewport_temp: Backend.update_log(f'Rendering Started\n')
         else: Backend.update_log(f'Viewport Preview Render Started\n')
+
+        origConfig = config.copy()
+        origObjects = []
+
+        for obj in objects.items:
+            origObjects.append(obj.properties)
+            self.add_object_properties(obj)
 
         self.add_camera_poses(preview = preview)
 
@@ -506,6 +508,10 @@ class Backend():
                 os.system("blenderproc vis hdf5 output/"+str(i + num) +".hdf5")
 
         self.remove_camera_poses()
+        config = origConfig
+
+        for i in range(len(objects.items)):
+            obj.properties = origObjects[i]
 
         try:
             os.remove("backend/temp_export.json")
