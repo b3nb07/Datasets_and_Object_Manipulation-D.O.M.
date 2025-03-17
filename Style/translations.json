@@ -32,6 +32,7 @@
         "Set per FRAME": "Set per FRAME"
     },
     "Spanish": {
+        "Please select an object to remove from below": "testfordelete",
         "Colour Theme": "Tema de color",
         "Help": "Ayuda",
         "Languages": "Idiomas",

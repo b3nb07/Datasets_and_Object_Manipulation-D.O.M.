@@ -463,9 +463,12 @@ class ObjectTab(QWidget):
         self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
     
         def delete_object(tab_widget, scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+            
             to_delete = QMessageBox()
-
-            to_delete.setText("Please select an object to remove from below")
+            to_delete_text = translations.get("Please select an object to remove from below","Please select an object to remove from below")
+            to_delete.setText(to_delete_text)
 
             if (not shared_state.items):
                 return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
@@ -646,9 +649,12 @@ class ObjectTab(QWidget):
     
     def delete_object(self, tab_widget, scroll):
             # Delete Object
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+            
             to_delete = QMessageBox()
-            to_delete.setText("Please select an object to remove from below")
-
+            to_delete_text = translations.get("delete_object_message","Please select an object to remove from below")
+            to_delete.setText(to_delete_text)
             if (not shared_state.items):
                 return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
 
@@ -2916,7 +2922,7 @@ class Settings(QWidget):
         translator.languageChanged.connect(self.translateUi)
         self.Languages.clicked.connect(self.Language_button_press)
         self.Help_button.clicked.connect(self.openWebsite)
-        
+            
         #button Layout
         main_layout.addWidget(self.colour_scheme_button, 0, 1)
         main_layout.addWidget(self.Help_button, 0, 2)
