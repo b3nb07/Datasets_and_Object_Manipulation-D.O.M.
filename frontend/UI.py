@@ -1802,6 +1802,14 @@ class Render(QWidget):
     def renderQueueControl(self):
         if self.rendering:
             config = backend.get_config()
+            
+            # if mode is set to generate per frame call
+            if config["random"]["mode"] == "frame":
+                backend.apply_all_random_limits()
+                # get updated config
+                config = backend.get_config()
+            
+            print(f"{'='*5} config to be appended {'='*5}\n{config}")
             self.queue.append(config)
 
             renderingBox = QMessageBox()
@@ -1811,6 +1819,14 @@ class Render(QWidget):
 
         else:
             config = backend.get_config()
+            
+            # if mode is set to generate per frame call
+            if config["random"]["mode"] == "frame":
+                backend.apply_all_random_limits()
+                # get updated config
+                config = backend.get_config()
+            
+            print(f"{'='*5} config to be appended {'='*5}\n{config}")
             self.queue.append(config)
 
             self.generate_render()
