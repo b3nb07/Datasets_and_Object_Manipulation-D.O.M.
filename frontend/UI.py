@@ -2937,7 +2937,6 @@ class Settings(QWidget):
         self.colour_scheme_button.clicked.connect(self.Colour_Scheme_Press)
         translator.languageChanged.connect(self.translateUi)
         self.Languages.clicked.connect(self.Language_button_press)
-        self.Help_button.clicked.connect(self.openWebsite)
             
         #button Layout
         main_layout.addWidget(self.colour_scheme_button, 0, 1)
