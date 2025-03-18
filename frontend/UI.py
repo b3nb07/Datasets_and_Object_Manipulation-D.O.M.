@@ -1171,7 +1171,7 @@ class RandomObject(QWidget):
                 val = float(Field.text())
                 Field.setText(str(val))
             except:
-                Field.setText("")
+                Field.setText("0")
 
     def update_combo_box_items(self, items):
         """ Method could be called to update combo_box_items. Maybe Delete. """
@@ -1189,6 +1189,9 @@ class RandomObject(QWidget):
         # list of all possible fields (can make this more modular later lol)
         all_fields = ["X", "Y", "Z", "Pitch", "Roll", "Yaw", "Width", "Height", "Length"]
 
+        # temporary bug fix
+        count = 0
+
         for field_name in all_fields:
             # get widgets by their object names
             checkbox = self.findChild(QCheckBox, field_name)
@@ -1201,13 +1204,14 @@ class RandomObject(QWidget):
 
                     # activate checkbox and put in the bounds from config
                     checkbox.setChecked(True)
-                    lower_bound.setText(bounds[0])
-                    upper_bound.setText(bounds[1])
+                    lower_bound.setText(str(bounds[0]))
+                    upper_bound.setText(str(bounds[1]))
                     lower_bound.setEnabled(True)
                     upper_bound.setEnabled(True)
                     
                     # update to back end to fix previous index not updating bug :)
                     backend.update_random_attribute(index, 'object', field_name, checkbox.isChecked(), lower_bound.text(), upper_bound.text())
+                    count+=1
                 else:
                     # if field not in config: reset to default unchecked state
                     checkbox.setChecked(False)
@@ -1215,7 +1219,24 @@ class RandomObject(QWidget):
                     upper_bound.setText("0")
                     lower_bound.setEnabled(False)
                     upper_bound.setEnabled(False)
+        
+        # update the toggle-all checkbox
+        all_box = self.layout().itemAtPosition(1, 10).widget()
+        
+        # check if all fields are active
+        if count == len(all_fields):  # all fields are active
+            if not all_box.isChecked():  # if not already checked toggle it
+                all_box.blockSignals(True)
+                all_box.setChecked(True)
+                all_box.blockSignals(False)
+        else:  # when not all fields are active
+            if all_box.isChecked():  # if already checked toggle it
+                all_box.blockSignals(True)
+                all_box.setChecked(False)
+                all_box.blockSignals(False)
 
+            
+            
 class RandomPivot(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
@@ -1293,7 +1314,7 @@ class RandomPivot(QWidget):
                 val = float(Field.text())
                 Field.setText(str(val))
             except:
-                Field.setText("")
+                Field.setText("0")
         
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
         Layout.addWidget(Field, Y, X)
@@ -1429,7 +1450,7 @@ class RandomRender(QWidget):
                 val = float(Field.text())
                 Field.setText(str(val))
             except:
-                Field.setText("")
+                Field.setText("0")
 
     def setAbled(self, Field, State):
         """Connect Checkbox to correlating page field"""
@@ -1572,7 +1593,7 @@ class RandomLight(QWidget):
                 val = float(Field.text())
                 Field.setText(str(val))
             except:
-                Field.setText("")
+                Field.setText("0")
 
     def setAbled(self, Field, State):
         """Connect Checkbox to correlating page field"""
