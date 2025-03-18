@@ -105,7 +105,10 @@ class RenderThreadPreview(QThread):
     progress = pyqtSignal(str)
 
     def run(self):
-        self.progress.emit("Rendering...")
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        rendering_text = translations.get("Rendering...", "Rendering...")
+        self.progress.emit(rendering_text)
         backend.render(headless = False, preview = True)
         self.finished.emit()
     
@@ -115,16 +118,22 @@ class RenderThread(QThread):
     progress = pyqtSignal(str)
 
     def run(self):
-        self.progress.emit("Rendering...")
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        rendering_text = translations.get("Rendering...", "Rendering...")
+        self.progress.emit(rendering_text)
         backend.render(headless = False)
         self.finished.emit()
 
 class LoadingScreen(QDialog):
     def __init__(self, text, parent=None):
         super().__init__(parent)
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
 
-
-        self.setWindowTitle("Rendering...")
+        rendering_text = translations.get("Rendering...", "Rendering...")
+        self.setWindowTitle(rendering_text)
         self.setWindowModality(Qt.NonModal)
         self.setGeometry(250, 250, 250, 200)
 
@@ -382,17 +391,19 @@ class ObjectTab(QWidget):
 
         #First Section
         def Get_Object_Filepath(Scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             import_box = QMessageBox()
-            import_box.setText("How would you like to import objects?")
-            import_box.addButton("Import Files", QMessageBox.ActionRole)
-            import_box.addButton("Folder", QMessageBox.ActionRole)
-            import_box.addButton("Cancel", QMessageBox.RejectRole)
+            import_box.setText(translations.get("How would you like to import objects?", "How would you like to import objects?"))
+            import_files_button = import_box.addButton(translations.get("Import Files", "Import Files"), QMessageBox.ActionRole)
+            folder_button = import_box.addButton(translations.get("Folder", "Folder"), QMessageBox.ActionRole)
+            cancel_button = import_box.addButton(translations.get("Cancel", "Cancel"), QMessageBox.RejectRole)
             
             import_box.exec()
-            clicked_button = import_box.clickedButton().text()
+            clicked_button = import_box.clickedButton()
             
             try:
-                if clicked_button == "Import Files":
+                if clicked_button == import_files_button:
                     paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
                     if not paths:
                         return
@@ -405,9 +416,8 @@ class ObjectTab(QWidget):
                         button = QPushButton(Name)
                         button.setMaximumWidth(175)
                         menu = QMenu()
-                        incexc = menu.addAction('Included in Scene')
-                        ground = menu.addAction('Grounded')
-                        
+                        incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                        ground = menu.addAction(translations.get("Grounded","Grounded"))
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
                         incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
@@ -418,7 +428,7 @@ class ObjectTab(QWidget):
                         button.setMenu(menu)
                         Scroll.addWidget(button)
 
-                elif clicked_button == "Folder":
+                elif clicked_button == folder_button:
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
                     if not folder_path:
                         return
@@ -437,8 +447,8 @@ class ObjectTab(QWidget):
                                 button = QPushButton(Name)
                                 button.setMaximumWidth(175)
                                 menu = QMenu()
-                                incexc = menu.addAction('Included in Scene')
-                                ground = menu.addAction('Grounded')
+                                incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                                ground = menu.addAction(translations.get("Grounded","Grounded"))
                                 
                                 incexc.setCheckable(True)
                                 incexc.setChecked(True)
@@ -454,10 +464,13 @@ class ObjectTab(QWidget):
                 Object_detect(tab_widget)
 
             except Exception:
-                QMessageBox.warning(self, "Error when reading model", "The selected file is corrupt or invalid.")
-                
+                error_title = translations.get("error_reading_title", "Error when reading model")
+                error_msg = translations.get("error_reading_body", "The selected file is corrupt or invalid.")
+                QMessageBox.warning(self, error_title, error_msg)
             except Exception as e:
-                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
+                error_title = translations.get("Error when importing", "Error when importing")
+                error_msg = translations.get("Error_Import", "Error: {}").format(str(e))
+                QMessageBox.warning(self, error_title, error_msg)
 
         self.Import_Object_Button = QPushButton("Import Objects", self)
         self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
@@ -467,21 +480,22 @@ class ObjectTab(QWidget):
             translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             
             to_delete = QMessageBox()
-            to_delete_text = translations.get("Please select an object to remove from below","Please select an object to remove from below")
-            to_delete.setText(to_delete_text)
+            to_delete.setText(translations.get("Please select an object to remove from below", "Please select an object to remove from below"))
 
             if (not shared_state.items):
-                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
+                warning_text = translations.get("Warning", "Warning")
+                warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
+                return QMessageBox.warning(self, warning_text, warning_msg)
 
             for obj in shared_state.items:
                 to_delete.addButton(str(obj), QMessageBox.ActionRole)
             
-            to_delete.addButton("Cancel", QMessageBox.ActionRole)
-
+            cancel_button = to_delete.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             to_delete.exec()
-            choice = str(to_delete.clickedButton().text())
+            clicked_button = to_delete.clickedButton()
 
-            if choice != "Cancel":
+
+            if clicked_button != cancel_button:
                 obj_index = int(to_delete.clickedButton().text()[-1]) - 1
                 obj = shared_state.items[obj_index]
                 shared_state.remove_item(obj)
@@ -496,8 +510,7 @@ class ObjectTab(QWidget):
                 # The last object was deleted
                 if (not shared_state.items):
                     Object_detect(tab_widget)
-                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
-
+                    QMessageBox.warning(self, translations.get("Warning", "Warning"),translations.get("You have deleted all of the objects, object manipulation tabs have been disabled.", "You have deleted all of the objects, object manipulation tabs have been disabled."))
         self.Delete_Object_Button = QPushButton('Delete Object', self)
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
 
@@ -2142,31 +2155,36 @@ class Render(QWidget):
 
             #self.thread.quit()
         else:
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             renderingBox = QMessageBox()
-            renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
+            renderingBox.setText(translations.get("Already rendering, please wait for current render to finish before starting new render.", "Already rendering, please wait for current render to finish before starting new render."))
             renderingBox.exec()
 
     def renderQueueControl(self):
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
         if self.rendering:
             config = backend.get_config()
             self.queue.append(config)
 
             renderingBox = QMessageBox()
-            renderingBox.setText("Added to queue.")
+            renderingBox.setText(translations.get("render_added_to_queue", "Added to queue."))
             renderingBox.exec()
 
 
         else:
             config = backend.get_config()
             self.queue.append(config)
-
             self.generate_render()
             self.render_preview_button.setEnabled(False)
     
     def generate_render(self):
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
         if (self.mainpage.viewport_ongoing):
             renderingBox = QMessageBox()
-            renderingBox.setText("Please wait for the viewport to finish its approximation before starting the main render.")
+            renderingBox.setText(translations.get("Please wait for the viewport to finish its approximation before starting the main render.", "Please wait for the viewport to finish its approximation before starting the main render."))
             renderingBox.exec()
             return
         self.rendering = True
@@ -2176,8 +2194,7 @@ class Render(QWidget):
         self.newThread = RenderThread()
         self.newThread.progress.connect(self.update_loading)
         self.newThread.finished.connect(self.complete_loading)
-        self.GenerateRenders_Button.setText("Add render job to queue")
-
+        self.GenerateRenders_Button.setText(translations.get("Add render job to queue", "Add render job to queue"))
 
         self.newThread.start()
         self.windowUp()
@@ -2193,11 +2210,13 @@ class Render(QWidget):
         self.LoadingBox.update_text(text)
     
     def complete_loading(self):
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
         self.newThread.quit()
         if not self.queue:
             self.rendering = False
-            self.LoadingBox.update_text("Rendering complete")
-            self.GenerateRenders_Button.setText("Generate Renders")
+            self.LoadingBox.update_text(translations.get("Rendering complete", "Rendering complete"))
+            self.GenerateRenders_Button.setText(translations.get("Generate Renders", "Generate Renders"))
             self.render_preview_button.setEnabled(True)
         else:
             self.generate_render()
@@ -2227,17 +2246,22 @@ class Port(QWidget):
 
         #First Section
         def Get_Object_Filepath(Scroll):
+
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+
             import_box = QMessageBox()
-            import_box.setText("How would you like to import objects?")
-            import_box.addButton("Import Files", QMessageBox.ActionRole)
-            import_box.addButton("Folder", QMessageBox.ActionRole)
-            import_box.addButton("Cancel", QMessageBox.RejectRole)
+            import_box.setText(translations.get("How would you like to import objects?", "How would you like to import objects?"))
+            import_files_button = import_box.addButton(translations.get("Import Files", "Import Files"), QMessageBox.ActionRole)
+            folder_button = import_box.addButton(translations.get("Folder", "Folder"), QMessageBox.ActionRole)
+            cancel_button = import_box.addButton(translations.get("Cancel", "Cancel"), QMessageBox.RejectRole)
             
             import_box.exec()
-            clicked_button = import_box.clickedButton().text()
+            clicked_button = import_box.clickedButton()
             
             try:
-                if clicked_button == "Import Files":
+                if clicked_button == import_files_button:
                     paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
                     if not paths:
                         return
@@ -2251,8 +2275,8 @@ class Port(QWidget):
                         button = QPushButton(Name)
                         button.setMaximumWidth(175)
                         menu = QMenu()
-                        incexc = menu.addAction('Included in Scene')
-                        ground = menu.addAction('Grounded')
+                        incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                        ground = menu.addAction(translations.get("Grounded","Grounded"))
                         
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
@@ -2265,7 +2289,7 @@ class Port(QWidget):
                         Scroll.addWidget(button)
 
 
-                elif clicked_button == "Folder":
+                elif clicked_button == folder_button:
 
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
                     if not folder_path:
@@ -2286,8 +2310,8 @@ class Port(QWidget):
                                 button = QPushButton(Name)
                                 button.setMaximumWidth(175)
                                 menu = QMenu()
-                                incexc = menu.addAction('Included in Scene')
-                                ground = menu.addAction('Grounded')
+                                incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                                ground = menu.addAction(translations.get("Grounded","Grounded"))
                                 
                                 incexc.setCheckable(True)
                                 incexc.setChecked(True)
@@ -2317,24 +2341,31 @@ class Port(QWidget):
 
         #Second Section
         def Tutorial_Object(Scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
             Tutorial_Box = QMessageBox()
-            Tutorial_Box.setText("Please select a tutorial object from below")
-            Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Cylinder", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Cone", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
-            Tutorial_Box.addButton(QMessageBox.Cancel)
+            Tutorial_Box.setText(translations.get("Please select a tutorial object from below", "Please select a tutorial object from below"))            
+            object_types = ["Cube", "Cylinder", "Cone", "Plane", "Sphere", "Monkey"]
+            button_map = {}
+            
+            for obj_type in object_types:
+                translated_text = translations.get(obj_type, obj_type)
+                button = Tutorial_Box.addButton(translated_text, QMessageBox.ActionRole)
+                button_map[button] = obj_type 
 
+
+            cancel_button = Tutorial_Box.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             Tutorial_Box.exec()
-
+            clicked_button = Tutorial_Box.clickedButton()
+            selected_object = button_map.get(clicked_button)
+ 
             
             try:
-                if Tutorial_Box.clickedButton().text().upper() != "CANCEL":
+                if clicked_button != cancel_button:
                     Name = self.GetName()
                     if Name != False:
-                        obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+                        obj = backend.RenderObject(primative = selected_object.upper())
                         if Name == "Object":
                             Name = f"{Name} {len(shared_state.itemNames)+1}"
                         shared_state.add_item(obj, Name)
@@ -2342,8 +2373,8 @@ class Port(QWidget):
                         button = QPushButton(Name)
                         button.setMaximumWidth(175)
                         menu = QMenu()
-                        incexc = menu.addAction('Included in Scene')
-                        ground = menu.addAction('Grounded')
+                        incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                        ground = menu.addAction(translations.get("Grounded","Grounded"))
                         
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
@@ -2360,12 +2391,14 @@ class Port(QWidget):
                 
             except Exception as e:
                 print(e)
-                error_box = QMessageBox()
-                error_box.setWindowTitle("Error")
-                error_box.setText("Error loading tutorial object.")
-                error_box.exec()
 
-                error_box = ilyaMessageBox("Error loading tutorial object.", "Error")
+                error_title = translations.get("Error", "Error")
+                error_text = translations.get("Error loading tutorial object.", "Error loading tutorial object.")
+                error_box = QMessageBox()
+                error_box.setWindowTitle(error_title)
+                error_box.setText(error_text)
+                error_box.exec()
+                error_box = ilyaMessageBox(error_text, error_title)
                 
     
             Object_detect(tab_widget)
@@ -2411,44 +2444,42 @@ class Port(QWidget):
         self.ImportSettings_Button.clicked.connect(lambda: Get_Settings_Filepath(tab_widget))
 
         def delete_object(tab_widget, scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+            
             to_delete = QMessageBox()
-            to_delete.setText("Please select an object to remove from below")
+            to_delete.setText(translations.get("Please select an object to remove from below", "Please select an object to remove from below"))
 
             if (not shared_state.items):
-                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
+                warning_text = translations.get("Warning", "Warning")
+                warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
+                return QMessageBox.warning(self, warning_text, warning_msg)
 
-            for i in range(len(shared_state.itemNames)):
-                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
+            for obj in shared_state.items:
+                to_delete.addButton(str(obj), QMessageBox.ActionRole)
             
-            to_delete.addButton("Cancel", QMessageBox.ActionRole)
-
+            cancel_button = to_delete.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             to_delete.exec()
+            clicked_button = to_delete.clickedButton()
 
-            choice = str(to_delete.clickedButton().text())
 
-            if choice != "Cancel":
-                obj_index = shared_state.itemNames.index(choice)
+            if clicked_button != cancel_button:
+                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
                 obj = shared_state.items[obj_index]
+                shared_state.remove_item(obj)
                 scroll.itemAt(obj_index).widget().setParent(None)
-                try:
-                    shared_state.remove_item(obj)
-                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
-                    backend.update_log(f'{obj} object deleted\n')
-                    del backend.get_config()["objects"][obj.object_pos]
-                    # shift objects after this one down by one
-                    for i in range(obj_index, len(shared_state.items)):
-                        obj = shared_state.items[i]
-                        obj.object_pos = i
-                except:
-                    error_box = ilyaMessageBox("Error deleting object", "Error")
+                backend.update_log(f'{obj} object deleted\n')
+                del backend.get_config()["objects"][obj.object_pos]
+                # shift objects after this one down by one
+                for i in range(len(shared_state.itemNames)):
+                    to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
 
                 shared_state.items_updated.emit(shared_state.items)
                 # The last object was deleted
                 if (not shared_state.items):
                     Object_detect(tab_widget)
-                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
-    
-        #Sixth section
+                    QMessageBox.warning(self, translations.get("Warning", "Warning"),translations.get("You have deleted all of the objects, object manipulation tabs have been disabled.", "You have deleted all of the objects, object manipulation tabs have been disabled."))
+        
         self.Delete_Object_Button = QPushButton('Delete Object', self)
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
         
@@ -2511,8 +2542,14 @@ class Port(QWidget):
         
     def GetName(self):
         try:
-            ObjName, State = QtWidgets.QInputDialog.getText(self, 'Object Name', "Enter Object Name: ")
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             
+            
+            window_title = translations.get("Object Name", "Object Name")
+            window_text = translations.get("Enter Object Name:", "Enter Object Name:")
+            ObjName, State = QtWidgets.QInputDialog.getText(self, window_title, window_text)
+
             if State and ObjName != "":
                 return ObjName
             elif not State:
