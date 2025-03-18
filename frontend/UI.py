@@ -2917,7 +2917,6 @@ class Settings(QWidget):
         main_layout.addWidget(self.colour_scheme_button, 0, 1)
         main_layout.addWidget(self.Help_button, 0, 2)
         main_layout.addWidget(self.Languages, 0, 3)
-        main_layout.addWidget(self.Secret_button, 0, 4)
         self.setLayout(main_layout)
 
         self.load_settings()
