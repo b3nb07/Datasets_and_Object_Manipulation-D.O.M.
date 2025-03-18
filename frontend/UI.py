@@ -629,7 +629,9 @@ class ObjectTab(QWidget):
         self.X_Rotation.sliderReleased.connect(self.update_object_rotation)
         self.Y_Rotation.sliderReleased.connect(self.update_object_rotation)
         self.Z_Rotation.sliderReleased.connect(self.update_object_rotation)
-        
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
+
         #########################################
 
         def show_hide_object(object,state):
@@ -728,7 +730,32 @@ class ObjectTab(QWidget):
         self.Update_slider(self.X_Rotation,self.X_Rotation_input_field.text())
         self.Update_slider(self.Y_Rotation,self.Y_Rotation_input_field.text())
         self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
-        
+
+    def translateUi(self):
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        self.Object_pos_title.setText(translations.get("Co-ords", "Co-ords"))
+        self.XObj_pos.setText(translations.get("X:", "X:"))
+        self.YObj_pos.setText(translations.get("Y:", "Y:"))
+        self.ZObj_pos.setText(translations.get("Z:", "Z:"))
+        self.Object_scale_title.setText(translations.get("Scale", "Scale"))
+        self.Width_Obj_pos.setText(translations.get("Width:", "Width:"))
+        self.Height_Obj_pos.setText(translations.get("Height:", "Height:"))
+        self.Length_Obj_pos.setText(translations.get("Length:", "Length:"))        
+        self.Object_rotation_title.setText(translations.get("Rotation", "Rotation"))
+        self.X_Rotation_Label.setText(translations.get("Roll:", "Roll:"))
+        self.Y_Rotation_Label.setText(translations.get("Pitch:", "Pitch:"))
+        self.Z_Rotation_Label.setText(translations.get("Yaw:", "Yaw:"))
+        self.Object_pos_title.setToolTip(translations.get('Changes the objects Position', 'Changes the objects Position'))
+        self.Object_scale_title.setToolTip(translations.get('Changes the objects scale', 'Changes the objects scale'))
+        self.Object_rotation_title.setToolTip(translations.get('Changes the objects rotation', 'Changes the objects rotation'))
+        self.W_slider.setToolTip(translations.get("Adjust Width", "Adjust Width"))
+        self.H_slider.setToolTip(translations.get("Adjust Height", "Adjust Height"))
+        self.L_slider.setToolTip(translations.get("Adjust Length", "Adjust Length"))
+        self.Delete_Object_Button.setText(translations.get("Delete Object", "Delete Object"))
+        self.Import_Object_Button.setText(translations.get("Import Object", "Import Object"))
+       
     def ValidType(self, val):
         """Validates if val type is string"""
         return type(val) == str
@@ -869,11 +896,6 @@ class PivotTab(QWidget):
         """Pivot Tab"""
         super().__init__(parent)
 
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
-
         # Pivot Point Coords Section
         self.Pivot_Point_Check = QCheckBox("Cutom Pivot Point", self)
         self.Pivot_Point_Check.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
@@ -987,6 +1009,8 @@ class PivotTab(QWidget):
         main_layout.addWidget(self.combo_box, 0, 7)
 
         self.setLayout(main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
 
 
