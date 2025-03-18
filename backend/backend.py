@@ -166,7 +166,7 @@ class Backend():
     def set_angles(self, angles):
         """ Sets camera angle change per render in the config.
         
-        :param angles: a list containing x z and y angle change"""
+        :param angles: a list containing x y and z angle change"""
         config["render"]["degree"] = angles
 
         Backend.update_log(f'Camera angle change per render changed to: {angles}\n')
@@ -329,16 +329,16 @@ class Backend():
         :param angle: a list containing the camera angle
         :param distance: distance from pivot point
 
-        :return param position: list containing x,z,y position values for camera"""
+        :return param position: list containing x,y,z position values for camera"""
 
         r = np.sin(angle[0]) * distance
 
         x_position = r * np.sin( angle[2] )    #calculate x and y positions based on y angle
-        z_position = -1 * r * np.cos( angle[2] )
+        y_position = -1 * r * np.cos( angle[2] )
 
-        y_position = np.cos(angle[0]) * distance #caluclate y angle based on x positions
+        z_position = np.cos(angle[0]) * distance #caluclate z angle based on x positions
 
-        position = [x_position, z_position, y_position]
+        position = [x_position, y_position, z_position]
         return position
 
     
@@ -355,12 +355,12 @@ class Backend():
         number_of_renders = config["render"]["renders"]
 
         starting_x_angle = np.pi / 2 #No place in UI to set starting camera angle 
-        starting_z_angle = 0
         starting_y_angle = 0
+        starting_z_angle = 0
 
         current_x_angle = starting_x_angle
-        current_z_angle = starting_z_angle
         current_y_angle = starting_y_angle
+        current_z_angle = starting_z_angle
 
         if preview:
             number_of_renders = 1
@@ -368,11 +368,11 @@ class Backend():
         for i in range(number_of_renders): #Reads config and randomised parts of render meant to be rendered
             
             if "background" in randoms["environment"]:
-                self.set_bg_color( [ random.randint(1,255) , random.randint(1,255) , random.randint(1,255) ] )
+                self.set_bg_color( [ random.randint(0,255) , random.randint(0,255) , random.randint(0,255) ] )
             else:
                 pass
 
-            camera_rotation = [current_x_angle,current_z_angle,current_y_angle]
+            camera_rotation = [current_x_angle,current_y_angle,current_z_angle]
             position = self.calculate_position(camera_rotation, pivot_distance)
 
             if "x" in randoms["pivot"]:
@@ -380,12 +380,12 @@ class Backend():
             else:
                 position[0] += pivot_point[0]
 
-            if "z" in randoms["pivot"]:
+            if "y" in randoms["pivot"]:
                position[1] += random.randint(0,10)
             else:
                 position[1] += pivot_point[1]
             
-            if "y" in randoms["pivot"]:
+            if "z" in randoms["pivot"]:
                position[2] += random.randint(0,10)
             else:
                 position[2] += pivot_point[2] 
@@ -397,12 +397,12 @@ class Backend():
 
             if "angle" in randoms["environment"]:
                 current_x_angle += np.deg2rad( random.randint(0,359) )
-                current_z_angle += np.deg2rad( random.randint(0,359) )
                 current_y_angle += np.deg2rad( random.randint(0,359) )
+                current_z_angle += np.deg2rad( random.randint(0,359) )
             else:
                 current_x_angle += degree_change[0]
-                current_z_angle += degree_change[1]
-                current_y_angle += degree_change[2]
+                current_y_angle += degree_change[1]
+                current_z_angle += degree_change[2]
 
     def remove_camera_poses(self):
         """Remove camera poses that have been used to generate renders"""
@@ -429,12 +429,12 @@ class Backend():
                 print(f"Randomized Object X: {scale[0]}")
                 
             if "y" in random_object_pos:
-                position[2] = random.uniform(1, 10)
-                print(f"Randomized Object y: {position[2]}")
+                position[1] = random.uniform(1, 10)
+                print(f"Randomized Object y: {position[1]}")
 
             if "z" in random_object_pos:
-                position[1] = random.uniform(1, 10)
-                print(f"Randomized Object Z: {position[1]}")
+                position[2] = random.uniform(1, 10)
+                print(f"Randomized Object Z: {position[2]}")
 
 
                 #Scale properties
@@ -512,8 +512,8 @@ class Backend():
         self.remove_camera_poses()
         config = origConfig
 
-        for i in range(len(objects.items)):
-            obj.properties = origObjects[i]
+        '''for i in range(len(objects.items)):
+            obj.properties = origObjects[i]'''
 
         try:
             os.remove("backend/temp_export.json")
@@ -586,7 +586,7 @@ class Backend():
                         file.write(interaction)
 
             except:
-                print("Error")
+                print("Error updating log")
 
 
     class RenderObject():
@@ -641,7 +641,7 @@ class Backend():
         def set_loc(self, location):
             """Set the location of an object in the scene.
             
-            :param location: A list containing [x,z,y] where x,z,y is an integer or float. This determines the coordinates of the object's location.
+            :param location: A list containing [x,y,z] where x,y,z is an integer or float. This determines the coordinates of the object's location.
             """
             if (is_blender_environment):
                 self.object.set_location(location)
@@ -653,7 +653,7 @@ class Backend():
         def set_scale(self, scale):
             """Set the scale of an object in the scene.
             
-            :param scale: A list containing [x,z,y] where x,z,y is an integer or float. This determines the scaling of each axis.
+            :param scale: A list containing [x,y,z] where x,y,z is an integer or float. This determines the scaling of each axis.
             """
             if (is_blender_environment):
                 self.object.set_scale(scale)
@@ -664,7 +664,7 @@ class Backend():
         def set_rotation(self, euler_rotation):
             """Set the rotation of an object in the scene.
             
-            :param euler_rotation: A list containing [x,y,z] - (pitch,yaw,roll) values for the euler rotation to be applied to the object.
+            :param euler_rotation: A list containing [x,y,z] - (roll,yaw,pitch) values for the euler rotation to be applied to the object.
             """
             if (is_blender_environment):
                 self.object.set_rotation_euler(euler_rotation)
@@ -742,7 +742,7 @@ class Backend():
         def set_loc(self, location):
             """Set the location of a light source in the scene.
             
-            :param location: A list containing [x,z,y] where x,z,y is an integer or float. This determines the coordinates of the light's location.
+            :param location: A list containing [x,y,z] where x,y,z is an integer or float. This determines the coordinates of the light's location.
             """
             #print("location changed")
             if (is_blender_environment):
@@ -755,7 +755,7 @@ class Backend():
         def set_rotation(self, rotation):
             """Set the rotation of the light in the scene.
 
-            :param rotation: A list [x,z,y] with values for the rotation to be applied to the light.
+            :param rotation: A list [x,y,z] with values for the rotation to be applied to the light.
             """
             #print("angle changed")
             rotRad = []

@@ -758,10 +758,10 @@ class ObjectTab(QWidget):
         """ Method to dynamically update a targetted object's position """
         try: 
             x = float(self.XObj_pos_input_field.text() or 0)
-            z = float(self.ZObj_pos_input_field.text() or 0)
             y = float(self.YObj_pos_input_field.text() or 0)
+            z = float(self.ZObj_pos_input_field.text() or 0)
                 
-            location = [x,z,y]
+            location = [x,y,z]
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
@@ -797,7 +797,7 @@ class ObjectTab(QWidget):
             y_rot = float(self.Y_Rotation_input_field.text() or 0)
             z_rot = float(self.Z_Rotation_input_field.text() or 0)
             
-            rotation = [np.deg2rad(y_rot),np.deg2rad(x_rot),np.deg2rad(z_rot)]
+            rotation = [np.deg2rad(x_rot),np.deg2rad(y_rot),np.deg2rad(z_rot)]
             
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
@@ -2041,7 +2041,8 @@ class Render(QWidget):
     
     def set_angles(self):
         try: 
-            backend.set_angles( [float(self.X_Degree_input_field.text()), float(self.Z_Degree_input_field.text()), float(self.Y_Degree_input_field.text())] )
+            backend.set_angles( [np.deg2rad(float(self.X_Degree_input_field.text())), np.deg2rad(float(self.Y_Degree_input_field.text())), np.deg2rad(float(self.Z_Degree_input_field.text()))] )
+            print([np.deg2rad(float(self.X_Degree_input_field.text())), np.deg2rad(float(self.Y_Degree_input_field.text())), np.deg2rad(float(self.Z_Degree_input_field.text()))])
         except:
             print("Error")
 
@@ -2575,7 +2576,7 @@ class Lighting(QWidget):
         y = self.Ylight_coords_input_field.text()
         z = self.Zlight_coords_input_field.text()
         try:
-            self.light.set_loc([float(x),float(z),float(y)])
+            self.light.set_loc([float(x),float(y),float(z)])
         except:
             pass
     
@@ -2585,7 +2586,7 @@ class Lighting(QWidget):
         y = self.Ylight_coords_input_field.text()
         z = self.Zlight_coords_input_field.text()
         try:
-            self.light.set_loc([float(x),float(z),float(y)])
+            self.light.set_loc([float(x),float(y),float(z)])
         except:
             pass
         
@@ -2611,7 +2612,7 @@ class Lighting(QWidget):
         y = self.Ylight_angle_input_field.text()
         z = self.Zlight_angle_input_field.text()
 
-        self.light.set_rotation([float(x),float(z),float(y)])
+        self.light.set_rotation([float(x),float(y),float(z)])
         
 
     def getColour(self):
@@ -2665,7 +2666,7 @@ class Lighting(QWidget):
             y = self.Ylight_angle_input_field.text()
             z = self.Zlight_angle_input_field.text()
             
-            self.light.set_rotation([float(x),float(z),float(y)])
+            self.light.set_rotation([float(x),float(y),float(z)])
         except:
             pass
 
@@ -2861,9 +2862,16 @@ class Settings(QWidget):
         self.apply_stylesheet(Colour_Setup)
 
 
+def startApp():
+    app.exec()
+    try:
+        app.focusWidget().clearFocus()
+    except:
+        pass
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     tab_dialog = TabDialog()
     tab_dialog.show()
 
-    sys.exit(app.exec())
+    sys.exit(startApp())
