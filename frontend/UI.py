@@ -1052,7 +1052,7 @@ class RandomObject(QWidget):
         # connecting shared state updates to combo box
         shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
-        #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
+        self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
         self.update_combo_box_items(shared_state.itemNames)
@@ -1087,6 +1087,10 @@ class RandomObject(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        
+        Field.setObjectName(Fieldname)
+        Field_LowerBound.setObjectName(f"{Fieldname}_lower")
+        Field_UpperBound.setObjectName(f"{Fieldname}_upper")
         
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
@@ -1173,10 +1177,44 @@ class RandomObject(QWidget):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
         self.combo_box.addItems(map(lambda o: str(o), items))
-        
-    def on_object_selected(self, selected_object_pos):
-        """ Method could be called to update combo_box_items. Maybe Delete. """
-        pass
+            
+    def on_object_selected(self, index):
+        # get config from bacl
+        config = backend.get_config()
+
+        # get specific index 
+        objects_config = config.get("random", {}).get("objects", {})
+        object_config = objects_config.get(index, {}).get("object", {})
+
+        # list of all possible fields (can make this more modular later lol)
+        all_fields = ["X", "Y", "Z", "Pitch", "Roll", "Yaw", "Width", "Height", "Length"]
+
+        for field_name in all_fields:
+            # get widgets by their object names
+            checkbox = self.findChild(QCheckBox, field_name)
+            lower_bound = self.findChild(QLineEdit, f"{field_name}_lower")
+            upper_bound = self.findChild(QLineEdit, f"{field_name}_upper")
+
+            if checkbox and lower_bound and upper_bound:
+                if field_name in object_config:
+                    bounds = object_config[field_name]
+
+                    # activate checkbox and put in the bounds from config
+                    checkbox.setChecked(True)
+                    lower_bound.setText(bounds[0])
+                    upper_bound.setText(bounds[1])
+                    lower_bound.setEnabled(True)
+                    upper_bound.setEnabled(True)
+                    
+                    # update to back end to fix previous index not updating bug :)
+                    backend.update_random_attribute(index, 'object', field_name, checkbox.isChecked(), lower_bound.text(), upper_bound.text())
+                else:
+                    # if field not in config: reset to default unchecked state
+                    checkbox.setChecked(False)
+                    lower_bound.setText("0")
+                    upper_bound.setText("0")
+                    lower_bound.setEnabled(False)
+                    upper_bound.setEnabled(False)
 
 class RandomPivot(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
@@ -1802,14 +1840,6 @@ class Render(QWidget):
     def renderQueueControl(self):
         if self.rendering:
             config = backend.get_config()
-            
-            # if mode is set to generate per frame call
-            if config["random"]["mode"] == "frame":
-                backend.apply_all_random_limits()
-                # get updated config
-                config = backend.get_config()
-            
-            print(f"{'='*5} config to be appended {'='*5}\n{config}")
             self.queue.append(config)
 
             renderingBox = QMessageBox()
@@ -1819,14 +1849,6 @@ class Render(QWidget):
 
         else:
             config = backend.get_config()
-            
-            # if mode is set to generate per frame call
-            if config["random"]["mode"] == "frame":
-                backend.apply_all_random_limits()
-                # get updated config
-                config = backend.get_config()
-            
-            print(f"{'='*5} config to be appended {'='*5}\n{config}")
             self.queue.append(config)
 
             self.generate_render()
@@ -1840,6 +1862,16 @@ class Render(QWidget):
             return
         self.rendering = True
         newConfig = self.queue.pop(0)
+        
+        print(newConfig)
+        # if mode is set to generate per frame call
+        if newConfig["random"]["mode"] == "frame":
+            newConfig = backend.apply_all_random_limits()
+            print('='*30)
+            print(newConfig)
+            
+
+        
         backend.set_runtime_config(newConfig)
         
         self.newThread = RenderThread()
