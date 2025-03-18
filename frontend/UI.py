@@ -105,7 +105,10 @@ class RenderThreadPreview(QThread):
     progress = pyqtSignal(str)
 
     def run(self):
-        self.progress.emit("Rendering...")
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        rendering_text = translations.get("Rendering...", "Rendering...")
+        self.progress.emit(rendering_text)
         backend.render(headless = False, preview = True)
         self.finished.emit()
     
@@ -115,16 +118,22 @@ class RenderThread(QThread):
     progress = pyqtSignal(str)
 
     def run(self):
-        self.progress.emit("Rendering...")
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        rendering_text = translations.get("Rendering...", "Rendering...")
+        self.progress.emit(rendering_text)
         backend.render(headless = False)
         self.finished.emit()
 
 class LoadingScreen(QDialog):
     def __init__(self, text, parent=None):
         super().__init__(parent)
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
 
-
-        self.setWindowTitle("Rendering...")
+        rendering_text = translations.get("Rendering...", "Rendering...")
+        self.setWindowTitle(rendering_text)
         self.setWindowModality(Qt.NonModal)
         self.setGeometry(250, 250, 250, 200)
 
@@ -146,7 +155,6 @@ class ilyaStorageBox:
 
 # creates this shared state
 shared_state = ComboBoxState()
-
 class TabDialog(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
@@ -164,29 +172,32 @@ class TabDialog(QWidget):
         ObjectsStatusBar.setWidget(content_widget)
         ObjectsStatusBar.setWidgetResizable(True)
         
-        tab_widget = QTabWidget()
+        self.tab_widget = QTabWidget()
         # NAVBAR: Add all other tabs first
-        tab_widget.addTab(ObjectTab(self, tab_widget, ObjLayout), "Object")
-        tab_widget.addTab(PivotTab(self), "Pivot Point")
-        tab_widget.addTab(Render(self), "Render")
-        tab_widget.addTab(Lighting(self), "Lighting")
+        self.tab_widget.addTab(ObjectTab(self, self.tab_widget, ObjLayout), "Object")
+        self.tab_widget.addTab(PivotTab(self), "Pivot Point")
+        self.tab_widget.addTab(Render(self), "Render")
+        self.tab_widget.addTab(Lighting(self), "Lighting")
  
-        Temp_index = tab_widget.addTab(QWidget(), "Random")
-        tab_widget.addTab(Port(self, tab_widget, ObjLayout), "Import/Export")
-        tab_widget.addTab(Settings(self, tab_widget), "Settings")
+        Temp_index = self.tab_widget.addTab(QWidget(), "Random")
+        self.tab_widget.addTab(Port(self, self.tab_widget, ObjLayout), "Import/Export")
+        self.tab_widget.addTab(Settings(self, self.tab_widget), "Settings")
         
-        random_tab = RandomTabDialog(self, tab_widget)
-        tab_widget.removeTab(Temp_index)
-        tab_widget.insertTab(Temp_index, random_tab, "Random")
+        random_tab = RandomTabDialog(self, self.tab_widget)
+        self.tab_widget.removeTab(Temp_index)
+        self.tab_widget.insertTab(Temp_index, random_tab, "Random")
+        translator.languageChanged.connect(self.translateUi)
 
         #Disable until Object is loaded
-        tab_widget.setTabEnabled(0, False)
-        tab_widget.setTabEnabled(1, False)
-        tab_widget.setTabEnabled(2, False)
-        tab_widget.setTabEnabled(3, False)
-        tab_widget.setTabEnabled(4, False)
+        self.tab_widget.setTabEnabled(0, False)
+        self.tab_widget.setTabEnabled(1, False)
+        self.tab_widget.setTabEnabled(2, False)
+        self.tab_widget.setTabEnabled(3, False)
+        self.tab_widget.setTabEnabled(4, False)
+        self.tab_widget.setTabEnabled(5, True)
 
-        tab_widget.setMaximumHeight(250)
+
+        self.tab_widget.setMaximumHeight(250)
         
         # enviroment
         self.environment = QWidget()
@@ -204,11 +215,13 @@ class TabDialog(QWidget):
 
         # Layout of Main Page
         main_layout = QGridLayout()
-        main_layout.addWidget(tab_widget, 0, 0, 1, 8)
+        main_layout.addWidget(self.tab_widget, 0, 0, 1, 8)
         main_layout.addWidget(ObjectsStatusBar, 1, 0, 1, 2)
         main_layout.addWidget(self.environment, 1, 1, 1, 7)  
     
         self.setLayout(main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
         
         """#Tests for all pages except Random (included in RandomTabDialog)
         from FrontTests import Tests
@@ -246,6 +259,17 @@ class TabDialog(QWidget):
             if ("Program" not in interaction and "Render" not in interaction):
                 self.update_while_viewport = True
             return self.old_log(interaction)
+    
+    def translateUi(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.tab_widget.setTabText(0, translation.get("Object", "Object"))
+        self.tab_widget.setTabText(1, translation.get("Pivot Point", "Pivot Point"))
+        self.tab_widget.setTabText(2, translation.get("Render", "Render"))
+        self.tab_widget.setTabText(3, translation.get("Lighting", "Lighting"))
+        self.tab_widget.setTabText(4, translation.get("Random", "Random"))
+        self.tab_widget.setTabText(5, translation.get("Import/Export", "Import/Export"))
+        self.tab_widget.setTabText(6, translation.get("Settings", "Settings"))
 
 class ilyaMessageBox(QMessageBox):
     #IlyaCommentBox
@@ -355,17 +379,19 @@ class ObjectTab(QWidget):
 
         #First Section
         def Get_Object_Filepath(Scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             import_box = QMessageBox()
-            import_box.setText("How would you like to import objects?")
-            import_box.addButton("Import Files", QMessageBox.ActionRole)
-            import_box.addButton("Folder", QMessageBox.ActionRole)
-            import_box.addButton("Cancel", QMessageBox.RejectRole)
+            import_box.setText(translations.get("How would you like to import objects?", "How would you like to import objects?"))
+            import_files_button = import_box.addButton(translations.get("Import Files", "Import Files"), QMessageBox.ActionRole)
+            folder_button = import_box.addButton(translations.get("Folder", "Folder"), QMessageBox.ActionRole)
+            cancel_button = import_box.addButton(translations.get("Cancel", "Cancel"), QMessageBox.RejectRole)
             
             import_box.exec()
-            clicked_button = import_box.clickedButton().text()
+            clicked_button = import_box.clickedButton()
             
             try:
-                if clicked_button == "Import Files":
+                if clicked_button == import_files_button:
                     paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
                     if not paths:
                         return
@@ -378,9 +404,8 @@ class ObjectTab(QWidget):
                         button = QPushButton(Name)
                         button.setMaximumWidth(175)
                         menu = QMenu()
-                        incexc = menu.addAction('Included in Scene')
-                        ground = menu.addAction('Grounded')
-                        
+                        incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                        ground = menu.addAction(translations.get("Grounded","Grounded"))
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
                         incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
@@ -391,7 +416,7 @@ class ObjectTab(QWidget):
                         button.setMenu(menu)
                         Scroll.addWidget(button)
 
-                elif clicked_button == "Folder":
+                elif clicked_button == folder_button:
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
                     if not folder_path:
                         return
@@ -410,8 +435,8 @@ class ObjectTab(QWidget):
                                 button = QPushButton(Name)
                                 button.setMaximumWidth(175)
                                 menu = QMenu()
-                                incexc = menu.addAction('Included in Scene')
-                                ground = menu.addAction('Grounded')
+                                incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                                ground = menu.addAction(translations.get("Grounded","Grounded"))
                                 
                                 incexc.setCheckable(True)
                                 incexc.setChecked(True)
@@ -427,45 +452,54 @@ class ObjectTab(QWidget):
                 Object_detect(tab_widget)
                 
             except Exception as e:
-                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
+                error_title = translations.get("Error when importing", "Error when importing")
+                error_msg = translations.get("Error_Import", "Error: {}").format(str(e))
+                QMessageBox.warning(self, error_title, error_msg)
 
         self.Import_Object_Button = QPushButton("Import Objects", self)
         self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
     
         def delete_object(tab_widget, scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+            
             to_delete = QMessageBox()
-            to_delete.setText("Please select an object to remove from below")
+            to_delete.setText(translations.get("Please select an object to remove from below", "Please select an object to remove from below"))
 
             if (not shared_state.items):
-                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
+                warning_text = translations.get("Warning", "Warning")
+                warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
+                return QMessageBox.warning(self, warning_text, warning_msg)
 
             for i in range(len(shared_state.itemNames)):
                 to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
             
-            to_delete.addButton("Cancel", QMessageBox.ActionRole)
-
+            cancel_button = to_delete.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             to_delete.exec()
-
             choice = str(to_delete.clickedButton().text())
 
-            if choice != "Cancel":
-                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
+            if choice != cancel_button:
+                obj_index = shared_state.itemNames.index(choice)
                 obj = shared_state.items[obj_index]
-                shared_state.remove_item(obj)
                 scroll.itemAt(obj_index).widget().setParent(None)
-                backend.update_log(f'{obj} object deleted\n')
-                del backend.get_config()["objects"][obj.object_pos]
-                # shift objects after this one down by one
-                for i in range(obj_index, len(shared_state.items)):
-                    obj = shared_state.items[i]
-                    obj.object_pos = i
+                try:
+                    shared_state.remove_item(obj)
+                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
+                    backend.update_log(f'{obj} object deleted\n')
+                    del backend.get_config()["objects"][obj.object_pos]
+                    # shift objects after this one down by one
+                    for i in range(obj_index, len(shared_state.items)):
+                        obj = shared_state.items[i]
+                        obj.object_pos = i
+                except:
+                    error_box = ilyaMessageBox("Error deleting object", "Error")
 
                 shared_state.items_updated.emit(shared_state.items)
                 # The last object was deleted
                 if (not shared_state.items):
                     Object_detect(tab_widget)
-                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
-
+                    QMessageBox.warning(self, translations.get("Warning", "Warning"),translations.get("You have deleted all of the objects, object manipulation tabs have been disabled.", "You have deleted all of the objects, object manipulation tabs have been disabled."))
+    
         self.Delete_Object_Button = QPushButton('Delete Object', self)
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
 
@@ -596,7 +630,9 @@ class ObjectTab(QWidget):
         self.X_Rotation.sliderReleased.connect(self.update_object_rotation)
         self.Y_Rotation.sliderReleased.connect(self.update_object_rotation)
         self.Z_Rotation.sliderReleased.connect(self.update_object_rotation)
-        
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
+
         #########################################
 
         def show_hide_object(object,state):
@@ -613,12 +649,16 @@ class ObjectTab(QWidget):
     
     def delete_object(self, tab_widget, scroll):
             # Delete Object
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+            
             to_delete = QMessageBox()
-            to_delete.setText("Please select an object to remove from below")
-
+            to_delete_text = translations.get("delete_object_message","Please select an object to remove from below")
+            to_delete.setText(to_delete_text)
             if (not shared_state.items):
-                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
-
+                warning_text = translations.get("Warning", "Warning")
+                warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
+                return QMessageBox.warning(self, warning_text, warning_msg)
             for i in range(len(shared_state.itemNames)):
                 to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
             
@@ -692,7 +732,32 @@ class ObjectTab(QWidget):
         self.Update_slider(self.X_Rotation,self.X_Rotation_input_field.text())
         self.Update_slider(self.Y_Rotation,self.Y_Rotation_input_field.text())
         self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
-        
+
+    def translateUi(self):
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        self.Object_pos_title.setText(translations.get("Co-ords", "Co-ords"))
+        self.XObj_pos.setText(translations.get("X:", "X:"))
+        self.YObj_pos.setText(translations.get("Y:", "Y:"))
+        self.ZObj_pos.setText(translations.get("Z:", "Z:"))
+        self.Object_scale_title.setText(translations.get("Scale", "Scale"))
+        self.Width_Obj_pos.setText(translations.get("Width:", "Width:"))
+        self.Height_Obj_pos.setText(translations.get("Height:", "Height:"))
+        self.Length_Obj_pos.setText(translations.get("Length:", "Length:"))        
+        self.Object_rotation_title.setText(translations.get("Rotation", "Rotation"))
+        self.X_Rotation_Label.setText(translations.get("Roll:", "Roll:"))
+        self.Y_Rotation_Label.setText(translations.get("Pitch:", "Pitch:"))
+        self.Z_Rotation_Label.setText(translations.get("Yaw:", "Yaw:"))
+        self.Object_pos_title.setToolTip(translations.get('Changes the objects Position', 'Changes the objects Position'))
+        self.Object_scale_title.setToolTip(translations.get('Changes the objects scale', 'Changes the objects scale'))
+        self.Object_rotation_title.setToolTip(translations.get('Changes the objects rotation', 'Changes the objects rotation'))
+        self.W_slider.setToolTip(translations.get("Adjust Width", "Adjust Width"))
+        self.H_slider.setToolTip(translations.get("Adjust Height", "Adjust Height"))
+        self.L_slider.setToolTip(translations.get("Adjust Length", "Adjust Length"))
+        self.Delete_Object_Button.setText(translations.get("Delete Object", "Delete Object"))
+        self.Import_Object_Button.setText(translations.get("Import Object", "Import Object"))
+       
     def ValidType(self, val):
         """Validates if val type is string"""
         return type(val) == str
@@ -794,8 +859,8 @@ class ObjectTab(QWidget):
             y_rot = float(self.Y_Rotation_input_field.text() or 0)
             z_rot = float(self.Z_Rotation_input_field.text() or 0)
             
-            rotation = [np.deg2rad(y_rot),np.deg2rad(x_rot),np.deg2rad(z_rot)]
-            
+            rotation = [np.deg2rad(y_rot),np.deg2rad(x_rot),np.deg2rad(z_rot)]     
+
             # get the selected object's position from the combo box
             selected_object_index = self.combo_box.currentIndex()
             shared_state.itemNames[selected_object_index]
@@ -832,11 +897,6 @@ class PivotTab(QWidget):
     def __init__(self, parent: QWidget):
         """Pivot Tab"""
         super().__init__(parent)
-
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
 
         # Pivot Point Coords Section
         self.Pivot_Point_Check = QCheckBox("Cutom Pivot Point", self)
@@ -951,6 +1011,8 @@ class PivotTab(QWidget):
         main_layout.addWidget(self.combo_box, 0, 7)
 
         self.setLayout(main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
 
 
@@ -969,7 +1031,8 @@ class PivotTab(QWidget):
             self.combo_box.setCurrentIndex(0)
 
         self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text())
-        
+        self.translateUi()
+
         
     def Update_slider(self, slider, val):
         try:
@@ -1058,7 +1121,13 @@ class PivotTab(QWidget):
                 field.editingFinished.emit()
             except:
                 field.setText(str(0.0))
-                field.editingFinished.emit()
+                field.editingFinished.emit()#
+    
+    def translateUi(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.Pivot_Point_Check.setText(translation.get("Custom Pivot Point", "Custom Pivot Point"))
+        self.Distance_Pivot.setText(translation.get("Distance","Distance"))
 
 class RandomTabDialog(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
@@ -1085,7 +1154,7 @@ class RandomTabDialog(QWidget):
 
 
     def translateUi(self):
-        """Apply translations to UI elements."""
+        """Apply translations to UI"""
         current_lang = translator.current_language
         translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
         self.tab_widget.setTabText(0, translation.get("Base", "Base"))
@@ -1101,38 +1170,51 @@ class RandomDefault(QWidget):
 
         main_layout = QGridLayout()
         """Sets all fields in all random pages to enabled"""
-        Field = QCheckBox("Set ALL RANDOM", self)
-        Field.setToolTip('Sets all elements on all pages to random') 
+        self.Field = QCheckBox("Set ALL RANDOM", self)
+        self.Field.setToolTip('Sets all elements on all pages to random') 
 
         """Set per is XOR"""
-        SetSetCheck = QCheckBox("Set per SET",self)
-        SetSetCheck.setToolTip('Each selected field is randomly generated and its value is maintained throughout the entire set generation.') 
-        SetFrameCheck = QCheckBox("Set per FRAME",self)
-        SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
+        self.SetSetCheck = QCheckBox("Set per SET",self)
+        self.SetSetCheck.setToolTip('Each selected field is randomly generated and its value is maintained throughout the entire set generation.') 
+        self.SetFrameCheck = QCheckBox("Set per FRAME",self)
+        self.SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
         RandomSeed = QLineEdit("", self)
 
         """The random seed value used to generate random values"""
         RandomSeed.setText(str(backend.get_config()["seed"]))
         RandomSeed.setMaximumWidth(200)
         
-        main_layout.addWidget(Field, 0, 0)
-        main_layout.addWidget(SetSetCheck, 1, 0)
-        main_layout.addWidget(SetFrameCheck, 2, 0)
+        main_layout.addWidget(self.Field, 0, 0)
+        main_layout.addWidget(self.SetSetCheck, 1, 0)
+        main_layout.addWidget(self.SetFrameCheck, 2, 0)
         
         """XOR FUNCTIONS"""
-        SetSetCheck.toggled.connect(lambda: self.SetSETChecks(main_layout))
-        SetFrameCheck.toggled.connect(lambda: self.SetFRAMEChecks(main_layout))
-        SetSetCheck.setChecked(True)
+        self.SetSetCheck.toggled.connect(lambda: self.SetSETChecks(main_layout))
+        self.SetFrameCheck.toggled.connect(lambda: self.SetFRAMEChecks(main_layout))
+        self.SetSetCheck.setChecked(True)
         main_layout.addWidget(RandomSeed, 3, 0)
         main_layout.setAlignment(Qt.AlignTop | Qt.AlignRight)
         
-        Field.toggled.connect(lambda state: self.checkUpdate(tab_widget, state))
+        self.Field.toggled.connect(lambda state: self.checkUpdate(tab_widget, state))
         RandomSeed.editingFinished.connect(lambda: self.SeedEdit(RandomSeed))
         
         self.setLayout(main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
+    def translateUi(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        
+        # Translate checkboxes
+        self.Field.setText(translation.get("Set ALL RANDOM", "Set ALL RANDOM"))
+        self.SetSetCheck.setText(translation.get("Set per SET", "Set per SET"))
+        self.SetFrameCheck.setText(translation.get("Set per FRAME", "Set per FRAME"))
+        
+        # Translate tooltips
+        self.Field.setToolTip(translation.get("All_random_TT", "Sets all elements on all pages to random"))
+        self.SetSetCheck.setToolTip(translation.get("Set_Per_Set_TT", "Each selected field is randomly generated and maintained through set generation."))
+        self.SetFrameCheck.setToolTip(translation.get("Set_Per_Frame_TT", "Each selected field is randomly generated per frame."))
 
     def SetSETChecks(self, Layout):
         """XOR FUNCTIONS"""
@@ -1141,6 +1223,7 @@ class RandomDefault(QWidget):
             # initial mode
             backend.toggle_random_mode("set")
             Layout.itemAtPosition(2, 0).widget().setChecked(False)
+
         self.notXOR(Layout)
     
     def SetFRAMEChecks(self, Layout):
@@ -1149,12 +1232,13 @@ class RandomDefault(QWidget):
             print('toggled: per frame')
             backend.toggle_random_mode("frame")
             Layout.itemAtPosition(1, 0).widget().setChecked(False)
+          
         self.notXOR(Layout)
 
     def notXOR(self, Layout):
         """XOR FUNCTIONS"""
-        if (not Layout.itemAtPosition(1, 0).widget().isChecked()) == (not Layout.itemAtPosition(2, 0).widget().isChecked()):
-            Layout.itemAtPosition(1, 0).widget().setChecked(True)
+        if (not self.SetSetCheck.isChecked()) == (not self.SetFrameCheck.isChecked()):
+            self.SetSetCheck.setChecked(True)
         
     def checkUpdate(self, tab_widget, State):
         """Method to update all Random checkboxes"""
@@ -1178,7 +1262,8 @@ class RandomDefault(QWidget):
             field.setText(str(backend.get_config()["seed"]))
 
             field.setToolTip('Random seed') 
-                            
+
+
 class RandomObject(QWidget):
     """Random Object"""
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
@@ -1191,8 +1276,11 @@ class RandomObject(QWidget):
         self.CheckBoxes = {}
         self.LowerBounds = {}
         self.UpperBounds = {}
+        self.field_checkboxes = {}
 
-        main_layout = QGridLayout()
+
+        self.main_layout = QGridLayout()
+
         
         # create initial combo_box
         self.combo_box = QComboBox(self)
@@ -1206,28 +1294,34 @@ class RandomObject(QWidget):
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
         
-        main_layout.addWidget(self.combo_box, 0, 10)
+        self.main_layout.addWidget(self.combo_box, 0, 10)
         
-        main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
-        main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
-             self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
+        self.set_all_checkbox = QCheckBox("Set all random", self)
+        self.main_layout.addWidget(self.set_all_checkbox, 1, 10)
+        self.set_all_checkbox.toggled.connect(lambda: 
+            self.set_all_random(self.main_layout, self.set_all_checkbox.isChecked()))
         
-        main_layout.addWidget(QLabel("Co-ords:", self), 0, 0)
-        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
-        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
-        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
+        self.coords_label = QLabel("Co-ords:", self)
+        self.main_layout.addWidget(self.coords_label, 0, 0)
+        self.gen_field("X", self.main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
+        self.gen_field("Y", self.main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
+        self.gen_field("Z", self.main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
 
-        main_layout.addWidget(QLabel("Rotation", self), 0, 3)
-        self.gen_field("Pitch", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
-        self.gen_field("Roll", main_layout, 3, 2, self.connFields(ParentTab, 5, 2))
-        self.gen_field("Yaw", main_layout, 3, 3, self.connFields(ParentTab, 5, 3))
+        self.rotation_label = QLabel("Rotation", self)
+        self.main_layout.addWidget(self.rotation_label, 0, 3)
+        self.gen_field("Pitch", self.main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
+        self.gen_field("Roll", self.main_layout, 3, 2, self.connFields(ParentTab, 5, 2))
+        self.gen_field("Yaw", self.main_layout, 3, 3, self.connFields(ParentTab, 5, 3))
         
-        main_layout.addWidget(QLabel("Scale", self), 0, 7)
-        self.gen_field("Width", main_layout, 6, 1, self.connFields(ParentTab, 8, 1))
-        self.gen_field("Height", main_layout, 6, 2, self.connFields(ParentTab, 8, 2))
-        self.gen_field("Length", main_layout, 6, 3, self.connFields(ParentTab, 8, 3))
-        
-        self.setLayout(main_layout)
+        self.scale_label = QLabel("Scale", self)
+        self.main_layout.addWidget(self.scale_label, 0, 7)
+        self.gen_field("Width", self.main_layout, 6, 1, self.connFields(ParentTab, 8, 1))
+        self.gen_field("Height", self.main_layout, 6, 2, self.connFields(ParentTab, 8, 2))
+        self.gen_field("Length", self.main_layout, 6, 3, self.connFields(ParentTab, 8, 3))
+        self.setLayout(self.main_layout)
+
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
     def gen_field(self, Fieldname, Layout, X, Y, ConField):
         """Generate a field including checkbox and 2 input fields"""
@@ -1238,6 +1332,7 @@ class RandomObject(QWidget):
         Field.setObjectName(Fieldname)
         Field_LowerBound.setObjectName(f"{Fieldname}_lower")
         Field_UpperBound.setObjectName(f"{Fieldname}_upper")
+        self.field_checkboxes[Fieldname] = Field 
 
         """sets text to ensure Bounds and better error handling"""
         Field_LowerBound.setText('-inf')
@@ -1269,6 +1364,7 @@ class RandomObject(QWidget):
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
         #
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
+
         
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
         """Generate checkbox"""
@@ -1336,7 +1432,7 @@ class RandomObject(QWidget):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         self.combo_box.clear()
         self.combo_box.addItems(map(lambda o: str(o), items))
-            
+
     def on_object_selected(self, index):
         # get config from bacl
         config = backend.get_config()
@@ -1393,6 +1489,21 @@ class RandomObject(QWidget):
                 all_box.blockSignals(True)
                 all_box.setChecked(False)
                 all_box.blockSignals(False)
+    
+    def translateUi(self,):
+        
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        self.rotation_label.setText(translation.get("Rotation","Rotation"))
+        self.coords_label.setText(translation.get("Co-ords:","Co-ords:"))
+        self.scale_label.setText(translation.get("Scale","Scale"))
+        self.set_all_checkbox.setText(translation.get("Set all random","Set all random"))
+        
+        
+        for field_name, checkbox in self.field_checkboxes.items():
+            translated = translation.get(field_name, field_name)
+            checkbox.setText(translated)
 
             
             
@@ -1405,8 +1516,10 @@ class RandomPivot(QWidget):
         self.CheckBoxes = {}
         self.LowerBounds = {}
         self.UpperBounds = {}
+        self.field_checkboxes = {}
 
-        main_layout = QGridLayout()
+
+        self.main_layout = QGridLayout()
         
         # create initial combo_box
         self.combo_box = QComboBox(self)
@@ -1420,32 +1533,36 @@ class RandomPivot(QWidget):
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
 
-        main_layout.addWidget(self.combo_box, 0, 10)
+        self.main_layout.addWidget(self.combo_box, 0, 10)
 
-        main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
-        main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
-             self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
-
-        main_layout.addWidget(QLabel("Co-ords:", self), 0, 0)
-        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
-        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
-        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
+        self.set_all_checkbox = QCheckBox("Set all random", self)
+        self.main_layout.addWidget(self.set_all_checkbox, 1, 10)
+        self.set_all_checkbox.toggled.connect(lambda: 
+            self.set_all_random(self.main_layout, self.set_all_checkbox.isChecked()))
+       
+        self.coords_label = QLabel("Co-ords:", self)
+        self.main_layout.addWidget(self.coords_label, 0, 0)
+        self.gen_field("X", self.main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
+        self.gen_field("Y", self.main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
+        self.gen_field("Z", self.main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
 
         """
         Special Connfields as this has a checkbox interaction that has to invert all related Fields
         """
         
-        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(1, 1).widget(), main_layout.itemAtPosition(1, 2).widget()))
-        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(2, 1).widget(), main_layout.itemAtPosition(2, 2).widget()))
-        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(3, 1).widget(), main_layout.itemAtPosition(3, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), self.main_layout.itemAtPosition(1, 1).widget(), self.main_layout.itemAtPosition(1, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), self.main_layout.itemAtPosition(2, 1).widget(), self.main_layout.itemAtPosition(2, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), self.main_layout.itemAtPosition(3, 1).widget(), self.main_layout.itemAtPosition(3, 2).widget()))
         
         main_layout.addWidget(QLabel("Distnace", self), 0, 3)
         self.gen_field("Measurement", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
         
         main_layout.itemAtPosition(0, 10).widget().setHidden(True)
         
-        self.setLayout(main_layout)
-
+        self.setLayout(main_layout
+        self.setLayout(self.main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
     """
     SEE RANDOM OBJECT CLASS FUNCTIONS FOR COMMENTS
@@ -1455,6 +1572,7 @@ class RandomPivot(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        self.field_checkboxes[Fieldname] = Field
         
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
@@ -1541,23 +1659,32 @@ class RandomPivot(QWidget):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         pass
 
+    def translateUi(self,):
+        
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        self.distance_label.setText(translation.get("Distance","Distance"))
+        self.coords_label.setText(translation.get("Co-ords:","Co-ords:"))
+        self.set_all_checkbox.setText(translation.get("Set all random","Set all random"))
+        
+        
+        for field_name, checkbox in self.field_checkboxes.items():
+            translated = translation.get(field_name, field_name)
+            checkbox.setText(translated)
+
 class RandomRender(QWidget):
     """Random Render"""
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
-        
-
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
-
 
         self.CheckBoxes = {}
         self.LowerBounds = {}
         self.UpperBounds = {}
+        self.field_checkboxes = {}
 
-        main_layout = QGridLayout()
+
+        self.main_layout = QGridLayout()
         
         # create initial combo_box
         self.combo_box = QComboBox(self)
@@ -1571,23 +1698,30 @@ class RandomRender(QWidget):
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
 
-        main_layout.addWidget(self.combo_box, 0, 10)
-        
-        main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
-        main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
-             self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
+        self.main_layout.addWidget(self.combo_box, 0, 10)
 
-        main_layout.addWidget(QLabel("Degrees of Change:", self), 0, 0)
-        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 4, 1))
-        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 4, 2))
-        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 4, 3))
+        self.set_all_checkbox = QCheckBox("Set all random", self)  # Store as instance variable
+        self.main_layout.addWidget(self.set_all_checkbox, 1, 10)
+        self.set_all_checkbox.toggled.connect(lambda: 
+            self.set_all_random(self.main_layout, self.set_all_checkbox.isChecked()))
 
-        main_layout.addWidget(QLabel("Render", self), 0, 3)
-        self.gen_field("Quantity", main_layout, 3, 1, self.connFields(ParentTab, 0, 1))
+        self.degrees_label = QLabel("Degrees of Change:", self)
+        self.main_layout.addWidget(self.degrees_label, 0, 0)
+        self.gen_field("X", self.main_layout, 0, 1, self.connFields(ParentTab, 4, 1))
+        self.gen_field("Y", self.main_layout, 0, 2, self.connFields(ParentTab, 4, 2))
+        self.gen_field("Z", self.main_layout, 0, 3, self.connFields(ParentTab, 4, 3))
+
 
         main_layout.itemAtPosition(0, 10).widget().setHidden(True)
 
         self.setLayout(main_layout)
+
+        self.render_label = QLabel("Render", self)
+        self.main_layout.addWidget(self.render_label, 0, 3)
+        self.gen_field("Quantity", self.main_layout, 3, 1, self.connFields(ParentTab, 0, 1))
+
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
     """
     SEE RANDOM OBJECT CLASS FUNCTIONS FOR COMMENTS
@@ -1597,6 +1731,7 @@ class RandomRender(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        self.field_checkboxes[Fieldname] = Field
         
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
@@ -1684,22 +1819,35 @@ class RandomRender(QWidget):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         pass
 
+    def translateUi(self,):
+        
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        #translations for labels/checkboxes
+        self.degrees_label.setText(translation.get("Degrees of Change:", "Degrees of Change:"))
+        self.render_label.setText(translation.get("Render", "Render"))
+        self.set_all_checkbox.setText(translation.get("Set all random", "Set all random"))
+
+        #translation for gen fields
+        for field_name, checkbox in self.field_checkboxes.items():
+            translated = translation.get(field_name, field_name)
+            checkbox.setText(translated)
+
+
 
 class RandomLight(QWidget):
     """Random Lighting"""
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
 
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
-
         self.CheckBoxes = {}
         self.LowerBounds = {}
         self.UpperBounds = {}
+        self.field_checkboxes = {}
 
-        main_layout = QGridLayout()
+
+        self.main_layout = QGridLayout()
         
         # create initial combo_box
         self.combo_box = QComboBox(self)
@@ -1712,33 +1860,38 @@ class RandomLight(QWidget):
         self.update_combo_box_items(shared_state.itemNames)
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
-
-        main_layout.addWidget(self.combo_box, 0, 12)
+        self.main_layout.addWidget(self.combo_box, 0, 12)
         
-        main_layout.addWidget(QCheckBox("Set all random", self), 1, 12)
-        main_layout.itemAtPosition(1, 12).widget().toggled.connect(lambda:
-             self.set_all_random(main_layout, main_layout.itemAtPosition(1, 12).widget().isChecked()))
+        self.set_all_checkbox = QCheckBox("Set all random", self)
+        self.main_layout.addWidget(self.set_all_checkbox, 1, 12)
+        self.set_all_checkbox.toggled.connect(lambda: self.set_all_random(self.main_layout, self.set_all_checkbox.isChecked()))
 
-        main_layout.addWidget(QLabel("Co-ords:", self), 0, 0)
-        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 5, 1))
-        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 5, 2))
-        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 5, 3))
+        self.coords_label = QLabel("Co-ords:", self)
+        self.main_layout.addWidget(self.coords_label, 0, 0)
+        self.gen_field("X", self.main_layout, 0, 1, self.connFields(ParentTab, 5, 1))
+        self.gen_field("Y", self.main_layout, 0, 2, self.connFields(ParentTab, 5, 2))
+        self.gen_field("Z", self.main_layout, 0, 3, self.connFields(ParentTab, 5, 3))
 
-        main_layout.addWidget(QLabel("Angle", self), 0, 3)
-        self.gen_field("Pitch", main_layout, 3, 1, self.connFields(ParentTab, 9, 1))
-        self.gen_field("Roll", main_layout, 3, 2, self.connFields(ParentTab, 9, 2))
-        self.gen_field("Yaw", main_layout, 3, 3, self.connFields(ParentTab, 9, 3))
+        self.angle_label1 = QLabel("Angle", self)
+        self.main_layout.addWidget(self.angle_label1, 0, 3)
+        self.gen_field("Pitch", self.main_layout, 3, 1, self.connFields(ParentTab, 9, 1))
+        self.gen_field("Roll", self.main_layout, 3, 2, self.connFields(ParentTab, 9, 2))
+        self.gen_field("Yaw", self.main_layout, 3, 3, self.connFields(ParentTab, 9, 3))
         
-        main_layout.addWidget(QLabel("Angle", self), 0, 7)
-        self.gen_field("Strength", main_layout, 6, 1, self.connFields(ParentTab, 1, 0))
-        self.gen_field("Radius", main_layout, 6, 2, self.connFields(ParentTab, 1, 2))
-        self.gen_field("Colour", main_layout, 6, 3, self.connFields(ParentTab, 2, 1))
+        self.angle_label2 = QLabel("Angle", self)
+        self.main_layout.addWidget(self.angle_label2, 0, 7)
+        self.gen_field("Strength", self.main_layout, 6, 1, self.connFields(ParentTab, 1, 0))
+        self.gen_field("Radius", self.main_layout, 6, 2, self.connFields(ParentTab, 1, 2))
+        self.gen_field("Colour", self.main_layout, 6, 3, self.connFields(ParentTab, 2, 1))
 
+
+        self.setLayout(self.main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
         #self.gen_field("BackGround", main_layout, 9, 1)
 
         #print(main_layout.itemAtPosition(0, 0).widget().setText("Electric boogalo"))
         #how to change values
-
 
         main_layout.itemAtPosition(0, 12).widget().setHidden(True)
 
@@ -1753,6 +1906,8 @@ class RandomLight(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        self.field_checkboxes[Fieldname] = Field
+
         
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
@@ -1839,6 +1994,21 @@ class RandomLight(QWidget):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         pass
 
+    def translateUi(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        # Translate labels
+        self.coords_label.setText(translation.get("Co-ords:", "Co-ords:"))
+        self.angle_label1.setText(translation.get("Angle", "Angle"))
+        self.angle_label2.setText(translation.get("Angle", "Angle"))
+        self.set_all_checkbox.setText(translation.get("Set all random", "Set all random"))
+
+        # Translate generated fields
+        for field_name, checkbox in self.field_checkboxes.items():
+            translated = translation.get(field_name, field_name)
+            checkbox.setText(translated)
+
 
 class Render(QWidget):
     def __init__(self, parent: QWidget):
@@ -1846,15 +2016,7 @@ class Render(QWidget):
         self.mainpage = parent
 
         self.i = 1
-
-
         self.queue = []
-
-
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
 
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
         self.GenerateRenders_Button.clicked.connect(self.renderQueueControl)
@@ -1974,19 +2136,20 @@ class Render(QWidget):
         self.GenerateRenders_Button.setText(translation.get("Generate Renders", "Generate Renders"))
         self.unlimited_render_button.setText(translation.get("Unlimited Renders", "Unlimited Renders"))
         self.Degree_Change_title.setText(translation.get("Degrees of Change", "Degrees of Change"))
-        self.Number_of_renders_title.setText(translation.get("Number of Renders"))
-
-
-    
+        self.Number_of_renders_title.setText(translation.get("Number of Renders", "Number of Renders"))
+        self.render_preview_button.setText(translation.get("Render Preview","Render Preview"))
+        
     def unlimitedrender(self):
         unlimitedRenderConfig = backend.get_config()
         test = True
-        while True:
+        while test:
             if (self.rendering):
                 loop = QEventLoop()
                 QTimer.singleShot(2000, loop.quit)
                 loop.exec()
                 continue
+            else:
+                test = False
             if self.unlimited_render_button.isChecked():
                 self.Number_of_renders_input_field.setText("1")
                 self.queue.append(unlimitedRenderConfig)
@@ -2066,31 +2229,36 @@ class Render(QWidget):
 
             #self.thread.quit()
         else:
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             renderingBox = QMessageBox()
-            renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
+            renderingBox.setText(translations.get("Already rendering, please wait for current render to finish before starting new render.", "Already rendering, please wait for current render to finish before starting new render."))
             renderingBox.exec()
 
     def renderQueueControl(self):
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
         if self.rendering:
             config = backend.get_config()
             self.queue.append(config)
 
             renderingBox = QMessageBox()
-            renderingBox.setText("Added to queue.")
+            renderingBox.setText(translations.get("render_added_to_queue", "Added to queue."))
             renderingBox.exec()
 
 
         else:
             config = backend.get_config()
             self.queue.append(config)
-
             self.generate_render()
             self.render_preview_button.setEnabled(False)
     
     def generate_render(self):
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
         if (self.mainpage.viewport_ongoing):
             renderingBox = QMessageBox()
-            renderingBox.setText("Please wait for the viewport to finish its approximation before starting the main render.")
+            renderingBox.setText(translations.get("Please wait for the viewport to finish its approximation before starting the main render.", "Please wait for the viewport to finish its approximation before starting the main render."))
             renderingBox.exec()
             return
         self.rendering = True
@@ -2110,8 +2278,7 @@ class Render(QWidget):
         self.newThread = RenderThread()
         self.newThread.progress.connect(self.update_loading)
         self.newThread.finished.connect(self.complete_loading)
-        self.GenerateRenders_Button.setText("Add render job to queue")
-
+        self.GenerateRenders_Button.setText(translations.get("Add render job to queue", "Add render job to queue"))
 
         self.newThread.start()
         self.windowUp()
@@ -2127,11 +2294,13 @@ class Render(QWidget):
         self.LoadingBox.update_text(text)
     
     def complete_loading(self):
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
         self.newThread.quit()
         if not self.queue:
             self.rendering = False
-            self.LoadingBox.update_text("Rendering complete")
-            self.GenerateRenders_Button.setText("Generate Renders")
+            self.LoadingBox.update_text(translations.get("Rendering complete", "Rendering complete"))
+            self.GenerateRenders_Button.setText(translations.get("Generate Renders", "Generate Renders"))
             self.render_preview_button.setEnabled(True)
         else:
             self.generate_render()
@@ -2211,26 +2380,34 @@ class Port(QWidget):
 
         #First Section
         def Get_Object_Filepath(Scroll):
+
             """ Import objects function """
+
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+
             import_box = QMessageBox()
-            import_box.setText("How would you like to import objects?")
-            import_box.addButton("Import Files", QMessageBox.ActionRole)
-            import_box.addButton("Folder", QMessageBox.ActionRole)
-            import_box.addButton("Cancel", QMessageBox.RejectRole)
+            import_box.setText(translations.get("How would you like to import objects?", "How would you like to import objects?"))
+            import_files_button = import_box.addButton(translations.get("Import Files", "Import Files"), QMessageBox.ActionRole)
+            folder_button = import_box.addButton(translations.get("Folder", "Folder"), QMessageBox.ActionRole)
+            cancel_button = import_box.addButton(translations.get("Cancel", "Cancel"), QMessageBox.RejectRole)
             
             import_box.exec()
-            clicked_button = import_box.clickedButton().text()
+            clicked_button = import_box.clickedButton()
             
             if clicked_button == "Cancel":
                     return
             # might not need this try now as cleaned up code a bit
             try:
+
                 # keep track of imports and their status
                 successful_imps = 0
                 failed_imps = []
                 
                 """ Importing single or multiple files """
                 if clicked_button == "Import Files":
+
                     paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
                     if not paths:
                         msg = ilyaMessageBox("No objects imported", "Cancelled")
@@ -2253,8 +2430,8 @@ class Port(QWidget):
                         button = QPushButton(Name)
                         button.setMaximumWidth(175)
                         menu = QMenu()
-                        incexc = menu.addAction('Included in Scene')
-                        ground = menu.addAction('Grounded')
+                        incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                        ground = menu.addAction(translations.get("Grounded","Grounded"))
                         
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
@@ -2265,8 +2442,6 @@ class Port(QWidget):
                         
                         button.setMenu(menu)
                         Scroll.addWidget(button)
-
-
 
                 elif clicked_button == "Folder":
                     """ Importing a folder or folders """
@@ -2300,8 +2475,8 @@ class Port(QWidget):
                                 button = QPushButton(Name)
                                 button.setMaximumWidth(175)
                                 menu = QMenu()
-                                incexc = menu.addAction('Included in Scene')
-                                ground = menu.addAction('Grounded')
+                                incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                                ground = menu.addAction(translations.get("Grounded","Grounded"))
                                 
                                 incexc.setCheckable(True)
                                 incexc.setChecked(True)
@@ -2323,24 +2498,31 @@ class Port(QWidget):
 
         #Second Section
         def Tutorial_Object(Scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
             Tutorial_Box = QMessageBox()
-            Tutorial_Box.setText("Please select a tutorial object from below")
-            Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Cylinder", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Cone", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
-            Tutorial_Box.addButton(QMessageBox.Cancel)
+            Tutorial_Box.setText(translations.get("Please select a tutorial object from below", "Please select a tutorial object from below"))            
+            object_types = ["Cube", "Cylinder", "Cone", "Plane", "Sphere", "Monkey"]
+            button_map = {}
+            
+            for obj_type in object_types:
+                translated_text = translations.get(obj_type, obj_type)
+                button = Tutorial_Box.addButton(translated_text, QMessageBox.ActionRole)
+                button_map[button] = obj_type 
 
+
+            cancel_button = Tutorial_Box.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             Tutorial_Box.exec()
-
+            clicked_button = Tutorial_Box.clickedButton()
+            selected_object = button_map.get(clicked_button)
+ 
             
             try:
-                if Tutorial_Box.clickedButton().text().upper() != "CANCEL":
+                if clicked_button != cancel_button:
                     Name = self.GetName()
                     if Name != False and len(Name) < 25:
-                        obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+                        obj = backend.RenderObject(primative = selected_object.upper())
                         if Name == "Object":
                             count = 1
                             while f"{Name} {len(shared_state.itemNames)+count}" in shared_state.itemNames:
@@ -2351,8 +2533,8 @@ class Port(QWidget):
                         button = QPushButton(Name)
                         button.setMaximumWidth(175)
                         menu = QMenu()
-                        incexc = menu.addAction('Included in Scene')
-                        ground = menu.addAction('Grounded')
+                        incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                        ground = menu.addAction(translations.get("Grounded","Grounded"))
                         
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
@@ -2371,7 +2553,15 @@ class Port(QWidget):
                         pass
                         
             except Exception as e:
-                error_box = ilyaMessageBox("Error loading tutorial object.", "Error")
+                print(e)
+
+                error_title = translations.get("Error", "Error")
+                error_text = translations.get("Error loading tutorial object.", "Error loading tutorial object.")
+                error_box = QMessageBox()
+                error_box.setWindowTitle(error_title)
+                error_box.setText(error_text)
+                error_box.exec()
+                error_box = ilyaMessageBox(error_text, error_title)
                 
     
             Object_detect(tab_widget)
@@ -2417,22 +2607,27 @@ class Port(QWidget):
         self.ImportSettings_Button.clicked.connect(lambda: Get_Settings_Filepath(tab_widget))
 
         def delete_object(tab_widget, scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+            
             to_delete = QMessageBox()
-            to_delete.setText("Please select an object to remove from below")
+            to_delete.setText(translations.get("Please select an object to remove from below", "Please select an object to remove from below"))
 
             if (not shared_state.items):
-                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
+                warning_text = translations.get("Warning", "Warning")
+                warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
+                return QMessageBox.warning(self, warning_text, warning_msg)
 
             for i in range(len(shared_state.itemNames)):
                 to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
             
-            to_delete.addButton("Cancel", QMessageBox.ActionRole)
-
+            cancel_button = to_delete.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             to_delete.exec()
-
             choice = str(to_delete.clickedButton().text())
 
-            if choice != "Cancel":
+
+
+            if choice != cancel_button:
                 obj_index = shared_state.itemNames.index(choice)
                 obj = shared_state.items[obj_index]
                 scroll.itemAt(obj_index).widget().setParent(None)
@@ -2452,9 +2647,8 @@ class Port(QWidget):
                 # The last object was deleted
                 if (not shared_state.items):
                     Object_detect(tab_widget)
-                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
+                    QMessageBox.warning(self, translations.get("Warning", "Warning"),translations.get("You have deleted all of the objects, object manipulation tabs have been disabled.", "You have deleted all of the objects, object manipulation tabs have been disabled."))
     
-        #Sixth section
         self.Delete_Object_Button = QPushButton('Delete Object', self)
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
         
@@ -2517,8 +2711,12 @@ class Port(QWidget):
         
     def GetName(self):
         try:
-            ObjName, State = QtWidgets.QInputDialog.getText(self, 'Object Name', "Enter Object Name: ")
-            
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+            window_title = translations.get("Object Name", "Object Name")
+            window_text = translations.get("Enter Object Name:", "Enter Object Name:")
+            ObjName, State = QtWidgets.QInputDialog.getText(self, window_title, window_text)
+
             if State and ObjName != "":
                 return ObjName
             elif not State:
@@ -2920,7 +3118,6 @@ class Settings(QWidget):
         self.colour_scheme_button = QPushButton('Colour Theme', self)
         self.Help_button = QPushButton('Help', self)
         self.Languages = QPushButton('Languages', self)
-        self.Secret_button = QPushButton('Button', self)
         self.current_language = "English"
         self.translations = translator.translations
 
@@ -2929,19 +3126,19 @@ class Settings(QWidget):
         self.colour_scheme_button.clicked.connect(self.Colour_Scheme_Press)
         translator.languageChanged.connect(self.translateUi)
         self.Languages.clicked.connect(self.Language_button_press)
-        
+            
         #button Layout
         main_layout.addWidget(self.colour_scheme_button, 0, 1)
         main_layout.addWidget(self.Help_button, 0, 2)
         main_layout.addWidget(self.Languages, 0, 3)
-        main_layout.addWidget(self.Secret_button, 0, 4)
         self.setLayout(main_layout)
 
         self.load_settings()
-        
+
     def openWebsite(self):
-        import webbrowser
-        webbrowser.open('https://github.com/b3nb07/CS3028_Group_Project')
+         import webbrowser
+         webbrowser.open('https://github.com/b3nb07/CS3028_Group_Project')
+
 
     def Colour_Scheme_Press(self):
         colour_box = QMessageBox(self)
@@ -2996,12 +3193,9 @@ class Settings(QWidget):
 
         # Add buttons for different styles
         English = language_box.addButton("English", QMessageBox.ActionRole)
-        Spanish = language_box.addButton("Spanish", QMessageBox.ActionRole)
-        Portuguese = language_box.addButton("Portuguese", QMessageBox.ActionRole)
-        Mandarin = language_box.addButton("Mandarin", QMessageBox.ActionRole)
-        Language5 = language_box.addButton("Language 5", QMessageBox.ActionRole)
-        Language6 = language_box.addButton("Language 6", QMessageBox.ActionRole)
-        Language7 = language_box.addButton("Imagetest", QMessageBox.ActionRole)
+        Spanish = language_box.addButton("Español", QMessageBox.ActionRole)
+        Portuguese = language_box.addButton("Português", QMessageBox.ActionRole)
+        Mandarin = language_box.addButton("中文", QMessageBox.ActionRole)
         language_box.addButton(QMessageBox.Cancel)
         language_box.exec()
 
@@ -3014,12 +3208,9 @@ class Settings(QWidget):
             translator.setLanguage("Portugese")
         elif language_box.clickedButton() == Mandarin:
             translator.setLanguage("Mandarin")
-        elif language_box.clickedButton() == Language5:
-            translator.setLanguage()
-        elif language_box.clickedButton() == Language6:
-            translator.setLanguage()
-        elif language_box.clickedButton() == Language7:
-            translator.setLanguage()
+        self.save_language_setting()
+
+
 
     def translateUi(self):
         current_lang = translator.current_language
@@ -3027,7 +3218,6 @@ class Settings(QWidget):
         self.colour_scheme_button.setText(translation.get("Colour Theme", "Colour Theme"))
         self.Help_button.setText(translation.get("Help", "Help"))
         self.Languages.setText(translation.get("Languages", "Languages"))
-        self.Secret_button.setText(translation.get("Button", "Button"))
 
     def save_settings(self, Colour_Setup):
         settings = QSettings("UserSettings")
@@ -3038,6 +3228,18 @@ class Settings(QWidget):
         settings = QSettings("UserSettings")
         Colour_Setup = settings.value("theme", "LightMode.qss")  # default mode is light mode 
         self.apply_stylesheet(Colour_Setup)
+
+        saved_lang = settings.value("language", "English")
+        if saved_lang in translator.translations:
+            translator.setLanguage(saved_lang)
+        else:
+            translator.setLanguage("English") # default language english
+        
+        self.translateUi()
+
+    def save_language_setting(self):
+        settings = QSettings("UserSettings")
+        settings.setValue("language", translator.current_language)
 
 
 if __name__ == "__main__":
