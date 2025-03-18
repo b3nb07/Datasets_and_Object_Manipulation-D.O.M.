@@ -195,7 +195,10 @@ class Backend():
         # if still ticked
         if state:            
             # add field to config with bounds
-            config["random"]["objects"][index][category][field] = [str(lower), str(upper)]
+            try:
+                config["random"]["objects"][index][category][field] = [float(lower), float(upper)]
+            except:
+                config["random"]["objects"][index][category][field] = [0,0]
             # try apply this change
             self.apply_specific_random_limit(index, category, field)
         else:
@@ -241,6 +244,9 @@ class Backend():
                             self.apply_specific_random_limit(obj_index, category, attr)
                         except Exception as e:
                             print(f"Error processing attribute '{attr}' for Object {obj_index}: {e}")
+        
+            return config
+        
         except Exception as e:
             print(f"Error processing config['random']['objects']: {e}")
     #
@@ -294,7 +300,7 @@ class Backend():
                 config["render"]["degree"][2] = random_value
             
             case "Quantity":
-                config["render"]["renders"] = int(np.floor(random_value))
+                config["render"]["renders"] = int(np.ceil(random_value))
                 
             case _:
                 raise ValueError(f"Unrecognized category: {category}")
