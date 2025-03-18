@@ -2164,159 +2164,122 @@ class Port(QWidget):
                     self.setText(text)
                     self.setWindowTitle(title)
                     self.exec()
+                    
+        def _display_import_message(successful_imps, failed_imps):
+            """ display appropriate import message """
+            if successful_imps > 0 and not failed_imps:
+                QMessageBox.information(self, "Import Successful", f"All {successful_imps} objects were successfully imported.")
 
-        def display_import_message(suc: int, fail: int):
-            """ Helper function to display the correct import message """
-            if suc > 0 and not fail:
-                # best case message
-                msg = ilyaMessageBox("All objects imported successfully", "Success")
-            elif suc > 0 and fail:
-                # some successful, some failed
-                error_msg = f"Successfully imported {suc} files.\nFailed to import:\n"
-                for name, error in fail:
-                    error_msg += f"\n- {name}"
-                    # error_msg += f"\n- {name}: {error}"
-                    
-                ilyaMessageBox(error_msg, "Issues found")
-            else:
-                # error_msg = "Failed to import all files:\n"
-                # for name, error in fail:
-                #     error_msg += f"\n- {name}"
-                    # error_msg += f"\n- {name}: {error}"
-                    
-                error_msg = f"Failed to import all files\n"
-                error_msg += f"{fail[0][1]}"
-                raise Exception(error_msg)
+            elif successful_imps > 0 and failed_imps:
+                error_message = f"Successfully imported {successful_imps} objects.\nFailed to import:\n"
+                error_message += "\n".join([f"{name}: {error}" for name, error in failed_imps])
+                QMessageBox.warning(self, "Partial Import", error_message)
+
+            elif not successful_imps and failed_imps:
+                # may have to cap this in the future to stop massive folders
+                error_message = f"Failed to import all objects:\n"
+                error_message += "\n".join([f"{name}: {error}" for name, error in failed_imps])
+                QMessageBox.critical(self, "Import Failed", error_message)
 
         def process_file(path):
-            """ Helper function to reduce clutter in the main function """
-            # maybe move this as a constant?
-            supported_extensions = ('.blend', '.stl', '.obj')    
-            name = os.path.basename(os.path.normpath(path))
+            """ helper function to process each file """
+            supported_extensions = ('.blend', '.stl', '.obj')
             
             if not path.lower().endswith(supported_extensions):
                 raise Exception(f"Unsupported file type. Only {', '.join(supported_extensions)} files are supported.")
+
+            name = os.path.basename(os.path.normpath(path))
             
             obj = backend.RenderObject(filepath=path)
             shared_state.add_item(obj, name)
-    
-            Label = QLabel(name)
-            Label.setStyleSheet("border: 1px solid black;")
-            Label.setAlignment(QtCore.Qt.AlignCenter)
-            Label.setMaximumHeight(40)
-            Label.setMinimumHeight(40)
-            Scroll.addWidget(Label)
-            
-            return name
+
+            return name, obj
+
+
+        def _process_import(path, Scroll, successful_imps, failed_imps):
+            """ process a single file during import """
+            try:
+                name, obj = process_file(path)
+                successful_imps += 1
+
+                # OOP button creation with menu for imported object
+                button = _create_object_button(name, obj)
+                Scroll.addWidget(button)
+
+            except Exception as e:
+                name = os.path.basename(os.path.normpath(path))
+                failed_imps.append((name, str(e)))
+                
+        def _create_object_button(name, obj):
+            """ create the button with menu options for an object """
+            button = QPushButton(name)
+            button.setMaximumWidth(175)
+
+            menu = QMenu()
+            incexc = menu.addAction('Included in Scene')
+            ground = menu.addAction('Grounded')
+
+            incexc.setCheckable(True)
+            incexc.setChecked(True)
+            incexc.triggered.connect(lambda: show_hide_object(obj, incexc.isChecked()))
+
+            ground.setCheckable(True)
+            ground.triggered.connect(lambda: ground_object(obj, ground.isChecked()))
+
+            button.setMenu(menu)
+            return button
+
+
 
         #First Section
         def Get_Object_Filepath(Scroll):
-            """ Import objects function """
-            import_box = QMessageBox()
-            import_box.setText("How would you like to import objects?")
-            import_box.addButton("Import Files", QMessageBox.ActionRole)
-            import_box.addButton("Folder", QMessageBox.ActionRole)
-            import_box.addButton("Cancel", QMessageBox.RejectRole)
-            
-            import_box.exec()
-            clicked_button = import_box.clickedButton().text()
-            
-            if clicked_button == "Cancel":
-                    return
-            # might not need this try now as cleaned up code a bit
+            """ import objects main function """
             try:
-                # keep track of imports and their status
+                # display message box (boycotting ilya)
+                import_box = QMessageBox()
+                import_box.setText("How would you like to import objects?")
+                import_box.addButton("Import Files", QMessageBox.ActionRole)
+                import_box.addButton("Folder", QMessageBox.ActionRole)
+                import_box.addButton("Cancel", QMessageBox.RejectRole)
+                import_box.exec()
+
+                clicked_button = import_box.clickedButton().text()
+
+                if clicked_button == "Cancel":
+                    return
+
+                # init counters for imports
                 successful_imps = 0
                 failed_imps = []
-                
-                """ Importing single or multiple files """
+
                 if clicked_button == "Import Files":
                     paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
                     if not paths:
-                        msg = ilyaMessageBox("No objects imported", "Cancelled")
+                        QMessageBox.warning(self, "No objects imported", "Import cancelled.")
                         return
-                    
+
                     for path in paths:
-                        try:
-                            process_file(path)
-                            successful_imps += 1
-                        # any exceptions append to failed import list
-                        except Exception as e:
-                            name = os.path.basename(os.path.normpath(path))
-                            failed_imps.append((name, str(e)))
-                            
-                        obj = backend.RenderObject(filepath=path)
-
-                        Name = os.path.basename(os.path.normpath(path))
-                        shared_state.add_item(obj, Name)
-
-                        button = QPushButton(Name)
-                        button.setMaximumWidth(175)
-                        menu = QMenu()
-                        incexc = menu.addAction('Included in Scene')
-                        ground = menu.addAction('Grounded')
-                        
-                        incexc.setCheckable(True)
-                        incexc.setChecked(True)
-                        incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
-
-                        ground.setCheckable(True)
-                        ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
-                        
-                        button.setMenu(menu)
-                        Scroll.addWidget(button)
-
-
+                        _process_import(path, Scroll, successful_imps, failed_imps)
 
                 elif clicked_button == "Folder":
-                    """ Importing a folder or folders """
+                    # import all files from a folder
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
                     if not folder_path:
-                        msg = ilyaMessageBox("No objects imported", "Cancelled")
+                        QMessageBox.warning(self, "No objects imported", "Import cancelled.")
                         return
-                    
-                    # go through each file in directory
+
                     for root, _, files in os.walk(folder_path):
                         for file in files:
-                            try:
-                                path = os.path.join(root, file)
-                                process_file(path)
-                                successful_imps += 1
-                            # any exceptions append to failed import list
-                            except Exception as e:
-                                name = os.path.basename(file)
-                                failed_imps.append((name, str(e)))
-                
-            
-                # display the appropriate import message
-                display_import_message(successful_imps, failed_imps)
-                            if any(file.lower().endswith(ext) for ext in supported_extensions):
-                                full_path = os.path.join(root, file)
-                                obj = backend.RenderObject(filepath=full_path)
+                            path = os.path.join(root, file)
+                            _process_import(path, Scroll, successful_imps, failed_imps)
 
-                                Name = os.path.basename(os.path.normpath(full_path))
-                                shared_state.add_item(obj, Name)
-
-                                button = QPushButton(Name)
-                                button.setMaximumWidth(175)
-                                menu = QMenu()
-                                incexc = menu.addAction('Included in Scene')
-                                ground = menu.addAction('Grounded')
-                                
-                                incexc.setCheckable(True)
-                                incexc.setChecked(True)
-                                incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
-
-                                ground.setCheckable(True)
-                                ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
-                                
-                                button.setMenu(menu)
-                                Scroll.addWidget(button)
-
-                Object_detect(tab_widget)
+                # finally display results of the importss
+                _display_import_message(successful_imps, failed_imps)
 
             except Exception as e:
-                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
+                QMessageBox.warning(self, "Error when importing", f"An unexpected error occurred: {str(e)}")
+
+            Object_detect(tab_widget)
                 
         self.Import_Object_Button = QPushButton("Import Objects", self)
         self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
