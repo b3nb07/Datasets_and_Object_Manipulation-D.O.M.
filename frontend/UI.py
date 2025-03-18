@@ -2037,19 +2037,20 @@ class Render(QWidget):
         self.GenerateRenders_Button.setText(translation.get("Generate Renders", "Generate Renders"))
         self.unlimited_render_button.setText(translation.get("Unlimited Renders", "Unlimited Renders"))
         self.Degree_Change_title.setText(translation.get("Degrees of Change", "Degrees of Change"))
-        self.Number_of_renders_title.setText(translation.get("Number of Renders"))
+        self.Number_of_renders_title.setText(translation.get("Number of Renders", "Number of Renders"))
         self.render_preview_button.setText(translation.get("Render Preview","Render Preview"))
-
-    
+        
     def unlimitedrender(self):
         unlimitedRenderConfig = backend.get_config()
         test = True
-        while True:
+        while test:
             if (self.rendering):
                 loop = QEventLoop()
                 QTimer.singleShot(2000, loop.quit)
                 loop.exec()
                 continue
+            else:
+                test = False
             if self.unlimited_render_button.isChecked():
                 self.Number_of_renders_input_field.setText("1")
                 self.queue.append(unlimitedRenderConfig)
