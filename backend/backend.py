@@ -5,6 +5,7 @@ import numpy as np
 import random
 import json
 import os
+from copy import deepcopy
 
 # initialise config - will hold the config ready for export
 config = { 
@@ -124,7 +125,7 @@ class Backend():
         }
         config["render"] = {
             "renders": 1,
-            "degree": [1,1,1]
+            "degree": [0,0,0]
         }
         config["render_folder"] = ""
 
@@ -361,7 +362,8 @@ class Backend():
         current_z_angle = starting_z_angle
         current_y_angle = starting_y_angle
 
-        
+        if preview:
+            number_of_renders = 1
 
         for i in range(number_of_renders): #Reads config and randomised parts of render meant to be rendered
             
@@ -430,7 +432,6 @@ class Backend():
                 position[2] = random.uniform(1, 10)
                 print(f"Randomized Object y: {position[2]}")
 
-
             if "z" in random_object_pos:
                 position[1] = random.uniform(1, 10)
                 print(f"Randomized Object Z: {position[1]}")
@@ -468,14 +469,15 @@ class Backend():
         if not viewport_temp: Backend.update_log(f'Rendering Started\n')
         else: Backend.update_log(f'Viewport Preview Render Started\n')
 
-        origConfig = config.copy()
+        
+        origConfig = deepcopy(config)
         origObjects = []
 
         for obj in objects.items:
-            origObjects.append(obj.properties)
+            origObjects.append(deepcopy(obj.properties))
             self.add_object_properties(obj)
 
-        self.add_camera_poses(preview = preview)
+        self.add_camera_poses(viewport_temp)
 
 
         with open("backend\\temp_export.json", "w") as export_file:
