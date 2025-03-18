@@ -42,12 +42,6 @@ class Backend():
         new_seed = random.randint(1000000, 999999999) # set config seed to a random 7 digit number
         self.set_seed(new_seed)
 
-        try: 
-            with open('interaction_log.txt','w') as file:
-                file.write('Program initialised\n')
-        except:
-            print("Error")
-
         if (json_filepath is not None):
             # load json objects into self
             temp = None
@@ -72,7 +66,6 @@ class Backend():
                         o = self.RenderObject(filepath = obj["filename"])
                     else:
                         o = self.RenderObject(primative = obj["primative"])
-                
 
                     o.set_loc(obj["pos"])
                     o.set_rotation(obj["rot"])
@@ -137,7 +130,7 @@ class Backend():
         }
         config["render_folder"] = ""
 
-        config["render_res"] = [256,256]
+        config["render_res"] = (256,256)
 
     def set_pivot_point(self, point):
         """ Sets a custom pivotpoint in the scene for rendering.
@@ -427,12 +420,18 @@ class Backend():
             if object.hidden: 
                 #config['objects'].append(object)
                 object.add_object()
-                Backend.update_log(f'Object {object} toggled on\n')
         else:
             if not object.hidden:
                 #config['objects'].remove(object)
                 object.remove_object()
-                Backend.update_log(f'Object {object} toggled off\n')
+    
+    def ground_object(self, object, state):
+        if state:
+            object.grounded = True
+        else:
+            object.grounded = False
+        print(object.grounded)
+            
   
     def is_config_objects_empty(self):
         if config.get("objects") == None:
@@ -567,7 +566,8 @@ class Backend():
 
         # We need to take 
 
-        Backend.update_log(f'Rendering Started\n')
+        if not viewport_temp: Backend.update_log(f'Rendering Started\n')
+        else: Backend.update_log(f'Viewport Preview Render Started\n')
 
         self.add_camera_poses(preview = preview)
 
@@ -688,6 +688,7 @@ class Backend():
             self.object_pos = len(config.setdefault("objects", []))
             self.properties = None
             self.hidden = False
+            self.grounded = False
             config["objects"].append({})
 
             Backend.update_log(f'{self.__str__()} object added\n')
@@ -766,15 +767,15 @@ class Backend():
             config["objects"][self.object_pos] = None
             self.hidden = True
 
-            Backend.update_log(f'{self.__str__()} object removed\n')
+            Backend.update_log(f'{self.__str__()} object removed from the scene\n')
         
         def add_object(self):
-            """Remove the object from the scene"""
+            """Add the object to the scene"""
 
             config["objects"][self.object_pos] = self.properties
             self.hidden = False
 
-            Backend.update_log(f'{self.__str__()} object added\n')
+            Backend.update_log(f'{self.__str__()} object added to the scene\n')
 
 
         #! TODO: Think of and implement more object manipulation methods
@@ -883,7 +884,10 @@ class Backend():
             OR WE REFERENCE
             :SHRUG:
             """
-            return [x / 255 for x in bytes.fromhex(hex_value[-6:])]
+            try:
+                return [x / 255 for x in bytes.fromhex(hex_value[-6:])]
+            except:
+                return [255, 255, 255]
 
         def set_color(self, color):
             """Sets the color of the light using the RGB colour space.
@@ -894,6 +898,7 @@ class Backend():
             colour = self.hex_to_rgba(color)
             #print(colour)
             if (is_blender_environment):
+                print(colour)
                 self.light.set_color(colour)
 
             config["light_sources"]["color"] = color
