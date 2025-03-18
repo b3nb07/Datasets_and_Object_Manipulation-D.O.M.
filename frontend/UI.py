@@ -2032,6 +2032,8 @@ class Render(QWidget):
         self.unlimited_render_button.setText(translation.get("Unlimited Renders", "Unlimited Renders"))
         self.Degree_Change_title.setText(translation.get("Degrees of Change", "Degrees of Change"))
         self.Number_of_renders_title.setText(translation.get("Number of Renders"))
+        self.render_preview_button.setText(translation.get("Render Preview","Render Preview"))
+
     
     def unlimitedrender(self):
         unlimitedRenderConfig = backend.get_config()
