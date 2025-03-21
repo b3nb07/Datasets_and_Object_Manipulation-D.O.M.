@@ -155,7 +155,6 @@ class ilyaStorageBox:
 
 # creates this shared state
 shared_state = ComboBoxState()
-
 class TabDialog(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
@@ -223,15 +222,10 @@ class TabDialog(QWidget):
         self.setLayout(main_layout)
         translator.languageChanged.connect(self.translateUi)
         self.translateUi()
-
         
         """#Tests for all pages except Random (included in RandomTabDialog)
         from FrontTests import Tests
         Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)"""
-
-
-
-
 
     def visual_change(self, thread):
         #Updates Viewport Image
@@ -265,8 +259,7 @@ class TabDialog(QWidget):
             if ("Program" not in interaction and "Render" not in interaction):
                 self.update_while_viewport = True
             return self.old_log(interaction)
-        
-
+    
     def translateUi(self):
         current_lang = translator.current_language
         translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
@@ -277,11 +270,6 @@ class TabDialog(QWidget):
         self.tab_widget.setTabText(4, translation.get("Random", "Random"))
         self.tab_widget.setTabText(5, translation.get("Import/Export", "Import/Export"))
         self.tab_widget.setTabText(6, translation.get("Settings", "Settings"))
-
-
-
-        
-
 
 class ilyaMessageBox(QMessageBox):
     #IlyaCommentBox
@@ -487,30 +475,37 @@ class ObjectTab(QWidget):
                 warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
                 return QMessageBox.warning(self, warning_text, warning_msg)
 
-            for obj in shared_state.items:
-                to_delete.addButton(str(obj), QMessageBox.ActionRole)
+            for i in range(len(shared_state.itemNames)):
+                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
             
             cancel_button = to_delete.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             to_delete.exec()
-            clicked_button = to_delete.clickedButton()
+            choice = str(to_delete.clickedButton().text())
 
 
-            if clicked_button != cancel_button:
-                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
+
+            if choice != cancel_button.text():
+                obj_index = shared_state.itemNames.index(choice)
                 obj = shared_state.items[obj_index]
-                shared_state.remove_item(obj)
                 scroll.itemAt(obj_index).widget().setParent(None)
-                backend.update_log(f'{obj} object deleted\n')
-                del backend.get_config()["objects"][obj.object_pos]
-                # shift objects after this one down by one
-                for i in range(len(shared_state.itemNames)):
-                    to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
+                try:
+                    shared_state.remove_item(obj)
+                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
+                    backend.update_log(f'{obj} object deleted\n')
+                    del backend.get_config()["objects"][obj.object_pos]
+                    # shift objects after this one down by one
+                    for i in range(obj_index, len(shared_state.items)):
+                        obj = shared_state.items[i]
+                        obj.object_pos = i
+                except:
+                    error_box = ilyaMessageBox("Error deleting object", "Error")
 
                 shared_state.items_updated.emit(shared_state.items)
                 # The last object was deleted
                 if (not shared_state.items):
                     Object_detect(tab_widget)
                     QMessageBox.warning(self, translations.get("Warning", "Warning"),translations.get("You have deleted all of the objects, object manipulation tabs have been disabled.", "You have deleted all of the objects, object manipulation tabs have been disabled."))
+    
         self.Delete_Object_Button = QPushButton('Delete Object', self)
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
 
@@ -587,7 +582,7 @@ class ObjectTab(QWidget):
         main_layout.addWidget(self.Import_Object_Button, 4, 8)
         main_layout.addWidget(self.Delete_Object_Button, 4, 9)
 
-
+        self.setLayout(main_layout)
 
         #Connect Page to functions
         # editingFinished callbacks that updates backend
@@ -641,10 +636,8 @@ class ObjectTab(QWidget):
         self.X_Rotation.sliderReleased.connect(self.update_object_rotation)
         self.Y_Rotation.sliderReleased.connect(self.update_object_rotation)
         self.Z_Rotation.sliderReleased.connect(self.update_object_rotation)
-        self.setLayout(main_layout)
         translator.languageChanged.connect(self.translateUi)
         self.translateUi()
-        
 
         #########################################
 
@@ -660,38 +653,37 @@ class ObjectTab(QWidget):
                 tab_widget.setTabEnabled(i, State)
 
     
-    def delete_object(self, tab_widget, scroll):
-            # Delete Object
+        def delete_object(tab_widget, scroll):
             current_lang = translator.current_language
             translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             
             to_delete = QMessageBox()
-            to_delete_text = translations.get("delete_object_message","Please select an object to remove from below")
-            to_delete.setText(to_delete_text)
+            to_delete.setText(translations.get("Please select an object to remove from below", "Please select an object to remove from below"))
+
             if (not shared_state.items):
-                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
+                warning_text = translations.get("Warning", "Warning")
+                warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
+                return QMessageBox.warning(self, warning_text, warning_msg)
 
             for i in range(len(shared_state.itemNames)):
                 to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
             
-            to_delete.addButton("Cancel", QMessageBox.ActionRole)
+            cancel_button = to_delete.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             to_delete.exec()
-            #Object select
             choice = str(to_delete.clickedButton().text())
 
-            if choice != "Cancel":
-                """Removes Object Via Index from all areas """
+
+
+            if choice != cancel_button.text():
                 obj_index = shared_state.itemNames.index(choice)
                 obj = shared_state.items[obj_index]
                 scroll.itemAt(obj_index).widget().setParent(None)
                 try:
-                    #Removal
                     shared_state.remove_item(obj)
                     success_box = ilyaMessageBox("Object successfully deleted", "Success")
-                    
-                    #Deletes backend
+                    backend.update_log(f'{obj} object deleted\n')
                     del backend.get_config()["objects"][obj.object_pos]
-                    """shift objects after this one down by one"""
+                    # shift objects after this one down by one
                     for i in range(obj_index, len(shared_state.items)):
                         obj = shared_state.items[i]
                         obj.object_pos = i
@@ -699,11 +691,11 @@ class ObjectTab(QWidget):
                     error_box = ilyaMessageBox("Error deleting object", "Error")
 
                 shared_state.items_updated.emit(shared_state.items)
-                """The last object was deleted"""
+                # The last object was deleted
                 if (not shared_state.items):
-                    self.Object_detect(tab_widget)
-                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
-                    
+                    Object_detect(tab_widget)
+                    QMessageBox.warning(self, translations.get("Warning", "Warning"),translations.get("You have deleted all of the objects, object manipulation tabs have been disabled.", "You have deleted all of the objects, object manipulation tabs have been disabled."))
+    
     def Object_detect(self, tab_widget):
             """On upload/delete to be called to check if any object is to be rendered and enables tabs accordingly"""
             State = not Backend.is_config_objects_empty(tab_widget)
@@ -745,8 +737,6 @@ class ObjectTab(QWidget):
         self.Update_slider(self.Y_Rotation,self.Y_Rotation_input_field.text())
         self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
 
-
-
     def translateUi(self):
         current_lang = translator.current_language
         translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
@@ -771,10 +761,7 @@ class ObjectTab(QWidget):
         self.L_slider.setToolTip(translations.get("Adjust Length", "Adjust Length"))
         self.Delete_Object_Button.setText(translations.get("Delete Object", "Delete Object"))
         self.Import_Object_Button.setText(translations.get("Import Object", "Import Object"))
-
-
-
-        
+       
     def ValidType(self, val):
         """Validates if val type is string"""
         return type(val) == str
@@ -915,9 +902,8 @@ class PivotTab(QWidget):
         """Pivot Tab"""
         super().__init__(parent)
 
-
         # Pivot Point Coords Section
-        self.Pivot_Point_Check = QCheckBox("Custom Pivot Point", self)
+        self.Pivot_Point_Check = QCheckBox("Cutom Pivot Point", self)
         self.Pivot_Point_Check.setLayoutDirection(Qt.LayoutDirection.RightToLeft)
         self.Pivot_Point_Check.setChecked(True)
         self.Pivot_Point_Check.stateChanged.connect(lambda: self.state_changed(self.Pivot_Point_Check, [self.XPivot_point_input_field, self.YPivot_point_input_field, self.ZPivot_point_input_field], [self.XPivot_button_minus, self.XPivot_button_plus, self.YPivot_button_minus, self.YPivot_button_plus,self.ZPivot_button_plus, self.ZPivot_button_minus]))
@@ -1034,7 +1020,6 @@ class PivotTab(QWidget):
 
 
 
-
     def update_ui_by_config(self):
         """ Method that updates attributes in text field when the object index is change from combo box. """
 
@@ -1051,7 +1036,7 @@ class PivotTab(QWidget):
 
         self.Update_slider(self.Distance_Slider, self.Distance_Pivot_input_field.text())
         self.translateUi()
-        
+
         
     def Update_slider(self, slider, val):
         try:
@@ -1140,15 +1125,13 @@ class PivotTab(QWidget):
                 field.editingFinished.emit()
             except:
                 field.setText(str(0.0))
-                field.editingFinished.emit()
-
-
+                field.editingFinished.emit()#
+    
     def translateUi(self):
         current_lang = translator.current_language
         translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
         self.Pivot_Point_Check.setText(translation.get("Custom Pivot Point", "Custom Pivot Point"))
         self.Distance_Pivot.setText(translation.get("Distance","Distance"))
-
 
 class RandomTabDialog(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
@@ -1175,6 +1158,7 @@ class RandomTabDialog(QWidget):
 
 
     def translateUi(self):
+        """Apply translations to UI"""
         current_lang = translator.current_language
         translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
         self.tab_widget.setTabText(0, translation.get("Base", "Base"))
@@ -1182,7 +1166,6 @@ class RandomTabDialog(QWidget):
         self.tab_widget.setTabText(2, translation.get("Pivot Point", "Pivot Point"))
         self.tab_widget.setTabText(3, translation.get("Render", "Render"))
         self.tab_widget.setTabText(4, translation.get("Light", "Light"))
-
 
 class RandomDefault(QWidget):
     """Defualt page for Random"""
@@ -1278,7 +1261,6 @@ class RandomDefault(QWidget):
             field.setToolTip('Random seed') 
 
 
-                            
 class RandomObject(QWidget):
     """Random Object"""
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
@@ -1453,8 +1435,6 @@ class RandomObject(QWidget):
         for field_name, checkbox in self.field_checkboxes.items():
             translated = translation.get(field_name, field_name)
             checkbox.setText(translated)
-
-
 
 class RandomPivot(QWidget):
     """Random PivotPage"""
@@ -1765,6 +1745,7 @@ class RandomRender(QWidget):
             checkbox.setText(translated)
 
 
+
 class RandomLight(QWidget):
     """Random Lighting"""
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
@@ -1936,13 +1917,7 @@ class Render(QWidget):
         self.mainpage = parent
 
         self.i = 1
-
-
         self.queue = []
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
 
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
         self.GenerateRenders_Button.clicked.connect(self.renderQueueControl)
@@ -2062,9 +2037,8 @@ class Render(QWidget):
         self.GenerateRenders_Button.setText(translation.get("Generate Renders", "Generate Renders"))
         self.unlimited_render_button.setText(translation.get("Unlimited Renders", "Unlimited Renders"))
         self.Degree_Change_title.setText(translation.get("Degrees of Change", "Degrees of Change"))
-        self.Number_of_renders_title.setText(translation.get("Number of Renders", "Number of Renders"))
+        self.Number_of_renders_title.setText(translation.get("Number of Renders"))
         self.render_preview_button.setText(translation.get("Render Preview","Render Preview"))
-
 
     
     def unlimitedrender(self):
@@ -2221,7 +2195,13 @@ class Render(QWidget):
         else:
             self.generate_render()
 
-    def set_renders(self):
+    def set_renders(self):#
+        try:
+            val = int(self.Number_of_renders_input_field.text())
+            if val <= 0:
+                self.Number_of_renders_input_field.setText("1") 
+        except:
+            self.Number_of_renders_input_field.setText("1") 
         try: 
             backend.set_renders(int(self.Number_of_renders_input_field.text()))
         except:
@@ -2246,10 +2226,8 @@ class Port(QWidget):
 
         #First Section
         def Get_Object_Filepath(Scroll):
-
             current_lang = translator.current_language
             translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
-
 
             import_box = QMessageBox()
             import_box.setText(translations.get("How would you like to import objects?", "How would you like to import objects?"))
@@ -2323,10 +2301,6 @@ class Port(QWidget):
                                 button.setMenu(menu)
                                 Scroll.addWidget(button)
 
-
-
-
-
                 Object_detect(tab_widget)
 
             except Exception:
@@ -2364,10 +2338,13 @@ class Port(QWidget):
             try:
                 if clicked_button != cancel_button:
                     Name = self.GetName()
-                    if Name != False:
+                    if Name != False and len(Name) < 25:
                         obj = backend.RenderObject(primative = selected_object.upper())
                         if Name == "Object":
-                            Name = f"{Name} {len(shared_state.itemNames)+1}"
+                            count = 1
+                            while f"{Name} {len(shared_state.itemNames)+count}" in shared_state.itemNames:
+                                count+=1
+                            Name = f"{Name} {len(shared_state.itemNames)+count}"
                         shared_state.add_item(obj, Name)
 
                         button = QPushButton(Name)
@@ -2387,8 +2364,11 @@ class Port(QWidget):
                         Scroll.addWidget(button)
 
                         QApplication.instance().focusWidget().clearFocus()
-
-                
+                    elif Name != False and len(Name) >= 25:
+                        error_box = ilyaMessageBox("Name is too long!", "Error")
+                    else:
+                        pass
+                        
             except Exception as e:
                 print(e)
 
@@ -2440,7 +2420,7 @@ class Port(QWidget):
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
 
-        self.ImportSettings_Button = QPushButton("Import Settings", self)
+        self.ImportSettings_Button = QPushButton('Import Settings', self)
         self.ImportSettings_Button.clicked.connect(lambda: Get_Settings_Filepath(tab_widget))
 
         def delete_object(tab_widget, scroll):
@@ -2455,31 +2435,37 @@ class Port(QWidget):
                 warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
                 return QMessageBox.warning(self, warning_text, warning_msg)
 
-            for obj in shared_state.items:
-                to_delete.addButton(str(obj), QMessageBox.ActionRole)
+            for i in range(len(shared_state.itemNames)):
+                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
             
             cancel_button = to_delete.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             to_delete.exec()
-            clicked_button = to_delete.clickedButton()
+            choice = str(to_delete.clickedButton().text())
 
 
-            if clicked_button != cancel_button:
-                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
+
+            if choice != cancel_button.text():
+                obj_index = shared_state.itemNames.index(choice)
                 obj = shared_state.items[obj_index]
-                shared_state.remove_item(obj)
                 scroll.itemAt(obj_index).widget().setParent(None)
-                backend.update_log(f'{obj} object deleted\n')
-                del backend.get_config()["objects"][obj.object_pos]
-                # shift objects after this one down by one
-                for i in range(len(shared_state.itemNames)):
-                    to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
+                try:
+                    shared_state.remove_item(obj)
+                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
+                    backend.update_log(f'{obj} object deleted\n')
+                    del backend.get_config()["objects"][obj.object_pos]
+                    # shift objects after this one down by one
+                    for i in range(obj_index, len(shared_state.items)):
+                        obj = shared_state.items[i]
+                        obj.object_pos = i
+                except:
+                    error_box = ilyaMessageBox("Error deleting object", "Error")
 
                 shared_state.items_updated.emit(shared_state.items)
                 # The last object was deleted
                 if (not shared_state.items):
                     Object_detect(tab_widget)
                     QMessageBox.warning(self, translations.get("Warning", "Warning"),translations.get("You have deleted all of the objects, object manipulation tabs have been disabled.", "You have deleted all of the objects, object manipulation tabs have been disabled."))
-        
+    
         self.Delete_Object_Button = QPushButton('Delete Object', self)
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
         
@@ -2544,8 +2530,6 @@ class Port(QWidget):
         try:
             current_lang = translator.current_language
             translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
-            
-            
             window_title = translations.get("Object Name", "Object Name")
             window_text = translations.get("Enter Object Name:", "Enter Object Name:")
             ObjName, State = QtWidgets.QInputDialog.getText(self, window_title, window_text)
@@ -2955,10 +2939,10 @@ class Settings(QWidget):
         self.translations = translator.translations
 
         #button clicks
+        self.Help_button.clicked.connect(self.openWebsite)
         self.colour_scheme_button.clicked.connect(self.Colour_Scheme_Press)
         translator.languageChanged.connect(self.translateUi)
         self.Languages.clicked.connect(self.Language_button_press)
-        self.Help_button.clicked.connect(self.openWebsite)
             
         #button Layout
         main_layout.addWidget(self.colour_scheme_button, 0, 1)
@@ -2981,10 +2965,11 @@ class Settings(QWidget):
         # Add buttons for different styles
         dark_mode = colour_box.addButton("Dark Mode", QMessageBox.ActionRole)
         light_mode = colour_box.addButton("Light Mode", QMessageBox.ActionRole)
-        colourblind1 = colour_box.addButton("Factory Default", QMessageBox.ActionRole)
-        default = colour_box.addButton("Colourblind 1", QMessageBox.ActionRole)
+        colourblind1 = colour_box.addButton("Factory New", QMessageBox.ActionRole)
+        default = colour_box.addButton("Colourblind 2", QMessageBox.ActionRole)
         dyslexic = colour_box.addButton("Light Mode 2", QMessageBox.ActionRole)
-        colour_scheme1 = colour_box.addButton("Colour Blind 2", QMessageBox.ActionRole)
+        colour_scheme1 = colour_box.addButton("Colour Mode 1", QMessageBox.ActionRole)
+        Image_test = colour_box.addButton("Imagetest", QMessageBox.ActionRole)
         colour_box.addButton(QMessageBox.Cancel)
 
         colour_box.exec()
@@ -3002,6 +2987,8 @@ class Settings(QWidget):
             self.apply_stylesheet("Dyslexic.qss")
         elif colour_box.clickedButton() == colour_scheme1:
             self.apply_stylesheet("ColourScheme1.qss")
+        elif colour_box.clickedButton() == Image_test:
+            self.apply_stylesheet("ImageTest.qss")
 
 
     def apply_stylesheet(self, filename):
@@ -3035,7 +3022,7 @@ class Settings(QWidget):
         elif language_box.clickedButton() == Spanish:
             translator.setLanguage("Spanish")
         elif language_box.clickedButton() == Portuguese:
-            translator.setLanguage("Portuguese")
+            translator.setLanguage("Portugese")
         elif language_box.clickedButton() == Mandarin:
             translator.setLanguage("Mandarin")
         self.save_language_setting()

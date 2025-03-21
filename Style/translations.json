@@ -137,7 +137,15 @@
         "Error when reading model": "Error al leer el modelo",
         "The selected file is corrupt or invalid.": "El archivo seleccionado está dañado o es inválido.",
         "Error when importing": "Error al importar",
-        "Error: {}": "Error: {}"
+        "Error: {}": "Error: {}",
+        "Datasets and Object Modeling": "Conjuntos de Datos y Modelado de Objetos",
+        "tab_object": "Objeto",
+        "tab_pivot": "Punto de Pivote",
+        "tab_render": "Renderizar",
+        "tab_lighting": "Iluminación",
+        "tab_import_export": "Importar/Exportar",
+        "tab_settings": "Configuraciones",
+        "tab_random": "Aleatorio"
         
     },
         "Mandarin": {
