@@ -5,6 +5,7 @@ import numpy as np
 import random
 import json
 import os
+from copy import deepcopy
 
 # initialise config - will hold the config ready for export
 config = { 
@@ -66,20 +67,19 @@ class Backend():
                         o = self.RenderObject(filepath = obj["filename"])
                     else:
                         o = self.RenderObject(primative = obj["primative"])
-                
 
                     o.set_loc(obj["pos"])
                     o.set_rotation(obj["rot"])
                     o.set_scale(obj["sca"])
 
             if ("light_sources" in temp):
-                for light in temp["light_sources"]:
-                    l = self.RenderLight(light["type"], light["name"])
+                # for now there is only one light which can be on the scene
+                l = self.RenderLight(temp["light_sources"]["type"], temp["light_sources"]["name"])
 
-                    l.set_loc(light["pos"])
-                    l.set_rotation(light["rot"])
-                    l.set_energy(light["energy"])
-                    l.set_color(light["color"])
+                l.set_loc(temp["light_sources"]["pos"])
+                l.set_rotation(temp["light_sources"]["rot"])
+                l.set_energy(temp["light_sources"]["energy"])
+                l.set_color(temp["light_sources"]["color"])
 
             if ("pivot" in temp):
                 config["pivot"] = temp["pivot"].copy()
@@ -118,6 +118,8 @@ class Backend():
             "dis": 0
         }
         config["random"] = {
+            "mode": "set",
+            "objects": {},
             "pivot": [],
             "environment": [],
             "pos": [],
@@ -125,7 +127,7 @@ class Backend():
         }
         config["render"] = {
             "renders": 1,
-            "degree": [1,1,1]
+            "degree": [0,0,0]
         }
         config["render_folder"] = ""
 
@@ -162,114 +164,255 @@ class Backend():
         config["render"]["renders"] = n
 
         Backend.update_log(f'Number of renders changed to: {n}\n')
-
+   
     def set_angles(self, angles):
         """ Sets camera angle change per render in the config.
         
-        :param angles: a list containing x z and y angle change"""
+        :param angles: a list containing x y and z angle change"""
         config["render"]["degree"] = angles
 
-        Backend.update_log(f'Camera angle change per render changed to: {angles}\n')
+    # REPOSITION THESE FUNCTIONS 
+    #
+    def toggle_random_mode(self, mode):
+        """
+        Toggles the random mode in config.
 
-    def toggle_random_pivot_x(self):
-        """Toggles value for if pivot x coordinate is randomised"""
-        if "x" in config["random"]["pivot"]:
-            config["random"]["pivot"].remove("x")
-            Backend.update_log(f'Pivot point X co-ord set to not random\n')
+        Args:
+            mode (str): The new mode to set for random operations. 
+
+        Returns:
+            None
+        """
+        config["random"]["mode"] = str(mode)
+        Backend.update_log(f'Random mode set to {mode}\n')
+        
+    def update_random_attribute(self, index, category, field, state, lower, upper):        
+        # cfg error handling:
+        config["random"].setdefault("objects", {})
+        config["random"]["objects"].setdefault(index, {})
+        config["random"]["objects"][index].setdefault(category, {})
+
+        # if still ticked
+        if state:            
+            # add field to config with bounds
+            try:
+                config["random"]["objects"][index][category][field] = [float(lower), float(upper)]
+            except:
+                config["random"]["objects"][index][category][field] = [0,0]
+            # try apply this change
+            self.apply_specific_random_limit(index, category, field)
         else:
-            config["random"]["pivot"].append("x")
-            Backend.update_log(f'Pivot point X co-ord set to random\n')
+            # check this logic again
+            # remove field from config if it exists
+            if field in config["random"]["objects"][index][category]:
+                del config["random"]["objects"][index][category][field]
+        
+        # Backend.update_log(f'Random attribute {field} set to {state}\n')
+    #
+    
+    def apply_specific_random_limit(self, index, category, field):
+        """Applies the specific limits"""
+        try:
+            lower_bound = float(config["random"]["objects"][index][category][field][0])
+            upper_bound = float(config["random"]["objects"][index][category][field][1])
+            
+            random_value = random.uniform(lower_bound, upper_bound)
+            # print(f"object {index} - {category} - {field}: {random_value}")
+            self.update_appropriate_cfg(index, category, field, random_value)
+        except:
+            pass
+    
+    # this should be called for when its generating PER render
+    def apply_all_random_limits(self):
+        """Applies the limits at the per render mode"""
+        # will be chcanged to obj, cat, attributes later
+        print(config["random"]["objects"].items())
+        try:
+            for obj_index, categories in config["random"]["objects"].items():
+                for category, attributes in categories.items():  # Iterate over categories (e.g., 'render', 'pivot')
+                    for attr, bounds in attributes.items():  # Iterate over attributes within each category
+                        try:
+                            # Extract lower and upper bounds for random generation
+                            lower_bound = float(bounds[0])
+                            upper_bound = float(bounds[1])
 
+                            # Generate a random value within bounds
+                            random_value = random.uniform(lower_bound, upper_bound)
+                            print(f"Object {obj_index} - {category} - {attr}: {random_value}")
+                            
+                            # apply this field
+                            self.apply_specific_random_limit(obj_index, category, attr)
+                        except Exception as e:
+                            print(f"Error processing attribute '{attr}' for Object {obj_index}: {e}")
+        
+            return config
+        
+        except Exception as e:
+            print(f"Error processing config['random']['objects']: {e}")
+    #
+    #
+    def update_appropriate_cfg(self, index, category, field, random_value): 
+        """
+        Updates the config file based on the specific index, category and field.
+        
+        Args:
+            index (int): The objects index of the configuration to update if applicable default is 0.
+            category (str): The category of which  configuration to update (object, pivot, render, light).
+            field (str): The specific field within the category to update.
+            random_value (float): The new value to be applied to the corresponding category and field.
+            
+        Returns:
+            None 
+        """
+        match category:
+            case 'object':
+                self.random_update_object_loc(index, field, random_value)
+            case 'pivot':
+                self.random_update_pivot(field, random_value)
+            case 'render':
+                self.random_update_render(field, random_value)
+            case 'light':
+                self.random_update_light(field, random_value)
+                
+            case _:
+                raise ValueError(f"Unrecognized category: {category}")
 
-    def toggle_random_pivot_z(self):
-        """Toggles value for if pivot z coordinate is randomised"""
-        if "z" in config["random"]["pivot"]:
-            config["random"]["pivot"].remove("z")
-            Backend.update_log(f'Pivot point Z co-ord set to not random\n')
-        else:
-            config["random"]["pivot"].append("z")
-            Backend.update_log(f'Pivot point Z co-ord set to random\n')
+    def random_update_render(self, field, random_value):
+        """
+        Updates the render section in the config based on the specific field.
+        
+        Args:
+            field (str): The specific field within the render config to update (X, Y, Z, Quantity).
+            random_value (float): The new value to be applied to the corresponding field.
 
-    def toggle_random_pivot_y(self):
-        """Toggles value for if pivot y coordinate is randomised"""
-        if "y" in config["random"]["pivot"]:
-            config["random"]["pivot"].remove("y")
-            Backend.update_log(f'Pivot point Y co-ord set to not random\n')
-        else:
-            config["random"]["pivot"].append("y")
-            Backend.update_log(f'Pivot point Y co-ord set to random\n')
+        Returns:
+            dict: The updated render config.
 
-    def toggle_random_environment_angle(self):
-        """Toggles value for if the angle is randomised during render"""
-        if "angle" in config["random"]["environment"]:
-            config["random"]["environment"].remove("angle")
-            Backend.update_log(f'Angle during render set to not random\n')
-        else:
-            config["random"]["environment"].append("angle")
-            Backend.update_log(f'Angle during render set to random\n')
+        Notes:
+            This function modifies the global config.
+        """
+        match field:
+            case "X":
+                config["render"]["degree"][0] = random_value
+            case "Y":
+                config["render"]["degree"][1] = random_value
+            case "Z":
+                config["render"]["degree"][2] = random_value
+            
+            case "Quantity":
+                config["render"]["renders"] = int(np.ceil(random_value))
+                
+            case _:
+                raise ValueError(f"Unrecognized category: {category}")
+                
+        return config
 
-    def toggle_random_environment_background(self):
-        """Toggles value for if background colour is randomised during render"""
-        if "background" in config["random"]["environment"]:
-            config["random"]["environment"].remove("background")
-            Backend.update_log(f'Background colour set to not random\n')
-        else:
-            Backend.update_log(f'Background colour set to random\n')
+    def random_update_pivot(self, field, random_value):
+        """
+        Updates the pivot section in the config based on the specified field.
 
-    def toggle_random_coord_x(self,selected_index):
-        if "x" in config["random"]["pos"]:
-            config["random"]["pos"].remove("x")
-            Backend.update_log(f'X co-ord of object {selected_index} set to not random\n')
-        else:
-            config["random"]["pos"].append("x")
-            Backend.update_log(f'X co-ord of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
+        Args:
+            field (str): The specific field within the pivot config to update.
+                        Expected vals: 'X', 'Y', 'Z' (pivot cords) or 'Measurement' (distance).
+            random_value (float): The new value to apply to the specified field.
 
-    def toggle_random_coord_y(self,selected_index):
-        if "y" in config["random"]["pos"]:
-            config["random"]["pos"].remove("y")
-            Backend.update_log(f'Y co-ord of object {selected_index} set to not random\n')
-        else:
-            config["random"]["pos"].append("y")
-            Backend.update_log(f'Y co-ord of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
+        Returns:
+            dict: The updated pivot config.
 
-    def toggle_random_coord_z(self,selected_index):
-        if "z" in config["random"]["pos"]:
-            config["random"]["pos"].remove("z")
-            Backend.update_log(f'Z co-ord of object {selected_index} set to not random\n')
-        else:
-            config["random"]["pos"].append("z")
-            Backend.update_log(f'Z co-ord of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
+        Notes:
+            This function modifies the global config.
+        """        
+        match field:
+            case "X":
+                config["pivot"]["point"][0] = random_value
+            case "Y":
+                config["pivot"]["point"][1] = random_value
+            case "Z":
+                config["pivot"]["point"][2] = random_value
+            
+            case "Measurement":
+                config["pivot"]["dis"] = random_value
+            
+            case _:
+                raise ValueError(f"Unrecognized category: {category}")
+            
+        return config
+    
+    def random_update_light(self, field, random_value):
+        """
+        Updates the light source config based on the specified field.
 
+        Args:
+            field (str): The specific field within the light source config to update.
+                Expected vals: (X, Y, Z, Pitch, Roll, Yaw, Strength, Radius, Colour)
+            random_value (float): The new value to be applied to the corresponding field.
 
-    def toggle_random_width(self,selected_index):
-        if "width" in config["random"]["sca"]:
-            config["random"]["sca"].remove("width")
-            Backend.update_log(f'Width of object {selected_index} set to not random\n')
-        else:
-            config["random"]["sca"].append("width")
-            Backend.update_log(f'Width of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
+        Returns:
+            dict: The updated config.
+            
+        Notes:
+            This function modifies the global config.
+        """
+        match field:
+            case "X":
+                config["light_sources"]["pos"][0] = random_value
+            case "Y":
+                config["light_sources"]["pos"][1] = random_value
+            case "Z":
+                config["light_sources"]["pos"][2] = random_value
+                
+            case "Pitch":
+                config["light_sources"]["rot"][0] = random_value
+            case "Roll":
+                config["light_sources"]["rot"][1] = random_value
+            case "Yaw":
+                config["light_sources"]["rot"][2] = random_value 
+                
+            case "Strength":
+                config["light_sources"]["energy"] = random_value
+            case "Radius":
+                config["light_sources"]["radius"] = random_value
+            case "Colour":
+                # THIS NEEDS CHANGED SINCE ITS A HEXCODE
+                # config["light_sources"]["color"] = '#ffffff'
+                # config["light_sources"]["color"] = random_value  
+                pass
+            
+            case _:
+                raise ValueError(f"Unrecognized field: {field}")
+        
+        return config
 
-    def toggle_random_height(self,selected_index):
-        if "height" in config["random"]["sca"]:
-            config["random"]["sca"].remove("height")
-            Backend.update_log(f'Height of object {selected_index} set to not random\n')
-        else:
-            config["random"]["sca"].append("height")
-            Backend.update_log(f'Height of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
-
-    def toggle_random_length(self,selected_index):
-        if "length" in config["random"]["sca"]:
-            config["random"]["sca"].remove("length")
-            Backend.update_log(f'Length of object {selected_index} set to not random\n')
-        else:
-            config["random"]["sca"].append("length")
-            Backend.update_log(f'Length of object {selected_index} set to random\n')
-        self.add_object_properties(selected_index)
+    def random_update_object_loc(self, index, field, random_value):
+        match field:
+            # assumes pos is xyz
+            case "X":
+                config["objects"][index]["pos"][0] = random_value
+            case "Y":
+                config["objects"][index]["pos"][1] = random_value
+            case "Z":
+                config["objects"][index]["pos"][2] = random_value
+            
+            # assumes pitch is Y, roll is X and yaw is Z
+            case "Pitch":
+                config["objects"][index]["rot"][0] = random_value
+            case "Roll":
+                config["objects"][index]["rot"][1] = random_value
+            case "Yaw":
+                config["objects"][index]["rot"][2] = random_value
+            
+            # assumes width is x height is y and length is z and is in form xyz
+            case "Width":
+                config["objects"][index]["sca"][0] = random_value
+            case "Height":
+                config["objects"][index]["sca"][1] = random_value
+            case "Length":
+                config["objects"][index]["sca"][2] = random_value
+            
+            case _:
+                raise ValueError(f"Unrecognized field: {field}")
+        return config
+    
 
     def toggle_object(self, object, state):
         if state:
@@ -284,9 +427,10 @@ class Backend():
     def ground_object(self, object, state):
         if state:
             object.grounded = True
+            Backend.update_log(f'Object {object} grounded\n')
         else:
             object.grounded = False
-        print(object.grounded)
+            Backend.update_log(f'Object {object} ungrounded\n')
             
   
     def is_config_objects_empty(self):
@@ -334,16 +478,16 @@ class Backend():
         :param angle: a list containing the camera angle
         :param distance: distance from pivot point
 
-        :return param position: list containing x,z,y position values for camera"""
+        :return param position: list containing x,y,z position values for camera"""
 
         r = np.sin(angle[0]) * distance
 
         x_position = r * np.sin( angle[2] )    #calculate x and y positions based on y angle
-        z_position = -1 * r * np.cos( angle[2] )
+        y_position = -1 * r * np.cos( angle[2] )
 
-        y_position = np.cos(angle[0]) * distance #caluclate y angle based on x positions
+        z_position = np.cos(angle[0]) * distance #caluclate z angle based on x positions
 
-        position = [x_position, z_position, y_position]
+        position = [x_position, y_position, z_position]
         return position
 
     
@@ -360,23 +504,24 @@ class Backend():
         number_of_renders = config["render"]["renders"]
 
         starting_x_angle = np.pi / 2 #No place in UI to set starting camera angle 
-        starting_z_angle = 0
         starting_y_angle = 0
+        starting_z_angle = 0
 
         current_x_angle = starting_x_angle
-        current_z_angle = starting_z_angle
         current_y_angle = starting_y_angle
+        current_z_angle = starting_z_angle
 
-        
+        if preview:
+            number_of_renders = 1
 
         for i in range(number_of_renders): #Reads config and randomised parts of render meant to be rendered
             
             if "background" in randoms["environment"]:
-                self.set_bg_color( [ random.randint(1,255) , random.randint(1,255) , random.randint(1,255) ] )
+                self.set_bg_color( [ random.randint(0,255) , random.randint(0,255) , random.randint(0,255) ] )
             else:
                 pass
 
-            camera_rotation = [current_x_angle,current_z_angle,current_y_angle]
+            camera_rotation = [current_x_angle,current_y_angle,current_z_angle]
             position = self.calculate_position(camera_rotation, pivot_distance)
 
             if "x" in randoms["pivot"]:
@@ -384,12 +529,12 @@ class Backend():
             else:
                 position[0] += pivot_point[0]
 
-            if "z" in randoms["pivot"]:
+            if "y" in randoms["pivot"]:
                position[1] += random.randint(0,10)
             else:
                 position[1] += pivot_point[1]
             
-            if "y" in randoms["pivot"]:
+            if "z" in randoms["pivot"]:
                position[2] += random.randint(0,10)
             else:
                 position[2] += pivot_point[2] 
@@ -401,72 +546,23 @@ class Backend():
 
             if "angle" in randoms["environment"]:
                 current_x_angle += np.deg2rad( random.randint(0,359) )
-                current_z_angle += np.deg2rad( random.randint(0,359) )
                 current_y_angle += np.deg2rad( random.randint(0,359) )
+                current_z_angle += np.deg2rad( random.randint(0,359) )
             else:
                 current_x_angle += degree_change[0]
-                current_z_angle += degree_change[1]
-                current_y_angle += degree_change[2]
+                current_y_angle += degree_change[1]
+                current_z_angle += degree_change[2]
 
     def remove_camera_poses(self):
         """Remove camera poses that have been used to generate renders"""
 
         config["camera_poses"] = []
-   
-
-    def add_object_properties(self,selected_index):
-        #IF ANYONE WANTS ASSIGN VALUES TO RANDOM RANGE I JUST PUT PLACEHOLDER VALUES
-        obj = config["objects"][selected_index]
-
-        # Get randomization settings from the config
-        randoms = config["random"]
-        random_object_pos = randoms["pos"]
-        random_object_scale = randoms["sca"]
-
-        # Copy current position and scale values
-        position = obj["pos"].copy()
-        scale = obj["sca"].copy()
-            #Position propertis
-        if "x" in random_object_pos:
-            position[0] = random.uniform(1, 10) # random range of x coords - 1-10
-            print(f"Randomized Object X: {scale[0]}")
-            
-        if "y" in random_object_pos:
-            position[2] = random.uniform(1, 10)
-            print(f"Randomized Object y: {position[2]}")
-
-
-        if "z" in random_object_pos:
-            position[1] = random.uniform(1, 10)
-            print(f"Randomized Object Z: {position[1]}")
-
-
-            #Scale properties
-        if "width" in random_object_scale:
-            self.random_object_width = random.uniform(1,5)
-            scale[0] = self.random_object_width # random range of width - 1-5
-            print(f"Randomized Width: {scale[0]}")
-
-            
-        if "height" in random_object_scale:
-            scale[1] = random.uniform(1, 5)
-            print(f"Randomized Height: {scale[1]}")
-
-
-        if "length" in random_object_scale:
-            scale[2] = random.uniform(1, 5)
-            print(f"Randomized Length: {scale[2]}")
-
-                    
-        obj["pos"] = position
-        obj["sca"] = scale
-        obj = config["objects"][selected_index]
 
     def set_runtime_config(self, config):
         self.runtime_config = config
 
 
-    def render(self, headless = False, preview = False, viewport_temp = False):
+    def render(self, objects, headless = False, preview = False, viewport_temp = False, config = config):
         """Renders the scene and saves to file in the output folder."""
 
         # We need to take 
@@ -474,7 +570,15 @@ class Backend():
         if not viewport_temp: Backend.update_log(f'Rendering Started\n')
         else: Backend.update_log(f'Viewport Preview Render Started\n')
 
-        self.add_camera_poses(preview = preview)
+        
+        origConfig = deepcopy(config)
+        origObjects = []
+
+        for obj in objects.items:
+            origObjects.append(deepcopy(obj.properties))
+            #self.add_object_properties(obj)
+
+        self.add_camera_poses(viewport_temp)
 
 
         with open("backend\\temp_export.json", "w") as export_file:
@@ -507,6 +611,10 @@ class Backend():
                 os.system("blenderproc vis hdf5 output/"+str(i + num) +".hdf5")
 
         self.remove_camera_poses()
+        config = origConfig
+
+        '''for i in range(len(objects.items)):
+            obj.properties = origObjects[i]'''
 
         try:
             os.remove("backend/temp_export.json")
@@ -579,7 +687,7 @@ class Backend():
                         file.write(interaction)
 
             except:
-                print("Error")
+                print("Error updating log")
 
 
     class RenderObject():
@@ -634,7 +742,7 @@ class Backend():
         def set_loc(self, location):
             """Set the location of an object in the scene.
             
-            :param location: A list containing [x,z,y] where x,z,y is an integer or float. This determines the coordinates of the object's location.
+            :param location: A list containing [x,y,z] where x,y,z is an integer or float. This determines the coordinates of the object's location.
             """
             if (is_blender_environment):
                 self.object.set_location(location)
@@ -646,7 +754,7 @@ class Backend():
         def set_scale(self, scale):
             """Set the scale of an object in the scene.
             
-            :param scale: A list containing [x,z,y] where x,z,y is an integer or float. This determines the scaling of each axis.
+            :param scale: A list containing [x,y,z] where x,y,z is an integer or float. This determines the scaling of each axis.
             """
             if (is_blender_environment):
                 self.object.set_scale(scale)
@@ -657,7 +765,7 @@ class Backend():
         def set_rotation(self, euler_rotation):
             """Set the rotation of an object in the scene.
             
-            :param euler_rotation: A list containing [x,y,z] - (pitch,yaw,roll) values for the euler rotation to be applied to the object.
+            :param euler_rotation: A list containing [x,y,z] - (roll,yaw,pitch) values for the euler rotation to be applied to the object.
             """
             if (is_blender_environment):
                 self.object.set_rotation_euler(euler_rotation)
@@ -697,11 +805,11 @@ class Backend():
             if (is_blender_environment):
                 self.light = bproc.types.Light(light_type, name)
 
-            self.light_pos = len(config.setdefault("light_sources", []))
+            self.light_pos = len(config.setdefault("light_sources", {}))
 
             Backend.update_log(f'{self.__str__()} light source added\n')
 
-            config["light_sources"].append({
+            config["light_sources"] = {
                 "type": light_type,
                 "name": name,
                 "pos": [0, 0, 0],
@@ -709,7 +817,7 @@ class Backend():
                 "energy": 10,
                 "color": [255, 255, 255],
                 "radius": 0
-            })
+            }
 
         def __str__(self):
             return f"Light Source {self.light_pos + 1}"
@@ -719,7 +827,7 @@ class Backend():
             if (is_blender_environment):
                 self.light.set_type(type)
 
-            config["light_sources"][self.light_pos]["type"] = type
+            config["light_sources"]["type"] = type
 
             Backend.update_log(f'Type of {self.__str__()} changed to {type}\n')
 
@@ -728,27 +836,27 @@ class Backend():
             if (is_blender_environment):
                 self.light.set_radius(radius)
 
-            config["light_sources"][self.light_pos]["radius"] = radius
+            config["light_sources"]["radius"] = radius
 
             Backend.update_log(f'Radius of {self.__str__()} changed to {radius}\n')
 
         def set_loc(self, location):
             """Set the location of a light source in the scene.
             
-            :param location: A list containing [x,z,y] where x,z,y is an integer or float. This determines the coordinates of the light's location.
+            :param location: A list containing [x,y,z] where x,y,z is an integer or float. This determines the coordinates of the light's location.
             """
             #print("location changed")
             if (is_blender_environment):
                 self.light.set_location(location)
 
-            config["light_sources"][self.light_pos]["pos"] = location
+            config["light_sources"]["pos"] = location
 
             Backend.update_log(f'Location of {self.__str__()} changed to {location}\n')
 
         def set_rotation(self, rotation):
             """Set the rotation of the light in the scene.
 
-            :param rotation: A list [x,z,y] with values for the rotation to be applied to the light.
+            :param rotation: A list [x,y,z] with values for the rotation to be applied to the light.
             """
             #print("angle changed")
             rotRad = []
@@ -759,7 +867,7 @@ class Backend():
             if (is_blender_environment):
                 self.light.set_rotation_euler(rotRad)
 
-            config["light_sources"][self.light_pos]["rot"] = rotation
+            config["light_sources"]["rot"] = rotation
 
             Backend.update_log(f'Rotation of {self.__str__()} changed to {rotation}\n')
 
@@ -772,7 +880,7 @@ class Backend():
             if (is_blender_environment):
                 self.light.set_energy(energy)
 
-            config["light_sources"][self.light_pos]["energy"] = energy
+            config["light_sources"]["energy"] = energy
 
             Backend.update_log(f'Energy of {self.__str__()} changed to {energy}\n')
 
@@ -806,7 +914,7 @@ class Backend():
                 print(colour)
                 self.light.set_color(colour)
 
-            config["light_sources"][self.light_pos]["color"] = color
+            config["light_sources"]["color"] = color
 
             Backend.update_log(f'Colour of {self.__str__()} changed to {color}\n')
 # Empty line required
