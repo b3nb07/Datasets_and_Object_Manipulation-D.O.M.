@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Japp"
+  given-names: "Oliver"
+- family-names: "Waywell"
+  given-names: "Ilya"
+- family-names: "Brown"
+  given-names: "Dominic"
+- family-names: "Brown"
+  given-names: "Ben"
+- family-names: "Burke"
+  given-names: "Ethan"
+- family-names: "Dawson"
+  given-names: "Miller"
+- family-names: "Bowie"
+  given-names: "Sophie"
+title: "Datasets and Object Modelling (D.O.M)"
+version: 1.0
+date-released: 2025-04-15
+url: "https://github.com/b3nb07/CS3028_Group_Project"
