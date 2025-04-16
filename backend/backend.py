@@ -5,6 +5,7 @@ import numpy as np
 import random
 import json
 import os
+import shutil
 from copy import deepcopy
 
 # initialise config - will hold the config ready for export
@@ -668,6 +669,16 @@ class Backend():
             json.dump(config, export_file, indent = 2)
 
         Backend.update_log(f'Settings exported\n')
+
+    def export_interaction(self, path, filename="interaction_log.txt"):
+        """Exports the current interaction log.
+        
+        :param filename: The filename of the exported config, defaults to export.json."
+        """
+        file_path = path + "/" + filename
+        shutil.copyfile(filename, file_path)
+
+        Backend.update_log(f'Interaction exported\n')
 
     @staticmethod
     def update_log(interaction):
