@@ -2615,6 +2615,9 @@ class Port(QWidget):
             for i in range(5):
                 tab_widget.setTabEnabled(i, State)
 
+        self.Export_Interaction_Button = QPushButton("Export Interaction Log", self)
+        self.Export_Interaction_Button.clicked.connect(lambda: Export_Interaction())
+
         main_layout = QGridLayout()
 
         main_layout.addWidget(self.TutorialObjects_Button, 0, 0)
@@ -2623,7 +2626,21 @@ class Port(QWidget):
         main_layout.addWidget(self.ExportSettings_Button, 0, 3)
         main_layout.addWidget(self.ImportSettings_Button, 0, 4)
         main_layout.addWidget(self.SelectRenderFolder_Button, 0, 5)
+        main_layout.addWidget(self.Export_Interaction_Button, 0, 6)
         self.setLayout(main_layout)
+
+        def Export_Interaction():
+            try:
+                export_path = QFileDialog.getExistingDirectory(self, "Select Folder")
+
+                if (export_path == "" or export_path == None):
+                    pass
+                else:
+                    backend.export_interaction(export_path)
+                    success_box = ilyaMessageBox("Interaction exported successfully.", "Success")
+                   
+            except:
+                error_box = ilyaMessageBox("There was an error selecting folder, please try again.", "Error")
 
         def show_hide_object(object,state):
             backend.toggle_object(object,state)
