@@ -114,7 +114,12 @@ The **RandomTab** allows fields across all pages to be set to random:
 ### Citation and Terms of Use
 
 1. Scope of License
-This software is provided for exclusive use in non-commercial research. Any use outside of this scope, including but not limited to commercial endeavours, is strictly prohibited without the consent of the developers.
+As defined by https://creativecommons.org/share-your-work/cclicenses/
+
+CC BY-NC-SA
+
+This license enables reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator. If you remix, adapt, or build upon the material, you must license the modified material under identical terms. CC BY-NC-SA includes the following elements:
+
 2. Restrictions
 - Users agree not to employ automated systems, algorithms, or processes—including but not limited to web crawlers, data scraping tools, or AI models—to extract or analyse any part of this software or its associated data.
 - The software or its contents shall not be integrated into training datasets for machine learning or AI systems. The outputted data may be used in non-commercial AI training.
