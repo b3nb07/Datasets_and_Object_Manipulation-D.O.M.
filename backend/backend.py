@@ -609,7 +609,7 @@ class Backend():
             os.system("blenderproc vis hdf5 output/0.hdf5")
         elif (not headless):
             for i in range(config["render"]["renders"] ):
-                os.system("blenderproc vis hdf5 output/"+str(i + num) +".hdf5")
+                os.system("blenderproc vis hdf5 " + config["render_folder"] + "/" + str(i + num) +".hdf5")
 
         self.remove_camera_poses()
         config = origConfig
@@ -643,7 +643,7 @@ class Backend():
 
     def getHighestInDir(self):
         highest = -1
-        for file in os.listdir("output"):
+        for file in os.listdir(config["render_folder"]):
             if file.endswith(".hdf5"):
                 num = ""
                 for x in file:
