@@ -130,7 +130,7 @@ class Backend():
             "renders": 1,
             "degree": [0,0,0]
         }
-        config["render_folder"] = ""
+        config["render_folder"] = "output/"
 
         config["render_res"] = (256,256)
 
