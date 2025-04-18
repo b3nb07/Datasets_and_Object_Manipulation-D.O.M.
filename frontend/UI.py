@@ -559,13 +559,13 @@ class ObjectTab(QWidget):
         main_layout.addWidget(self.Width_Obj_pos_input_field, 1, 8)
         main_layout.addWidget(self.W_slider, 1, 9)
 
-        main_layout.addWidget(self.Height_Obj_pos, 2, 7)
-        main_layout.addWidget(self.Height_Obj_pos_input_field, 2, 8)
-        main_layout.addWidget(self.H_slider, 2, 9)
+        main_layout.addWidget(self.Length_Obj_pos, 2, 7)
+        main_layout.addWidget(self.Length_Obj_pos_input_field, 2, 8)
+        main_layout.addWidget(self.L_slider, 2, 9)
 
-        main_layout.addWidget(self.Length_Obj_pos, 3, 7)
-        main_layout.addWidget(self.Length_Obj_pos_input_field, 3, 8)
-        main_layout.addWidget(self.L_slider, 3, 9)
+        main_layout.addWidget(self.Height_Obj_pos, 3, 7)
+        main_layout.addWidget(self.Height_Obj_pos_input_field, 3, 8)
+        main_layout.addWidget(self.H_slider, 3, 9)
 
         main_layout.addWidget(self.combo_box, 0, 9)
 
