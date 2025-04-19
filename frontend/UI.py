@@ -1236,7 +1236,7 @@ class RandomDefault(QWidget):
         """Updates field value"""
         try:
             val = int(field.text())
-            field.setText(str(val))
+            backend.set_seed(val)
         except ValueError:
             field.setText(str(backend.get_config()["seed"]))
 
@@ -2179,14 +2179,19 @@ class Render(QWidget):
             renderingBox.exec()
 
     def renderQueueControl(self):
-        if self.rendering:
+        if self.rendering and not self.mainpage.viewport_ongoing:
             config = backend.get_config()
             self.queue.append(config)
 
             renderingBox = QMessageBox()
             renderingBox.setText("Added to queue.")
             renderingBox.exec()
-
+        
+        elif self.mainpage.viewport_ongoing:
+            renderingBox = QMessageBox()
+            renderingBox.setText("Please wait for the viewport to finish its approximation before starting the main render.")
+            renderingBox.exec()
+            return
 
         else:
             config = backend.get_config()
@@ -2485,7 +2490,7 @@ class Port(QWidget):
                         Scroll.addWidget(button)
 
                         QApplication.instance().focusWidget().clearFocus()
-                    elif Name != False and len(Name) >= 25:
+                    elif Name != False and len(Name) >= 10:
                         error_box = ilyaMessageBox("Name is too long!", "Error")
                     else:
                         pass
