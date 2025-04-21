@@ -214,9 +214,11 @@ class TabDialog(QWidget):
         translator.languageChanged.connect(self.translateUi)
         self.translateUi()
         
-        """#Tests for all pages except Random (included in RandomTabDialog)
+        #Tests for all pages except Random (included in RandomTabDialog)
+        """
         from FrontTests import Tests
-        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)"""
+        Tests(self, self.tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)
+        """
 
     def visual_change(self, thread):
         #Updates Viewport Image

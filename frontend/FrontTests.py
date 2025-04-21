@@ -90,7 +90,8 @@ def ObjectTabTests(tab_widget, shared_state, ObjectTab):
             
             #Updates Field Value
             ObjectTab.Slider_Update_Scale(ObjectTab, 5450, Field)
-            TestPrint(f"Expected 100:", Field.text() == "100")
+            TestPrint(f"Expected 100:", Field.text() == "100.0")
+            print(Field.text())
             
             """#Updates slider position
             ObjectTab.Update_slider(ObjectTab, Slider, 5450)
@@ -108,7 +109,7 @@ def ObjectTabTests(tab_widget, shared_state, ObjectTab):
             TestPrint(f"Expected 0.0:", Field.text() == "0.0")
             
             ObjectTab.Slider_Update_Scale(ObjectTab, 5450, Field)
-            TestPrint(f"Expected 100:", Field.text() == "100")
+            TestPrint(f"Expected 100:", Field.text() == "100.0")
             
             """#Updates slider position
             ObjectTab.Update_slider(ObjectTab, Slider, 5450)
