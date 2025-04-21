@@ -398,12 +398,15 @@ class ObjectTab(QWidget):
                         menu = QMenu()
                         incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
                         ground = menu.addAction(translations.get("Grounded","Grounded"))
+                        menu.actionAt(1).setVisible(False)
+
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
                         incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
 
                         ground.setCheckable(True)
                         ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                        ground.setVisible(False)
                         
                         button.setMenu(menu)
                         Scroll.addWidget(button)
@@ -436,6 +439,7 @@ class ObjectTab(QWidget):
 
                                 ground.setCheckable(True)
                                 ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                                ground.setVisible(False)
                                 
                                 button.setMenu(menu)
                                 Scroll.addWidget(button)
@@ -636,7 +640,7 @@ class ObjectTab(QWidget):
             backend.toggle_object(object,state)
         
         def ground_object(object,state):
-            backend.grounf_object(object,state)
+            backend.ground_object(object,state)
 
         def Object_detect(tab_widget):
             State = not Backend.is_config_objects_empty(tab_widget)
@@ -1184,6 +1188,9 @@ class RandomDefault(QWidget):
         main_layout.addWidget(Field, 0, 0)
         main_layout.addWidget(SetSetCheck, 1, 0)
         main_layout.addWidget(SetFrameCheck, 2, 0)
+
+        main_layout.itemAtPosition(1, 0).widget().hide()
+        main_layout.itemAtPosition(2, 0).widget().hide()
         
         """XOR FUNCTIONS"""
         SetSetCheck.toggled.connect(lambda: self.SetSETChecks(main_layout))
@@ -1494,6 +1501,7 @@ class RandomPivot(QWidget):
         shared_state.update_selected(0)
 
         self.main_layout.addWidget(self.combo_box, 0, 10)
+        self.main_layout.itemAtPosition(0, 10).widget().hide()
 
         self.set_all_checkbox = QCheckBox("Set all random", self)
         self.main_layout.addWidget(self.set_all_checkbox, 1, 10)
@@ -1656,6 +1664,7 @@ class RandomRender(QWidget):
         shared_state.update_selected(0)
 
         self.main_layout.addWidget(self.combo_box, 0, 10)
+        self.main_layout.itemAtPosition(0, 10).widget().hide()
 
         self.set_all_checkbox = QCheckBox("Set all random", self)  # Store as instance variable
         self.main_layout.addWidget(self.set_all_checkbox, 1, 10)
@@ -1830,7 +1839,7 @@ class RandomLight(QWidget):
         self.main_layout.addWidget(self.angle_label2, 0, 7)
         self.gen_field("Strength", self.main_layout, 6, 1, self.connFields(ParentTab, 1, 0))
         self.gen_field("Radius", self.main_layout, 6, 2, self.connFields(ParentTab, 1, 2))
-        self.gen_field("Colour", self.main_layout, 6, 3, self.connFields(ParentTab, 2, 1))
+        #self.gen_field("Colour", self.main_layout, 6, 3, self.connFields(ParentTab, 2, 1))
 
 
         self.setLayout(self.main_layout)
@@ -2335,6 +2344,7 @@ class Port(QWidget):
             menu = QMenu()
             incexc = menu.addAction('Included in Scene')
             ground = menu.addAction('Grounded')
+            menu.actionAt(1).setVisible(False)
 
             incexc.setCheckable(True)
             incexc.setChecked(True)
@@ -2342,6 +2352,7 @@ class Port(QWidget):
 
             ground.setCheckable(True)
             ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+            ground.setVisible(False)
                                 
             button.setMenu(menu)
             Scroll.addWidget(button)
@@ -2390,6 +2401,7 @@ class Port(QWidget):
 
                             ground.setCheckable(True)
                             ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                            ground.setVisible(False)
                             
                             button.setMenu(menu)
                             Scroll.addWidget(button)
@@ -2425,6 +2437,7 @@ class Port(QWidget):
 
                                     ground.setCheckable(True)
                                     ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                                    ground.setVisible(False)
                                     
                                     button.setMenu(menu)
                                     Scroll.addWidget(button)
@@ -2479,6 +2492,8 @@ class Port(QWidget):
                         menu = QMenu()
                         incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
                         ground = menu.addAction(translations.get("Grounded","Grounded"))
+
+                        ground.setVisible(False)
                         
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
@@ -2486,6 +2501,7 @@ class Port(QWidget):
 
                         ground.setCheckable(True)
                         ground.triggered.connect(lambda: ground_object(obj,ground.isChecked()))
+                        ground.setVisible(False)
                         
                         button.setMenu(menu)
                         Scroll.addWidget(button)
@@ -2737,6 +2753,7 @@ class Lighting(QWidget):
         #self.radius_button_minus.clicked.connect(lambda: self.Minus_click(self.radius_input_field))
         #set_radius
         self.radius_button_minus.clicked.connect(lambda: self.set_radius("Minus", self.radius_input_field))
+        self.radius_button_minus.setMaximumWidth(40)
 
         self.radius_button_plus = QPushButton("+", self)
         #self.radius_button_plus.clicked.connect(lambda: self.Plus_click(self.radius_input_field))
@@ -2885,7 +2902,7 @@ class Lighting(QWidget):
 
         main_layout.addWidget(self.radius_label, 2, 0)
         main_layout.addWidget(self.radius_input_field, 2, 1)
-        main_layout.addWidget(self.radius_button_minus, 2, 2)
+        main_layout.addWidget(self.radius_button_minus, 2, 2, alignment=QtCore.Qt.AlignRight)
         main_layout.addWidget(self.radius_button_plus, 2, 3)
 
         self.setLayout(main_layout)

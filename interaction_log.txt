@@ -1,17 +1,7 @@
 Program initialised
-Seed changed to: 304124179
+Seed changed to: 122879132
 Light Source 1 light source added
 Random mode set to set
 Object 1 object added
 Render resolution changed to (286, 122)
 Viewport Preview Render Started
-Render resolution changed to (256, 256)
-Location of Object 1 changed to [0.0, 0.0, 0.0]
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Render resolution changed to (256, 256)
-Rendering Started
-Colour of Light Source 1 changed to #000000
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Render resolution changed to (256, 256)
