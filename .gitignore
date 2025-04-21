@@ -1,6 +1,6 @@
 # Backend output
 viewport_temp/
-output/
+*.hdf5
 export.json
 interaction_log.txt
 interaction_log
