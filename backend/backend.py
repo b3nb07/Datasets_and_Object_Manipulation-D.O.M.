@@ -619,10 +619,10 @@ class Backend():
             for i in range(config["render"]["renders"]):
                 hdf5_file = f"{config['render_folder']}/{i + num}.hdf5"
                 image = multiprocessing.Process(target=subprocess.run, args=(["blenderproc", "vis", "hdf5", hdf5_file],))
-                images.append(process)
+                images.append(image)
                 image.start()
 
-            if images < 50: # so a PC doesn't explode
+            if (len(images) < 50): # so a PC doesn't explode
                 for image in images:
                     image.join()
 
