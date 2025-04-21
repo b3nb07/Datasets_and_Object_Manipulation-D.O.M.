@@ -238,6 +238,7 @@ class TabDialog(QWidget):
         if (not self.viewport_ongoing and "Render" not in interaction):
             self.old_log(interaction)
             config = backend.get_config()
+            if (not config["objects"][0]): return
             backend.set_runtime_config(config)
 
             thread = ViewportThread(self.size())
@@ -246,7 +247,6 @@ class TabDialog(QWidget):
 
             self.viewport_ongoing = True
             thread.start()
-            thread.wait(1) # this stops it trying to render before backend update
         elif (update_log):
             if ("Program" not in interaction and "Render" not in interaction):
                 self.update_while_viewport = True
