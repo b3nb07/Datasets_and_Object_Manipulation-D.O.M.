@@ -131,6 +131,11 @@ class Backend():
             "degree": [0,0,0]
         }
         config["render_folder"] = "output/"
+        path = config["render_folder"] 
+
+        if (not os.path.exists(path)):
+            os.mkdir("output/") 
+
 
         config["render_res"] = (256,256)
 
