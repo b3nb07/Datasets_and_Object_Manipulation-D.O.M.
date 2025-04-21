@@ -7,6 +7,8 @@ import json
 import os
 import shutil
 from copy import deepcopy
+import subprocess
+import multiprocessing
 
 # initialise config - will hold the config ready for export
 config = { 
@@ -613,8 +615,16 @@ class Backend():
         elif (not headless and preview): # Doesnt work anymore / could just bin off preview though
             os.system("blenderproc vis hdf5 output/0.hdf5")
         elif (not headless):
-            for i in range(config["render"]["renders"] ):
-                os.system("blenderproc vis hdf5 " + config["render_folder"] + "/" + str(i + num) +".hdf5")
+            images = []
+            for i in range(config["render"]["renders"]):
+                hdf5_file = f"{config['render_folder']}/{i + num}.hdf5"
+                image = multiprocessing.Process(target=subprocess.run, args=(["blenderproc", "vis", "hdf5", hdf5_file],))
+                images.append(process)
+                image.start()
+
+            if images < 50: # so a PC doesn't explode
+                for image in images:
+                    image.join()
 
         self.remove_camera_poses()
         config = origConfig
