@@ -246,6 +246,7 @@ class TabDialog(QWidget):
 
             self.viewport_ongoing = True
             thread.start()
+            thread.wait(1) # this stops it trying to render before backend update
         elif (update_log):
             if ("Program" not in interaction and "Render" not in interaction):
                 self.update_while_viewport = True
