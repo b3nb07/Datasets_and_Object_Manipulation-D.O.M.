@@ -2990,9 +2990,6 @@ class Settings(QWidget):
         Spanish = language_box.addButton("Spanish", QMessageBox.ActionRole)
         Portuguese = language_box.addButton("Portuguese", QMessageBox.ActionRole)
         Mandarin = language_box.addButton("Mandarin", QMessageBox.ActionRole)
-        Language5 = language_box.addButton("Language 5", QMessageBox.ActionRole)
-        Language6 = language_box.addButton("Language 6", QMessageBox.ActionRole)
-        Language7 = language_box.addButton("Imagetest", QMessageBox.ActionRole)
         language_box.addButton(QMessageBox.Cancel)
         language_box.exec()
 
@@ -3005,12 +3002,6 @@ class Settings(QWidget):
             translator.setLanguage("Portugese")
         elif language_box.clickedButton() == Mandarin:
             translator.setLanguage("Mandarin")
-        elif language_box.clickedButton() == Language5:
-            translator.setLanguage()
-        elif language_box.clickedButton() == Language6:
-            translator.setLanguage()
-        elif language_box.clickedButton() == Language7:
-            translator.setLanguage()
 
     def translateUi(self):
         current_lang = translator.current_language
