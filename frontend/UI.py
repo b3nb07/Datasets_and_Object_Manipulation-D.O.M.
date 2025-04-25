@@ -151,10 +151,7 @@ class TabDialog(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.setWindowTitle("Datasets and Object Modeling")
-        current_lang = translator.current_language
-        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
-
-        
+          
         #Object side par to display current objects loaded in and allow for removal from current render without deletion
         ObjectsStatusBar = QScrollArea()
         ObjectsStatusBar.setMaximumWidth(175)
@@ -167,29 +164,32 @@ class TabDialog(QWidget):
         ObjectsStatusBar.setWidget(content_widget)
         ObjectsStatusBar.setWidgetResizable(True)
         
-        tab_widget = QTabWidget()
+        self.tab_widget = QTabWidget()
         # NAVBAR: Add all other tabs first
-        tab_widget.addTab(ObjectTab(self, tab_widget, ObjLayout), "Object")
-        tab_widget.addTab(PivotTab(self), "Pivot Point")
-        tab_widget.addTab(Render(self), "Render")
-        tab_widget.addTab(Lighting(self),"Lighting")
+        self.tab_widget.addTab(ObjectTab(self, self.tab_widget, ObjLayout), "Object")
+        self.tab_widget.addTab(PivotTab(self), "Pivot Point")
+        self.tab_widget.addTab(Render(self), "Render")
+        self.tab_widget.addTab(Lighting(self), "Lighting")
  
-        Temp_index = tab_widget.addTab(QWidget(), "Random")
-        tab_widget.addTab(Port(self, tab_widget, ObjLayout), "Import/Export")
-        tab_widget.addTab(Settings(self, tab_widget), "Settings")
+        Temp_index = self.tab_widget.addTab(QWidget(), "Random")
+        self.tab_widget.addTab(Port(self, self.tab_widget, ObjLayout), "Import/Export")
+        self.tab_widget.addTab(Settings(self, self.tab_widget), "Settings")
         
-        random_tab = RandomTabDialog(self, tab_widget)
-        tab_widget.removeTab(Temp_index)
-        tab_widget.insertTab(Temp_index, random_tab, "Random")
+        random_tab = RandomTabDialog(self, self.tab_widget)
+        self.tab_widget.removeTab(Temp_index)
+        self.tab_widget.insertTab(Temp_index, random_tab, "Random")
+        translator.languageChanged.connect(self.translateUi)
+
 
         #Disable until Object is loaded
-        tab_widget.setTabEnabled(0, False)
-        tab_widget.setTabEnabled(1, False)
-        tab_widget.setTabEnabled(2, False)
-        tab_widget.setTabEnabled(3, False)
-        tab_widget.setTabEnabled(4, False)
+        self.tab_widget.setTabEnabled(0, False)
+        self.tab_widget.setTabEnabled(1, False)
+        self.tab_widget.setTabEnabled(2, False)
+        self.tab_widget.setTabEnabled(3, False)
+        self.tab_widget.setTabEnabled(4, False)
+        self.tab_widget.setTabEnabled(5, True)
 
-        tab_widget.setMaximumHeight(250)
+        self.tab_widget.setMaximumHeight(250)
         
         # enviroment
         self.environment = QWidget()
@@ -207,15 +207,27 @@ class TabDialog(QWidget):
 
         # Layout of Main Page
         main_layout = QGridLayout()
-        main_layout.addWidget(tab_widget, 0, 0, 1, 8)
+        main_layout.addWidget(self.tab_widget, 0, 0, 1, 8)
         main_layout.addWidget(ObjectsStatusBar, 1, 0, 1, 2)
         main_layout.addWidget(self.environment, 1, 1, 1, 7)  
     
         self.setLayout(main_layout)
-        
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
         """#Tests for all pages except Random (included in RandomTabDialog)
         from FrontTests import Tests
         Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)"""
+    
+    def translateUi(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.tab_widget.setTabText(0, translation.get("Object", "Object"))
+        self.tab_widget.setTabText(1, translation.get("Pivot Point", "Pivot Point"))
+        self.tab_widget.setTabText(2, translation.get("Render", "Render"))
+        self.tab_widget.setTabText(3, translation.get("Lighting", "Lighting"))
+        self.tab_widget.setTabText(4, translation.get("Random", "Random"))
+        self.tab_widget.setTabText(5, translation.get("Import/Export", "Import/Export"))
+        self.tab_widget.setTabText(6, translation.get("Settings", "Settings"))
 
     def visual_change(self, thread):
         #Updates Viewport Image
