@@ -970,6 +970,8 @@ class PivotTab(QWidget):
         main_layout.addWidget(self.combo_box, 0, 7)
 
         self.setLayout(main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
 
 
@@ -1078,6 +1080,13 @@ class PivotTab(QWidget):
             except:
                 field.setText(str(0.0))
                 field.editingFinished.emit()
+
+    def translateUi(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.Pivot_Point_Check.setText(translation.get("Custom Pivot Point", "Custom Pivot Point"))
+        self.Distance_Pivot.setText(translation.get("Distance","Distance"))
+
 
 class RandomTabDialog(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
@@ -2308,24 +2317,29 @@ class Port(QWidget):
 
         #Second Section
         def Tutorial_Object(Scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
             Tutorial_Box = QMessageBox()
-            Tutorial_Box.setText("Please select a tutorial object from below")
-            Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Cylinder", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Cone", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
-            Tutorial_Box.addButton(QMessageBox.Cancel)
-
-            Tutorial_Box.exec()
-
+            Tutorial_Box.setText(translations.get("Please select a tutorial object from below", "Please select a tutorial object from below"))            
+            object_types = ["Cube", "Cylinder", "Cone", "Plane", "Sphere", "Monkey"]
+            button_map = {}
             
+            for obj_type in object_types:
+                translated_text = translations.get(obj_type, obj_type)
+                button = Tutorial_Box.addButton(translated_text, QMessageBox.ActionRole)
+                button_map[button] = obj_type 
+
+            cancel_button = Tutorial_Box.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
+            Tutorial_Box.exec()
+            clicked_button = Tutorial_Box.clickedButton()
+            selected_object = button_map.get(clicked_button)
+
             try:
-                if Tutorial_Box.clickedButton().text().upper() != "CANCEL":
+                if clicked_button != cancel_button:
                     Name = self.GetName()
                     if Name != False and len(Name) < 25:
-                        obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+                        obj = backend.RenderObject(primative = selected_object.upper())
                         if Name == "Object":
                             count = 1
                             while f"{Name} {len(shared_state.itemNames)+count}" in shared_state.itemNames:
@@ -2336,9 +2350,8 @@ class Port(QWidget):
                         button = QPushButton(Name)
                         button.setMaximumWidth(175)
                         menu = QMenu()
-                        incexc = menu.addAction('Included in Scene')
-                        ground = menu.addAction('Grounded')
-                        ground.setVisible(False)
+                        incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                        ground = menu.addAction(translations.get("Grounded","Grounded"))
                         
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
@@ -2357,7 +2370,15 @@ class Port(QWidget):
                         pass
                         
             except Exception as e:
-                error_box = ilyaMessageBox("Error loading tutorial object.", "Error")
+                print(e)
+
+                error_title = translations.get("Error", "Error")
+                error_text = translations.get("Error loading tutorial object.", "Error loading tutorial object.")
+                error_box = QMessageBox()
+                error_box.setWindowTitle(error_title)
+                error_box.setText(error_text)
+                error_box.exec()
+                error_box = ilyaMessageBox(error_text, error_title)
                 
     
             Object_detect(tab_widget)
