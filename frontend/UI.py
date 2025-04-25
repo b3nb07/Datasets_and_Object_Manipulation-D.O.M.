@@ -535,13 +535,13 @@ class ObjectTab(QWidget):
         main_layout.addWidget(self.Width_Obj_pos_input_field, 1, 8)
         main_layout.addWidget(self.W_slider, 1, 9)
 
-        main_layout.addWidget(self.Height_Obj_pos, 2, 7)
-        main_layout.addWidget(self.Height_Obj_pos_input_field, 2, 8)
-        main_layout.addWidget(self.H_slider, 2, 9)
+        main_layout.addWidget(self.Length_Obj_pos, 2, 7)
+        main_layout.addWidget(self.Length_Obj_pos_input_field, 2, 8)
+        main_layout.addWidget(self.L_slider, 2, 9)
 
-        main_layout.addWidget(self.Length_Obj_pos, 3, 7)
-        main_layout.addWidget(self.Length_Obj_pos_input_field, 3, 8)
-        main_layout.addWidget(self.L_slider, 3, 9)
+        main_layout.addWidget(self.Height_Obj_pos, 3, 7)
+        main_layout.addWidget(self.Height_Obj_pos_input_field, 3, 8)
+        main_layout.addWidget(self.H_slider, 3, 9)
 
         main_layout.addWidget(self.combo_box, 0, 9)
 
@@ -1117,6 +1117,9 @@ class RandomDefault(QWidget):
         SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
         RandomSeed = QLineEdit("", self)
 
+        SetSetCheck.setVisible(False) 
+        SetFrameCheck.setVisible(False)
+
         """The random seed value used to generate random values"""
         RandomSeed.setText(str(backend.get_config()["seed"]))
         RandomSeed.setMaximumWidth(200)
@@ -1179,7 +1182,7 @@ class RandomDefault(QWidget):
         """Updates field value"""
         try:
             val = int(field.text())
-            field.setText(str(val))
+            backend.set_seed(val)
         except ValueError:
             field.setText(str(backend.get_config()["seed"]))
 
@@ -2078,7 +2081,7 @@ class Render(QWidget):
             renderingBox.exec()
 
     def renderQueueControl(self):
-        if self.rendering:
+        if self.rendering and not self.mainpage.viewport_ongoing:
             config = backend.get_config()
             self.queue.append(config)
 
@@ -2086,6 +2089,11 @@ class Render(QWidget):
             renderingBox.setText("Added to queue.")
             renderingBox.exec()
 
+        elif self.mainpage.viewport_ongoing:
+            renderingBox = QMessageBox()
+            renderingBox.setText("Please wait for the viewport to finish its approximation before starting the main render.")
+            renderingBox.exec()
+            return
 
         else:
             config = backend.get_config()
@@ -2338,7 +2346,7 @@ class Port(QWidget):
                         Scroll.addWidget(button)
 
                         QApplication.instance().focusWidget().clearFocus()
-                    elif Name != False and len(Name) >= 25:
+                    elif Name != False and len(Name) >= 10:
                         error_box = ilyaMessageBox("Name is too long!", "Error")
                     else:
                         pass
@@ -2983,9 +2991,11 @@ class Settings(QWidget):
 
         # Add buttons for different styles
         English = language_box.addButton("English", QMessageBox.ActionRole)
+
         Spanish = language_box.addButton("Español", QMessageBox.ActionRole)
         Portuguese = language_box.addButton("Português", QMessageBox.ActionRole)
         Mandarin = language_box.addButton("中文", QMessageBox.ActionRole)
+
         language_box.addButton(QMessageBox.Cancel)
         language_box.exec()
 
@@ -2998,9 +3008,8 @@ class Settings(QWidget):
             translator.setLanguage("Portuguese")
         elif language_box.clickedButton() == Mandarin:
             translator.setLanguage("Mandarin")
+
         self.save_language_setting()
-
-
 
     def translateUi(self):
         current_lang = translator.current_language

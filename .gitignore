@@ -5,6 +5,7 @@ export.json
 interaction_log.txt
 interaction_log
 backend/_temp.py
+*.hdf5
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

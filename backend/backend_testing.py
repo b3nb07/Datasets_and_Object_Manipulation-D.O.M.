@@ -1,4 +1,4 @@
-import random, backend, unittest
+import random, backend, unittest, pathlib, os
 
 """
 Structure of my unit testing with unit tests
@@ -45,7 +45,7 @@ class BackendUnitTests(unittest.TestCase):
 
         # test render values
         self.assertEqual(cfg['render']['renders'], 1)
-        self.assertEqual(cfg['render']['degree'], [1,1,1])
+        self.assertEqual(cfg['render']['degree'], [0,0,0])
 
         # test objects is empty
         self.assertEqual(self.backend.is_config_objects_empty(), True)
@@ -109,73 +109,46 @@ class BackendUnitTests(unittest.TestCase):
     def toggle_piv_x(self):
         """ Method to toggle the randomising of x pivot value and ensure it is updated """
         cfg = self.get_cfg
-        cfg['random']['pivot']= [] # initilises to empty list
         
-        self.backend.toggle_random_pivot_x()
-        self.assertNotEqual(cfg['random']['pivot'], []) # ensures its not the initialised value
-        self.assertEqual(cfg['random']['pivot'], ['x']) # ensures its equal to toggled value
+
+        self.backend.update_random_attribute(0, "pivot", "X", True, 0, 2)
+        self.assertNotEqual(cfg['random']['objects'][0]["pivot"]["X"], []) # ensures its not the initialised value
+        self.assertEqual(cfg['random']['objects'][0]["pivot"]["X"], [0, 2]) # ensures its equal to toggled value
         
         # toggle it again
-        self.backend.toggle_random_pivot_x()
-        self.assertEqual(cfg['random']['pivot'], [])
+        self.backend.update_random_attribute(0, "pivot", "X", False, 0, 2)
+        self.assertEqual(cfg['random']['objects'][0]["pivot"], {})
         
     def toggle_piv_y(self):
         """ Method to toggle the randomising of y pivot value and ensure it is updated """
         cfg = self.get_cfg
-        cfg['random']['pivot']= [] # initilises to empty list
         
-        self.backend.toggle_random_pivot_y()
-        self.assertNotEqual(cfg['random']['pivot'], []) # ensures its not the initialised value
-        self.assertEqual(cfg['random']['pivot'], ['y']) # ensures its equal to toggled value
+        self.backend.update_random_attribute(0, "pivot", "Y", True, 0, 1)
+        self.assertNotEqual(cfg['random']['objects'][0]["pivot"]["Y"], []) # ensures its not the initialised value
+        self.assertEqual(cfg['random']['objects'][0]["pivot"]["Y"], [0, 1]) # ensures its equal to toggled value
         
         # toggle it again
-        self.backend.toggle_random_pivot_y()
-        self.assertEqual(cfg['random']['pivot'], [])
+        self.backend.update_random_attribute(0, "pivot", "Y", False, 0, 2)
+        self.assertEqual(cfg['random']['objects'][0]["pivot"], {})
         
     def toggle_piv_z(self):
         """ Method to toggle the randomising of z pivot value and ensure it is updated """
         cfg = self.get_cfg
-        cfg['random']['pivot']= [] # initilises to empty list
-        
-        self.backend.toggle_random_pivot_z()
-        self.assertNotEqual(cfg['random']['pivot'], []) # ensures its not the initialised value
-        self.assertEqual(cfg['random']['pivot'], ['z']) # ensures its equal to toggled value
-        
-        # toggle it again
-        self.backend.toggle_random_pivot_z()
-        self.assertEqual(cfg['random']['pivot'], [])
 
-    def toggle_env_angle(self):
-        """ Method to toggle the randomising of the environment angle and ensure it is updated """
-        cfg = self.get_cfg
-        cfg['random']['environment']= [] # initilises to empty list
-        
-        self.backend.toggle_random_environment_angle()
-        self.assertNotEqual(cfg['random']['environment'], []) # ensures its not the initialised value
-        self.assertEqual(cfg['random']['environment'], ['angle']) # ensures its equal to toggled value
+        # make these random
+        self.backend.update_random_attribute(0, "pivot", "Z", True, 0, 3)
+        self.assertNotEqual(cfg['random']['objects'][0]["pivot"]["Z"], []) # ensures its not the initialised value
+        self.assertEqual(cfg['random']['objects'][0]["pivot"]["Z"], [0, 3]) # ensures its equal to toggled value
         
         # toggle it again
-        self.backend.toggle_random_environment_angle()
-        self.assertEqual(cfg['random']['environment'], [])
-
-    def toggle_env_bg(self):
-        """ Method to toggle the randomising of the environment background and ensure it is updated """
-        cfg = self.get_cfg
-        cfg['random']['environment']= [] # initilises to empty list
-        
-        self.backend.toggle_random_environment_background()
-        self.assertNotEqual(cfg['random']['environment'], []) # ensures its not the initialised value
-        self.assertEqual(cfg['random']['environment'], ['background']) # ensures its equal to toggled value
-        
-        # toggle it again
-        self.backend.toggle_random_environment_background()
-        self.assertEqual(cfg['random']['environment'], [])
+        self.backend.update_random_attribute(0, "pivot", "Z", False, 0, 3)
+        self.assertEqual(cfg['random']['objects'][0]["pivot"], {})
         
     def change_res(self):
         """ Method to update the render resolution and ensure it is updated """
         cfg = self.get_cfg
         
-        self.assertEqual(cfg['render_res'], [256, 256]) # ensures its equal to initial value
+        self.assertEqual(cfg['render_res'], (256, 256)) # ensures its equal to initial value
         self.backend.set_res([2560, 1440])
         self.assertEqual(cfg['render_res'], [2560, 1440]) # ensures its equal to updated value
         
@@ -184,14 +157,16 @@ class BackendUnitTests(unittest.TestCase):
         self.obj = self.backend.RenderObject(primative = "MONKEY")
 
         cfg = self.get_cfg
-        cfg['random']['pos']= [] # initilises to empty list
         
-        self.backend.toggle_random_coord_x(0)
-        self.assertNotEqual(cfg['random']['pos'], []) # ensures its not the initialised value
-        self.assertEqual(cfg['random']['pos'], ['x']) # ensures its equal to toggled value
+        
+        #self.backend.toggle_random_coord_x(0)
+        self.backend.update_random_attribute(0, "object", "X", True, 0, 2)
+        #print(cfg)
+        self.assertNotEqual(cfg['random']['objects'][0]['object'], []) # ensures its not the initialised value
+        self.assertEqual(cfg['random']['objects'][0]['object'], {'X': [0.0, 2.0]}) # ensures its equal to toggled value
         
         # toggle it again
-        self.backend.toggle_random_coord_x(0)
+        self.backend.update_random_attribute(0, "object", "X", False, 0, 2)
         self.assertEqual(cfg['random']['pos'], [])
 
         self.obj.remove_object()
@@ -201,14 +176,15 @@ class BackendUnitTests(unittest.TestCase):
         self.obj = self.backend.RenderObject(primative = "MONKEY")
 
         cfg = self.get_cfg
-        cfg['random']['pos']= [] # initilises to empty list
         
-        self.backend.toggle_random_coord_y(0)
-        self.assertNotEqual(cfg['random']['pos'], []) # ensures its not the initialised value
-        self.assertEqual(cfg['random']['pos'], ['y']) # ensures its equal to toggled value
+
+        
+        self.backend.update_random_attribute(0, "object", "Y", True, 0, 2)
+        self.assertNotEqual(cfg['random']['objects'][0]['object'], []) # ensures its not the initialised value
+        self.assertEqual(cfg['random']['objects'][0]['object'], {'Y': [0.0, 2.0]}) # ensures its equal to toggled value
         
         # toggle it again
-        self.backend.toggle_random_coord_y(0)
+        self.backend.update_random_attribute(0, "object", "Y", False, 0, 2)
         self.assertEqual(cfg['random']['pos'], [])
 
         self.obj.remove_object()
@@ -218,14 +194,15 @@ class BackendUnitTests(unittest.TestCase):
         self.obj = self.backend.RenderObject(primative = "MONKEY")
 
         cfg = self.get_cfg
-        cfg['random']['pos']= [] # initilises to empty list
         
-        self.backend.toggle_random_coord_z(0)
-        self.assertNotEqual(cfg['random']['pos'], []) # ensures its not the initialised value
-        self.assertEqual(cfg['random']['pos'], ['z']) # ensures its equal to toggled value
+        
+        self.backend.update_random_attribute(0, "object", "Z", True, 0, 2)
+        
+        self.assertNotEqual(cfg['random']['objects'][0]['object'], []) # ensures its not the initialised value
+        self.assertEqual(cfg['random']['objects'][0]['object'], {'Z': [0.0, 2.0]}) # ensures its equal to toggled value
         
         # toggle it again
-        self.backend.toggle_random_coord_z(0)
+        self.backend.update_random_attribute(0, "object", "Z", False, 0, 2)
         self.assertEqual(cfg['random']['pos'], [])
 
         self.obj.remove_object()
@@ -284,49 +261,111 @@ class BackendUnitTests(unittest.TestCase):
         self.backend.initialise_cfg()
 
         light_1 = self.backend.RenderLight()
-        light_2 = self.backend.RenderLight()
-        
-        # ==================== Multiple Light Testing ====================
-        self.assertEqual(len(cfg['light_sources']), 2) # 2 lights should be currently rendered
-        light_3 = self.backend.RenderLight()
-        self.assertEqual(len(cfg['light_sources']), 3) # 3 lights should be currently rendered
 
         # ==================== Light location Testing ====================
         # test this light is where it should be initialised
-        self.assertEqual(cfg['light_sources'][0]['pos'], [0,0,0])
+        self.assertEqual(cfg['light_sources']['pos'], [0,0,0])
         # generate a random location and apply this to the first light object
         random_loc = [random.uniform(1,10), random.uniform(-1,-10), random.uniform(1,10)]
         light_1.set_loc(random_loc)
-        self.assertNotEqual(cfg['light_sources'][0]['pos'], [0,0,0]) # light no longer at initial pos
-        self.assertEqual(cfg['light_sources'][0]['pos'], random_loc) # light now at random pos
+        self.assertNotEqual(cfg['light_sources']['pos'], [0,0,0]) # light no longer at initial pos
+        self.assertEqual(cfg['light_sources']['pos'], random_loc) # light now at random pos
         
         # ==================== Light Energy Testing ====================
         # test the light energy is what it should be initialised at
-        self.assertEqual(cfg['light_sources'][1]['energy'], 10)
+        self.assertEqual(cfg['light_sources']['energy'], 10)
         # generate a random energy integer and apply this to the second light object
         random_en = random.randint(1,9)
-        light_2.set_energy(random_en)
-        self.assertNotEqual(cfg['light_sources'][1]['energy'], 10) # light no longer original energy
-        self.assertEqual(cfg['light_sources'][1]['energy'], random_en) # light now at random energy
+        light_1.set_energy(random_en)
+        self.assertNotEqual(cfg['light_sources']['energy'], 10) # light no longer original energy
+        self.assertEqual(cfg['light_sources']['energy'], random_en) # light now at random energy
         
         # ==================== Light Colour Testing ====================
         # generate a random rgb and apply this to set a light to a specific rgb
-        rgb = [random.randint(0,255), random.randint(0,255), random.randint(0,255)]
-        light_3.set_color(rgb)
-        self.assertEqual(cfg['light_sources'][2]['color'], rgb) # light now at random energy
+        options = ["0", "1","2","3","4","5","6","8","9","a","b","c","d", "e","f"]
+        rgb = options[random.randint(0,14)] + options[random.randint(0,14)] + options[random.randint(0,14)] + options[random.randint(0,14)] +options[random.randint(0,14)] + options[random.randint(0,14)]
+        light_1.set_color(rgb)
+        self.assertEqual(cfg['light_sources']['color'], rgb) # light now at random energy
         
-        # ==================== Light Rotation Testing ====================
+        # ==================== Light Rotation Testing ===================
         # test the light rotation is what it should be at initilisation
-        self.assertEqual(cfg['light_sources'][0]['rot'], [0,0,0])
+        self.assertEqual(cfg['light_sources']['rot'], [0,0,0])
         # generate a random rotation and apply this to the light
         random_rot = [random.uniform(0.1,1.9), random.uniform(0.1,1.9), random.uniform(0.1,1.9)]
         light_1.set_rotation(random_rot)
-        self.assertNotEqual(cfg['light_sources'][0]['rot'], [0,0,0]) # light rotation no longer initial value
-        self.assertEqual(cfg['light_sources'][0]['rot'], random_rot) # light rotation now random value
+        self.assertNotEqual(cfg['light_sources']['rot'], [0,0,0]) # light rotation no longer initial value
+        self.assertEqual(cfg['light_sources']['rot'], random_rot) # light rotation now random value
+
+        # ==================== Light Type Testing =======================
+        # test that light type is what it should be at initialisation
+        self.assertEqual(cfg['light_sources']['type'], "POINT")
+        # generate a random type and apply to the light
+        types = ["POINT", "SUN", "SPOT", "AREA"]
+        random_type = types[random.randint(0,3)]
+        light_1.set_type(random_type)
+        self.assertEqual(cfg['light_sources']['type'], random_type)
+
+
+    def toggle_object(self):
+        # test that object is not hidden on initialisation
+        self.obj = self.backend.RenderObject(primative = "MONKEY")
+        
+        self.assertEqual(self.obj.hidden, False)
+        
+        # ==================== Remove Object Testing ===================
+        # test that object gets removed from scene
+        self.backend.toggle_object(self.obj, self.obj.hidden)
+        self.assertEqual(self.obj.hidden, True)
+
+        # ==================== Add Object Testing ===================
+        # test that object gets added back to scene
+        self.backend.toggle_object(self.obj, self.obj.hidden)
+        self.assertEqual(self.obj.hidden, False)
+
+        self.obj.remove_object()
+    
+    def change_output_folder(self):
+        #test that output folder is changed upon calling function
+        absolute_path = str(pathlib.Path(__file__).parent.resolve())
+        output_folder = absolute_path + "\\testing_folder"
+        self.backend.set_render_output_folder(output_folder)
+
+        cfg = self.get_cfg
+        self.assertEqual(cfg["render_folder"], output_folder)
+
+    def highest_in_directory(self):
+        #test the highest value hdf5 file is returned from function
+        cfg = self.get_cfg
+        print(self.backend.getHighestInDir())
+        self.assertEqual(self.backend.getHighestInDir(), 3) 
+
+
+    def interaction_log_initialise(self):
+        #test the first line of the interaction log is initialisation
+        f = open("interaction_log.txt", "r")
+        self.assertEqual(f.readline(), "Program initialised\n")
+        f.close()
+
+        
+    
+    def interaction_log_change_seed(self):
+        #test when seed is changed it is reflected in the interaction log
+        self.backend.set_seed(123)
+
+        with open('interaction_log.txt', 'r') as f:
+            lines = f.read().splitlines()
+            last_line = lines[-1]
+        
+        self.assertEqual(last_line, "Seed changed to: 123")
+        
 
 
 def test_sequence(test):
     """ Method to be called to carry out a sequence of the testing. Comment out any lines you dont want to test """
+    #interaction log testing
+    test.interaction_log_initialise()
+    test.interaction_log_change_seed()
+
     # more config orientated testing
     test.initial_config()
     test.pivot_update()
@@ -337,9 +376,10 @@ def test_sequence(test):
     test.toggle_piv_x()
     test.toggle_piv_y()
     test.toggle_piv_z()
-    test.toggle_env_angle()
-    test.toggle_env_bg()
     test.change_res()
+    test.change_output_folder()
+    test.highest_in_directory()
+
 
     # object specific testing
     test.render_obj()
@@ -347,9 +387,13 @@ def test_sequence(test):
     test.toggle_obj_x()
     test.toggle_obj_y()
     test.toggle_obj_z()
+    test.toggle_object()
     
     # light specific testing (I just put it all in one)
     test.render_lights()
+
+    
+    
     print("All tests passed, no errors occured")
     
     
