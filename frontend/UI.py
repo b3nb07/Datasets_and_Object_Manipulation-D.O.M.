@@ -151,6 +151,9 @@ class TabDialog(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.setWindowTitle("Datasets and Object Modeling")
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
         
         #Object side par to display current objects loaded in and allow for removal from current render without deletion
         ObjectsStatusBar = QScrollArea()
@@ -169,7 +172,7 @@ class TabDialog(QWidget):
         tab_widget.addTab(ObjectTab(self, tab_widget, ObjLayout), "Object")
         tab_widget.addTab(PivotTab(self), "Pivot Point")
         tab_widget.addTab(Render(self), "Render")
-        tab_widget.addTab(Lighting(self), "Lighting")
+        tab_widget.addTab(Lighting(self),"Lighting")
  
         Temp_index = tab_widget.addTab(QWidget(), "Random")
         tab_widget.addTab(Port(self, tab_widget, ObjLayout), "Import/Export")
@@ -1240,6 +1243,7 @@ class RandomObject(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        
         
         Field.setObjectName(Fieldname)
         Field_LowerBound.setObjectName(f"{Fieldname}_lower")
@@ -2942,11 +2946,9 @@ class Settings(QWidget):
         # Add buttons for different styles
         dark_mode = colour_box.addButton("Dark Mode", QMessageBox.ActionRole)
         light_mode = colour_box.addButton("Light Mode", QMessageBox.ActionRole)
-        colourblind1 = colour_box.addButton("Factory New", QMessageBox.ActionRole)
-        default = colour_box.addButton("Colourblind 2", QMessageBox.ActionRole)
-        dyslexic = colour_box.addButton("Light Mode 2", QMessageBox.ActionRole)
-        colour_scheme1 = colour_box.addButton("Colour Mode 1", QMessageBox.ActionRole)
-        Image_test = colour_box.addButton("Imagetest", QMessageBox.ActionRole)
+        default = colour_box.addButton("Default", QMessageBox.ActionRole)
+        dyslexic = colour_box.addButton("Dyslexic", QMessageBox.ActionRole)
+        colour_scheme1 = colour_box.addButton("Colour Blindness", QMessageBox.ActionRole)
         colour_box.addButton(QMessageBox.Cancel)
 
         colour_box.exec()
@@ -2954,18 +2956,20 @@ class Settings(QWidget):
         # Apply styles based on button clicked
         if colour_box.clickedButton() == dark_mode:
             self.apply_stylesheet("DarkMode.qss")
+
         elif colour_box.clickedButton() == light_mode:
             self.apply_stylesheet("LightMode.qss")
-        elif colour_box.clickedButton() == colourblind1:
-            self.apply_stylesheet("colourblind1.qss")
         elif colour_box.clickedButton() == default:
             self.apply_stylesheet("default.qss")
+
         elif colour_box.clickedButton() == dyslexic:
             self.apply_stylesheet("Dyslexic.qss")
+
         elif colour_box.clickedButton() == colour_scheme1:
-            self.apply_stylesheet("ColourScheme1.qss")
-        elif colour_box.clickedButton() == Image_test:
-            self.apply_stylesheet("ImageTest.qss")
+            self.apply_stylesheet("Deuteranomaly.qss")
+
+
+            
 
 
     def apply_stylesheet(self, filename):
@@ -2987,9 +2991,11 @@ class Settings(QWidget):
 
         # Add buttons for different styles
         English = language_box.addButton("English", QMessageBox.ActionRole)
-        Spanish = language_box.addButton("Spanish", QMessageBox.ActionRole)
-        Portuguese = language_box.addButton("Portuguese", QMessageBox.ActionRole)
-        Mandarin = language_box.addButton("Mandarin", QMessageBox.ActionRole)
+
+        Spanish = language_box.addButton("Español", QMessageBox.ActionRole)
+        Portuguese = language_box.addButton("Português", QMessageBox.ActionRole)
+        Mandarin = language_box.addButton("中文", QMessageBox.ActionRole)
+
         language_box.addButton(QMessageBox.Cancel)
         language_box.exec()
 
@@ -2999,9 +3005,11 @@ class Settings(QWidget):
         elif language_box.clickedButton() == Spanish:
             translator.setLanguage("Spanish")
         elif language_box.clickedButton() == Portuguese:
-            translator.setLanguage("Portugese")
+            translator.setLanguage("Portuguese")
         elif language_box.clickedButton() == Mandarin:
             translator.setLanguage("Mandarin")
+
+        self.save_language_setting()
 
     def translateUi(self):
         current_lang = translator.current_language
@@ -3020,6 +3028,17 @@ class Settings(QWidget):
         Colour_Setup = settings.value("theme", "LightMode.qss")  # default mode is light mode 
         self.apply_stylesheet(Colour_Setup)
 
+        saved_lang = settings.value("language", "English")
+        if saved_lang in translator.translations:
+            translator.setLanguage(saved_lang)
+        else:
+            translator.setLanguage("English") # default language english
+        
+        self.translateUi()
+
+    def save_language_setting(self):
+        settings = QSettings("UserSettings")
+        settings.setValue("language", translator.current_language)
 
 def startApp():
     app.exec()
