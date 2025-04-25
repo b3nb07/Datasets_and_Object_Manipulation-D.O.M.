@@ -136,7 +136,10 @@ class Backend():
         
         path = config["render_folder"] 
         if (not os.path.exists(path)):
-            os.mkdir("output/") 
+            try:
+                os.mkdir("output/") 
+            except:
+                pass
 
         config["render_res"] = (256,256)
 
