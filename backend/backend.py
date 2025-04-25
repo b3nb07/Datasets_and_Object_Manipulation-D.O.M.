@@ -129,7 +129,7 @@ class Backend():
             "renders": 1,
             "degree": [0,0,0]
         }
-        config["render_folder"] = ""
+        config["render_folder"] = "output/"
 
         config["render_res"] = (256,256)
 
@@ -642,7 +642,7 @@ class Backend():
 
     def getHighestInDir(self):
         highest = -1
-        for file in os.listdir("output"):
+        for file in os.listdir(config["render_folder"]):
             if file.endswith(".hdf5"):
                 num = ""
                 for x in file:
