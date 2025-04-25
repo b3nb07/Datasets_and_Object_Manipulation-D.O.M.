@@ -1114,6 +1114,9 @@ class RandomDefault(QWidget):
         SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
         RandomSeed = QLineEdit("", self)
 
+        SetSetCheck.setVisible(False) 
+        SetFrameCheck.setVisible(False)
+
         """The random seed value used to generate random values"""
         RandomSeed.setText(str(backend.get_config()["seed"]))
         RandomSeed.setMaximumWidth(200)
