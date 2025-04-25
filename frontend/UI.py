@@ -371,6 +371,8 @@ class ObjectTab(QWidget):
 
         #First Section
         def Get_Object_Filepath(Scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             import_box = QMessageBox()
             import_box.setText("How would you like to import objects?")
             import_box.addButton("Import Files", QMessageBox.ActionRole)
@@ -444,8 +446,14 @@ class ObjectTab(QWidget):
 
                 Object_detect(tab_widget)
                 
+            except Exception:
+                error_title = translations.get("error_reading_title", "Error when reading model")
+                error_msg = translations.get("error_reading_body", "The selected file is corrupt or invalid.")
+                QMessageBox.warning(self, error_title, error_msg)
             except Exception as e:
-                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
+                error_title = translations.get("Error when importing", "Error when importing")
+                error_msg = translations.get("Error_Import", "Error: {}").format(str(e))
+                QMessageBox.warning(self, error_title, error_msg)
 
         self.Import_Object_Button = QPushButton("Import Objects", self)
         self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
@@ -621,7 +629,8 @@ class ObjectTab(QWidget):
         self.X_Rotation.sliderReleased.connect(self.update_object_rotation)
         self.Y_Rotation.sliderReleased.connect(self.update_object_rotation)
         self.Z_Rotation.sliderReleased.connect(self.update_object_rotation)
-        
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
         #########################################
 
         def show_hide_object(object,state):
@@ -636,49 +645,7 @@ class ObjectTab(QWidget):
                 tab_widget.setTabEnabled(i, State)
 
     
-        def delete_object(tab_widget, scroll):
-            current_lang = translator.current_language
-            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
-            
-            to_delete = QMessageBox()
-            to_delete.setText(translations.get("Please select an object to remove from below", "Please select an object to remove from below"))
 
-            if (not shared_state.items):
-                warning_text = translations.get("Warning", "Warning")
-                warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
-                return QMessageBox.warning(self, warning_text, warning_msg)
-
-            for i in range(len(shared_state.itemNames)):
-                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
-            
-            cancel_button = to_delete.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
-            to_delete.exec()
-            choice = str(to_delete.clickedButton().text())
-
-
-
-            if choice != cancel_button.text():
-                obj_index = shared_state.itemNames.index(choice)
-                obj = shared_state.items[obj_index]
-                scroll.itemAt(obj_index).widget().setParent(None)
-                try:
-                    shared_state.remove_item(obj)
-                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
-                    backend.update_log(f'{obj} object deleted\n')
-                    del backend.get_config()["objects"][obj.object_pos]
-                    # shift objects after this one down by one
-                    for i in range(obj_index, len(shared_state.items)):
-                        obj = shared_state.items[i]
-                        obj.object_pos = i
-                except:
-                    error_box = ilyaMessageBox("Error deleting object", "Error")
-
-                shared_state.items_updated.emit(shared_state.items)
-                # The last object was deleted
-                if (not shared_state.items):
-                    Object_detect(tab_widget)
-                    QMessageBox.warning(self, translations.get("Warning", "Warning"),translations.get("You have deleted all of the objects, object manipulation tabs have been disabled.", "You have deleted all of the objects, object manipulation tabs have been disabled."))
-    
     def Object_detect(self, tab_widget):
             """On upload/delete to be called to check if any object is to be rendered and enables tabs accordingly"""
             State = not Backend.is_config_objects_empty(tab_widget)
@@ -719,7 +686,32 @@ class ObjectTab(QWidget):
         self.Update_slider(self.X_Rotation,self.X_Rotation_input_field.text())
         self.Update_slider(self.Y_Rotation,self.Y_Rotation_input_field.text())
         self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
-        
+
+    def translateUi(self):
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        self.Object_pos_title.setText(translations.get("Co-ords", "Co-ords"))
+        self.XObj_pos.setText(translations.get("X:", "X:"))
+        self.YObj_pos.setText(translations.get("Y:", "Y:"))
+        self.ZObj_pos.setText(translations.get("Z:", "Z:"))
+        self.Object_scale_title.setText(translations.get("Scale", "Scale"))
+        self.Width_Obj_pos.setText(translations.get("Width:", "Width:"))
+        self.Height_Obj_pos.setText(translations.get("Height:", "Height:"))
+        self.Length_Obj_pos.setText(translations.get("Length:", "Length:"))        
+        self.Object_rotation_title.setText(translations.get("Rotation", "Rotation"))
+        self.X_Rotation_Label.setText(translations.get("Roll:", "Roll:"))
+        self.Y_Rotation_Label.setText(translations.get("Pitch:", "Pitch:"))
+        self.Z_Rotation_Label.setText(translations.get("Yaw:", "Yaw:"))
+        self.Object_pos_title.setToolTip(translations.get('Changes the objects Position', 'Changes the objects Position'))
+        self.Object_scale_title.setToolTip(translations.get('Changes the objects scale', 'Changes the objects scale'))
+        self.Object_rotation_title.setToolTip(translations.get('Changes the objects rotation', 'Changes the objects rotation'))
+        self.W_slider.setToolTip(translations.get("Adjust Width", "Adjust Width"))
+        self.H_slider.setToolTip(translations.get("Adjust Height", "Adjust Height"))
+        self.L_slider.setToolTip(translations.get("Adjust Length", "Adjust Length"))
+        self.Delete_Object_Button.setText(translations.get("Delete Object", "Delete Object"))
+        self.Import_Object_Button.setText(translations.get("Import Object", "Import Object"))
+    
     def ValidType(self, val):
         """Validates if val type is string"""
         return type(val) == str
