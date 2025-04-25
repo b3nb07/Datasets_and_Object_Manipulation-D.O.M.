@@ -3000,17 +3000,18 @@ class Settings(QWidget):
         import webbrowser
         webbrowser.open('https://github.com/b3nb07/CS3028_Group_Project')
 
-    def Colour_Scheme_Press(self):
-        colour_box = QMessageBox(self)
-        colour_box.setWindowTitle("Select Colour Scheme")
-        colour_box.setText("Please select a colour scheme:")
 
-        # Add buttons for different styles
-        dark_mode = colour_box.addButton("Dark Mode", QMessageBox.ActionRole)
-        light_mode = colour_box.addButton("Light Mode", QMessageBox.ActionRole)
-        default = colour_box.addButton("Default", QMessageBox.ActionRole)
-        dyslexic = colour_box.addButton("Dyslexic", QMessageBox.ActionRole)
-        colour_scheme1 = colour_box.addButton("Colour Blindness", QMessageBox.ActionRole)
+    def Colour_Scheme_Press(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        colour_box = QMessageBox(self)
+        colour_box.setWindowTitle(translation.get("Select Colour Scheme", "Select Colour Scheme"))
+        colour_box.setText(translation.get("Please select a colour scheme:", "Please select a colour scheme:"))
+        dark_mode = colour_box.addButton(translation.get("Dark Mode", "Dark Mode"), QMessageBox.ActionRole)
+        light_mode = colour_box.addButton(translation.get("Light Mode", "Light Mode"), QMessageBox.ActionRole)
+        default = colour_box.addButton(translation.get("Default", "Default"), QMessageBox.ActionRole)
+        dyslexic = colour_box.addButton(translation.get("Dyslexic", "Dyslexic"), QMessageBox.ActionRole)
+        colour_scheme1 = colour_box.addButton(translation.get("Colour Blindness", "Colour Blindness"), QMessageBox.ActionRole)
         colour_box.addButton(QMessageBox.Cancel)
 
         colour_box.exec()
@@ -3031,9 +3032,6 @@ class Settings(QWidget):
             self.apply_stylesheet("Deuteranomaly.qss")
 
 
-            
-
-
     def apply_stylesheet(self, filename):
         """Loads and applies stylesheet, then saves the choice"""
         qss_path = os.path.join(os.path.dirname(__file__), "..", "Style", filename)
@@ -3047,9 +3045,11 @@ class Settings(QWidget):
 
 
     def Language_button_press(self):
+        current_lang = translator.current_language
+        translation = self.translations.get(current_lang, self.translations.get("English"))
         language_box = QMessageBox(self)
-        language_box.setWindowTitle("Select a Language")
-        language_box.setText("Please select a Language:")
+        language_box.setWindowTitle(translation.get("Select a Language", "Select a Language"))
+        language_box.setText(translation.get("Please select a Language:", "Please select a Language:"))
 
         # Add buttons for different styles
         English = language_box.addButton("English", QMessageBox.ActionRole)

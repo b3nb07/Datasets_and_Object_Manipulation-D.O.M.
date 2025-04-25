@@ -145,7 +145,16 @@
         "tab_lighting": "Iluminación",
         "tab_import_export": "Importar/Exportar",
         "tab_settings": "Configuraciones",
-        "tab_random": "Aleatorio"
+        "tab_random": "Aleatorio",
+        "Dark Mode": "Modo oscuro",
+        "Light Mode": "Modo claro",
+        "Default": "Predeterminado",
+        "Dyslexic": "Modo disléxico",
+        "Colour Blindness": "Daltonismo",
+        "Select Colour Scheme": "Seleccionar esquema de color",
+        "Please select a colour scheme:": "Por favor, seleccione un esquema de color:",
+        "Select a Language": "Seleccionar un idioma",
+        "Please select a Language:": "Por favor, seleccione un idioma:"
         
     },
         "Mandarin": {
@@ -254,7 +263,16 @@
             "Error when reading model": "读取模型时出错",
             "The selected file is corrupt or invalid.": "所选文件已损坏或无效。",
             "Error when importing": "导入时出错",
-            "Error: {}": "错误：{}"
+            "Error: {}": "错误：{}",
+            "Dark Mode": "深色模式",
+            "Light Mode": "浅色模式",
+            "Default": "默认",
+            "Dyslexic": "阅读障碍模式",
+            "Colour Blindness": "色盲模式",
+            "Select Colour Scheme": "选择颜色方案",
+            "Please select a colour scheme:": "请选择一种颜色方案：",
+            "Select a Language": "选择语言",
+            "Please select a Language:": "请选择一种语言："
         },
         "Portuguese": {
             "You have deleted all of the objects, object manipulation tabs have been disabled.": "Você deletou todos os objetos, as abas de manipulação de objetos foram desativadas.",
@@ -362,6 +380,15 @@
             "Error when reading model": "Erro ao ler o modelo",
             "The selected file is corrupt or invalid.": "O arquivo selecionado está corrompido ou é inválido.",
             "Error when importing": "Erro ao importar",
-            "Error: {}": "Erro: {}"
+            "Error: {}": "Erro: {}",
+            "Dark Mode": "Modo escuro",
+            "Light Mode": "Modo claro",
+            "Default": "Padrão",
+            "Dyslexic": "Modo disléxico",
+            "Colour Blindness": "Daltonismo",
+            "Select Colour Scheme": "Selecionar esquema de cores",
+            "Please select a colour scheme:": "Por favor, selecione um esquema de cores:",
+            "Select a Language": "Selecionar um idioma",
+            "Please select a Language:": "Por favor, selecione um idioma:"
         }
     }
