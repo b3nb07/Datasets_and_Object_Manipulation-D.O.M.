@@ -6,6 +6,7 @@ import random
 import json
 import os
 from copy import deepcopy
+import shutil
 
 # initialise config - will hold the config ready for export
 config = { 
@@ -656,6 +657,16 @@ class Backend():
                 except:
                     pass
         return highest
+    
+    def export_interaction(self, path, filename="interaction_log.txt"):
+        """Exports the current interaction log.
+        
+        :param filename: The filename of the exported config, defaults to export.json."
+        """
+        file_path = path + "/" + filename
+        shutil.copyfile(filename, file_path)
+
+        Backend.update_log(f'Interaction exported\n')
 
     def export(self, path, filename="export.json"):
         """Exports the current scene setup to a JSON file.
