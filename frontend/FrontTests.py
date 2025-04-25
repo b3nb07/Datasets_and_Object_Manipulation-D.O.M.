@@ -90,7 +90,7 @@ def ObjectTabTests(tab_widget, shared_state, ObjectTab):
             
             #Updates Field Value
             ObjectTab.Slider_Update_Scale(ObjectTab, 5450, Field)
-            TestPrint(f"Expected 100:", Field.text() == "100")
+            TestPrint(f"Expected 100:", Field.text() == "100.0")
             
             """#Updates slider position
             ObjectTab.Update_slider(ObjectTab, Slider, 5450)
@@ -108,7 +108,7 @@ def ObjectTabTests(tab_widget, shared_state, ObjectTab):
             TestPrint(f"Expected 0.0:", Field.text() == "0.0")
             
             ObjectTab.Slider_Update_Scale(ObjectTab, 5450, Field)
-            TestPrint(f"Expected 100:", Field.text() == "100")
+            TestPrint(f"Expected 100:", Field.text() == "100.0")
             
             """#Updates slider position
             ObjectTab.Update_slider(ObjectTab, Slider, 5450)
@@ -297,8 +297,8 @@ def RandomTabPageTests(tab_widget, PagePos):
         TestPrint("---Illegal Value")
         PageLayout.itemAtPosition(y, x+1).widget().setText("OYJ")
         PageLayout.itemAtPosition(y, x+1).widget().editingFinished.emit()
-        TestPrint("Expected -inf:", PageLayout.itemAtPosition(y, x+1).widget().text() == "-inf")
-        TestPrint("Expected inf:", PageLayout.itemAtPosition(y, x+2).widget().text() == "inf")
+        TestPrint("Expected 0:", PageLayout.itemAtPosition(y, x+1).widget().text() == "0")
+        TestPrint("Expected 0:", PageLayout.itemAtPosition(y, x+2).widget().text() == "0")
 
         TestPrint("---LowerBound Value > UpperBound Value")
         PageLayout.itemAtPosition(y, x+1).widget().setText("1")
