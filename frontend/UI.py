@@ -151,10 +151,7 @@ class TabDialog(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.setWindowTitle("Datasets and Object Modeling")
-        current_lang = translator.current_language
-        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
-
-        
+          
         #Object side par to display current objects loaded in and allow for removal from current render without deletion
         ObjectsStatusBar = QScrollArea()
         ObjectsStatusBar.setMaximumWidth(175)
@@ -172,7 +169,7 @@ class TabDialog(QWidget):
         self.tab_widget.addTab(ObjectTab(self, self.tab_widget, ObjLayout), "Object")
         self.tab_widget.addTab(PivotTab(self), "Pivot Point")
         self.tab_widget.addTab(Render(self), "Render")
-        self.tab_widget.addTab(Lighting(self),"Lighting")
+        self.tab_widget.addTab(Lighting(self), "Lighting")
  
         Temp_index = self.tab_widget.addTab(QWidget(), "Random")
         self.tab_widget.addTab(Port(self, self.tab_widget, ObjLayout), "Import/Export")
@@ -181,6 +178,7 @@ class TabDialog(QWidget):
         random_tab = RandomTabDialog(self, self.tab_widget)
         self.tab_widget.removeTab(Temp_index)
         self.tab_widget.insertTab(Temp_index, random_tab, "Random")
+        translator.languageChanged.connect(self.translateUi)
 
         #Disable until Object is loaded
         self.tab_widget.setTabEnabled(0, False)
@@ -188,15 +186,11 @@ class TabDialog(QWidget):
         self.tab_widget.setTabEnabled(2, False)
         self.tab_widget.setTabEnabled(3, False)
         self.tab_widget.setTabEnabled(4, False)
+        self.tab_widget.setTabEnabled(5, True)
+  
+        self.tab_widget.currentChanged.connect(self.update_tab_fields)
 
         self.tab_widget.setMaximumHeight(250)
-
-        '''self.tab_widget.currentChanged.connect(self.tab_widget..on_object_selected)
-        self.tab_widget.currentChanged.connect(PivotTab.update_ui_by_config)
-        self.tab_widget.currentChanged.connect(Render.update_ui_by_config)
-        self.tab_widget.currentChanged.connect(Lighting.update_ui_by_config)'''
-
-        self.tab_widget.currentChanged.connect(self.update_tab_fields)
         
         # enviroment
         self.environment = QWidget()
@@ -219,13 +213,23 @@ class TabDialog(QWidget):
         main_layout.addWidget(self.environment, 1, 1, 1, 7)  
     
         self.setLayout(main_layout)
-        
-        """#Tests for all pages except Random (included in RandomTabDialog)
-        from FrontTests import Tests
-        Tests(self, self.tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)"""
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
     def update_tab_fields(self):
         self.tab_widget.currentWidget().update_ui_by_config()
+        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)"""
+    
+    def translateUi(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.tab_widget.setTabText(0, translation.get("Object", "Object"))
+        self.tab_widget.setTabText(1, translation.get("Pivot Point", "Pivot Point"))
+        self.tab_widget.setTabText(2, translation.get("Render", "Render"))
+        self.tab_widget.setTabText(3, translation.get("Lighting", "Lighting"))
+        self.tab_widget.setTabText(4, translation.get("Random", "Random"))
+        self.tab_widget.setTabText(5, translation.get("Import/Export", "Import/Export"))
+        self.tab_widget.setTabText(6, translation.get("Settings", "Settings"))
 
     def visual_change(self, thread):
         #Updates Viewport Image
@@ -247,7 +251,7 @@ class TabDialog(QWidget):
         if (not self.viewport_ongoing and "Render" not in interaction):
             self.old_log(interaction)
             config = backend.get_config()
-            if (not config["objects"][0]): return
+            if (not config["objects"] or not config["objects"][0]): return
             backend.set_runtime_config(config)
 
             thread = ViewportThread(self.size())
@@ -369,6 +373,8 @@ class ObjectTab(QWidget):
 
         #First Section
         def Get_Object_Filepath(Scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             import_box = QMessageBox()
             import_box.setText("How would you like to import objects?")
             import_box.addButton("Import Files", QMessageBox.ActionRole)
@@ -442,49 +448,63 @@ class ObjectTab(QWidget):
 
                 Object_detect(tab_widget)
                 
+            except Exception:
+                error_title = translations.get("error_reading_title", "Error when reading model")
+                error_msg = translations.get("error_reading_body", "The selected file is corrupt or invalid.")
+                QMessageBox.warning(self, error_title, error_msg)
             except Exception as e:
-                QMessageBox.warning(self, "Error when importing", f"Error: {str(e)}")
+                error_title = translations.get("Error when importing", "Error when importing")
+                error_msg = translations.get("Error_Import", "Error: {}").format(str(e))
+                QMessageBox.warning(self, error_title, error_msg)
 
         self.Import_Object_Button = QPushButton("Import Objects", self)
         self.Import_Object_Button.clicked.connect(lambda: Get_Object_Filepath(Scroll))
     
         def delete_object(tab_widget, scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+            
             to_delete = QMessageBox()
-            to_delete.setText("Please select an object to remove from below")
+            to_delete.setText(translations.get("Please select an object to remove from below", "Please select an object to remove from below"))
 
             if (not shared_state.items):
-                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
+                warning_text = translations.get("Warning", "Warning")
+                warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
+                return QMessageBox.warning(self, warning_text, warning_msg)
 
             for i in range(len(shared_state.itemNames)):
                 to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
             
-            to_delete.addButton("Cancel", QMessageBox.ActionRole)
-
+            cancel_button = to_delete.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             to_delete.exec()
-
             choice = str(to_delete.clickedButton().text())
 
-            if choice != "Cancel":
-                obj_index = int(to_delete.clickedButton().text()[-1]) - 1
+
+
+            if choice != cancel_button.text():
+                obj_index = shared_state.itemNames.index(choice)
                 obj = shared_state.items[obj_index]
-                shared_state.remove_item(obj)
                 scroll.itemAt(obj_index).widget().setParent(None)
-                backend.update_log(f'{obj} object deleted\n')
-                del backend.get_config()["objects"][obj.object_pos]
-                # shift objects after this one down by one
-                for i in range(obj_index, len(shared_state.items)):
-                    obj = shared_state.items[i]
-                    obj.object_pos = i
+                try:
+                    shared_state.remove_item(obj)
+                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
+                    backend.update_log(f'{obj} object deleted\n')
+                    del backend.get_config()["objects"][obj.object_pos]
+                    # shift objects after this one down by one
+                    for i in range(obj_index, len(shared_state.items)):
+                        obj = shared_state.items[i]
+                        obj.object_pos = i
+                except:
+                    error_box = ilyaMessageBox("Error deleting object", "Error")
 
                 shared_state.items_updated.emit(shared_state.items)
                 # The last object was deleted
                 if (not shared_state.items):
                     Object_detect(tab_widget)
-                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
-
+                    QMessageBox.warning(self, translations.get("Warning", "Warning"),translations.get("You have deleted all of the objects, object manipulation tabs have been disabled.", "You have deleted all of the objects, object manipulation tabs have been disabled."))
+    
         self.Delete_Object_Button = QPushButton('Delete Object', self)
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
-
 
         # create initial combo_box
         self.combo_box = QComboBox(self)
@@ -498,7 +518,6 @@ class ObjectTab(QWidget):
         shared_state.update_selected(0)
         
         self.combo_box.setToolTip('Changes the object selected')
-
         ####################################################
 
         #Declare Location of elements in a grid layout 
@@ -612,7 +631,8 @@ class ObjectTab(QWidget):
         self.X_Rotation.sliderReleased.connect(self.update_object_rotation)
         self.Y_Rotation.sliderReleased.connect(self.update_object_rotation)
         self.Z_Rotation.sliderReleased.connect(self.update_object_rotation)
-        
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
         #########################################
 
         def show_hide_object(object,state):
@@ -627,47 +647,7 @@ class ObjectTab(QWidget):
                 tab_widget.setTabEnabled(i, State)
 
     
-    def delete_object(self, tab_widget, scroll):
-            # Delete Object
-            to_delete = QMessageBox()
-            to_delete.setText("Please select an object to remove from below")
 
-            if (not shared_state.items):
-                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
-
-            for i in range(len(shared_state.itemNames)):
-                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
-            
-            to_delete.addButton("Cancel", QMessageBox.ActionRole)
-            to_delete.exec()
-            #Object select
-            choice = str(to_delete.clickedButton().text())
-
-            if choice != "Cancel":
-                """Removes Object Via Index from all areas """
-                obj_index = shared_state.itemNames.index(choice)
-                obj = shared_state.items[obj_index]
-                scroll.itemAt(obj_index).widget().setParent(None)
-                try:
-                    #Removal
-                    shared_state.remove_item(obj)
-                    success_box = ilyaMessageBox("Object successfully deleted", "Success")
-                    
-                    #Deletes backend
-                    del backend.get_config()["objects"][obj.object_pos]
-                    """shift objects after this one down by one"""
-                    for i in range(obj_index, len(shared_state.items)):
-                        obj = shared_state.items[i]
-                        obj.object_pos = i
-                except:
-                    error_box = ilyaMessageBox("Error deleting object", "Error")
-
-                shared_state.items_updated.emit(shared_state.items)
-                """The last object was deleted"""
-                if (not shared_state.items):
-                    self.Object_detect(tab_widget)
-                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
-                    
     def Object_detect(self, tab_widget):
             """On upload/delete to be called to check if any object is to be rendered and enables tabs accordingly"""
             State = not Backend.is_config_objects_empty(tab_widget)
@@ -709,7 +689,32 @@ class ObjectTab(QWidget):
         self.Update_slider(self.X_Rotation,self.X_Rotation_input_field.text())
         self.Update_slider(self.Y_Rotation,self.Y_Rotation_input_field.text())
         self.Update_slider(self.Z_Rotation,self.Z_Rotation_input_field.text())
-        
+
+    def translateUi(self):
+        current_lang = translator.current_language
+        translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        self.Object_pos_title.setText(translations.get("Co-ords", "Co-ords"))
+        self.XObj_pos.setText(translations.get("X:", "X:"))
+        self.YObj_pos.setText(translations.get("Y:", "Y:"))
+        self.ZObj_pos.setText(translations.get("Z:", "Z:"))
+        self.Object_scale_title.setText(translations.get("Scale", "Scale"))
+        self.Width_Obj_pos.setText(translations.get("Width:", "Width:"))
+        self.Height_Obj_pos.setText(translations.get("Height:", "Height:"))
+        self.Length_Obj_pos.setText(translations.get("Length:", "Length:"))        
+        self.Object_rotation_title.setText(translations.get("Rotation", "Rotation"))
+        self.X_Rotation_Label.setText(translations.get("Roll:", "Roll:"))
+        self.Y_Rotation_Label.setText(translations.get("Pitch:", "Pitch:"))
+        self.Z_Rotation_Label.setText(translations.get("Yaw:", "Yaw:"))
+        self.Object_pos_title.setToolTip(translations.get('Changes the objects Position', 'Changes the objects Position'))
+        self.Object_scale_title.setToolTip(translations.get('Changes the objects scale', 'Changes the objects scale'))
+        self.Object_rotation_title.setToolTip(translations.get('Changes the objects rotation', 'Changes the objects rotation'))
+        self.W_slider.setToolTip(translations.get("Adjust Width", "Adjust Width"))
+        self.H_slider.setToolTip(translations.get("Adjust Height", "Adjust Height"))
+        self.L_slider.setToolTip(translations.get("Adjust Length", "Adjust Length"))
+        self.Delete_Object_Button.setText(translations.get("Delete Object", "Delete Object"))
+        self.Import_Object_Button.setText(translations.get("Import Object", "Import Object"))
+    
     def ValidType(self, val):
         """Validates if val type is string"""
         return type(val) == str
@@ -2412,22 +2417,28 @@ class Port(QWidget):
         self.ImportSettings_Button.clicked.connect(lambda: Get_Settings_Filepath(tab_widget))
 
         def delete_object(tab_widget, scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+            
             to_delete = QMessageBox()
-            to_delete.setText("Please select an object to remove from below")
+            to_delete.setText(translations.get("Please select an object to remove from below", "Please select an object to remove from below"))
 
             if (not shared_state.items):
-                return QMessageBox.warning(self, "Warning", "There are no objects to delete.")
+                warning_text = translations.get("Warning", "Warning")
+                warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
+                return QMessageBox.warning(self, warning_text, warning_msg)
 
             for i in range(len(shared_state.itemNames)):
                 to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
             
-            to_delete.addButton("Cancel", QMessageBox.ActionRole)
-
+            cancel_button = to_delete.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             to_delete.exec()
-
             choice = str(to_delete.clickedButton().text())
 
-            if choice != "Cancel":
+
+
+
+            if choice != cancel_button.text():
                 obj_index = shared_state.itemNames.index(choice)
                 obj = shared_state.items[obj_index]
                 scroll.itemAt(obj_index).widget().setParent(None)
@@ -2447,9 +2458,9 @@ class Port(QWidget):
                 # The last object was deleted
                 if (not shared_state.items):
                     Object_detect(tab_widget)
-                    QMessageBox.warning(self, "Warning", "You have deleted all of the objects, object manipulation tabs have been disabled.")
+                    QMessageBox.warning(self, translations.get("Warning", "Warning"),translations.get("You have deleted all of the objects, object manipulation tabs have been disabled.", "You have deleted all of the objects, object manipulation tabs have been disabled."))
     
-        #Sixth section
+
         self.Delete_Object_Button = QPushButton('Delete Object', self)
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
         
