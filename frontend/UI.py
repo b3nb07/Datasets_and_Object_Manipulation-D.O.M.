@@ -1221,7 +1221,7 @@ class RandomObject(QWidget):
         # connecting shared state updates to combo box
         shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
-        self.combo_box.currentIndexChanged.connect(self.on_object_selected)
+        self.combo_box.currentIndexChanged.connect(lambda: self.on_object_selected(ParentTab, self.combo_box.currentIndex()))
 
         # initialise items
         self.update_combo_box_items(shared_state.itemNames)
@@ -1360,9 +1360,10 @@ class RandomObject(QWidget):
         self.combo_box.clear()
         self.combo_box.addItems(map(lambda o: str(o), items))
             
-    def on_object_selected(self, index):
+    def on_object_selected(self, ParentTab, index):
         # get config from bacl
         config = backend.get_config()
+        OFLocation = [[1,1], [1,2], [1,3],  [5,1], [5,2], [5,3],  [8,1], [8,2], [8,3]] # This method of implementation is gonna be technical debt but we don't have time
 
         # get specific index 
         objects_config = config.get("random", {}).get("objects", {})
@@ -1401,6 +1402,8 @@ class RandomObject(QWidget):
                     upper_bound.setText("0")
                     lower_bound.setEnabled(False)
                     upper_bound.setEnabled(False)
+                
+            self.setAbled(self.connFields(ParentTab, OFLocation[count][1], OFLocation[count][0]), checkbox.checkState())
         
         # update the toggle-all checkbox
         all_box = self.layout().itemAtPosition(1, 10).widget()
