@@ -372,9 +372,9 @@ class Backend():
             case "Z":
                 config["light_sources"]["pos"][2] = random_value
                 
-            case "Pitch":
-                config["light_sources"]["rot"][0] = random_value
             case "Roll":
+                config["light_sources"]["rot"][0] = random_value
+            case "Pitch":
                 config["light_sources"]["rot"][1] = random_value
             case "Yaw":
                 config["light_sources"]["rot"][2] = random_value 
@@ -383,11 +383,6 @@ class Backend():
                 config["light_sources"]["energy"] = random_value
             case "Radius":
                 config["light_sources"]["radius"] = random_value
-            case "Colour":
-                # THIS NEEDS CHANGED SINCE ITS A HEXCODE
-                # config["light_sources"]["color"] = '#ffffff'
-                # config["light_sources"]["color"] = random_value  
-                pass
             
             case _:
                 raise ValueError(f"Unrecognized field: {field}")
@@ -405,9 +400,9 @@ class Backend():
                 config["objects"][index]["pos"][2] = random_value
             
             # assumes pitch is Y, roll is X and yaw is Z
-            case "Pitch":
-                config["objects"][index]["rot"][0] = random_value
             case "Roll":
+                config["objects"][index]["rot"][0] = random_value
+            case "Pitch":
                 config["objects"][index]["rot"][1] = random_value
             case "Yaw":
                 config["objects"][index]["rot"][2] = random_value
@@ -415,9 +410,9 @@ class Backend():
             # assumes width is x height is y and length is z and is in form xyz
             case "Width":
                 config["objects"][index]["sca"][0] = random_value
-            case "Height":
-                config["objects"][index]["sca"][1] = random_value
             case "Length":
+                config["objects"][index]["sca"][1] = random_value
+            case "Height":
                 config["objects"][index]["sca"][2] = random_value
             
             case _:
@@ -843,7 +838,7 @@ class Backend():
                 "name": name,
                 "pos": [0, 0, 0],
                 "rot": [0, 0, 0],
-                "energy": 10,
+                "energy": 0,
                 "color": [255, 255, 255],
                 "radius": 0
             }

@@ -167,29 +167,36 @@ class TabDialog(QWidget):
         ObjectsStatusBar.setWidget(content_widget)
         ObjectsStatusBar.setWidgetResizable(True)
         
-        tab_widget = QTabWidget()
+        self.tab_widget = QTabWidget()
         # NAVBAR: Add all other tabs first
-        tab_widget.addTab(ObjectTab(self, tab_widget, ObjLayout), "Object")
-        tab_widget.addTab(PivotTab(self), "Pivot Point")
-        tab_widget.addTab(Render(self), "Render")
-        tab_widget.addTab(Lighting(self),"Lighting")
+        self.tab_widget.addTab(ObjectTab(self, self.tab_widget, ObjLayout), "Object")
+        self.tab_widget.addTab(PivotTab(self), "Pivot Point")
+        self.tab_widget.addTab(Render(self), "Render")
+        self.tab_widget.addTab(Lighting(self),"Lighting")
  
-        Temp_index = tab_widget.addTab(QWidget(), "Random")
-        tab_widget.addTab(Port(self, tab_widget, ObjLayout), "Import/Export")
-        tab_widget.addTab(Settings(self, tab_widget), "Settings")
+        Temp_index = self.tab_widget.addTab(QWidget(), "Random")
+        self.tab_widget.addTab(Port(self, self.tab_widget, ObjLayout), "Import/Export")
+        self.tab_widget.addTab(Settings(self, self.tab_widget), "Settings")
         
-        random_tab = RandomTabDialog(self, tab_widget)
-        tab_widget.removeTab(Temp_index)
-        tab_widget.insertTab(Temp_index, random_tab, "Random")
+        random_tab = RandomTabDialog(self, self.tab_widget)
+        self.tab_widget.removeTab(Temp_index)
+        self.tab_widget.insertTab(Temp_index, random_tab, "Random")
 
         #Disable until Object is loaded
-        tab_widget.setTabEnabled(0, False)
-        tab_widget.setTabEnabled(1, False)
-        tab_widget.setTabEnabled(2, False)
-        tab_widget.setTabEnabled(3, False)
-        tab_widget.setTabEnabled(4, False)
+        self.tab_widget.setTabEnabled(0, False)
+        self.tab_widget.setTabEnabled(1, False)
+        self.tab_widget.setTabEnabled(2, False)
+        self.tab_widget.setTabEnabled(3, False)
+        self.tab_widget.setTabEnabled(4, False)
 
-        tab_widget.setMaximumHeight(250)
+        self.tab_widget.setMaximumHeight(250)
+
+        '''self.tab_widget.currentChanged.connect(self.tab_widget..on_object_selected)
+        self.tab_widget.currentChanged.connect(PivotTab.update_ui_by_config)
+        self.tab_widget.currentChanged.connect(Render.update_ui_by_config)
+        self.tab_widget.currentChanged.connect(Lighting.update_ui_by_config)'''
+
+        self.tab_widget.currentChanged.connect(self.update_tab_fields)
         
         # enviroment
         self.environment = QWidget()
@@ -207,7 +214,7 @@ class TabDialog(QWidget):
 
         # Layout of Main Page
         main_layout = QGridLayout()
-        main_layout.addWidget(tab_widget, 0, 0, 1, 8)
+        main_layout.addWidget(self.tab_widget, 0, 0, 1, 8)
         main_layout.addWidget(ObjectsStatusBar, 1, 0, 1, 2)
         main_layout.addWidget(self.environment, 1, 1, 1, 7)  
     
@@ -215,7 +222,10 @@ class TabDialog(QWidget):
         
         """#Tests for all pages except Random (included in RandomTabDialog)
         from FrontTests import Tests
-        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)"""
+        Tests(self, self.tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)"""
+
+    def update_tab_fields(self):
+        self.tab_widget.currentWidget().update_ui_by_config()
 
     def visual_change(self, thread):
         #Updates Viewport Image
@@ -672,7 +682,8 @@ class ObjectTab(QWidget):
     def update_ui_by_config(self):
         """ Method that updates attributes in text field when the object index is change from combo box. """
 
-        self.on_object_selected(0)
+        if not backend.is_config_objects_empty():
+            self.on_object_selected(0)
     
     
     def on_object_selected(self, selected_object_pos):
@@ -1099,6 +1110,9 @@ class RandomTabDialog(QWidget):
         self.tab_widget.setTabText(2, translation.get("Pivot Point", "Pivot Point"))
         self.tab_widget.setTabText(3, translation.get("Render", "Render"))
         self.tab_widget.setTabText(4, translation.get("Light", "Light"))
+    
+    def update_ui_by_config(self):
+        pass
 
 class RandomDefault(QWidget):
     """Defualt page for Random"""
@@ -1227,14 +1241,14 @@ class RandomObject(QWidget):
         self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
 
         main_layout.addWidget(QLabel("Rotation", self), 0, 3)
-        self.gen_field("Pitch", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
-        self.gen_field("Roll", main_layout, 3, 2, self.connFields(ParentTab, 5, 2))
+        self.gen_field("Roll", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
+        self.gen_field("Pitch", main_layout, 3, 2, self.connFields(ParentTab, 5, 2))
         self.gen_field("Yaw", main_layout, 3, 3, self.connFields(ParentTab, 5, 3))
         
         main_layout.addWidget(QLabel("Scale", self), 0, 7)
         self.gen_field("Width", main_layout, 6, 1, self.connFields(ParentTab, 8, 1))
-        self.gen_field("Height", main_layout, 6, 2, self.connFields(ParentTab, 8, 2))
-        self.gen_field("Length", main_layout, 6, 3, self.connFields(ParentTab, 8, 3))
+        self.gen_field("Length", main_layout, 6, 2, self.connFields(ParentTab, 8, 2))
+        self.gen_field("Height", main_layout, 6, 3, self.connFields(ParentTab, 8, 3))
         
         self.setLayout(main_layout)
 
@@ -1356,7 +1370,7 @@ class RandomObject(QWidget):
         object_config = objects_config.get(index, {}).get("object", {})
 
         # list of all possible fields (can make this more modular later lol)
-        all_fields = ["X", "Y", "Z", "Pitch", "Roll", "Yaw", "Width", "Height", "Length"]
+        all_fields = ["X", "Y", "Z", "Roll", "Pitch", "Yaw", "Width", "Length", "Height"]
 
         # temporary bug fix
         count = 0
@@ -2525,6 +2539,9 @@ class Port(QWidget):
         except:
             pass
 
+    def update_ui_by_config(self):
+        pass
+
 class Lighting(QWidget):
     def __init__(self, parent: QWidget):
         super().__init__(parent)
@@ -2552,7 +2569,7 @@ class Lighting(QWidget):
         self.lighting_strength_label = QLabel("Strength: ", self)
         self.lighting_strength_label.setToolTip('Strength of lighting element')
         self.lighting_strength_input_field = QLineEdit(self)
-        self.lighting_strength_input_field.setText("1")
+        self.lighting_strength_input_field.setText("0")
         self.lighting_strength_input_field.textEdited.connect(lambda: self.Update_slider(self.strength_slider, self.lighting_strength_input_field.text()))
         self.lighting_strength_input_field.editingFinished.connect(self.update_strength)
 
@@ -2727,6 +2744,27 @@ class Lighting(QWidget):
         self.setLayout(main_layout)
         translator.languageChanged.connect(self.translateUi)
         self.translateUi()
+    
+    def update_ui_by_config(self):
+        """ Method that updates attributes in text field when the object index is change from combo box. """
+
+        cfg = backend.get_config()
+
+        self.Xlight_coords_input_field.setText(str(cfg["light_sources"]["pos"][0]))
+        self.Ylight_coords_input_field.setText(str(cfg["light_sources"]["pos"][1]))
+        self.Zlight_coords_input_field.setText(str(cfg["light_sources"]["pos"][2]))
+
+        self.Xlight_angle_input_field.setText(str(cfg["light_sources"]["rot"][0]))
+        self.Ylight_angle_input_field.setText(str(cfg["light_sources"]["rot"][1]))
+        self.Zlight_angle_input_field.setText(str(cfg["light_sources"]["rot"][2]))
+
+        self.lighting_strength_input_field.setText(str(cfg["light_sources"]["energy"]))
+        self.radius_input_field.setText(str(cfg["light_sources"]["radius"]))
+
+        self.Update_slider(self.Xlight_angle_slider,self.Xlight_angle_input_field.text())
+        self.Update_slider(self.Ylight_angle_slider,self.Ylight_angle_input_field.text())
+        self.Update_slider(self.Zlight_angle_slider,self.Zlight_angle_input_field.text())
+        self.Update_slider(self.strength_slider,self.lighting_strength_input_field.text())
 
 
     def change_type(self):
@@ -3039,6 +3077,9 @@ class Settings(QWidget):
     def save_language_setting(self):
         settings = QSettings("UserSettings")
         settings.setValue("language", translator.current_language)
+
+    def update_ui_by_config(self):
+        pass
 
 def startApp():
     app.exec()
