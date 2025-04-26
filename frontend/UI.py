@@ -218,7 +218,6 @@ class TabDialog(QWidget):
 
     def update_tab_fields(self):
         self.tab_widget.currentWidget().update_ui_by_config()
-        Tests(self, tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)"""
     
     def translateUi(self):
         current_lang = translator.current_language
