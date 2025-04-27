@@ -375,16 +375,16 @@ class ObjectTab(QWidget):
             current_lang = translator.current_language
             translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             import_box = QMessageBox()
-            import_box.setText("How would you like to import objects?")
-            import_box.addButton("Import Files", QMessageBox.ActionRole)
-            import_box.addButton("Folder", QMessageBox.ActionRole)
-            import_box.addButton("Cancel", QMessageBox.RejectRole)
+            import_box.setText(translations.get("How would you like to import objects?", "How would you like to import objects?"))
+            import_files_button = import_box.addButton(translations.get("Import Files", "Import Files"), QMessageBox.ActionRole)
+            folder_button = import_box.addButton(translations.get("Folder", "Folder"), QMessageBox.ActionRole)
+            cancel_button = import_box.addButton(translations.get("Cancel", "Cancel"), QMessageBox.RejectRole)
             
             import_box.exec()
-            clicked_button = import_box.clickedButton().text()
+            clicked_button = import_box.clickedButton()
             
             try:
-                if clicked_button == "Import Files":
+                if clicked_button == import_files_button:
                     paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
                     if not paths:
                         return
@@ -397,10 +397,8 @@ class ObjectTab(QWidget):
                         button = QPushButton(Name)
                         button.setMaximumWidth(175)
                         menu = QMenu()
-                        incexc = menu.addAction('Included in Scene')
-                        ground = menu.addAction('Grounded')
-                        ground.setVisible(False)
-                        
+                        incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                        ground = menu.addAction(translations.get("Grounded","Grounded"))
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
                         incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
@@ -411,7 +409,7 @@ class ObjectTab(QWidget):
                         button.setMenu(menu)
                         Scroll.addWidget(button)
 
-                elif clicked_button == "Folder":
+                elif clicked_button == folder_button:
                     folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
                     if not folder_path:
                         return
@@ -430,9 +428,8 @@ class ObjectTab(QWidget):
                                 button = QPushButton(Name)
                                 button.setMaximumWidth(175)
                                 menu = QMenu()
-                                incexc = menu.addAction('Included in Scene')
-                                ground = menu.addAction('Grounded')
-                                ground.setVisible(False)
+                                incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                                ground = menu.addAction(translations.get("Grounded","Grounded"))
                                 
                                 incexc.setCheckable(True)
                                 incexc.setChecked(True)
@@ -972,6 +969,8 @@ class PivotTab(QWidget):
         main_layout.addWidget(self.combo_box, 0, 7)
 
         self.setLayout(main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
 
 
@@ -1080,6 +1079,13 @@ class PivotTab(QWidget):
             except:
                 field.setText(str(0.0))
                 field.editingFinished.emit()
+
+    def translateUi(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        self.Pivot_Point_Check.setText(translation.get("Custom Pivot Point", "Custom Pivot Point"))
+        self.Distance_Pivot.setText(translation.get("Distance","Distance"))
+
 
 class RandomTabDialog(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
@@ -2266,10 +2272,7 @@ class Port(QWidget):
 
             button.setMenu(menu)
             return button
-
-
-
-        #First Section
+        
         def Get_Object_Filepath(Scroll):
             """ import objects main function """
             try:
@@ -2324,24 +2327,29 @@ class Port(QWidget):
 
         #Second Section
         def Tutorial_Object(Scroll):
+            current_lang = translator.current_language
+            translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
             Tutorial_Box = QMessageBox()
-            Tutorial_Box.setText("Please select a tutorial object from below")
-            Tutorial_Box.addButton("Cube", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Cylinder", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Cone", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Plane", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Sphere", QMessageBox.ActionRole)
-            Tutorial_Box.addButton("Monkey", QMessageBox.ActionRole)
-            Tutorial_Box.addButton(QMessageBox.Cancel)
-
-            Tutorial_Box.exec()
-
+            Tutorial_Box.setText(translations.get("Please select a tutorial object from below", "Please select a tutorial object from below"))            
+            object_types = ["Cube", "Cylinder", "Cone", "Plane", "Sphere", "Monkey"]
+            button_map = {}
             
+            for obj_type in object_types:
+                translated_text = translations.get(obj_type, obj_type)
+                button = Tutorial_Box.addButton(translated_text, QMessageBox.ActionRole)
+                button_map[button] = obj_type 
+
+            cancel_button = Tutorial_Box.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
+            Tutorial_Box.exec()
+            clicked_button = Tutorial_Box.clickedButton()
+            selected_object = button_map.get(clicked_button)
+
             try:
-                if Tutorial_Box.clickedButton().text().upper() != "CANCEL":
+                if clicked_button != cancel_button:
                     Name = self.GetName()
                     if Name != False and len(Name) < 25:
-                        obj = backend.RenderObject(primative = Tutorial_Box.clickedButton().text().upper())
+                        obj = backend.RenderObject(primative = selected_object.upper())
                         if Name == "Object":
                             count = 1
                             while f"{Name} {len(shared_state.itemNames)+count}" in shared_state.itemNames:
@@ -2352,9 +2360,8 @@ class Port(QWidget):
                         button = QPushButton(Name)
                         button.setMaximumWidth(175)
                         menu = QMenu()
-                        incexc = menu.addAction('Included in Scene')
-                        ground = menu.addAction('Grounded')
-                        ground.setVisible(False)
+                        incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                        ground = menu.addAction(translations.get("Grounded","Grounded"))
                         
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
@@ -2373,7 +2380,15 @@ class Port(QWidget):
                         pass
                         
             except Exception as e:
-                error_box = ilyaMessageBox("Error loading tutorial object.", "Error")
+                print(e)
+
+                error_title = translations.get("Error", "Error")
+                error_text = translations.get("Error loading tutorial object.", "Error loading tutorial object.")
+                error_box = QMessageBox()
+                error_box.setWindowTitle(error_title)
+                error_box.setText(error_text)
+                error_box.exec()
+                error_box = ilyaMessageBox(error_text, error_title)
                 
     
             Object_detect(tab_widget)
@@ -2989,17 +3004,18 @@ class Settings(QWidget):
         import webbrowser
         webbrowser.open('https://github.com/b3nb07/CS3028_Group_Project')
 
-    def Colour_Scheme_Press(self):
-        colour_box = QMessageBox(self)
-        colour_box.setWindowTitle("Select Colour Scheme")
-        colour_box.setText("Please select a colour scheme:")
 
-        # Add buttons for different styles
-        dark_mode = colour_box.addButton("Dark Mode", QMessageBox.ActionRole)
-        light_mode = colour_box.addButton("Light Mode", QMessageBox.ActionRole)
-        default = colour_box.addButton("Default", QMessageBox.ActionRole)
-        dyslexic = colour_box.addButton("Dyslexic", QMessageBox.ActionRole)
-        colour_scheme1 = colour_box.addButton("Colour Blindness", QMessageBox.ActionRole)
+    def Colour_Scheme_Press(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        colour_box = QMessageBox(self)
+        colour_box.setWindowTitle(translation.get("Select Colour Scheme", "Select Colour Scheme"))
+        colour_box.setText(translation.get("Please select a colour scheme:", "Please select a colour scheme:"))
+        dark_mode = colour_box.addButton(translation.get("Dark Mode", "Dark Mode"), QMessageBox.ActionRole)
+        light_mode = colour_box.addButton(translation.get("Light Mode", "Light Mode"), QMessageBox.ActionRole)
+        default = colour_box.addButton(translation.get("Default", "Default"), QMessageBox.ActionRole)
+        dyslexic = colour_box.addButton(translation.get("Dyslexic", "Dyslexic"), QMessageBox.ActionRole)
+        colour_scheme1 = colour_box.addButton(translation.get("Colour Blindness", "Colour Blindness"), QMessageBox.ActionRole)
         colour_box.addButton(QMessageBox.Cancel)
 
         colour_box.exec()
@@ -3020,9 +3036,6 @@ class Settings(QWidget):
             self.apply_stylesheet("Deuteranomaly.qss")
 
 
-            
-
-
     def apply_stylesheet(self, filename):
         """Loads and applies stylesheet, then saves the choice"""
         qss_path = os.path.join(os.path.dirname(__file__), "..", "Style", filename)
@@ -3036,9 +3049,11 @@ class Settings(QWidget):
 
 
     def Language_button_press(self):
+        current_lang = translator.current_language
+        translation = self.translations.get(current_lang, self.translations.get("English"))
         language_box = QMessageBox(self)
-        language_box.setWindowTitle("Select a Language")
-        language_box.setText("Please select a Language:")
+        language_box.setWindowTitle(translation.get("Select a Language", "Select a Language"))
+        language_box.setText(translation.get("Please select a Language:", "Please select a Language:"))
 
         # Add buttons for different styles
         English = language_box.addButton("English", QMessageBox.ActionRole)
