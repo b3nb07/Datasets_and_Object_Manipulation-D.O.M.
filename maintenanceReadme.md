@@ -1,6 +1,6 @@
 # CS3028 Group Project
 
-## Datasets for Objects and Models (D.O.M)
+## Datasets for Objects and Manipulation (D.O.M)
 
 ### Goals and scope
 
