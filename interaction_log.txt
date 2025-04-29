@@ -1,16 +1,13 @@
 Program initialised
-Seed changed to: 679401256
+Seed changed to: 512056730
 Light Source 1 light source added
 Random mode set to set
 Object 1 object added
-Location of Object 1 changed to [0.0, 0.0, 0.0]
+Object 2 object added
+Object 3 object added
 Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Pivot distance changed to: 24.0
-Render resolution changed to (256, 256)
-Render resolution changed to (286, 122)
-Viewport Preview Render Started
-Pivot distance changed to: 100.0
+Object 4 object added
+ Started
 Render resolution changed to (256, 256)
 Render resolution changed to (286, 122)
 Viewport Preview Render Started

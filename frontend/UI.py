@@ -277,7 +277,7 @@ class ObjectTab(QWidget):
     #Object Page
     def __init__(self, parent: QWidget, tab_widget: QTabWidget, Scroll: QVBoxLayout):
         super().__init__(parent)
-
+    
         #Declare UI elements
 
         self.Object_pos_title = QLabel(f"Co-ords", self)
@@ -1227,12 +1227,17 @@ class RandomObject(QWidget):
 
         main_layout = QGridLayout()
         
+        
+        
         # create initial combo_box
         self.combo_box = QComboBox(self)
+        ObjectCombobox = ParentTab.widget(0).layout().itemAtPosition(0, 9).widget()
         # connecting shared state updates to combo box
         shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
         self.combo_box.currentIndexChanged.connect(lambda: self.on_object_selected(ParentTab, self.combo_box.currentIndex()))
+        self.combo_box.currentIndexChanged.connect(lambda: ObjectCombobox.setCurrentIndex(self.combo_box.currentIndex()))
+        ObjectCombobox.currentIndexChanged.connect(lambda: self.combo_box.setCurrentIndex(ObjectCombobox.currentIndex()))
 
         # initialise items
         self.update_combo_box_items(shared_state.itemNames)
