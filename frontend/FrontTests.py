@@ -164,12 +164,12 @@ def PivotTabTests(tab_widget, shared_state, PivotTab):
 
 def RenderTabTests(tab_widget, shared_state, RenderTab):
         TestPrint("---Render Tab Check")
-        Page = tab_widget.widget(1).layout()
+        Page = tab_widget.widget(2).layout()
 
         s = 0
 
-        ButtonFields = [[1, 1]]
-        Slider_Fields = [[1, 3], [1, 4], [1, 5]]
+        ButtonFields = [[1, 0]]
+        Slider_Fields = [[1, 4], [2, 4], [3, 4]]
     
         for i in range(len(ButtonFields)):
             TestPrint(f"{s}---Render Tab Button Check")
@@ -180,18 +180,19 @@ def RenderTabTests(tab_widget, shared_state, RenderTab):
             #Error Checking on MinusButton
             Field.setText("OYJ")
             MinusButton.click()
-            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            TestPrint(f"Expected 1:", Field.text() == "1")
             
             #Error Checking on PlusButton
             Field.setText("OYJ")
             PlusButton.click()
-            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            TestPrint(f"Expected 1:", Field.text() == "1")
             
             #Checking Buttons Alter values
+            Field.setText("10")
             MinusButton.click()
-            TestPrint(f"Expected -1.0:", Field.text() == "-1.0")
+            TestPrint(f"Expected 9:", Field.text() == "9")
             PlusButton.click()
-            TestPrint(f"Expected 0.0:", Field.text() == "0.0")
+            TestPrint(f"Expected 10:", Field.text() == "10")
 
         TestPrint(f"{s}---Render Tab Slider Check")
         for i in range(len(Slider_Fields)):
