@@ -150,7 +150,7 @@ shared_state = ComboBoxState()
 class TabDialog(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
-        self.setWindowTitle("Datasets and Object Modeling")
+        self.setWindowTitle("Datasets and Object Manipulation")
           
         #Object side par to display current objects loaded in and allow for removal from current render without deletion
         ObjectsStatusBar = QScrollArea()
@@ -215,6 +215,9 @@ class TabDialog(QWidget):
         self.setLayout(main_layout)
         translator.languageChanged.connect(self.translateUi)
         self.translateUi()
+
+        from FrontTests import Tests
+        Tests(self, self.tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)
 
     def update_tab_fields(self):
         self.tab_widget.currentWidget().update_ui_by_config()
