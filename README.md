@@ -12,6 +12,24 @@ Generating images of 3D objects can be tedious when working with large datasets.
 
 ---
 
+---
+
+### Installation Prerequisites
+##### General Prerequisites
+1. Ensure you have python installed - https://www.python.org/downloads/ 
+1. Set up your workspace and navigate to it in VSCode or your chosen code editor of choice.
+1. In terminal <code style="color:Gray">run pip install -r requirements.txt</code>
+
+##### MacOS Prerequisites
+Error Message - (Permission Error: Operation not permitted)
+1. Open system settings and navigate to privacy & security
+1. Navigate to full disk access and add new applications. 
+1. Give terminal full disk access: Applications/Utilities/terminal
+1. Give vs-code full disk access: Applications/VSCode
+1. Ensure that both of these applications are selected for this to avoid the permission error.
+
+---
+
 ### Getting Started
 
 To run D.O.M., simply execute the `UI.py` file located in the `frontend` folder.
@@ -19,15 +37,15 @@ To run D.O.M., simply execute the `UI.py` file located in the `frontend` folder.
 #### Steps:
 1. Begin by loading a tutorial object or uploading an object.
    
-   ![Import](https://github.com/user-attachments/assets/b0347dd6-a998-4835-8b02-1d7f74b0b523)
+   ![Step 1](images/userdocs/Step%201.png)
    
 2. When uploading a custom object, you can choose to upload an individual file or a folder. (Uploaded items will share their file name within the software.)
    
-   ![ImportObject](https://github.com/user-attachments/assets/9be4bc43-706f-49d1-bba7-b8a18c836b0a)
+   ![Step 2](images/userdocs/Step%202.png)
 
 3. Once an object is uploaded, the viewport will automatically update. Any changes you make to elements in the scene will trigger automatic updates in the viewport.
    
-   ![ViewPort](https://github.com/user-attachments/assets/f0d98f25-bd9e-460c-8dc0-ad9af0054891)
+   ![Step 3](images/userdocs/Step%203.png)
 
 ---
 
@@ -35,7 +53,7 @@ To run D.O.M., simply execute the `UI.py` file located in the `frontend` folder.
 
 When an object is uploaded, the **ObjectBar** will append an element. This allows you to specify whether particular objects in the scene should be grounded or not.
 
-![ObjectBar](https://github.com/user-attachments/assets/231890b4-e054-4261-a474-8c23af543a05)
+![Object Bar](images/userdocs/Object%20Bar.png)
 
 ---
 
@@ -43,7 +61,7 @@ When an object is uploaded, the **ObjectBar** will append an element. This allow
 
 The **ObjectTab** enables users to change the starting elements for each object. Users can select the object via the combobox (highlighted in orange below).
 
-![Object](https://github.com/user-attachments/assets/72ea49f7-d8d8-4055-b372-562faa2bf6dd)
+![Object Tab](images/userdocs/Object%20Tab.png)
 
 ---
 
@@ -55,7 +73,7 @@ The **PivotTab** allows users to:
 - Assign an object as the pivot point (blue).
 - Set the distance between the camera and the pivot point in meters (green).
 
-![Pivot](https://github.com/user-attachments/assets/be6fc5f3-f61f-4f1b-9b59-370c0bab6c49)
+![Pivot Tab](images/userdocs/PivotTab.png)
 
 ---
 
@@ -68,11 +86,11 @@ The **RenderTab** provides options to configure rendering settings:
 - Begin rendering by pressing **Generate Renders** (blue).
 - Use the unlimited render feature to generate renders continuously until manually stopped (orange).
 
-![Render](https://github.com/user-attachments/assets/f5223a4e-95d6-42d4-a7d6-d8453f2856ee)
+![Render Tab](images/userdocs/Render%20Tab.png)
 
 - Preview the current render configuration before generating final outputs (pink).
 
-![RenderPreview](https://github.com/user-attachments/assets/33590fe2-8747-425e-a48c-ed89d84268fd)
+![Render Tab 2](images/userdocs/Render%20Tab%202.png)
 
 ---
 
@@ -87,7 +105,7 @@ The **LightingTab** lets users fine-tune lighting options:
 - Specify light position (orange).
 - Set light angle (neon).
 
-![Lighting](https://github.com/user-attachments/assets/bceebf17-a4ea-4607-99c6-cf523cc34593)
+![Lighting Tab](images/userdocs/Lighting%20Tab.png)
 
 ---
 
@@ -99,7 +117,7 @@ The **RandomTab** allows fields across all pages to be set to random:
 - Set randomness per set (green) or per frame (blue).
 - Adjust the random seed value (orange).
 
-![RandomBase](https://github.com/user-attachments/assets/d1386ab1-8699-4d6d-b351-3e3f91c4211a)
+![Random Tab](images/userdocs/Random%20Tab.png)
 
 #### Random Selection:
 
@@ -108,7 +126,7 @@ The **RandomTab** allows fields across all pages to be set to random:
 - Change the target object (orange).
 - Set all elements on the current page to active (pink).
 
-![RandomSelection](https://github.com/user-attachments/assets/31607e0a-3a9e-49d3-8168-c0cf4cac67fe)
+![Random Tab 2](images/userdocs/Random%20Selection.png)
 
 ---
 ### Citation and Terms of Use
