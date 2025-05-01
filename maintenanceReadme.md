@@ -78,6 +78,11 @@ On line 217 you need to uncomment this section to test all Fields except random 
 On line 1095 you need to uncomment this section to test all Random Fields  
 ![image](https://github.com/user-attachments/assets/619ad81f-111e-4225-af3d-8a36a4b59140)
 
+Backend:
+Navigate to backend/backend_testing.py and run the file
+![image](https://github.com/user-attachments/assets/70b70198-17f2-40aa-a096-6a7df89682e1)
+
+
 All messages should print green:  
 
 Backend: 
