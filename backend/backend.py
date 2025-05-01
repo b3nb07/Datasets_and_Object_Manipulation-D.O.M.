@@ -75,7 +75,7 @@ class Backend():
                     o.set_rotation(obj["rot"])
                     o.set_scale(obj["sca"])
 
-            if ("light_sources" in temp):
+            if ("light_sources" in temp and temp["light_sources"].get("type")):
                 # for now there is only one light which can be on the scene
                 l = self.RenderLight(temp["light_sources"]["type"], temp["light_sources"]["name"])
 

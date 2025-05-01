@@ -1,5 +1,6 @@
 """Importing"""
 
+from copy import deepcopy
 from functools import cached_property
 import sys
 from PyQt5 import QtCore, QtWidgets
@@ -74,6 +75,10 @@ class ComboBoxState(QObject):
         self.items.remove(item)
         self.itemNames.remove(self.itemNames[pos])
         self.items_updated.emit(self.items)
+
+    def clear(self):
+        self.items.clear()
+        self.itemNames.clear()
 
     def update_selected(self, index):
         #Update current object selected
@@ -253,7 +258,7 @@ class TabDialog(QWidget):
         if (not self.viewport_ongoing and "Render" not in interaction):
             self.old_log(interaction)
             config = backend.get_config()
-            if (not config["objects"] or not config["objects"][0]): return
+            if (not config.get("objects") or not config["objects"] or not config["objects"][0]): return
             backend.set_runtime_config(config)
 
             thread = ViewportThread(self.size())
@@ -2430,14 +2435,54 @@ class Port(QWidget):
         #Fifth Section
         def Get_Settings_Filepath(tab_widget):
             try:
+                current_lang = translator.current_language
+                translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:/',"Settings (*.json)")[0]
                 if (path == ""): return
+                shared_state.clear()
                 backend = Backend(json_filepath = path)
-                for i in range(5):
-                    tab_widget(i).update_ui_by_config()
+                temp = deepcopy(backend.get_config()["objects"])
+                backend.get_config()["objects"].clear()
 
+                for n, obj in enumerate(temp):
+                    if obj == None: continue
+                    o = None
+                    if ("filename" in obj):
+                        o = backend.RenderObject(filepath = obj["filename"])
+                    else:
+                        o = backend.RenderObject(primative = obj["primative"])
+
+                    o.set_loc(obj["pos"])
+                    o.set_rotation(obj["rot"])
+                    o.set_scale(obj["sca"])
+
+                    name = f"Object {n + 1}"
+                    shared_state.add_item(o, name)
+
+                    button = QPushButton(name)
+                    button.setMaximumWidth(175)
+                    menu = QMenu()
+                    incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
+                    ground = menu.addAction(translations.get("Grounded","Grounded"))
+                    
+                    incexc.setCheckable(True)
+                    incexc.setChecked(True)
+                    incexc.triggered.connect(lambda: show_hide_object(o,incexc.isChecked()))
+
+                    ground.setCheckable(True)
+                    ground.triggered.connect(lambda: ground_object(o,ground.isChecked()))
+                    
+                    button.setMenu(menu)
+                    Scroll.addWidget(button)
+                # for i in range(5):
+                #     tab_widget.update_ui_by_config()
+
+                for i in range(5):
+                    tab_widget.setTabEnabled(i, True)
                 success_box = ilyaMessageBox("Setting imported successfully.", "Success")
-            except Exception:
+            except Exception as e:
+                import traceback
+                print(traceback.format_exc())
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
 
