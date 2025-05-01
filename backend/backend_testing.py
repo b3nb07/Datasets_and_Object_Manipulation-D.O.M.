@@ -327,7 +327,7 @@ class BackendUnitTests(unittest.TestCase):
     def change_output_folder(self):
         #test that output folder is changed upon calling function
         absolute_path = str(pathlib.Path(__file__).parent.resolve())
-        output_folder = absolute_path + "\\testing_folder"
+        output_folder = absolute_path + "/testing_folder"
         self.backend.set_render_output_folder(output_folder)
 
         cfg = self.get_cfg

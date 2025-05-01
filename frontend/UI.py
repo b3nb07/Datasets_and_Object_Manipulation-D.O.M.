@@ -216,8 +216,8 @@ class TabDialog(QWidget):
         translator.languageChanged.connect(self.translateUi)
         self.translateUi()
 
-        from FrontTests import Tests
-        Tests(self, self.tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)
+        # from FrontTests import Tests
+        # Tests(self, self.tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)
 
     def update_tab_fields(self):
         self.tab_widget.currentWidget().update_ui_by_config()
@@ -388,7 +388,7 @@ class ObjectTab(QWidget):
             
             try:
                 if clicked_button == import_files_button:
-                    paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
+                    paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:/', "3D Model (*.blend *.stl *.obj)")[0]
                     if not paths:
                         return
                     
@@ -413,7 +413,7 @@ class ObjectTab(QWidget):
                         Scroll.addWidget(button)
 
                 elif clicked_button == folder_button:
-                    folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
+                    folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:/')
                     if not folder_path:
                         return
                     
@@ -2302,7 +2302,7 @@ class Port(QWidget):
                 failed_imps = []
 
                 if clicked_button == "Import Files":
-                    paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:\\', "3D Model (*.blend *.stl *.obj)")[0]
+                    paths = QFileDialog.getOpenFileNames(self, 'Open files', 'c:/', "3D Model (*.blend *.stl *.obj)")[0]
                     if not paths:
                         QMessageBox.warning(self, "No objects imported", "Import cancelled.")
                         return
@@ -2312,7 +2312,7 @@ class Port(QWidget):
 
                 elif clicked_button == "Folder":
                     # import all files from a folder
-                    folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:\\')
+                    folder_path = QFileDialog.getExistingDirectory(self, 'Select Folder', 'c:/')
                     if not folder_path:
                         QMessageBox.warning(self, "No objects imported", "Import cancelled.")
                         return
@@ -2427,7 +2427,7 @@ class Port(QWidget):
         #Fifth Section
         def Get_Settings_Filepath(tab_widget):
             try:
-                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0]
+                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:/',"Settings (*.json)")[0]
                 if (path == ""): return
                 backend = Backend(json_filepath = path)
                 for i in range(5):

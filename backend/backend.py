@@ -587,19 +587,18 @@ class Backend():
         self.add_camera_poses(viewport_temp)
 
 
-        with open("backend\\temp_export.json", "w") as export_file:
+        with open("backend/temp_export.json", "w") as export_file:
             json.dump(self.runtime_config, export_file)
 
         # Create a temporary file for the blender environment and call it
-        path = os.path.abspath(os.getcwd()) + "\\backend"
+        path = (os.path.abspath(os.getcwd()) + "/backend").replace("\\", "/")
         file_contents = ""
 
-        with open(path + "\\backend.py", "r") as this_file:
+        with open(path + "/backend.py", "r") as this_file:
             file_contents = this_file.read()
 
-        with open(path + "\\_temp.py", "w") as to_run:
-            path = path.replace("\\", "\\\\")
-            to_run.write("import blenderproc as bproc\n" + file_contents + f"""Backend("{path}\\\\temp_export.json")._render({viewport_temp})""")
+        with open(path + "/_temp.py", "w") as to_run:
+            to_run.write("import blenderproc as bproc\n" + file_contents + f"""Backend("{path}/temp_export.json")._render({viewport_temp})""")
 
         os.system("blenderproc run backend/_temp.py")
 

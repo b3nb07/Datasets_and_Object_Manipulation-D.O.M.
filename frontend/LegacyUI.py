@@ -1466,7 +1466,7 @@ class Page5(Page):
         #First Section
         def Get_Object_Filepath():
             try:
-                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
+                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:/',"3D Model (*.blend *.stl *.obj)")[0]
                 if (path == ""): return
                 # add the object to the shared state
                 shared_state.add_item(backend.RenderObject(filepath = path))
@@ -1512,7 +1512,7 @@ class Page5(Page):
         #Fifth Section
         def Get_Settings_Filepath():
             try:
-                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"Settings (*.json)")[0]
+                path = QFileDialog.getOpenFileName(self, 'Open file', 'c:/',"Settings (*.json)")[0]
                 if (path == ""): return
                 backend = Backend(json_filepath = path)
                 for i in range(4):
@@ -1705,7 +1705,7 @@ if __name__ == "__main__":
 
     def Get_Object_Filepath(self):
         try:
-            path = QFileDialog.getOpenFileName(self, 'Open file', 'c:\\',"3D Model (*.blend *.stl *.obj)")[0]
+            path = QFileDialog.getOpenFileName(self, 'Open file', 'c:/',"3D Model (*.blend *.stl *.obj)")[0]
             if (path == ""): return False
             # add the object to the shared state
             shared_state.add_item(backend.RenderObject(filepath = path))
