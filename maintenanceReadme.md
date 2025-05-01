@@ -16,20 +16,20 @@ Thus creating a dataset for “Predictive change”.
 ● Must have base shapes (Cube, Sphere, Triangle)  
 ● Must allow n amount of objects (where n ∈ N+)  
 ● Must allow random object spawns and orientations  
-○ All randomness must be seeded  
+    ○ All randomness must be seeded  
 ● Must allow custom pivot points for camera rotation  
 ● Allow 3D object transformation:  
-○ To the X, Y, Z axis coordinates  
-○ To the Length, Breadth, Height transformations  
-○ To rotation  
+    ○ To the X, Y, Z axis coordinates  
+    ○ To the Length, Breadth, Height transformations  
+    ○ To rotation  
 ● Allow camera to be manually rotated  
-○ Allow automated custom rotations to create exportable datasets (degree of
+    ○ Allow automated custom rotations to create exportable datasets (degree of
 rotation between images)  
 ● Import/export modifications to a json file  
-○ Must be able to read all majour 3D file types  
-○ Must integrate with blender  
+    ○ Must be able to read all majour 3D file types  
+    ○ Must integrate with blender  
 ● Must have a simplified menu and advanced options  
-○ Allow custom environments / void  
+    ○ Allow custom environments / void  
 
 ### Boundaries:
 ● All files will be localised  
@@ -45,7 +45,7 @@ You can use 3 methods to install this project.
 
 Blue: using  
 git clone https://github.com/b3nb07/CS3028_Group_Project.git  
-Copy and paster this into your IDE's terminal  
+Copy and paste this into your IDE's terminal  
 
 Green:  
 If you have github desktop you can click "Open with GitHub Desktop"  
