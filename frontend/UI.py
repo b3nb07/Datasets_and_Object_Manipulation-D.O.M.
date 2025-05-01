@@ -1979,8 +1979,8 @@ class Render(QWidget):
         
         self.unlimited_render_button.setToolTip('Generates Frames until interupted')
 
-        self.render_preview_button = QPushButton("Render Preview", self)
-        self.render_preview_button.clicked.connect(self.renderPreview)
+        # self.render_preview_button = QPushButton("Render Preview", self)
+        # self.render_preview_button.clicked.connect(self.renderPreview)
         
 
         self.rendering = False
@@ -2011,7 +2011,7 @@ class Render(QWidget):
 
         main_layout.addWidget(self.GenerateRenders_Button, 0, 7)
 
-        main_layout.addWidget(self.render_preview_button, 2, 7)
+        # main_layout.addWidget(self.render_preview_button, 2, 7)
 
         self.setLayout(main_layout)
 
@@ -2032,19 +2032,18 @@ class Render(QWidget):
     
     def unlimitedrender(self):
         unlimitedRenderConfig = backend.get_config()
-        test = True
-        while True:
+
+        self.unlimited_render_button.setText("Stop Renders" if self.unlimited_render_button.text() == "Unlimited Renders" else "Unlimited Renders")
+        while self.unlimited_render_button.isChecked():
             if (self.rendering):
                 loop = QEventLoop()
                 QTimer.singleShot(2000, loop.quit)
                 loop.exec()
                 continue
-            if self.unlimited_render_button.isChecked():
-                self.Number_of_renders_input_field.setText("1")
-                self.queue.append(unlimitedRenderConfig)
-                self.generate_render()
-            else:
-                test = False
+
+            self.Number_of_renders_input_field.setText("1")
+            self.queue.append(unlimitedRenderConfig)
+            self.generate_render()
 
     def update_ui_by_config(self):
         """ Method that updates attributes in text field when the object index is change from combo box. """
@@ -2142,7 +2141,7 @@ class Render(QWidget):
             self.queue.append(config)
 
             self.generate_render()
-            self.render_preview_button.setEnabled(False)
+            # self.render_preview_button.setEnabled(False)
     
     def generate_render(self):
         if (self.mainpage.viewport_ongoing):
@@ -2189,7 +2188,7 @@ class Render(QWidget):
             self.rendering = False
             self.LoadingBox.update_text("Rendering complete")
             self.GenerateRenders_Button.setText("Generate Renders")
-            self.render_preview_button.setEnabled(True)
+            # self.render_preview_button.setEnabled(True)
         else:
             self.generate_render()
 
