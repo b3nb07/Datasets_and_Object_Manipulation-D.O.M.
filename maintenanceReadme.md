@@ -56,7 +56,7 @@ Download ZIP -> Extract ZIP -> Insert into workplace of IDE
 ![image](https://github.com/user-attachments/assets/f6e8a70a-7419-43e0-a1a2-a12af7d00c23)
 
 
-### Requirments
+### Requirements
 To run this software the prerequisite installs are:  
     Python - https://www.python.org/  
     pyqt5 - https://pypi.org/project/PyQt5/  
