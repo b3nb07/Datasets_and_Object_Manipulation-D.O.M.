@@ -12,6 +12,24 @@ Generating images of 3D objects can be tedious when working with large datasets.
 
 ---
 
+---
+
+### Installation Prerequisites
+##### General Prerequisites
+1. Ensure you have python installed - https://www.python.org/downloads/ 
+1. Set up your workspace and navigate to it in VSCode or your chosen code editor of choice.
+1. In terminal <code style="color:Gray">run pip install -r requirements.txt</code>
+
+##### MacOS Prerequisites - (https://github.com/DLR-RM/BlenderProc/issues/768) 
+Error Message - (Permission Error: Operation not permitted)
+1. Open system settings and navigate to privacy & security
+1. Navigate to full disk access and add new applications. 
+1. Give terminal full disk access: Applications/Utilities/terminal
+1. Give vs-code full disk access: Applications/VSCode
+1. Ensure that both of these applications are selected for this to avoid the permission error.
+
+---
+
 ### Getting Started
 
 To run D.O.M., simply execute the `UI.py` file located in the `frontend` folder.
