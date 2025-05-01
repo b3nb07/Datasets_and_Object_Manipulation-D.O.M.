@@ -53,7 +53,7 @@ If you have github desktop you can click "Open with GitHub Desktop"
 Red:  
 Download ZIP -> Extract ZIP -> Insert into workplace of IDE
 
-![image](https://github.com/user-attachments/assets/f6e8a70a-7419-43e0-a1a2-a12af7d00c23)
+![Installation](images/maintenancemanual/Installation.png)
 
 
 ### Requirements
@@ -73,14 +73,14 @@ pip install numpy
 
 Frontend:  
 On line 217 you need to uncomment this section to test all Fields except random tests
-![image](https://github.com/user-attachments/assets/e057027c-4e6a-44e5-8349-2b6bb73fa5fb)
+![Frontend Test](images/maintenancemanual/FrontEnd%20Test.png)
 
 On line 1095 you need to uncomment this section to test all Random Fields  
-![image](https://github.com/user-attachments/assets/619ad81f-111e-4225-af3d-8a36a4b59140)
+![Frontend Random](images/maintenancemanual/FrontEnd%20Random.png)
 
 Backend:
 Navigate to backend/backend_testing.py and run the file
-![image](https://github.com/user-attachments/assets/70b70198-17f2-40aa-a096-6a7df89682e1)
+![Backend Test](images/maintenancemanual/BackEnd%20Test.png)
 
 ### Running the Program
 
