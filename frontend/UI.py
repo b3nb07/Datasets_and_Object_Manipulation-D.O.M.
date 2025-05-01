@@ -55,7 +55,7 @@ class ComboBoxState(QObject):
 
     def update_items(self, items):
         self.items = items
-        self.items_updated.emit(items)  # Emit signal for item updates
+        self.items_updated.emit(items)  # Emit signal for item updates 
 
     def add_item(self, item, Name):
         # Add items to list of objects in list and display name
