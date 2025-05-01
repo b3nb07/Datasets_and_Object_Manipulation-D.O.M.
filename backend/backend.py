@@ -1,6 +1,7 @@
 """The main backend file which deals with rendering."""
 
 # import blenderproc as bproc
+import sys
 import numpy as np
 import random
 import json
@@ -591,7 +592,9 @@ class Backend():
             json.dump(self.runtime_config, export_file)
 
         # Create a temporary file for the blender environment and call it
-        path = (os.path.abspath(os.getcwd()) + "/backend").replace("\\", "/")
+        path = os.path.abspath(os.getcwd()) + "/backend"
+        if (sys.platform == 'win32'):
+            path = path.replace("\\", "/")
         file_contents = ""
 
         with open(path + "/backend.py", "r") as this_file:
