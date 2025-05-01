@@ -615,13 +615,10 @@ class Backend():
             images = []
             for i in range(config["render"]["renders"]):
                 hdf5_file = f"{config['render_folder']}/{i + num}.hdf5"
+                if (i > 10): break
                 image = multiprocessing.Process(target=subprocess.run, args=(["blenderproc", "vis", "hdf5", hdf5_file],))
                 images.append(image)
                 image.start()
-
-            if (len(images) > 10): # so a PC doesn't explode
-                for image in images:
-                    image.join()
 
         self.remove_camera_poses()
         config = origConfig
