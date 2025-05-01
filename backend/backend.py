@@ -619,7 +619,7 @@ class Backend():
                 images.append(image)
                 image.start()
 
-            if (len(images) < 50): # so a PC doesn't explode
+            if (len(images) < 10): # so a PC doesn't explode
                 for image in images:
                     image.join()
 
