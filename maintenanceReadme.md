@@ -53,7 +53,7 @@ If you have github desktop you can click "Open with GitHub Desktop"
 Red:  
 Download ZIP -> Extract ZIP -> Insert into workplace of IDE
 
-![image](https://github.com/user-attachments/assets/f6e8a70a-7419-43e0-a1a2-a12af7d00c23)
+![Installation](images/maintenancemanual/Installation.png)
 
 
 ### Requirements
@@ -73,21 +73,16 @@ pip install numpy
 
 Frontend:  
 On line 217 you need to uncomment this section to test all Fields except random tests
-![image](https://github.com/user-attachments/assets/e057027c-4e6a-44e5-8349-2b6bb73fa5fb)
+![Frontend Test](images/maintenancemanual/FrontEnd%20Test.png)
 
 On line 1095 you need to uncomment this section to test all Random Fields  
-![image](https://github.com/user-attachments/assets/619ad81f-111e-4225-af3d-8a36a4b59140)
+![Frontend Random](images/maintenancemanual/FrontEnd%20Random.png)
 
 Backend:
 Navigate to backend/backend_testing.py and run the file
-![image](https://github.com/user-attachments/assets/70b70198-17f2-40aa-a096-6a7df89682e1)
+![Backend Test](images/maintenancemanual/BackEnd%20Test.png)
 
-
-All messages should print green:  
-
-Backend: 
-
-### Runnning the Program
+### Running the Program
 
 To run the program navigate to frontend/UI.py and run  
 or  
@@ -96,11 +91,9 @@ PS C:[Path_To_Project] python -u "c:[Path_To_Project]\frontend\UI.py"
 
 ### Extension of the system and future additions  
 
-Randomisation currently only works for generating random values at the start of generation meaning that that value is used throughout the set.  
-Future development could include the randomisation of values between frames generated allowing for further randomisation control.   
+Randomisation currently only works for generating random values at the start of generation meaning that that value is used throughout the set. Future development could include the randomisation of values between frames generated allowing for further randomisation control.   
 
-During the survey users often responded to the lack of visual feedback in regards to the viewport,  
-often citing that a loading bar or feedback in some form would provide greater usability.  
+During the survey users often responded to the lack of visual feedback in regards to the viewport, often citing that a loading bar or feedback in some form would provide greater usability.  
 
 One of the features we didn't manage to implement was the portability of D.O.M over other operating systems. We attempted to achieve this throught docker as requeted by the client but as later discovered was not feesible due to the Userinterface We have included the code of where we finished with the dockerisation for your convenience. We also tried tried to bundle all of the files and include all of the modules we used (like blenderproc etc) but then when you try and run the executable it just crashes because it can't find blender because blenderproc doesn't initialise or work properly when packaged.  
 
