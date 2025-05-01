@@ -471,17 +471,20 @@ class ObjectTab(QWidget):
                 warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
                 return QMessageBox.warning(self, warning_text, warning_msg)
 
-            for i in range(len(shared_state.itemNames)):
-                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
-            
+            # store references so we can compare by references instead of text...
+            obj_buttons = []
+            for name in shared_state.itemNames:
+                button = to_delete.addButton
+                btn = to_delete.addButton(str(name), QMessageBox.ActionRole)
+                obj_buttons.append(btn)   
+                
             cancel_button = to_delete.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             to_delete.exec()
-            choice = str(to_delete.clickedButton().text())
+            choice = to_delete.clickedButton()
 
-
-
-            if choice != cancel_button.text():
-                obj_index = shared_state.itemNames.index(choice)
+            # change it so its by reference
+            if choice in obj_buttons:
+                obj_index = obj_buttons.index(choice)
                 obj = shared_state.items[obj_index]
                 scroll.itemAt(obj_index).widget().setParent(None)
                 try:
@@ -491,8 +494,7 @@ class ObjectTab(QWidget):
                     del backend.get_config()["objects"][obj.object_pos]
                     # shift objects after this one down by one
                     for i in range(obj_index, len(shared_state.items)):
-                        obj = shared_state.items[i]
-                        obj.object_pos = i
+                        shared_state.items[i].object_pos = i
                 except:
                     error_box = ilyaMessageBox("Error deleting object", "Error")
 
@@ -2453,18 +2455,20 @@ class Port(QWidget):
                 warning_msg = translations.get("There are no objects to delete.", "There are no objects to delete.")
                 return QMessageBox.warning(self, warning_text, warning_msg)
 
-            for i in range(len(shared_state.itemNames)):
-                to_delete.addButton(str(shared_state.itemNames[i]), QMessageBox.ActionRole)
-            
+            # store references so we can compare by references instead of text...
+            obj_buttons = []
+            for name in shared_state.itemNames:
+                button = to_delete.addButton
+                btn = to_delete.addButton(str(name), QMessageBox.ActionRole)
+                obj_buttons.append(btn)   
+                
             cancel_button = to_delete.addButton(translations.get("Cancel", "Cancel"), QMessageBox.ActionRole)
             to_delete.exec()
-            choice = str(to_delete.clickedButton().text())
+            choice = to_delete.clickedButton()
 
-
-
-
-            if choice != cancel_button.text():
-                obj_index = shared_state.itemNames.index(choice)
+            # change it so its by reference
+            if choice in obj_buttons:
+                obj_index = obj_buttons.index(choice)
                 obj = shared_state.items[obj_index]
                 scroll.itemAt(obj_index).widget().setParent(None)
                 try:
@@ -2474,8 +2478,7 @@ class Port(QWidget):
                     del backend.get_config()["objects"][obj.object_pos]
                     # shift objects after this one down by one
                     for i in range(obj_index, len(shared_state.items)):
-                        obj = shared_state.items[i]
-                        obj.object_pos = i
+                        shared_state.items[i].object_pos = i
                 except:
                     error_box = ilyaMessageBox("Error deleting object", "Error")
 
@@ -2484,7 +2487,6 @@ class Port(QWidget):
                 if (not shared_state.items):
                     Object_detect(tab_widget)
                     QMessageBox.warning(self, translations.get("Warning", "Warning"),translations.get("You have deleted all of the objects, object manipulation tabs have been disabled.", "You have deleted all of the objects, object manipulation tabs have been disabled."))
-    
 
         self.Delete_Object_Button = QPushButton('Delete Object', self)
         self.Delete_Object_Button.clicked.connect(lambda: delete_object(tab_widget, Scroll))
