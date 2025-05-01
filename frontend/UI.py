@@ -643,7 +643,7 @@ class ObjectTab(QWidget):
             backend.grounf_object(object,state)
 
         def Object_detect(tab_widget):
-            State = not Backend.is_config_objects_empty(tab_widget)
+            State = not backend.is_config_objects_empty()
             for i in range(5):
                 tab_widget.setTabEnabled(i, State)
 
@@ -651,7 +651,7 @@ class ObjectTab(QWidget):
 
     def Object_detect(self, tab_widget):
             """On upload/delete to be called to check if any object is to be rendered and enables tabs accordingly"""
-            State = not Backend.is_config_objects_empty(tab_widget)
+            State = not backend.is_config_objects_empty()
             for i in range(5):
                 tab_widget.setTabEnabled(i, State)
                 
@@ -2383,7 +2383,8 @@ class Port(QWidget):
                         button.setMenu(menu)
                         Scroll.addWidget(button)
 
-                        QApplication.instance().focusWidget().clearFocus()
+                        if (sys.platform == 'win32'):
+                            QApplication.instance().focusWidget().clearFocus()
                     elif Name != False and len(Name) >= 10:
                         error_box = ilyaMessageBox("Name is too long!", "Error")
                     else:
@@ -2512,7 +2513,7 @@ class Port(QWidget):
         self.Export_Interaction_Button.clicked.connect(lambda: Export_Interaction())
 
         def Object_detect(tab_widget):
-            State = not Backend.is_config_objects_empty(tab_widget)
+            State = not backend.is_config_objects_empty()
             for i in range(5):
                 tab_widget.setTabEnabled(i, State)
 
@@ -3122,7 +3123,8 @@ class Settings(QWidget):
 def startApp():
     app.exec()
     try:
-        app.focusWidget().clearFocus()
+        if (sys.platform == 'win32'):
+            app.focusWidget().clearFocus()
     except:
         pass
 
