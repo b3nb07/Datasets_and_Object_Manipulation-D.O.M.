@@ -91,11 +91,9 @@ PS C:[Path_To_Project] python -u "c:[Path_To_Project]\frontend\UI.py"
 
 ### Extension of the system and future additions  
 
-Randomisation currently only works for generating random values at the start of generation meaning that that value is used throughout the set.  
-Future development could include the randomisation of values between frames generated allowing for further randomisation control.   
+Randomisation currently only works for generating random values at the start of generation meaning that that value is used throughout the set. Future development could include the randomisation of values between frames generated allowing for further randomisation control.   
 
-During the survey users often responded to the lack of visual feedback in regards to the viewport,  
-often citing that a loading bar or feedback in some form would provide greater usability.  
+During the survey users often responded to the lack of visual feedback in regards to the viewport, often citing that a loading bar or feedback in some form would provide greater usability.  
 
 One of the features we didn't manage to implement was the portability of D.O.M over other operating systems. We attempted to achieve this throught docker as requeted by the client but as later discovered was not feesible due to the Userinterface We have included the code of where we finished with the dockerisation for your convenience. We also tried tried to bundle all of the files and include all of the modules we used (like blenderproc etc) but then when you try and run the executable it just crashes because it can't find blender because blenderproc doesn't initialise or work properly when packaged.  
 
