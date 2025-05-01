@@ -82,11 +82,6 @@ Backend:
 Navigate to backend/backend_testing.py and run the file
 ![image](https://github.com/user-attachments/assets/70b70198-17f2-40aa-a096-6a7df89682e1)
 
-
-All messages should print green:  
-
-Backend: 
-
 ### Runnning the Program
 
 To run the program navigate to frontend/UI.py and run  
