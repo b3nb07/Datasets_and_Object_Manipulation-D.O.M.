@@ -1,15 +1,10 @@
 """The main backend file which deals with rendering."""
 
 # import blenderproc as bproc
-import sys
-import numpy as np
-import random
-import json
-import os
 from copy import deepcopy
-import shutil
-import subprocess
-import multiprocessing
+import sys, random, json, os, shutil, subprocess, multiprocessing
+import numpy as np
+
 
 # initialise config - will hold the config ready for export
 config = { 

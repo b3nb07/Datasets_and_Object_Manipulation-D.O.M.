@@ -1,28 +1,19 @@
-"""Importing"""
-
+# Normal imports
 from copy import deepcopy
-from functools import cached_property
-import sys
-from PyQt5 import QtCore, QtWidgets
-from functools import cached_property
-from PyQt5.QtCore import QSettings
 from TranslationManager import translator
-import json
-import os
-import PyQt5
-from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox
-from PyQt5.QtCore import * 
-from PyQt5.QtGui import * 
-from PyQt5.QtWidgets import *
+from re import search as regex
+import os, traceback, sys
 import traceback
+import numpy as np
+# QT Imports
+from PyQt5 import QtCore, QtWidgets
+from PyQt5.QtCore import QSettings, QObject, pyqtSignal, QThread, Qt, QEventLoop, QTimer
+from PyQt5.QtWidgets import QApplication, QPushButton, QWidget, QVBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox, QDialog, QScrollArea, QGridLayout, QMessageBox, QFileDialog, QMenu, QSlider, QColorDialog
 
 from sys import path
 path.append("backend")
-"""Importing"""
+# Import backend
 from backend import Backend
-import numpy as np
-from re import search as regex
-from time import time
 
 """"
     Comment info - 
