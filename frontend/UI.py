@@ -14,6 +14,7 @@ from PyQt5.QtWidgets import QApplication, QPushButton, QMainWindow, QWidget, QVB
 from PyQt5.QtCore import * 
 from PyQt5.QtGui import * 
 from PyQt5.QtWidgets import *
+import traceback
 
 from sys import path
 path.append("backend")
@@ -203,6 +204,7 @@ class TabDialog(QWidget):
         #Viewport Variables
         self.old_log = Backend.update_log
         self.viewport_ongoing = False
+        self.unlimited_rendering = False
         self.update_while_viewport = False
 
         #Viewport Instatiate
@@ -255,7 +257,7 @@ class TabDialog(QWidget):
     def update_viewport(self, interaction = "", update_log = True):
         # At least 10 seconds between viewport updates
         # if (time() - last_viewport_update > 5):
-        if (not self.viewport_ongoing and "Render" not in interaction):
+        if (not self.unlimited_rendering and not self.viewport_ongoing and "Render" not in interaction):
             self.old_log(interaction)
             config = backend.get_config()
             if (not config.get("objects") or not config["objects"] or not config["objects"][0]): return
@@ -2034,6 +2036,7 @@ class Render(QWidget):
         unlimitedRenderConfig = backend.get_config()
 
         self.unlimited_render_button.setText("Stop Renders" if self.unlimited_render_button.text() == "Unlimited Renders" else "Unlimited Renders")
+        self.mainpage.unlimited_rendering = self.unlimited_render_button.isChecked()
         while self.unlimited_render_button.isChecked():
             if (self.rendering):
                 loop = QEventLoop()
@@ -2439,7 +2442,9 @@ class Port(QWidget):
                 path = QFileDialog.getOpenFileName(self, 'Open file', 'c:/',"Settings (*.json)")[0]
                 if (path == ""): return
                 shared_state.clear()
-                backend = Backend(json_filepath = path)
+                temp_backend = Backend(json_filepath = path)
+                if (not temp_backend.get_config()["objects"]): raise ImportError("File is incomplete or corrupt.")
+                backend = temp_backend
                 temp = deepcopy(backend.get_config()["objects"])
                 backend.get_config()["objects"].clear()
 
@@ -2480,7 +2485,6 @@ class Port(QWidget):
                     tab_widget.setTabEnabled(i, True)
                 success_box = ilyaMessageBox("Setting imported successfully.", "Success")
             except Exception as e:
-                import traceback
                 print(traceback.format_exc())
                 QMessageBox.warning(self, "Error when reading JSON", "The selected file is corrupt or invalid.")
 
