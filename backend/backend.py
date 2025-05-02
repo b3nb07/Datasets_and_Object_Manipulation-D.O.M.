@@ -207,7 +207,8 @@ class Backend():
             except:
                 config["random"]["objects"][index][category][field] = [0,0]
             # try apply this change
-            self.apply_specific_random_limit(index, category, field)
+            if (config["random"]["mode"] == "set"):
+                self.apply_specific_random_limit(index, category, field)
         else:
             # check this logic again
             # remove field from config if it exists

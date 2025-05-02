@@ -2144,7 +2144,7 @@ class Render(QWidget):
         newConfig = self.queue.pop(0)
 
         # if mode is set to generate per frame call
-        if newConfig["random"]["mode"] == "frame":
+        if (newConfig["random"]["mode"] == "frame"):
             temp_config = deepcopy(backend.get_config())
 
             for _ in range(newConfig["render"]["renders"]):
