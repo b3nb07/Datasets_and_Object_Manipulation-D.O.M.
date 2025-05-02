@@ -1144,9 +1144,6 @@ class RandomDefault(QWidget):
         SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
         RandomSeed = QLineEdit("", self)
 
-        SetSetCheck.setVisible(False) 
-        SetFrameCheck.setVisible(False)
-
         """The random seed value used to generate random values"""
         RandomSeed.setText(str(backend.get_config()["seed"]))
         RandomSeed.setMaximumWidth(200)
@@ -1484,7 +1481,7 @@ class RandomPivot(QWidget):
         ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(2, 1).widget(), main_layout.itemAtPosition(2, 2).widget()))
         ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(3, 1).widget(), main_layout.itemAtPosition(3, 2).widget()))
         
-        main_layout.addWidget(QLabel("Distnace", self), 0, 3)
+        main_layout.addWidget(QLabel("Distance", self), 0, 3)
         self.gen_field("Measurement", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
         
         main_layout.itemAtPosition(0, 10).widget().setHidden(True)
@@ -2145,16 +2142,23 @@ class Render(QWidget):
             return
         self.rendering = True
         newConfig = self.queue.pop(0)
-        
-        print(newConfig)
+
         # if mode is set to generate per frame call
         if newConfig["random"]["mode"] == "frame":
-            newConfig = backend.apply_all_random_limits()
-            print('='*30)
-            print(newConfig)
-            
+            temp_config = deepcopy(backend.get_config())
 
-        
+            for _ in range(newConfig["render"]["renders"]):
+                backend.apply_all_random_limits()
+                newConfig["random"]["mode"] = "set"
+                newConfig["render"]["renders"] = 1
+                backend.add_camera_poses(False)
+                self.queue.append(deepcopy(backend.get_config()))
+                backend.remove_camera_poses()
+
+            backend.set_config(temp_config)
+            self.newThread = None
+            return self.complete_loading()
+
         backend.set_runtime_config(newConfig)
         
         self.newThread = RenderThread()
@@ -2177,7 +2181,9 @@ class Render(QWidget):
         self.LoadingBox.update_text(text)
     
     def complete_loading(self):
-        self.newThread.quit()
+        if (self.newThread):
+            self.newThread.quit()
+
         if not self.queue:
             self.rendering = False
             self.LoadingBox.update_text("Rendering complete")
