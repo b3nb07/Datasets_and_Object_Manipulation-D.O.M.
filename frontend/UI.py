@@ -2232,6 +2232,7 @@ class Port(QWidget):
                 def __init__(self, text, title):
                     super().__init__()
                     self.setText(text)
+                    self.setWindowIcon(QIcon('DOMLOGO.png'))
                     self.setWindowTitle(title)
                     self.exec()
                     
