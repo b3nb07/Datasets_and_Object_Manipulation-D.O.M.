@@ -9,7 +9,7 @@ import numpy as np
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import QSettings, QObject, pyqtSignal, QThread, Qt, QEventLoop, QTimer
 from PyQt5.QtWidgets import QApplication, QPushButton, QWidget, QVBoxLayout, QTabWidget, QLabel, QLineEdit, QComboBox, QCheckBox, QDialog, QScrollArea, QGridLayout, QMessageBox, QFileDialog, QMenu, QSlider, QColorDialog
-
+from PyQt5.QtGui  import QIcon
 from sys import path
 path.append("backend")
 # Import backend
@@ -122,6 +122,7 @@ class LoadingScreen(QDialog):
 
 
         self.setWindowTitle("Rendering...")
+        self.setWindowIcon(QIcon('DOMLOGO.png'))
         self.setWindowModality(Qt.NonModal)
         self.setGeometry(250, 250, 250, 200)
 
@@ -148,6 +149,7 @@ class TabDialog(QWidget):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.setWindowTitle("Datasets and Object Manipulation")
+        self.setWindowIcon(QIcon('DOMLOGO.png'))
           
         #Object side par to display current objects loaded in and allow for removal from current render without deletion
         ObjectsStatusBar = QScrollArea()
@@ -270,6 +272,7 @@ class ilyaMessageBox(QMessageBox):
     # Displays a custom messagebox
     def __init__(self, text, title):
         super().__init__()
+        self.setWindowIcon(QIcon('DOMLOGO.png'))
         self.setText(text)
         self.setWindowTitle(title)
         self.exec()
@@ -376,6 +379,8 @@ class ObjectTab(QWidget):
             current_lang = translator.current_language
             translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             import_box = QMessageBox()
+            import_box.setWindowIcon(QIcon('DOMLOGO.png'))
+            import_box.setWindowTitle("Import")
             import_box.setText(translations.get("How would you like to import objects?", "How would you like to import objects?"))
             import_files_button = import_box.addButton(translations.get("Import Files", "Import Files"), QMessageBox.ActionRole)
             folder_button = import_box.addButton(translations.get("Folder", "Folder"), QMessageBox.ActionRole)
@@ -462,6 +467,8 @@ class ObjectTab(QWidget):
             translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             
             to_delete = QMessageBox()
+            to_delete.setWindowIcon(QIcon('DOMLOGO.png'))
+            to_delete.setWindowTitle("Delete")
             to_delete.setText(translations.get("Please select an object to remove from below", "Please select an object to remove from below"))
 
             if (not shared_state.items):
@@ -2109,6 +2116,8 @@ class Render(QWidget):
             #self.thread.quit()
         else:
             renderingBox = QMessageBox()
+            renderingBox.setWindowIcon(QIcon('DOMLOGO.png'))
+            renderingBox.setWindowTitle("Rendering")
             renderingBox.setText("Already rendering, please wait for current render to finish before starting new render.")
             renderingBox.exec()
 
@@ -2118,6 +2127,8 @@ class Render(QWidget):
             self.queue.append(config)
 
             renderingBox = QMessageBox()
+            renderingBox.setWindowIcon(QIcon('DOMLOGO.png'))
+            renderingBox.setWindowTitle("Added")
             renderingBox.setText("Added to queue.")
             renderingBox.exec()
 
@@ -2137,6 +2148,8 @@ class Render(QWidget):
     def generate_render(self):
         if (self.mainpage.viewport_ongoing):
             renderingBox = QMessageBox()
+            renderingBox.setWindowIcon(QIcon('DOMLOGO.png'))
+            renderingBox.setWindowTitle("Action in progress")
             renderingBox.setText("Please wait for the viewport to finish its approximation before starting the main render.")
             renderingBox.exec()
             return
@@ -2292,6 +2305,8 @@ class Port(QWidget):
             try:
                 # display message box (boycotting ilya)
                 import_box = QMessageBox()
+                import_box.setWindowIcon(QIcon('DOMLOGO.png'))
+                import_box.setWindowTitle("Import")
                 import_box.setText("How would you like to import objects?")
                 import_box.addButton("Import Files", QMessageBox.ActionRole)
                 import_box.addButton("Folder", QMessageBox.ActionRole)
@@ -2345,6 +2360,8 @@ class Port(QWidget):
             translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
 
             Tutorial_Box = QMessageBox()
+            Tutorial_Box.setWindowIcon(QIcon('DOMLOGO.png'))
+            Tutorial_Box.setWindowTitle("Tutorial")
             Tutorial_Box.setText(translations.get("Please select a tutorial object from below", "Please select a tutorial object from below"))            
             object_types = ["Cube", "Cylinder", "Cone", "Plane", "Sphere", "Monkey"]
             button_map = {}
@@ -2494,6 +2511,8 @@ class Port(QWidget):
             translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
             
             to_delete = QMessageBox()
+            to_delete.setWindowIcon(QIcon('DOMLOGO.png'))
+            to_delete.setWindowTitle("Delete")
             to_delete.setText(translations.get("Please select an object to remove from below", "Please select an object to remove from below"))
 
             if (not shared_state.items):
@@ -2671,6 +2690,8 @@ class Lighting(QWidget):
         self.radius_input_field.setText("0")
         self.radius_input_field.textChanged.connect(lambda: self.set_radius_from_field(self.radius_input_field))
         self.radius_button_minus = QPushButton("-", self)
+        self.radius_button_minus.setMaximumWidth(50)
+        
         #self.radius_button_minus.clicked.connect(lambda: self.Minus_click(self.radius_input_field))
         #set_radius
         self.radius_button_minus.clicked.connect(lambda: self.set_radius("Minus", self.radius_input_field))
@@ -2822,7 +2843,7 @@ class Lighting(QWidget):
 
         main_layout.addWidget(self.radius_label, 2, 0)
         main_layout.addWidget(self.radius_input_field, 2, 1)
-        main_layout.addWidget(self.radius_button_minus, 2, 2)
+        main_layout.addWidget(self.radius_button_minus, 2, 2, Qt.AlignRight)
         main_layout.addWidget(self.radius_button_plus, 2, 3)
 
         self.setLayout(main_layout)
@@ -2913,8 +2934,14 @@ class Lighting(QWidget):
         
 
     def getColour(self):
-        
-        colour = QColorDialog.getColor()
+    
+        colourdialog = QColorDialog()
+        colourdialog.setWindowIcon(QIcon('DOMLOGO.png'))
+        colourdialog.setWindowTitle("Colour")
+
+        colourdialog.exec()
+        colour = colourdialog.selectedColor()
+        self.lighting_colour.setText(colour.name()) 
         
         self.lighting_colour.setText(colour.name())
         self.colour_example.setStyleSheet(("background-color: {c}").format(c = colour.name()))
