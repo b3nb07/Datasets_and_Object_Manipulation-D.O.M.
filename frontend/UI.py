@@ -405,6 +405,7 @@ class ObjectTab(QWidget):
                         menu = QMenu()
                         incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
                         ground = menu.addAction(translations.get("Grounded","Grounded"))
+                        ground.setVisible(False)
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
                         incexc.triggered.connect(lambda: show_hide_object(obj,incexc.isChecked()))
@@ -436,6 +437,7 @@ class ObjectTab(QWidget):
                                 menu = QMenu()
                                 incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
                                 ground = menu.addAction(translations.get("Grounded","Grounded"))
+                                ground.setVisible(False)
                                 
                                 incexc.setCheckable(True)
                                 incexc.setChecked(True)
@@ -2394,6 +2396,7 @@ class Port(QWidget):
                         menu = QMenu()
                         incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
                         ground = menu.addAction(translations.get("Grounded","Grounded"))
+                        ground.setVisible(False)
                         
                         incexc.setCheckable(True)
                         incexc.setChecked(True)
@@ -2483,6 +2486,7 @@ class Port(QWidget):
                     menu = QMenu()
                     incexc = menu.addAction(translations.get("Included in Scene","Included in Scene"))
                     ground = menu.addAction(translations.get("Grounded","Grounded"))
+                    ground.setVisible(False)
                     
                     incexc.setCheckable(True)
                     incexc.setChecked(True)
