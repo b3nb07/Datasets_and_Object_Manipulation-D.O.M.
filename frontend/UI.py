@@ -1141,37 +1141,39 @@ class RandomDefault(QWidget):
     def __init__(self, parent: QWidget, tab_widget: QTabWidget):
         super().__init__(parent)
 
-        main_layout = QGridLayout()
+        self.main_layout = QGridLayout()
         """Sets all fields in all random pages to enabled"""
-        Field = QCheckBox("Set ALL RANDOM", self)
-        Field.setToolTip('Sets all elements on all pages to random') 
+        self.set_all_checkbox = QCheckBox("Set ALL RANDOM", self)
+        self.set_all_checkbox.setToolTip('Sets all elements on all pages to random') 
 
         """Set per is XOR"""
-        SetSetCheck = QCheckBox("Set per SET",self)
-        SetSetCheck.setToolTip('Each selected field is randomly generated and its value is maintained throughout the entire set generation.') 
-        SetFrameCheck = QCheckBox("Set per FRAME",self)
-        SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
+        self.SetSetCheck = QCheckBox("Set per SET",self)
+        self.SetSetCheck.setToolTip('Each selected field is randomly generated and its value is maintained throughout the entire set generation.') 
+        self.SetFrameCheck = QCheckBox("Set per FRAME",self)
+        self.SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
         RandomSeed = QLineEdit("", self)
 
         """The random seed value used to generate random values"""
         RandomSeed.setText(str(backend.get_config()["seed"]))
         RandomSeed.setMaximumWidth(200)
         
-        main_layout.addWidget(Field, 0, 0)
-        main_layout.addWidget(SetSetCheck, 1, 0)
-        main_layout.addWidget(SetFrameCheck, 2, 0)
+        self.main_layout.addWidget(self.set_all_checkbox, 0, 0)
+        self.main_layout.addWidget(self.SetSetCheck, 1, 0)
+        self.main_layout.addWidget(self.SetFrameCheck, 2, 0)
         
         """XOR FUNCTIONS"""
-        SetSetCheck.toggled.connect(lambda: self.SetSETChecks(main_layout))
-        SetFrameCheck.toggled.connect(lambda: self.SetFRAMEChecks(main_layout))
-        SetSetCheck.setChecked(True)
-        main_layout.addWidget(RandomSeed, 3, 0)
-        main_layout.setAlignment(Qt.AlignTop | Qt.AlignRight)
+        self.SetSetCheck.toggled.connect(lambda: self.SetSETChecks(self.main_layout))
+        self.SetFrameCheck.toggled.connect(lambda: self.SetFRAMEChecks(self.main_layout))
+        self.SetSetCheck.setChecked(True)
+        self.main_layout.addWidget(RandomSeed, 3, 0)
+        self.main_layout.setAlignment(Qt.AlignTop | Qt.AlignRight)
         
-        Field.toggled.connect(lambda state: self.checkUpdate(tab_widget, state))
+        self.set_all_checkbox.toggled.connect(lambda state: self.checkUpdate(tab_widget, state))
         RandomSeed.editingFinished.connect(lambda: self.SeedEdit(RandomSeed))
         
-        self.setLayout(main_layout)
+        self.setLayout(self.main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
         ###translator.languageChanged.connect(self.translateUi)
         ###self.translateUi()
@@ -1219,7 +1221,15 @@ class RandomDefault(QWidget):
         except ValueError:
             field.setText(str(backend.get_config()["seed"]))
 
-            field.setToolTip('Random seed') 
+            field.setToolTip('Random seed')
+
+    def translateUi(self,):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        self.set_all_checkbox.setText(translation.get("Set all random", "Set all random"))
+        self.SetSetCheck.setText(translation.get("Set per SET", "Set per SET"))
+        self.SetFrameCheck.setText(translation.get("Set per FRAME", "Set per FRAME"))
                             
 class RandomObject(QWidget):
     """Random Object"""
@@ -1233,8 +1243,10 @@ class RandomObject(QWidget):
         self.CheckBoxes = {}
         self.LowerBounds = {}
         self.UpperBounds = {}
+        self.field_checkboxes = {}
 
-        main_layout = QGridLayout()
+
+        self.main_layout = QGridLayout()
         
         
         
@@ -1253,34 +1265,43 @@ class RandomObject(QWidget):
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
         
-        main_layout.addWidget(self.combo_box, 0, 10)
+        self.main_layout.addWidget(self.combo_box, 0, 10)
         
-        main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
-        main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
-             self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
+        self.set_all_checkbox = QCheckBox("Set all random", self)
+        self.main_layout.addWidget(self.set_all_checkbox, 1, 10)
+        self.set_all_checkbox.toggled.connect(lambda: 
+            self.set_all_random(self.main_layout, self.set_all_checkbox.isChecked()))
         
-        main_layout.addWidget(QLabel("Co-ords:", self), 0, 0)
-        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
-        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
-        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
+        
+        self.coords_label = QLabel("Co-ords:", self)
+        self.main_layout.addWidget(self.coords_label, 0, 0)
+        self.gen_field("X", self.main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
+        self.gen_field("Y", self.main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
+        self.gen_field("Z", self.main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
 
-        main_layout.addWidget(QLabel("Rotation", self), 0, 3)
-        self.gen_field("Roll", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
-        self.gen_field("Pitch", main_layout, 3, 2, self.connFields(ParentTab, 5, 2))
-        self.gen_field("Yaw", main_layout, 3, 3, self.connFields(ParentTab, 5, 3))
+        self.rotation_label = QLabel("Rotation", self)
+        self.main_layout.addWidget(self.rotation_label, 0, 3)
+        self.gen_field("Roll", self.main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
+        self.gen_field("Pitch", self.main_layout, 3, 2, self.connFields(ParentTab, 5, 2))
+        self.gen_field("Yaw", self.main_layout, 3, 3, self.connFields(ParentTab, 5, 3))
         
-        main_layout.addWidget(QLabel("Scale", self), 0, 7)
-        self.gen_field("Width", main_layout, 6, 1, self.connFields(ParentTab, 8, 1))
-        self.gen_field("Length", main_layout, 6, 2, self.connFields(ParentTab, 8, 2))
-        self.gen_field("Height", main_layout, 6, 3, self.connFields(ParentTab, 8, 3))
+        self.scale_label = QLabel("Scale", self)
+        self.main_layout.addWidget(self.scale_label, 0, 7)
+        self.gen_field("Width", self.main_layout, 6, 1, self.connFields(ParentTab, 8, 1))
+        self.gen_field("Length", self.main_layout, 6, 2, self.connFields(ParentTab, 8, 2))
+        self.gen_field("Height", self.main_layout, 6, 3, self.connFields(ParentTab, 8, 3))
         
-        self.setLayout(main_layout)
+        self.setLayout(self.main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
     def gen_field(self, Fieldname, Layout, X, Y, ConField):
         """Generate a field including checkbox and 2 input fields"""
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        self.field_checkboxes[Fieldname] = Field 
+
         
         
         Field.setObjectName(Fieldname)
@@ -1430,6 +1451,7 @@ class RandomObject(QWidget):
                 
             self.setAbled(self.connFields(ParentTab, OFLocation[count][1], OFLocation[count][0]), checkbox.checkState())
         
+        
         # update the toggle-all checkbox
         all_box = self.layout().itemAtPosition(1, 10).widget()
         
@@ -1445,6 +1467,20 @@ class RandomObject(QWidget):
                 all_box.setChecked(False)
                 all_box.blockSignals(False)
 
+    def translateUi(self,):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        self.rotation_label.setText(translation.get("Rotation", "Rotation"))
+        self.coords_label.setText(translation.get("Co-ords:", "Co-ords:"))
+        self.scale_label.setText(translation.get("Scale", "Scale"))
+        self.set_all_checkbox.setText(translation.get("Set all random", "Set all random"))
+        
+        for field_name, checkbox in self.field_checkboxes.items():
+            translated = translation.get(field_name, field_name)
+            checkbox.setText(translated)
+            
+
             
             
 class RandomPivot(QWidget):
@@ -1456,8 +1492,10 @@ class RandomPivot(QWidget):
         self.CheckBoxes = {}
         self.LowerBounds = {}
         self.UpperBounds = {}
+        self.field_checkboxes = {}
 
-        main_layout = QGridLayout()
+
+        self.main_layout = QGridLayout()
         
         # create initial combo_box
         self.combo_box = QComboBox(self)
@@ -1471,31 +1509,37 @@ class RandomPivot(QWidget):
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
 
-        main_layout.addWidget(self.combo_box, 0, 10)
+        self.main_layout.addWidget(self.combo_box, 0, 10)
 
-        main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
-        main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
-             self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
-
-        main_layout.addWidget(QLabel("Co-ords:", self), 0, 0)
-        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
-        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
-        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
+        self.set_all_checkbox = QCheckBox("Set all random", self)
+        self.main_layout.addWidget(self.set_all_checkbox, 1, 10)
+        self.set_all_checkbox.toggled.connect(lambda: 
+            self.set_all_random(self.main_layout, self.set_all_checkbox.isChecked()))
+       
+        self.coords_label = QLabel("Co-ords:", self)
+        self.main_layout.addWidget(self.coords_label, 0, 0)
+        self.gen_field("X", self.main_layout, 0, 1, self.connFields(ParentTab, 1, 1))
+        self.gen_field("Y", self.main_layout, 0, 2, self.connFields(ParentTab, 1, 2))
+        self.gen_field("Z", self.main_layout, 0, 3, self.connFields(ParentTab, 1, 3))
 
         """
         Special Connfields as this has a checkbox interaction that has to invert all related Fields
         """
         
-        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(1, 1).widget(), main_layout.itemAtPosition(1, 2).widget()))
-        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(2, 1).widget(), main_layout.itemAtPosition(2, 2).widget()))
-        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(3, 1).widget(), main_layout.itemAtPosition(3, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), self.main_layout.itemAtPosition(1, 1).widget(), self.main_layout.itemAtPosition(1, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), self.main_layout.itemAtPosition(2, 1).widget(), self.main_layout.itemAtPosition(2, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), self.main_layout.itemAtPosition(3, 1).widget(), self.main_layout.itemAtPosition(3, 2).widget()))
         
-        main_layout.addWidget(QLabel("Distance", self), 0, 3)
-        self.gen_field("Measurement", main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
+        self.distance_label = QLabel("Distance", self)
+        self.main_layout.addWidget(self.distance_label, 0, 3)
+
+        self.gen_field("Measurement", self.main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
         
-        main_layout.itemAtPosition(0, 10).widget().setHidden(True)
-        
-        self.setLayout(main_layout)
+        self.main_layout.itemAtPosition(0, 10).widget().setHidden(True)
+        self.setLayout(self.main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
+
 
 
     """
@@ -1506,6 +1550,8 @@ class RandomPivot(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        self.field_checkboxes[Fieldname] = Field
+
         
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
@@ -1592,6 +1638,20 @@ class RandomPivot(QWidget):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         pass
 
+    def translateUi(self,):
+        
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        self.distance_label.setText(translation.get("Distance","Distance"))
+        self.coords_label.setText(translation.get("Co-ords:","Co-ords:"))
+        self.set_all_checkbox.setText(translation.get("Set all random","Set all random"))
+        
+        
+        for field_name, checkbox in self.field_checkboxes.items():
+            translated = translation.get(field_name, field_name)
+            checkbox.setText(translated)
+
 class RandomRender(QWidget):
     """Random Render"""
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
@@ -1607,8 +1667,10 @@ class RandomRender(QWidget):
         self.CheckBoxes = {}
         self.LowerBounds = {}
         self.UpperBounds = {}
+        self.field_checkboxes = {}
 
-        main_layout = QGridLayout()
+
+        self.main_layout = QGridLayout()
         
         # create initial combo_box
         self.combo_box = QComboBox(self)
@@ -1622,23 +1684,28 @@ class RandomRender(QWidget):
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
 
-        main_layout.addWidget(self.combo_box, 0, 10)
+        self.main_layout.addWidget(self.combo_box, 0, 10)
         
-        main_layout.addWidget(QCheckBox("Set all random", self), 1, 10)
-        main_layout.itemAtPosition(1, 10).widget().toggled.connect(lambda:
-             self.set_all_random(main_layout, main_layout.itemAtPosition(1, 10).widget().isChecked()))
+        self.set_all_checkbox = QCheckBox("Set all random", self)  # Store as instance variable
+        self.main_layout.addWidget(self.set_all_checkbox, 1, 10)
+        self.set_all_checkbox.toggled.connect(lambda: 
+            self.set_all_random(self.main_layout, self.set_all_checkbox.isChecked()))
 
-        main_layout.addWidget(QLabel("Degrees of Change:", self), 0, 0)
-        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 4, 1))
-        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 4, 2))
-        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 4, 3))
+        self.degrees_label = QLabel("Degrees of Change:", self)
+        self.main_layout.addWidget(self.degrees_label, 0, 0)
+        self.gen_field("X", self.main_layout, 0, 1, self.connFields(ParentTab, 4, 1))
+        self.gen_field("Y", self.main_layout, 0, 2, self.connFields(ParentTab, 4, 2))
+        self.gen_field("Z", self.main_layout, 0, 3, self.connFields(ParentTab, 4, 3))
 
-        main_layout.addWidget(QLabel("Render", self), 0, 3)
-        self.gen_field("Quantity", main_layout, 3, 1, self.connFields(ParentTab, 0, 1))
+        self.render_label = QLabel("Render", self)
+        self.main_layout.addWidget(self.render_label, 0, 3)
+        self.gen_field("Quantity", self.main_layout, 3, 1, self.connFields(ParentTab, 0, 1))
 
-        main_layout.itemAtPosition(0, 10).widget().setHidden(True)
+        self.main_layout.itemAtPosition(0, 10).widget().setHidden(True)
 
-        self.setLayout(main_layout)
+        self.setLayout(self.main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
 
     """
     SEE RANDOM OBJECT CLASS FUNCTIONS FOR COMMENTS
@@ -1648,6 +1715,8 @@ class RandomRender(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        self.field_checkboxes[Fieldname] = Field
+
         
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
@@ -1735,6 +1804,20 @@ class RandomRender(QWidget):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         pass
 
+    def translateUi(self,):
+        
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+
+        #translations for labels/checkboxes
+        self.degrees_label.setText(translation.get("Degrees of Change:", "Degrees of Change:"))
+        self.render_label.setText(translation.get("Render", "Render"))
+        self.set_all_checkbox.setText(translation.get("Set all random", "Set all random"))
+        
+        #translation for gen fields
+        for field_name, checkbox in self.field_checkboxes.items():
+            translated = translation.get(field_name, field_name)
+            checkbox.setText(translated)
 
 class RandomLight(QWidget):
     """Random Lighting"""
@@ -1749,8 +1832,10 @@ class RandomLight(QWidget):
         self.CheckBoxes = {}
         self.LowerBounds = {}
         self.UpperBounds = {}
+        self.field_checkboxes = {}
 
-        main_layout = QGridLayout()
+
+        self.main_layout = QGridLayout()
         
         # create initial combo_box
         self.combo_box = QComboBox(self)
@@ -1764,26 +1849,29 @@ class RandomLight(QWidget):
         shared_state.update_items(items=[])
         shared_state.update_selected(0)
 
-        main_layout.addWidget(self.combo_box, 0, 12)
+        self.main_layout.addWidget(self.combo_box, 0, 12)
         
-        main_layout.addWidget(QCheckBox("Set all random", self), 1, 12)
-        main_layout.itemAtPosition(1, 12).widget().toggled.connect(lambda:
-             self.set_all_random(main_layout, main_layout.itemAtPosition(1, 12).widget().isChecked()))
+        self.set_all_checkbox = QCheckBox("Set all random", self)
+        self.main_layout.addWidget(self.set_all_checkbox, 1, 12)
+        self.set_all_checkbox.toggled.connect(lambda: self.set_all_random(self.main_layout, self.set_all_checkbox.isChecked()))
 
-        main_layout.addWidget(QLabel("Co-ords:", self), 0, 0)
-        self.gen_field("X", main_layout, 0, 1, self.connFields(ParentTab, 5, 1))
-        self.gen_field("Y", main_layout, 0, 2, self.connFields(ParentTab, 5, 2))
-        self.gen_field("Z", main_layout, 0, 3, self.connFields(ParentTab, 5, 3))
+        self.coords_label = QLabel("Co-ords:", self)
+        self.main_layout.addWidget(self.coords_label, 0, 0)
+        self.gen_field("X", self.main_layout, 0, 1, self.connFields(ParentTab, 5, 1))
+        self.gen_field("Y", self.main_layout, 0, 2, self.connFields(ParentTab, 5, 2))
+        self.gen_field("Z", self.main_layout, 0, 3, self.connFields(ParentTab, 5, 3))
 
-        main_layout.addWidget(QLabel("Angle", self), 0, 3)
-        self.gen_field("Pitch", main_layout, 3, 1, self.connFields(ParentTab, 9, 1))
-        self.gen_field("Roll", main_layout, 3, 2, self.connFields(ParentTab, 9, 2))
-        self.gen_field("Yaw", main_layout, 3, 3, self.connFields(ParentTab, 9, 3))
+        self.angle_label1 = QLabel("Angle", self)
+        self.main_layout.addWidget(self.angle_label1, 0, 3)
+        self.gen_field("Pitch", self.main_layout, 3, 1, self.connFields(ParentTab, 9, 1))
+        self.gen_field("Roll", self.main_layout, 3, 2, self.connFields(ParentTab, 9, 2))
+        self.gen_field("Yaw", self.main_layout, 3, 3, self.connFields(ParentTab, 9, 3))
         
-        main_layout.addWidget(QLabel("Angle", self), 0, 7)
-        self.gen_field("Strength", main_layout, 6, 1, self.connFields(ParentTab, 1, 0))
-        self.gen_field("Radius", main_layout, 6, 2, self.connFields(ParentTab, 1, 2))
-        self.gen_field("Colour", main_layout, 6, 3, self.connFields(ParentTab, 2, 1))
+        self.angle_label2 = QLabel("Angle", self)
+        self.main_layout.addWidget(self.angle_label2, 0, 7)
+        self.gen_field("Strength", self.main_layout, 6, 1, self.connFields(ParentTab, 1, 0))
+        self.gen_field("Radius", self.main_layout, 6, 2, self.connFields(ParentTab, 1, 2))
+        self.gen_field("Colour", self.main_layout, 6, 3, self.connFields(ParentTab, 2, 1))
 
         #self.gen_field("BackGround", main_layout, 9, 1)
 
@@ -1791,9 +1879,11 @@ class RandomLight(QWidget):
         #how to change values
 
 
-        main_layout.itemAtPosition(0, 12).widget().setHidden(True)
+        self.main_layout.itemAtPosition(0, 12).widget().setHidden(True)
 
-        self.setLayout(main_layout)
+        self.setLayout(self.main_layout)
+        translator.languageChanged.connect(self.translateUi)
+        self.translateUi()
     
     """
     SEE RANDOM OBJECT CLASS FUNCTIONS FOR COMMENTS
@@ -1804,6 +1894,8 @@ class RandomLight(QWidget):
         Field = QCheckBox(Fieldname, self)
         Field_LowerBound = QLineEdit(parent=self)
         Field_UpperBound = QLineEdit(parent=self)
+        self.field_checkboxes[Fieldname] = Field
+
         
         Field_LowerBound.setToolTip('LowerBound') 
         Field_UpperBound.setToolTip('UpperBound') 
@@ -1889,6 +1981,22 @@ class RandomLight(QWidget):
     def on_object_selected(self, selected_object_pos):
         """ Method could be called to update combo_box_items. Maybe Delete. """
         pass
+
+    def translateUi(self):
+        current_lang = translator.current_language
+        translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
+        
+        self.coords_label.setText(translation.get("Co-ords:", "Co-ords:"))
+        self.angle_label1.setText(translation.get("Angle", "Angle"))
+        self.angle_label2.setText(translation.get("Angle", "Angle"))
+        self.set_all_checkbox.setText(translation.get("Set all random", "Set all random"))
+
+
+        # Translate generated fields
+        for field_name, checkbox in self.field_checkboxes.items():
+            translated = translation.get(field_name, field_name)
+            checkbox.setText(translated)
+
 
 
 class Render(QWidget):
