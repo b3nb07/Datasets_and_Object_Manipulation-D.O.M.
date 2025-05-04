@@ -602,7 +602,7 @@ class Backend():
 
         os.system("blenderproc run backend/_temp.py")
 
-        highest = self.getHighestInDir()
+        highest = self.get_highest_in_dir()
         num = highest - config["render"]["renders"] + 1
         print(highest)
         print(num)
@@ -650,7 +650,7 @@ class Backend():
         else:
             bproc.writer.write_hdf5(config["render_folder"], data, append_to_existing_output = True)
 
-    def getHighestInDir(self):
+    def get_highest_in_dir(self):
         highest = -1
         for file in os.listdir(config["render_folder"]):
             if file.endswith(".hdf5"):
@@ -665,7 +665,7 @@ class Backend():
                         highest = int(num)
                 except:
                     pass
-        return highest
+        return 0 if highest == -1 else highest
     
     def export_interaction(self, path, filename="interaction_log.txt"):
         """Exports the current interaction log.
