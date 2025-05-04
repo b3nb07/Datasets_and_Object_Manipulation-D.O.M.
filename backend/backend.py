@@ -207,7 +207,8 @@ class Backend():
             except:
                 config["random"]["objects"][index][category][field] = [0,0]
             # try apply this change
-            self.apply_specific_random_limit(index, category, field)
+            if (config["random"]["mode"] == "set"):
+                self.apply_specific_random_limit(index, category, field)
         else:
             # check this logic again
             # remove field from config if it exists
@@ -233,7 +234,6 @@ class Backend():
     def apply_all_random_limits(self):
         """Applies the limits at the per render mode"""
         # will be chcanged to obj, cat, attributes later
-        print(config["random"]["objects"].items())
         try:
             for obj_index, categories in config["random"]["objects"].items():
                 for category, attributes in categories.items():  # Iterate over categories (e.g., 'render', 'pivot')
@@ -560,11 +560,13 @@ class Backend():
 
         config["camera_poses"] = []
 
-    def set_runtime_config(self, config):
-        self.runtime_config = config
+    def set_runtime_config(self, run_config):
+        self.runtime_config = run_config
 
+    def set_config(self, new_config):
+        config = new_config
 
-    def render(self, objects, headless = False, preview = False, viewport_temp = False, config = config):
+    def render(self, objects, headless = False, preview = False, viewport_temp = False):
         """Renders the scene and saves to file in the output folder."""
 
         # We need to take 
@@ -573,12 +575,12 @@ class Backend():
         else: Backend.update_log(f'Viewport Preview Render Started\n')
 
         
-        origConfig = deepcopy(config)
-        origObjects = []
+        # origConfig = deepcopy(config)
+        # origObjects = []
 
-        for obj in objects.items:
-            origObjects.append(deepcopy(obj.properties))
-            #self.add_object_properties(obj)
+        # for obj in objects.items:
+        #     origObjects.append(deepcopy(obj.properties))
+        #     #self.add_object_properties(obj)
 
         self.add_camera_poses(viewport_temp)
 
@@ -600,7 +602,7 @@ class Backend():
 
         os.system("blenderproc run backend/_temp.py")
 
-        highest = self.getHighestInDir()
+        highest = self.get_highest_in_dir()
         num = highest - config["render"]["renders"] + 1
         print(highest)
         print(num)
@@ -619,7 +621,7 @@ class Backend():
                 image.start()
 
         self.remove_camera_poses()
-        config = origConfig
+        # config = origConfig
 
         '''for i in range(len(objects.items)):
             obj.properties = origObjects[i]'''
@@ -648,7 +650,7 @@ class Backend():
         else:
             bproc.writer.write_hdf5(config["render_folder"], data, append_to_existing_output = True)
 
-    def getHighestInDir(self):
+    def get_highest_in_dir(self):
         highest = -1
         for file in os.listdir(config["render_folder"]):
             if file.endswith(".hdf5"):
@@ -663,7 +665,7 @@ class Backend():
                         highest = int(num)
                 except:
                     pass
-        return highest
+        return 0 if highest == -1 else highest
     
     def export_interaction(self, path, filename="interaction_log.txt"):
         """Exports the current interaction log.
