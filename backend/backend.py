@@ -161,6 +161,7 @@ class Backend():
         
         :param seed: int value indicating random seed"""
         config["seed"] = seed
+        random.seed(seed)
 
         Backend.update_log(f'Seed changed to: {seed}\n')
 
