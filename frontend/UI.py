@@ -1147,10 +1147,10 @@ class RandomDefault(QWidget):
         self.set_all_checkbox.setToolTip('Sets all elements on all pages to random') 
 
         """Set per is XOR"""
-        SetSetCheck = QCheckBox("Set per SET",self)
-        SetSetCheck.setToolTip('Each selected field is randomly generated and its value is maintained throughout the entire set generation.') 
-        SetFrameCheck = QCheckBox("Set per FRAME",self)
-        SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
+        self.SetSetCheck = QCheckBox("Set per SET",self)
+        self.SetSetCheck.setToolTip('Each selected field is randomly generated and its value is maintained throughout the entire set generation.') 
+        self.SetFrameCheck = QCheckBox("Set per FRAME",self)
+        self.SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
         RandomSeed = QLineEdit("", self)
 
         """The random seed value used to generate random values"""
@@ -1158,13 +1158,13 @@ class RandomDefault(QWidget):
         RandomSeed.setMaximumWidth(200)
         
         self.main_layout.addWidget(self.set_all_checkbox, 0, 0)
-        self.main_layout.addWidget(SetSetCheck, 1, 0)
-        self.main_layout.addWidget(SetFrameCheck, 2, 0)
+        self.main_layout.addWidget(self.SetSetCheck, 1, 0)
+        self.main_layout.addWidget(self.SetFrameCheck, 2, 0)
         
         """XOR FUNCTIONS"""
-        SetSetCheck.toggled.connect(lambda: self.SetSETChecks(self.main_layout))
-        SetFrameCheck.toggled.connect(lambda: self.SetFRAMEChecks(self.main_layout))
-        SetSetCheck.setChecked(True)
+        self.SetSetCheck.toggled.connect(lambda: self.SetSETChecks(self.main_layout))
+        self.SetFrameCheck.toggled.connect(lambda: self.SetFRAMEChecks(self.main_layout))
+        self.SetSetCheck.setChecked(True)
         self.main_layout.addWidget(RandomSeed, 3, 0)
         self.main_layout.setAlignment(Qt.AlignTop | Qt.AlignRight)
         
@@ -1228,6 +1228,8 @@ class RandomDefault(QWidget):
         translation = translator.translations.get(current_lang, translator.translations.get("English", {}))
 
         self.set_all_checkbox.setText(translation.get("Set all random", "Set all random"))
+        self.SetSetCheck.setText(translation.get("Set per SET", "Set per SET"))
+        self.SetFrameCheck.setText(translation.get("Set per FRAME", "Set per FRAME"))
                             
 class RandomObject(QWidget):
     """Random Object"""
@@ -1524,9 +1526,9 @@ class RandomPivot(QWidget):
         Special Connfields as this has a checkbox interaction that has to invert all related Fields
         """
         
-        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(1, 1).widget(), main_layout.itemAtPosition(1, 2).widget()))
-        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(2, 1).widget(), main_layout.itemAtPosition(2, 2).widget()))
-        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), main_layout.itemAtPosition(3, 1).widget(), main_layout.itemAtPosition(3, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), self.main_layout.itemAtPosition(1, 1).widget(), self.main_layout.itemAtPosition(1, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), self.main_layout.itemAtPosition(2, 1).widget(), self.main_layout.itemAtPosition(2, 2).widget()))
+        ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().toggled.connect(lambda: self.un_checked(not ParentTab.widget(1).layout().itemAtPosition(0, 0).widget().isChecked(), self.main_layout.itemAtPosition(3, 1).widget(), self.main_layout.itemAtPosition(3, 2).widget()))
         
         self.distance_label = QLabel("Distance", self)
         self.main_layout.addWidget(self.distance_label, 0, 3)
