@@ -1525,11 +1525,9 @@ class RandomPivot(QWidget):
         self.distance_label = QLabel("Distance", self)
         self.main_layout.addWidget(self.distance_label, 0, 3)
 
-        self.main_layout.addWidget(QLabel("Distance", self), 0, 3)
         self.gen_field("Measurement", self.main_layout, 3, 1, self.connFields(ParentTab, 5, 1))
         
         self.main_layout.itemAtPosition(0, 10).widget().setHidden(True)
-        
         self.setLayout(self.main_layout)
         translator.languageChanged.connect(self.translateUi)
         self.translateUi()
