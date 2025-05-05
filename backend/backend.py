@@ -179,8 +179,6 @@ class Backend():
         :param angles: a list containing x y and z angle change"""
         config["render"]["degree"] = angles
 
-    # REPOSITION THESE FUNCTIONS 
-    #
     def toggle_random_mode(self, mode):
         """
         Toggles the random mode in config.
@@ -216,8 +214,6 @@ class Backend():
             if field in config["random"]["objects"][index][category]:
                 del config["random"]["objects"][index][category][field]
         
-        # Backend.update_log(f'Random attribute {field} set to {state}\n')
-    #
     
     def apply_specific_random_limit(self, index, category, field):
         """Applies the specific limits"""
@@ -226,7 +222,6 @@ class Backend():
             upper_bound = float(config["random"]["objects"][index][category][field][1])
             
             random_value = random.uniform(lower_bound, upper_bound)
-            # print(f"object {index} - {category} - {field}: {random_value}")
             self.update_appropriate_cfg(index, category, field, random_value)
         except:
             pass
@@ -234,7 +229,6 @@ class Backend():
     # this should be called for when its generating PER render
     def apply_all_random_limits(self):
         """Applies the limits at the per render mode"""
-        # will be chcanged to obj, cat, attributes later
         try:
             for obj_index, categories in config["random"]["objects"].items():
                 for category, attributes in categories.items():  # Iterate over categories (e.g., 'render', 'pivot')
@@ -246,7 +240,6 @@ class Backend():
 
                             # Generate a random value within bounds
                             random_value = random.uniform(lower_bound, upper_bound)
-                            print(f"Object {obj_index} - {category} - {attr}: {random_value}")
                             
                             # apply this field
                             self.apply_specific_random_limit(obj_index, category, attr)
@@ -257,8 +250,7 @@ class Backend():
         
         except Exception as e:
             print(f"Error processing config['random']['objects']: {e}")
-    #
-    #
+   
     def update_appropriate_cfg(self, index, category, field, random_value): 
         """
         Updates the config file based on the specific index, category and field.
@@ -420,11 +412,9 @@ class Backend():
     def toggle_object(self, object, state):
         if state:
             if object.hidden: 
-                #config['objects'].append(object)
                 object.add_object()
         else:
             if not object.hidden:
-                #config['objects'].remove(object)
                 object.remove_object()
     
     def ground_object(self, object, state):
@@ -488,7 +478,7 @@ class Backend():
         x_position = r * np.sin( angle[2] )    #calculate x and y positions based on y angle
         y_position = -1 * r * np.cos( angle[2] )
 
-        z_position = np.cos(angle[0]) * distance #caluclate z angle based on x positions
+        z_position = np.cos(angle[0]) * distance #calculate z angle based on x positions
 
         position = [x_position, y_position, z_position]
         return position
@@ -506,7 +496,7 @@ class Backend():
 
         number_of_renders = config["render"]["renders"]
 
-        starting_x_angle = np.pi / 2 #No place in UI to set starting camera angle 
+        starting_x_angle = np.pi / 2
         starting_y_angle = 0
         starting_z_angle = 0
 
@@ -570,18 +560,9 @@ class Backend():
     def render(self, objects, headless = False, preview = False, viewport_temp = False):
         """Renders the scene and saves to file in the output folder."""
 
-        # We need to take 
-
         if not viewport_temp: Backend.update_log(f'Rendering Started\n')
         else: Backend.update_log(f'Viewport Preview Render Started\n')
 
-        
-        # origConfig = deepcopy(config)
-        # origObjects = []
-
-        # for obj in objects.items:
-        #     origObjects.append(deepcopy(obj.properties))
-        #     #self.add_object_properties(obj)
 
         self.add_camera_poses(viewport_temp)
 
@@ -605,12 +586,10 @@ class Backend():
 
         highest = self.get_highest_in_dir()
         num = highest - config["render"]["renders"] + 1
-        print(highest)
-        print(num)
 
         if (viewport_temp):
             os.system("blenderproc vis hdf5 viewport_temp/0.hdf5 --save viewport_temp")
-        elif (not headless and preview): # Doesnt work anymore / could just bin off preview though
+        elif (not headless and preview):
             os.system("blenderproc vis hdf5 output/0.hdf5")
         elif (not headless):
             images = []
@@ -622,7 +601,6 @@ class Backend():
                 image.start()
 
         self.remove_camera_poses()
-        # config = origConfig
 
         '''for i in range(len(objects.items)):
             obj.properties = origObjects[i]'''
@@ -683,7 +661,6 @@ class Backend():
         
         :param filename: The filename of the exported config, defaults to export.json."
         """
-        # config["render_folder"] = ""
         file_path = path + "/" + filename
         with open(file_path, "w") as export_file:
             json.dump(config, export_file, indent = 2)
@@ -812,8 +789,6 @@ class Backend():
             Backend.update_log(f'{self.__str__()} object added to the scene\n')
 
 
-        #! TODO: Think of and implement more object manipulation methods
-
     class RenderLight():
         """Render a light source."""
 
@@ -844,7 +819,6 @@ class Backend():
             return f"Light Source {self.light_pos + 1}"
 
         def set_type(self, type):
-            #print(config)
             if (is_blender_environment):
                 self.light.set_type(type)
 
@@ -853,7 +827,6 @@ class Backend():
             Backend.update_log(f'Type of {self.__str__()} changed to {type}\n')
 
         def set_radius(self, radius):
-            #print(radius)
             if (is_blender_environment):
                 self.light.set_radius(radius)
 
@@ -866,7 +839,6 @@ class Backend():
             
             :param location: A list containing [x,y,z] where x,y,z is an integer or float. This determines the coordinates of the light's location.
             """
-            #print("location changed")
             if (is_blender_environment):
                 self.light.set_location(location)
 
@@ -879,7 +851,6 @@ class Backend():
 
             :param rotation: A list [x,y,z] with values for the rotation to be applied to the light.
             """
-            #print("angle changed")
             rotRad = []
             for x in rotation:
                 rotRad.append(np.deg2rad(int(x)))
@@ -897,7 +868,6 @@ class Backend():
             
             :param energy: The energy to set it as. Interpreted as watts.
             """
-            #print("energy changed")
             if (is_blender_environment):
                 self.light.set_energy(energy)
 
@@ -912,11 +882,6 @@ class Backend():
             :param hex_value: The hex string, describing rgb.
             :return: The rgba color, in form of a list. Values between 0 and 1.
 
-            THIS HAS BEEN BORROWED PERMENETLY FROM THE BPROC SOURCE CODE!
-            I COULDN'T FIGURE OUT HOW TO CALL IT
-            SOMEONE FIX IF YOU WANT TO
-            OR WE REFERENCE
-            :SHRUG:
             """
             try:
                 return [x / 255 for x in bytes.fromhex(hex_value[-6:])]
@@ -928,11 +893,8 @@ class Backend():
             
             :param color: A list [r,g,b] containing the values of the red, green and blue attributes from 0 to 255 inclusive.
             """
-            print(color)
             colour = self.hex_to_rgba(color)
-            #print(colour)
             if (is_blender_environment):
-                print(colour)
                 self.light.set_color(colour)
 
             config["light_sources"]["color"] = color

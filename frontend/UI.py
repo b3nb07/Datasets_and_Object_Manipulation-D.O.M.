@@ -75,7 +75,6 @@ class ComboBoxState(QObject):
     def update_selected(self, index):
         #Update current object selected
         self.selected_index = index
-        # maybe delete
         self.selection_changed.emit(index)
         
     def count(self):
@@ -216,6 +215,8 @@ class TabDialog(QWidget):
         translator.languageChanged.connect(self.translateUi)
         self.translateUi()
 
+        # Uncomment the following 2 lines to perform frontend testing:
+
         # from FrontTests import Tests
         # Tests(self, self.tab_widget, shared_state, ObjectTab, PivotTab, Render, Lighting, backend)
 
@@ -237,7 +238,6 @@ class TabDialog(QWidget):
         #Updates Viewport Image
         thread.quit()
         self.environment.setStyleSheet("border-image: url(viewport_temp/0_colors.png) 0 0 0 0 stretch stretch")
-        # environment.setStyleSheet("background-position: center;background-repeat: no-repeat;background-image: url(viewport_temp/0_colors.png);")
 
         self.viewport_ongoing = False
 
@@ -248,8 +248,6 @@ class TabDialog(QWidget):
 
     
     def update_viewport(self, interaction = "", update_log = True):
-        # At least 10 seconds between viewport updates
-        # if (time() - last_viewport_update > 5):
         if (not self.unlimited_rendering and not self.viewport_ongoing and "Render" not in interaction):
             self.old_log(interaction)
             config = backend.get_config()
@@ -268,7 +266,6 @@ class TabDialog(QWidget):
             return self.old_log(interaction)
 
 class ilyaMessageBox(QMessageBox):
-    #IlyaCommentBox
     # Displays a custom messagebox
     def __init__(self, text, title):
         super().__init__()
@@ -289,7 +286,6 @@ class ObjectTab(QWidget):
         self.XObj_pos = QLabel("X:", self)
         self.XObj_pos_input_field = QLineEdit(parent=self)
         self.XObj_pos_input_field.setText("0.0")
-        #self.XObj_pos_input_field.setFocusPolicy(Qt.NoFocus)
         self.X_button_minus = QPushButton('-', self)
         self.X_button_plus = QPushButton('+', self)
         
@@ -421,7 +417,6 @@ class ObjectTab(QWidget):
                     if not folder_path:
                         return
                     
-                    # maybe have a global constant of supported extensions?
                     supported_extensions = ['.blend', '.stl', '.obj']
                     # go through each file in directory
                     for root, _, files in os.walk(folder_path):
@@ -670,6 +665,8 @@ class ObjectTab(QWidget):
     def update_ui_by_config(self):
         """ Method that updates attributes in text field when the object index is change from combo box. """
 
+        self.combo_box.setCurrentIndex(0)
+
         if not backend.is_config_objects_empty():
             self.on_object_selected(0)
     
@@ -756,14 +753,14 @@ class ObjectTab(QWidget):
                 if field.text() == '':
                     field.setText('0')
                 if float(field.text()) > val or float(field.text()) + 0.5 < val:
-                    if val < 500: # <1 true
+                    if val < 500: # true value is < 1
                         trueValStr = str(val / 500)
                         if len(trueValStr) > 4:
                             field.setText(trueValStr[0:4])
                         else:
                             field.setText(trueValStr)
 
-                    else: # >1 true
+                    else: # true value is > 1
                         trueValStr = (val - 450) / 50
                         field.setText(str(round(trueValStr,1)))
         except:
@@ -795,7 +792,6 @@ class ObjectTab(QWidget):
             #call backend function   
             shared_state.itemNames[selected_object_index]
             obj = shared_state.items[selected_object_index]
-            #print(obj)
             obj.set_loc(location)
         except:
             print("Error Updating PosX, Y or Z value is invalid")
@@ -812,7 +808,6 @@ class ObjectTab(QWidget):
             selected_object_index = self.combo_box.currentIndex()
             shared_state.itemNames[selected_object_index]
             obj = shared_state.items[selected_object_index]
-            #print(obj)
             obj.set_scale(scale)
         except:
             print("Error Updating Scale, Width, Height or Length value is invalid")
@@ -863,10 +858,6 @@ class PivotTab(QWidget):
         """Pivot Tab"""
         super().__init__(parent)
 
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
 
         # Pivot Point Coords Section
         self.Pivot_Point_Check = QCheckBox("Cutom Pivot Point", self)
@@ -1175,9 +1166,6 @@ class RandomDefault(QWidget):
         translator.languageChanged.connect(self.translateUi)
         self.translateUi()
 
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-
     def SetSETChecks(self, Layout):
         """XOR FUNCTIONS"""
         if Layout.itemAtPosition(1, 0).widget().isChecked():
@@ -1327,7 +1315,6 @@ class RandomObject(QWidget):
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
         
-        #
         lower = Field_LowerBound.text()
         upper = Field_UpperBound.text()
         
@@ -1336,7 +1323,7 @@ class RandomObject(QWidget):
         
         Field.toggled.connect(lambda state: backend.update_random_attribute(self.combo_box.currentIndex(), 'object', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
-        #
+        
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
         
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
@@ -1383,7 +1370,6 @@ class RandomObject(QWidget):
         Field_LowerBound.setEnabled(State)
         Field_UpperBound.setEnabled(State)
         
-        # if not State:
         Field_LowerBound.setText("0")
         Field_UpperBound.setText("0")
 
@@ -1407,18 +1393,17 @@ class RandomObject(QWidget):
         self.combo_box.addItems(map(lambda o: str(o), items))
             
     def on_object_selected(self, ParentTab, index):
-        # get config from bacl
+        # get config from backend
         config = backend.get_config()
-        OFLocation = [[1,1], [1,2], [1,3],  [5,1], [5,2], [5,3],  [8,1], [8,2], [8,3]] # This method of implementation is gonna be technical debt but we don't have time
+        OFLocation = [[1,1], [1,2], [1,3],  [5,1], [5,2], [5,3],  [8,1], [8,2], [8,3]]
 
         # get specific index 
         objects_config = config.get("random", {}).get("objects", {})
         object_config = objects_config.get(index, {}).get("object", {})
 
-        # list of all possible fields (can make this more modular later lol)
+        # list of all possible fields
         all_fields = ["X", "Y", "Z", "Roll", "Pitch", "Yaw", "Width", "Length", "Height"]
 
-        # temporary bug fix
         count = 0
 
         for field_name in all_fields:
@@ -1438,7 +1423,7 @@ class RandomObject(QWidget):
                     lower_bound.setEnabled(True)
                     upper_bound.setEnabled(True)
                     
-                    # update to back end to fix previous index not updating bug :)
+                    # update to back end to fix previous index not updating bug
                     backend.update_random_attribute(index, 'object', field_name, checkbox.isChecked(), lower_bound.text(), upper_bound.text())
                     count+=1
                 else:
@@ -1502,7 +1487,6 @@ class RandomPivot(QWidget):
         # connecting shared state updates to combo box
         shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
-        #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
         self.update_combo_box_items(shared_state.itemNames)
@@ -1562,7 +1546,6 @@ class RandomPivot(QWidget):
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
         
-        #
         lower = Field_LowerBound.text()
         upper = Field_UpperBound.text()
         
@@ -1571,7 +1554,7 @@ class RandomPivot(QWidget):
         
         Field.toggled.connect(lambda state: backend.update_random_attribute(self.combo_box.currentIndex(), 'pivot', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
-        #
+
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
 
     def validation(self, Field):
@@ -1621,7 +1604,6 @@ class RandomPivot(QWidget):
         Field_LowerBound.setEnabled(State)
         Field_UpperBound.setEnabled(State)
         
-        # if not State:
         Field_LowerBound.setText("0")
         Field_UpperBound.setText("0")
 
@@ -1656,13 +1638,6 @@ class RandomRender(QWidget):
     """Random Render"""
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
-        
-
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
-
 
         self.CheckBoxes = {}
         self.LowerBounds = {}
@@ -1677,7 +1652,6 @@ class RandomRender(QWidget):
         # connecting shared state updates to combo box
         shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
-        #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
         self.update_combo_box_items(shared_state.itemNames)
@@ -1727,7 +1701,6 @@ class RandomRender(QWidget):
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
 
-        #
         lower = Field_LowerBound.text()
         upper = Field_UpperBound.text()
         
@@ -1736,7 +1709,6 @@ class RandomRender(QWidget):
         
         Field.toggled.connect(lambda state: backend.update_random_attribute(self.combo_box.currentIndex(), 'render', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
-        #
         
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
         
@@ -1787,7 +1759,6 @@ class RandomRender(QWidget):
         Field_LowerBound.setEnabled(State)
         Field_UpperBound.setEnabled(State)
         
-        # if not State:
         Field_LowerBound.setText("0")
         Field_UpperBound.setText("0")
 
@@ -1824,11 +1795,6 @@ class RandomLight(QWidget):
     def __init__(self, parent: QWidget, ParentTab: QTabWidget):
         super().__init__(parent)
 
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
-
         self.CheckBoxes = {}
         self.LowerBounds = {}
         self.UpperBounds = {}
@@ -1842,7 +1808,6 @@ class RandomLight(QWidget):
         # connecting shared state updates to combo box
         shared_state.items_updated.connect(lambda: self.update_combo_box_items(shared_state.itemNames))
         shared_state.selection_changed.connect(self.combo_box.setCurrentIndex)
-        #self.combo_box.currentIndexChanged.connect(self.on_object_selected)
 
         # initialise items
         self.update_combo_box_items(shared_state.itemNames)
@@ -1873,12 +1838,6 @@ class RandomLight(QWidget):
         self.gen_field("Radius", self.main_layout, 6, 2, self.connFields(ParentTab, 1, 2))
         self.gen_field("Colour", self.main_layout, 6, 3, self.connFields(ParentTab, 2, 1))
 
-        #self.gen_field("BackGround", main_layout, 9, 1)
-
-        #print(main_layout.itemAtPosition(0, 0).widget().setText("Electric boogalo"))
-        #how to change values
-
-
         self.main_layout.itemAtPosition(0, 12).widget().setHidden(True)
 
         self.setLayout(self.main_layout)
@@ -1906,7 +1865,6 @@ class RandomLight(QWidget):
         Field_LowerBound.editingFinished.connect(lambda: self.validation(Field_LowerBound))
         Field_UpperBound.editingFinished.connect(lambda: self.validation(Field_UpperBound))
 
-        #
         lower = Field_LowerBound.text()
         upper = Field_UpperBound.text()
         
@@ -1915,7 +1873,7 @@ class RandomLight(QWidget):
         
         Field.toggled.connect(lambda state: backend.update_random_attribute(self.combo_box.currentIndex(), 'light', Fieldname, state, lower, upper))
         Field.toggled.connect(lambda: self.un_checked(Field.isChecked(), Field_LowerBound, Field_UpperBound))
-        #
+
         self.un_checked(False, Field_LowerBound, Field_UpperBound)
 
     def addCheck(self, Field, Fieldname, Layout, X, Y, ConField):
@@ -1965,7 +1923,6 @@ class RandomLight(QWidget):
         Field_LowerBound.setEnabled(State)
         Field_UpperBound.setEnabled(State)
         
-        # if not State:
         Field_LowerBound.setText("0")
         Field_UpperBound.setText("0")
 
@@ -2008,12 +1965,6 @@ class Render(QWidget):
 
 
         self.queue = []
-
-
-        ###
-        ###translator.languageChanged.connect(self.translateUi)
-        ###self.translateUi()
-        ###
 
         self.GenerateRenders_Button = QPushButton('Generate Renders', self)
         self.GenerateRenders_Button.clicked.connect(self.renderQueueControl)
@@ -2086,10 +2037,6 @@ class Render(QWidget):
         
         self.unlimited_render_button.setToolTip('Generates Frames until interupted')
 
-        # self.render_preview_button = QPushButton("Render Preview", self)
-        # self.render_preview_button.clicked.connect(self.renderPreview)
-        
-
         self.rendering = False
 
         main_layout = QGridLayout()
@@ -2117,8 +2064,6 @@ class Render(QWidget):
         main_layout.addWidget(self.unlimited_render_button, 1, 7)
 
         main_layout.addWidget(self.GenerateRenders_Button, 0, 7)
-
-        # main_layout.addWidget(self.render_preview_button, 2, 7)
 
         self.setLayout(main_layout)
 
@@ -2222,8 +2167,6 @@ class Render(QWidget):
             self.newThread.start()
             
             self.windowUp()
-
-            #self.thread.quit()
         else:
             renderingBox = QMessageBox()
             renderingBox.setWindowIcon(QIcon('DOMLOGO.png'))
@@ -2253,7 +2196,6 @@ class Render(QWidget):
             self.queue.append(config)
 
             self.generate_render()
-            # self.render_preview_button.setEnabled(False)
     
     def generate_render(self):
         if (self.mainpage.viewport_ongoing):
@@ -2311,11 +2253,10 @@ class Render(QWidget):
             self.rendering = False
             self.LoadingBox.update_text("Rendering complete")
             self.GenerateRenders_Button.setText("Generate Renders")
-            # self.render_preview_button.setEnabled(True)
         else:
             self.generate_render()
 
-    def set_renders(self):#
+    def set_renders(self):
         try:
             val = int(self.Number_of_renders_input_field.text())
             if val <= 0:
@@ -2357,7 +2298,7 @@ class Port(QWidget):
                 QMessageBox.warning(self, "Partial Import", error_message)
 
             elif not successful_imps and failed_imps:
-                # may have to cap this in the future to stop massive folders
+                # may have to cap the number of imported files in the future to stop massive folders
                 error_message = f"Failed to import all objects:\n"
                 error_message += "\n".join([f"{name}: {error}" for name, error in failed_imps])
                 QMessageBox.critical(self, "Import Failed", error_message)
@@ -2414,7 +2355,6 @@ class Port(QWidget):
         def Get_Object_Filepath(Scroll):
             """ import objects main function """
             try:
-                # display message box (boycotting ilya)
                 import_box = QMessageBox()
                 import_box.setWindowIcon(QIcon('DOMLOGO.png'))
                 import_box.setWindowTitle("Import")
@@ -2454,7 +2394,7 @@ class Port(QWidget):
                             path = os.path.join(root, file)
                             _process_import(path, Scroll, successful_imps, failed_imps)
 
-                # finally display results of the importss
+                # finally display results of the imports
                 _display_import_message(successful_imps, failed_imps)
 
             except Exception as e:
@@ -2606,8 +2546,6 @@ class Port(QWidget):
                     
                     button.setMenu(menu)
                     Scroll.addWidget(button)
-                # for i in range(5):
-                #     tab_widget.update_ui_by_config()
 
                 for i in range(5):
                     tab_widget.setTabEnabled(i, True)
@@ -2771,13 +2709,11 @@ class Lighting(QWidget):
         self.colour_select_button.clicked.connect(self.getColour)
         self.colour_label.setToolTip('Object lighting Colour')
 
-        self.lighting_colour = QLineEdit(self) #f789886 & bullshit
+        self.lighting_colour = QLineEdit(self)
         self.lighting_colour.editingFinished.connect(lambda: self.update_colour_example_text(self.lighting_colour.text()))
         self.colour_example = QLabel(self)
         self.lighting_colour.setText("#ffffff")
         
-        
-        #self.light.set_color("#000000")
         self.colour_example.setStyleSheet(("background-color: {c}").format(c = "#ffffff"))
         ###
 
@@ -2805,13 +2741,10 @@ class Lighting(QWidget):
         self.radius_input_field.textChanged.connect(lambda: self.set_radius_from_field(self.radius_input_field))
         self.radius_button_minus = QPushButton("-", self)
         self.radius_button_minus.setMaximumWidth(50)
-        
-        #self.radius_button_minus.clicked.connect(lambda: self.Minus_click(self.radius_input_field))
-        #set_radius
+
         self.radius_button_minus.clicked.connect(lambda: self.set_radius("Minus", self.radius_input_field))
 
         self.radius_button_plus = QPushButton("+", self)
-        #self.radius_button_plus.clicked.connect(lambda: self.Plus_click(self.radius_input_field))
         self.radius_button_plus.clicked.connect(lambda: self.set_radius("Plus", self.radius_input_field))
 
         ###
@@ -3142,7 +3075,6 @@ class Lighting(QWidget):
                     colour = "#" + colour
 
                 self.light.set_color(colour)
-                #print("CHANGED BACKEND")
                 self.colour_example.setStyleSheet(("background-color: {c}").format(c = colour))
         except:
             pass
