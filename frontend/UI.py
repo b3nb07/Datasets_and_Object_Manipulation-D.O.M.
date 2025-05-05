@@ -1105,7 +1105,7 @@ class RandomTabDialog(QWidget):
         super().__init__(parent)
 
         self.tab_widget = QTabWidget()
-        self.tab_widget.addTab(RandomDefault(self, self.tab_widget), "Base")
+        self.tab_widget.addTab(RandomDefault(self, self.tab_widget, ParentTab), "Base")
         self.tab_widget.addTab(RandomObject(self, ParentTab), "Object")
         self.tab_widget.addTab(RandomPivot(self, ParentTab), "Pivot Point")
         self.tab_widget.addTab(RandomRender(self, ParentTab), "Render")
@@ -1138,7 +1138,7 @@ class RandomTabDialog(QWidget):
 
 class RandomDefault(QWidget):
     """Defualt page for Random"""
-    def __init__(self, parent: QWidget, tab_widget: QTabWidget):
+    def __init__(self, parent: QWidget, tab_widget: QTabWidget, parent_tab: QTabWidget):
         super().__init__(parent)
 
         self.main_layout = QGridLayout()
@@ -1151,11 +1151,11 @@ class RandomDefault(QWidget):
         self.SetSetCheck.setToolTip('Each selected field is randomly generated and its value is maintained throughout the entire set generation.') 
         self.SetFrameCheck = QCheckBox("Set per FRAME",self)
         self.SetFrameCheck.setToolTip('Each selected field is randomly generated and its value is changed for each frame.') 
-        RandomSeed = QLineEdit("", self)
+        parent_tab.RandomSeed = QLineEdit("", self)
 
         """The random seed value used to generate random values"""
-        RandomSeed.setText(str(backend.get_config()["seed"]))
-        RandomSeed.setMaximumWidth(200)
+        parent_tab.RandomSeed.setText(str(backend.get_config()["seed"]))
+        parent_tab.RandomSeed.setMaximumWidth(200)
         
         self.main_layout.addWidget(self.set_all_checkbox, 0, 0)
         self.main_layout.addWidget(self.SetSetCheck, 1, 0)
@@ -1165,11 +1165,11 @@ class RandomDefault(QWidget):
         self.SetSetCheck.toggled.connect(lambda: self.SetSETChecks(self.main_layout))
         self.SetFrameCheck.toggled.connect(lambda: self.SetFRAMEChecks(self.main_layout))
         self.SetSetCheck.setChecked(True)
-        self.main_layout.addWidget(RandomSeed, 3, 0)
+        self.main_layout.addWidget(parent_tab.RandomSeed, 3, 0)
         self.main_layout.setAlignment(Qt.AlignTop | Qt.AlignRight)
         
         self.set_all_checkbox.toggled.connect(lambda state: self.checkUpdate(tab_widget, state))
-        RandomSeed.editingFinished.connect(lambda: self.SeedEdit(RandomSeed))
+        parent_tab.RandomSeed.editingFinished.connect(lambda: self.SeedEdit(parent_tab.RandomSeed))
         
         self.setLayout(self.main_layout)
         translator.languageChanged.connect(self.translateUi)
@@ -2561,7 +2561,7 @@ class Port(QWidget):
         self.ExportSettings_Button.clicked.connect(Export_Settings)
 
         #Fifth Section
-        def Get_Settings_Filepath(tab_widget):
+        def Get_Settings_Filepath():
             try:
                 current_lang = translator.current_language
                 translations = translator.translations.get(current_lang, translator.translations.get("English", {}))
@@ -2573,6 +2573,7 @@ class Port(QWidget):
                 backend = temp_backend
                 temp = deepcopy(backend.get_config()["objects"])
                 backend.get_config()["objects"].clear()
+                tab_widget.RandomSeed.setText(str(backend.get_config()["seed"]))
 
                 for n, obj in enumerate(temp):
                     if obj == None: continue
@@ -2617,7 +2618,7 @@ class Port(QWidget):
 
 
         self.ImportSettings_Button = QPushButton('Import Settings', self)
-        self.ImportSettings_Button.clicked.connect(lambda: Get_Settings_Filepath(tab_widget))
+        self.ImportSettings_Button.clicked.connect(Get_Settings_Filepath)
 
         def delete_object(tab_widget, scroll):
             current_lang = translator.current_language
