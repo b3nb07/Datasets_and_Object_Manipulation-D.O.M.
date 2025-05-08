@@ -144,7 +144,7 @@ This license enables reusers to distribute, remix, adapt, and build upon the mat
 3. Attribution
 Any research or publications resulting from the use of this software must include proper citation and acknowledgment as specified by the software provider.
 
- - Oliver Japp, Ilya Waywell, Dominic Brown, Ben Brown, Ethan Burke, Miller Dawson, and Sophie Bowie. Datasets and Object Manipulation (D.O.M). Version 1.0, April 15, 2025. https://github.com/b3nb07/Datasets_and_Object_Manipulation-D.O.M..
+ - Oliver Japp, Ilya Waywell, Dominic Brown, Ben Brown, Ethan Burke, Miller Dawson, and Sophie Bowie. Datasets and Object Manipulation (D.O.M). Version 1.0, April 15, 2025. [https://github.com/b3nb07/Datasets_and_Object_Manipulation-D.O.M.].
 
 4. Acceptance
 By downloading, installing, or using the software, users acknowledge that they have read, understood, and agreed to these terms of use.
